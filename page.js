@@ -34,6 +34,7 @@ function loadPage(response,script) {
 	headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
 	codehighlightstyle = "<link rel='stylesheet' href='" + domain + "css/vs.css'>";
 	blockstyle = "<link rel='stylesheet' href='" + domain + "css/block.css'>";
+	pdfjs = "<script src='" + domain + "xample-scripts/pdf.js'></script>";
 	codehighlightjs = "<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js'></script>";
 	mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
 	xamplejs = "<script src='" + domain + "xample-scripts/navigation.js'></script>";
@@ -41,7 +42,7 @@ function loadPage(response,script) {
 	headend = "<title>Abaganon Xample</title></head>";
 	body = "<body class='xample'><div class='content' id='content'></div>";
 	
-	response.write(headstart + codehighlightstyle + blockstyle + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
+	response.write(headstart + codehighlightstyle + blockstyle + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
 
 	response.write(script);
 
@@ -200,6 +201,10 @@ function convertMedia(oldfile,dir,btype) {
             	newfile += ".mp4";
                 var command = "ffmpeg/ffmpeg -i " + reroute + oldfile + " -vcodec h264 -s 1280x720 -acodec aac " + reroute + newfile + " 2>&1";
                 break;
+            case "slide":
+            	newfile += ".pdf";
+            	var command = "unoconv -f pdf -o " + reroute + newfile + " " + reroute + oldfile;
+            	break;
             default:
             	newfile = "error";
                 var command = "";
@@ -211,7 +216,7 @@ function convertMedia(oldfile,dir,btype) {
 			removeMedia(reroute + oldfile);
 			
 			if (error !== null) {
-				console.log('Exec Error (createmedia): ' + stdout);
+				console.log('Exec Error (createmedia): ' + stdout + stderr);
 				resolve(newfile);
 			} else {
 				resolve(newfile);
@@ -666,7 +671,9 @@ module.exports = {
 		    request.busboy.on('file', function (fieldname, file, filename) {
 		        /* set path to save the file, then pipe/save the file to that path */
 		        var dir = "xample-media/" + uid + "/" + pid + "/";
-		        var link = dir + filename;
+		        
+		        /* replace spaces with underscores, fixes issues with shell commands */
+		        var link = dir + filename.replace(/ /g,"_");
 		        var fullpath = __dirname + "/../public_html/" + link;
 
                 /* save the file, then process it */

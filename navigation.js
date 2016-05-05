@@ -10,6 +10,8 @@
 	  Page Table - Pages are stored in the database as p_aid_pid, where aid = author id & pid = page id. Thus, aid & pid are used a lot for finding the correct page table to store the block data in.
 */
 
+var pdfObjects = {};
+
 /*
 	Section: Helper Functions
 	About: These are functions to help provide information about the current page.
@@ -309,6 +311,48 @@ function insertContent(block, btype, content) {
 		var str = '<video class="xVid" controls><source src="' + content + '" type="video/mp4"></video>';
 		block.innerHTML = str;
 	}
+	if(btype == "slide")
+	{
+		var str = '<canvas class="xSli" id="' + content + '" data-page="1"></canvas>';
+		block.innerHTML = str;
+
+		/* if block was just made, don't try to load pdf */
+		if (content !== "") {
+			PDFJS.getDocument(content).then(function (pdfObj) {
+				pdfObjects[content] = pdfObj;
+				
+				var tag = block.childNodes[0];
+					    
+				renderPDF(pdfObj,1,tag);
+			});
+		}
+
+		/* event listener for changing slides left & right */
+		block.onmouseup = function(event) {
+			var X = event.pageX - this.offsetLeft;
+			//var Y = event.pageY - this.offsetTop;
+			
+			var canvas = this.childNodes[0];
+			var pageNum = canvas.getAttribute("data-page");
+			var pdfID = canvas.getAttribute("id");
+			var pageCount = pdfObjects[pdfID].numPages;
+			
+			if(X > this.offsetWidth / 2) {
+				if(pageNum < pageCount) {
+					pageNum++;
+					canvas.setAttribute("data-page",pageNum);
+					renderPDF(pdfObjects[pdfID],pageNum,canvas);
+				}
+			}
+			else {
+				if(pageNum > 1) {
+					pageNum--;
+					canvas.setAttribute("data-page",pageNum);
+					renderPDF(pdfObjects[pdfID],pageNum,canvas);
+				}
+			}
+		}
+	}
 	
 	return block;
 }
@@ -407,6 +451,33 @@ function renderLatex(block) {
 	MathJax.Hub.Queue(["Typeset",MathJax.Hub,imageBlock]);
 }
 
+// pdfDoc -> pdf object
+// pageNum -> the page number to render
+// canvas -> the <canvas> tag
+
+function renderPDF(pdfDoc,pageNum,canvas) {
+
+	var scale = 0.8;
+
+    pdfDoc.getPage(pageNum).then(function(page) {
+		var viewport = page.getViewport(scale);
+		canvas.height = viewport.height;
+		canvas.width = viewport.width;
+
+		var renderContext = {
+			canvasContext: canvas.getContext('2d'),
+			viewport: viewport
+		};
+		
+		var renderTask = page.render(renderContext);
+		
+		renderTask.promise.then(function () {
+			// update stuff here, page has been rendered
+			// pdfDoc.numPages <- number of pages in pdf
+		});
+    });
+}
+
 function insertMath(block) {
 	/* get the math notation and prepend/append backticks */
 	var str = "`" + block.childNodes[1].textContent + "`";
@@ -465,6 +536,10 @@ function blockButtons(bid) {
 	vidBtn.setAttribute("onclick", "addBlock(" + bid + ",'video')");
 	vidBtn.innerHTML = "video";
 	
+	var sliBtn = document.createElement('button');
+	sliBtn.setAttribute("onclick", "addBlock(" + bid + ",'slide')");
+	sliBtn.innerHTML = "slides";
+	
 	var delBtn = document.createElement('button');
 	delBtn.setAttribute('id', 'd' + bid);
 	delBtn.setAttribute('onclick', 'deleteBlock(' + bid + ')');
@@ -478,6 +553,7 @@ function blockButtons(bid) {
 	buttonDiv.appendChild(imgBtn);
 	buttonDiv.appendChild(audBtn);
 	buttonDiv.appendChild(vidBtn);
+	buttonDiv.appendChild(sliBtn);
 	buttonDiv.appendChild(delBtn);
 	
 	return buttonDiv;
@@ -524,63 +600,85 @@ function uploadMedia(bid,btype) {
 	fileSelect.click();
 	fileSelect.onchange = function()  {
 		
-		createBlock(bid - 1,btype);
-	
-		var promise = new Promise(function(resolve, reject) {
-			var file = fileSelect.files[0];
+		var file = fileSelect.files[0];
 			
-			// place some checks here
-			// file.type.match('image.*')
-			
-			var formData = new FormData();
-			formData.append('media', file, file.name);
-			
-			var pid = document.getElementsByName('pageid')[0].value;
-			
-			var url = window.location.href;
-			var splitUrl = url.split("/");
-			
-			url = splitUrl[0] + "//" + splitUrl[2] + "/xample/uploadmedia?" + "pid=" + pid + "&btype=" + btype;
-			
-			var xmlhttp = new XMLHttpRequest();
-			xmlhttp.open('POST', url, true);
-			
-			xmlhttp.onreadystatechange = function() {
-		        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-					if(xmlhttp.status == 200){
-			        	resolve(xmlhttp.response);
-					}
-					else {
-						alert('Error:' + xmlhttp.status + ": Please Try Again");
-					}
-		        }
-		    }
-			    
-			xmlhttp.send(formData);
-		});
+		// place some checks here
+		// file.type.match('image.*')
+		notvalid = false;
 		
-		promise.then(function(success) { 
+		if(notvalid) {
 			
-			if (success == "err") {
-				deleteBlock(bid - 1);
-				alert('The Was A Problem Uploading The Media: Please Try Again');
-			} else {
-				/* audio & video divs have their src set in an extra child node */
-				if (btype == "image") {
-					var tag = document.getElementById('a' + bid).childNodes[0];
-					tag.src = success;
+			alert("Invalid File Format");
+			
+		} else {
+		
+			createBlock(bid - 1,btype);
+		
+			var promise = new Promise(function(resolve, reject) {
+				
+				/* replace spaces with underscores */
+				var formData = new FormData();
+				formData.append('media', file, file.name);
+				
+				var pid = document.getElementsByName('pageid')[0].value;
+				
+				var url = window.location.href;
+				var splitUrl = url.split("/");
+				
+				url = splitUrl[0] + "//" + splitUrl[2] + "/xample/uploadmedia?" + "pid=" + pid + "&btype=" + btype;
+				
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.open('POST', url, true);
+				
+				xmlhttp.onreadystatechange = function() {
+			        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+						if(xmlhttp.status == 200){
+				        	resolve(xmlhttp.response);
+						}
+						else {
+							alert('Error:' + xmlhttp.status + ": Please Try Again");
+						}
+			        }
+			    }
+				    
+				xmlhttp.send(formData);
+			});
+			
+			promise.then(function(success) { 
+				
+				if (success == "err") {
+					deleteBlock(bid - 1);
+					alert('The Was A Problem Uploading The Media: Please Try Again');
+				} else {
+					/* audio & video divs have their src set in an extra child node */
+					if (btype == "image") {
+						var tag = document.getElementById('a' + bid).childNodes[0];
+						tag.src = success;
+					}
+					else if(btype == "audio" || btype == "video") {
+						var tag = document.getElementById('a' + bid).childNodes[0].childNodes[0];
+						tag.src = success;
+						tag.parentNode.load(); 
+					}
+					else if(btype == "slide")
+					{
+						PDFJS.getDocument(success).then(function (pdfObj) {
+						    
+						    pdfObjects[success] = pdfObj;
+						    
+						    var tag = document.getElementById('a' + bid).childNodes[0];
+						    tag.setAttribute("id", success);
+						    
+							renderPDF(pdfObj,1,tag);
+						});
+					}
 				}
-				else if(btype == "audio" || btype == "video") {
-					var tag = document.getElementById('a' + bid).childNodes[0].childNodes[0];
-					tag.src = success;
-					tag.parentNode.load(); 
-				}
-			}
-			
-			
-		}, function(error) {
-				/* error is data passed thorugh reject */
-		});
+				
+				
+			}, function(error) {
+					/* error is data passed thorugh reject */
+			});
+		}
 	}		
 }
 
@@ -631,7 +729,7 @@ function addBlock(bid,btype) {
 	}
 	
 	/* upload media file if necessary */
-	if (["image","audio","video"].indexOf(btype) > -1)
+	if (["image","audio","video","slide"].indexOf(btype) > -1)
 	{
 		uploadMedia(bid + 1,btype);
 	}
@@ -1072,6 +1170,10 @@ function saveBlocks() {
 			}
 			else if (btype == "audio" || btype == "video") {
 				var str = document.getElementById('a' + bid).children[0].children[0].src;
+				blockContent[i] = str.replace(location.href.substring(0, location.href.lastIndexOf('/')+1), "");
+			}
+			else if (btype == "slide") {
+				var str = document.getElementById('a' + bid).children[0].id;
 				blockContent[i] = str.replace(location.href.substring(0, location.href.lastIndexOf('/')+1), "");
 			}
 			
