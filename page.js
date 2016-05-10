@@ -19,7 +19,7 @@ var pool  = mysql.createPool({
 /*
 	Section: Helper Functions
 	About: These are functions to help provide information about the current page.
-*/	
+*/
 
 /*
 	This loads the following scripts:
@@ -30,7 +30,7 @@ var pool  = mysql.createPool({
 	navigation.js <- xample's main js file
 */
 function loadPage(response,script) {
-	
+
 	headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
 	codehighlightstyle = "<link rel='stylesheet' href='" + domain + "css/vs.css'>";
 	blockstyle = "<link rel='stylesheet' href='" + domain + "css/block.css'>";
@@ -41,7 +41,7 @@ function loadPage(response,script) {
 	mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' } });</script>";
 	headend = "<title>Abaganon Xample</title></head>";
 	body = "<body class='xample'><div class='content' id='content'></div>";
-	
+
 	response.write(headstart + codehighlightstyle + blockstyle + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
 
 	response.write(script);
@@ -165,7 +165,7 @@ function removeMedia(file) {
 
 		var exec = require('child_process').exec;
 		var child;
-        
+
         command = "rm " + file;
 
 		/* execute the remove command */
@@ -214,7 +214,7 @@ function convertMedia(oldfile,dir,btype) {
 		child = exec(command, function (error, stdout, stderr) {
 			/* delete the old uploaded file */
 			removeMedia(reroute + oldfile);
-			
+
 			if (error !== null) {
 				console.log('Exec Error (createmedia): ' + stdout + stderr);
 				resolve(newfile);
@@ -625,7 +625,7 @@ module.exports = {
 	    							        //
 	    							        // check for type, get media file names, check folder for files that don't match, delete those extra files
 	    							        //
-	    							        
+
     								        qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
     								        i++
     							        }
@@ -671,7 +671,7 @@ module.exports = {
 		    request.busboy.on('file', function (fieldname, file, filename) {
 		        /* set path to save the file, then pipe/save the file to that path */
 		        var dir = "xample-media/" + uid + "/" + pid + "/";
-		        
+
 		        /* replace spaces with underscores, fixes issues with shell commands */
 		        var link = dir + filename.replace(/ /g,"_");
 		        var fullpath = __dirname + "/../public_html/" + link;
@@ -679,7 +679,7 @@ module.exports = {
                 /* save the file, then process it */
 		        fstream = fs.createWriteStream(fullpath);
 		        file.pipe(fstream);
-		        
+
 		        fstream.on('close', function () {
 
 			        /* ffmpeg conversion */
@@ -695,4 +695,3 @@ module.exports = {
 		}
 	}
 }
-
