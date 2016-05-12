@@ -1,0 +1,345 @@
+Title: Xample Overview
+
+This is the manual for the Xample app.
+
+Section: Intro
+
+Here is a summary of important stuff Xample uses.
+
+It is highly recommended that you are familiar with the following javascript concepts.
+
+o Promises
+o Callbacks
+o The DOM (Document Object Model)
+o Requiring Packages & The Objects You Get From Them
+o Ajax Post & Get Requests
+o Relative vs Absolute Urls & Paths, and Where The Server & Domain Are Located On The Computer
+
+It's useful to know what the following is.
+
+o Sql Injection
+
+The following libraries are used and thus knowledge of them is also useful.
+
+o highlight.js
+o MathJax.js
+o pdf.js
+
+If you want to add to the project, you should learn the following.
+
+o Git
+o Natural Docs
+
+Section: Files
+
+Xamples has these main files.
+
+Topic: xample.js
+the server
+
+Topic: page.js
+the back-end
+
+Topic: navigation.js
+the front-end
+
+Section: NPM Packages
+
+Xample uses the following native npm packages.
+
+Topic: Query String
+require('query-string'), https://github.com/sindresorhus/query-string
+
+Topic: File System
+require('fs')
+
+Topic: HTTP
+require('http')
+
+Xample uses the following installed npm packages.
+
+Topic: Password Hash
+require('password-hash'), https://github.com/davidwood/node-password-hash
+
+Topic: MySQL
+require('mysql'), https://github.com/felixge/node-mysql
+
+Topic: Express
+require('express'), https://github.com/expressjs/express
+
+Topic: Express Sessions
+require('express-session'), https://github.com/expressjs/session
+
+Topic: Busboy
+require('connect-busboy'), https://github.com/mscdex/connect-busboy
+
+Section: Libraries
+
+Xample uses the following libraries
+
+Topic: highlight.min.js
+for code block rendering
+
+Topic: MathJax.js
+for asciiMath & Latex rendering
+
+Topic: pdf.js
+for converting pdfs into <canvas> objects
+
+Section: Styles
+
+Xample uses the following css styles.
+
+Topic: vs.css
+for code block rendering
+
+Topic: block.css
+for styling blocks
+
+Section: Documentation
+
+Xample documentation is compiled using NaturalDocs. It compiles the comments in the files into a web doc. 
+
+This front page is a stand-alone file called manual.txt that is included in the compilation. It can be found in the manual_docs/ folder.
+
+To compile the doc, copy the Xample folder into the NaturalDocs folder. Then run this command.
+
+> ./NaturalDocs -i Xample/ -o HTML Xample/manual -p Xample/manual -s cust
+
+The "-s cust" refers to the cust.css file that applies custom styling for the manual.
+
+Section: Comments
+
+Xample is commented in the following way.
+
+Topic: NaturalDocs Comments
+These comments are used to generate the documentation. They frequently use "Section" "Topic" "Function" "Parameters" & "Returns" keywords.
+
+Topic: Asterisk Comments
+Asterisk comments are used for completed code.
+
+Topic: Double Slash Comments
+Double slash comments are used to marks sections of code where there are design questions or something is incomplete.
+
+Section: Pages
+
+Xample only loads the following four pages.
+
+Topic: Error Page
+displayError(), this is the 404 error page for unknown URLs
+
+Topic: Landing Page
+displayLanding(), this is the index page a user sees when not logged in
+
+Topic: Home Page
+displayHome(), this is the index page a user sees when they are logged in
+
+Topic: Edit Page
+editPage(), this is the page that displays the edit mode for a user's xample page
+
+Topic: Show Page
+showPage(), this is the page that displays the presentation mode for a user's xample page
+
+All of the previously mentioned pages are loaded by sending a default html page which contains the necessary javascript & css links, header information, and the main <div class='content'> tag, along with a specified front-end javascript function that will actually populate the main tag with the page's unique content. For example, the Landing Page will include <script>displayLanding();<script> at the bottom. Other than these pages, all content is dynamically loaded and altered by front-end functions.
+
+Section: Page Layout
+
+Xample uses the the following layout for block pages. A page has a <head> tag with all of the needed links to libraries and styles & a <body> tag which holds two things. The first is a <div> with class "content" and the second is a <script> with a front-end javascript function to generate content for the content div.
+
+Blocks are stores in the page in the following way. All of the blocks are stored in <div> with class "blocks". Inside of that regular blocks, which are <div> tags with a block id that is just a number. Inside of those are two things. First, a content block, which is a special tag with a block id that is the letter "a" and a number. Second, a buttons div, which is a <div> that holds all of the block buttons with an id that is the letter "b" and a number.
+
+> <head>
+> </head>
+>
+> <body> 
+> <div class="blocks"> 
+> <div class="block" id="1"> 
+>
+> <div class="btype" id="a1"> ...content... </div> <div class="blockbtns" id="b1"> ...buttons... </div>
+>
+> </div> // block
+> </div> // blocks
+>
+> <script>loadFunction()</script>
+> </body>
+
+Section: Database
+
+Xample uses a MySQL database. The following NodeJS package is used to handle communication with the database, https://github.com/felixge/node-mysql.
+
+Topic: Querying The Database
+
+When a page requires a query it uses a connection from a pool of connections set up on the back-end. To use a connection you call this.
+
+> pool.getConnection(function(err, connection) {...}); 
+
+Then, to use a connection you call this, where qry is the MySQL query.
+
+> connection.query(qry, function(err, rows, fields) {...});
+
+If successful, err will be false and rows will contain the query results. You can get specific rows of data as you would with an array.
+
+> rows[0]
+
+To grab a specfic column from that row, you use dot notation. In the following example, "column" would be the name of the column field you want.
+
+> rows[0].column
+
+If the query was not able to find the target of the WHERE clause, then typeof rows[0] will be undefined. You can check that for failed queries.
+
+> if (typeof rows[0] === 'undefined') {...}
+
+When you are done with the connection, release it back to the pool.
+
+> connection.release();
+
+Section: Database Tables
+Xample stores data in these tables.
+
+Topic: Users
+This table holds general info for every user.
+
+Topic: u_uid
+Each user has a table for storing info about their pages. The table is named "u_" + uid.
+
+uid- user ID
+
+Topic: p_uid_pid
+Each page has a table for storing info about their blocks. The table is named "p_" + uid + "_" + pid.
+
+pid - page ID
+
+Section: Uploaded Media
+
+Xample stores user uploaded media in a folder called "xample-media". Inside this folder, each user has their own folder which is named by their uid. Inside each user folder, each user page has their own folder named by their pid. Thus, the directory structure is like this.
+
+> xample-media/ -> uid/ -> pid/
+
+Media is saved in these folders with random eight character names. This is to help prevent people from web crawling the media. Uploading media requires the use of the package "connect-busboy".
+
+Section: Post Data (Back-End)
+
+Xample parses POST data on the back-end in the following way. It uses the "query-string" package. To get data from an http request, you call this.
+
+> request.on('data', function (data) {...});
+
+To parse the post data, you run this.
+
+> var postData = qs.parse(data);
+
+Now you can access post data by their keys using dot notation. In the following example, "info" should be the key for the data you want.
+
+> postData.info;
+
+Section: Ajax Data (Front-End)
+
+Xample parses data on the front-end in the following way. Data is always received as comma-separated strings which are parsed for their contents. Thus, it is necessary to know the format of the strings to use the data properly. The formats are listed below. *Sections in parentheses indicate that the data may be repeated.*
+
+getpages - returns a list of user's pages
+
+> (pid,pagename,)
+
+editpage - returns a list of page data & block data. mediaType & mediaContent are synonymous with btype (block type) & blockContent.
+
+> pid,pagename,(mediaType,mediaContent,)
+
+saveblocks - receives a list of the blocks types and contents
+
+> pid -> pid
+> pagename -> page name
+> mediaType -> (block type,)
+> mediaContent -> (block content,)
+
+Section: Blocks
+
+Xample can create the following blocks. A *block* is just a div, however each block will contain a type of html tag inside the generic div to hold the content. They are called *content blocks*. An example is provided below where "textarea" is used to hold content. These content blocks are identified with an "a" followed by the block number.
+
+> <div class="block" id="1"><textarea id="a1"></textarea></div>
+
+Topic: xtext
+
+This is the WYSIWIG (what you see is what you get) block. It is for creating rich text. To prevent clutter, applying styles to text is done through shortcuts (ctrl + shift + #), where # is a different key depending on the command. The shortcuts call the html5 javascript function execCommand() to apply style tags (such as <b> for bold). In order to use execCommand, the content block has to be an iframe.
+
+Thus, the block goes like this, block div -> <iframe> content block -> detectkey() -> execCommand()
+
+Currently, the following shortcuts are supported.
+
+"b" - bold
+"i" - italic
+"l" - list
+"+" - superscript
+"-" - subscript
+"j" - justify left
+"f" - fully justify
+"h" - hyperlink
+
+Topic: xcode
+
+This is the programming code block. It uses the <code> tag because that makes the browser display the text using a monospaced font. To avoid clutter, the code is color formatted when the user clicks anywhere outside of the block (onblur). The wrapper function renderCode() calls the function that applies formatting (a "highlight.js" library function) and also does some validation, like checking that the character limit hasn't been reached.
+
+Thus, the block goes like this, block div -> <code> content block -> renderCode()
+
+content block class - xCde
+
+Topic: xmath
+
+This is the ASCIIMath block. It takes ASCIIMath markup language and renders the input into MathML (which uses <math> tags, math fonts, and styling to make pretty equations). To prevent clutter, the input is not rendered until the user clicks anywhere outside of the block (onblur). The wrapper function renderMath() calls the function that applies rendering (a "MathJax.js" library function) and also does some validation. Input is entered in a contenteditable div and the MathML is inserted into a generic div with the "mathImage" class.
+
+Thus, the block goes like this, block div -> <div contenteditable> content block -> renderMath() -> <div class-"mathImage"> content display
+
+content block class - xMat
+
+Topic: latex
+
+This is the LaTeX block. It takes LaTeX markup language and renders the input into MathML (which uses <math> tags, math fonts, and styling to make pretty equations). To prevent clutter, the input is not rendered until the user clicks anywhere outside of the block (onblur). The wrapper function renderLatex() calls the function that applies rendering (a "MathJax.js" library function) and also does some validation. Input is entered in a contenteditable div and the MathML is inserted into a generic div with the "latexImage" class.
+
+Thus, the block goes like this, block div -> <div contenteditable> content block -> renderLatex() -> <div class-"latexImage"> content display
+
+Although this block isn't really necessary since there is an ASCIIMath block which uses a much easier markup language, it is still provided because LaTeX has been around for longer (which means more people know how to use it) and there is the potential that it is more powerful and could provide some styling that ASCIIMath does not.
+
+content block class - xLtx
+
+Topic: image
+
+This is the image block. It accepts a user uploaded image which is converted on the back-end using imagemagick to a jpg, which is html5 compatible on all browsers. The jpg image is put into an <img> tag by setting its source "src" value.
+
+Thus, the block goes like this, block div -> <img> content block -> uploadMedia()
+
+content block class - xImg
+
+Topic: audio
+
+This is the audio block. It accepts a user uploaded audio file which is converted on the back-end using ffmpeg to a mp3, which is html5 compatible on all browsers. The mp3 is put into a <audio> tag. Audio tags have <source> tags inside them. The mp3 path is applied to that <source> tag.
+
+Thus, the block goes like this, block div -> <audio> content block -> uploadMedia()
+
+content block class - xAud
+
+Topic: video
+
+Thus is the video block. It accepts a user uploaded video file which is converted on the back-end using ffmpeg to an mp4, which is html5 compatible on all browsers. The mp4 is put into a <video> tag. Video tags have <source> tags inside them. The mp4 path is applied to that <source> tag.
+
+Thus, the block goes like this, block div -> <video> content block -> uploadMedia()
+
+content block class - xVid
+
+Topic: slide
+
+This is the slide block. It accepts a user uploaded presentation slide (like power point) which is converted to pdf on the back-end using unoconv (which is just a command line tool for LibreOffice). This block is easily the most complex due to the difficulty of working with pdfs. When a page is loaded, a pdf object is created for each pdf on the page. These pdf objects are stored in a global array on the front-end called "pdfObjects". These pdf objects can be rendered into a 2D image inside of a <canvas> tag using a "pdf.js" library function. The first page is always rendered first. When the user clicks on the right or left side of the block, renderPDF() is called, which is just a wrapper function. Clicking left makes the slide render the previous page, and clicking right makes the slide render the next page. To keep track of which page is currently rendered, the <canvas> tag uses a custom data attribute, specifically "data-page".
+
+Thus, the block goes like this, block div -> <canvas> content block -> renderPDF()
+
+content block class - xSli
+
+Topic: title
+
+This is the title block. It's very simple. It's just a text input that accepts a short line of text. It allows users to place titles over other blocks, like for putting a title over a video block.
+
+Thus, the block goes like this, block div -> <input type="text"> content block
+
+content block class - xTit
+
+
+
+
+

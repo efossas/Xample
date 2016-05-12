@@ -1,11 +1,18 @@
 /*
-	template - none
-	page - routines for url requests
+	Title: xample
+	About: This is the server for Xample
+*/
+
+/*
+	Section: Modules
+	About: These are the modules xample uses
 	
-	http - create a server
-	express - ?
-	mysql - hand mysql queries	
-*/	
+	page - imports the functions that handl xample url requests
+	http - ??? was using this to start a server, but this might not be needed since express module is used now
+	express - used to start a server and page routing
+	session - used with express to add sessions for users
+	busboy - used to parse media data (file uploads)
+*/
 
 var page = require('./page.js');
 var http = require('http');
@@ -13,31 +20,56 @@ var express = require('express');
 var session = require('express-session');
 var busboy = require('connect-busboy');
 
+/*
+	Section: Server Exit
+	About: These functions handle uncaught errors and program exit procedure
+*/
+
 /* prevents node from exiting on error */
 process.on('uncaughtException', function (err) {
   console.log('666 Caught Exception: ' + err);
 });
 
-/* clean up routines */
-process.stdin.resume(); // so the program will not close instantly
+/* ensures stdin continues after uncaught exception */
+process.stdin.resume();
 
+/*
+	Function: exitHandler
+	
+	Used to run code when the program exits. Called on SIGINT (ctrl^c)
+	
+	Parameters:
+	
+		none
+	
+	Returns:
+	
+		nothing
+*/
 function exitHandler() {
-	page.end();
+	console.log('\nClean up routine complete. Xample app terminated.');
     process.exit();
 }
 
+/* calls exitHandler() on SIGINT, ctrl^c
 process.on('SIGINT', exitHandler);
+
+/*
+	Section: Create Server
+	About: These functions create a server, set it up, and route url addresses
+*/
 
 /* create express server */
 app = express();
 
-/* initiate server requirements */
+/* set up sessions */
 app.use(session({
 	secret: 'KZtX0C0qlhvi)d',
 	resave: false,
     saveUninitialized: false
 }));
 
+/* set up busboy */
 app.use(busboy());
 
 /* routes */
