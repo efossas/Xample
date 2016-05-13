@@ -17,11 +17,19 @@ var pool  = mysql.createPool({
 });
 
 /*for log file*/
-function log(logFile,error){
+function logError(logFile,error){
+
   var fs = require('fs');
+
+  if (logFile == 0) {
+    logFile = "system.txt";
+  }else{
+      logFile + ".txt";
+  }
+
   fs.appendFile("/log/"+logFile, error, function(err) {
       if(err) {
-          return console.log(err);
+          return console.(err);
       }
   });
   response.end();
@@ -182,7 +190,7 @@ function removeMedia(file) {
 		/* execute the remove command */
 		child = exec(command, function (error, stdout, stderr) {
 			if (error !== null) {
-        log("system.txt","597: " + error);
+        logError(0,"597: " + error);
 			}
 		});
 }
@@ -226,7 +234,7 @@ function convertMedia(oldfile,dir,btype) {
 			removeMedia(reroute + oldfile);
 
 			if (error !== null) {
-        log("system.txt","598: " + error);
+        logError(0,"598: " + error);
 				resolve(newfile);
 			} else {
 				resolve(newfile);
@@ -243,7 +251,7 @@ function convertMedia(oldfile,dir,btype) {
 */
 module.exports = {
 	end: function(request,response) {
-    log("system.txt",'599: Clean up routine complete. Xample app terminated.');
+    logError(0,'599: Clean up routine complete. Xample app terminated.');
 	},
 
 	notfound: function(request,response) {
@@ -276,7 +284,7 @@ module.exports = {
         /* prevent overload attacks */
         if (body.length > 1e5) {
 			request.connection.destroy();
-      log("system.txt","600: Overload Attack!");
+      logError(0,"600: Overload Attack!");
 		}
 
         /* when the request ends, parse the POST data, & process the sql queries */
@@ -305,14 +313,14 @@ module.exports = {
     					connection.query(qryUser, function(err, rows, fields) {
 
     						if (err) {
-                  log("system.txt","601: " + err);
+                  logError(0,"601: " + err);
     						} else {
     				            var qryUid = "SELECT uid FROM Users WHERE username = " + username;
 
     				            /* retrieve the user's new uid */
     				            connection.query(qryUid, function(err, rows, fields) {
     								if (err) {
-    									log("system.txt","602: " + err);
+    									logError(0,"602: " + err);
     									response.end('err');
     								} else {
     									var uid = rows[0].uid;
@@ -321,7 +329,7 @@ module.exports = {
     									/* create the user's page table */
     									connection.query(qryTable, function(err, rows, fields) {
     										if (err) {
-    											log(uid,"603: " + err);
+    											logError(uid,"603: " + err);
     								//			response.end('err');
     										} else {
     											request.session.uid = uid;
@@ -336,7 +344,7 @@ module.exports = {
     				}
 
     			}, function(error) {
-    				log("system.txt","604: " + error);
+    				logError(0,"604: " + error);
     			});
                 connection.release();
             });
@@ -357,7 +365,7 @@ module.exports = {
         /* prevent overload attacks */
         if (body.length > 1e5) {
 			request.connection.destroy();
-			log("system.txt",'605: Overload Attack!');
+			logError(0,'605: Overload Attack!');
 		}
 
         /* when the request ends, parse the POST data, & process the sql queries */
@@ -383,7 +391,7 @@ module.exports = {
     		            /* retrieve the user's password */
     		            connection.query(qry, function(err, rows, fields) {
     						if (err) {
-    							log(uid,"606: " + err);
+    							logError(uid,"606: " + err);
     							response.end('err');
     						} else {
     							if(ps.verify(POST.password,rows[0].password)) {
@@ -396,7 +404,7 @@ module.exports = {
     					});
     				}
     			}, function(error) {
-    				log("system.txt","607: searchUid() Promise Error " + error);
+    				logError(0,"607: searchUid() Promise Error " + error);
     			});
                 connection.release();
             });
@@ -423,7 +431,7 @@ module.exports = {
         /* prevent overload attacks */
         if (body.length > 1e5) {
 			request.connection.destroy();
-			log("system.txt",'608: Overload Attack!');
+			logError(0,'608: Overload Attack!');
 		}
 
         /* when the request ends, parse the POST data, & process the sql queries */
@@ -448,7 +456,7 @@ module.exports = {
 
     				    connection.query(qryUser, function(err, rows, fields) {
     				    	if (err) {
-    							log(uid,"609: " + err);
+    							logError(uid,"609: " + err);
     							response.end('err');
     						} else {
     							/* grab the pid of the new page name from the user's page table */
@@ -456,7 +464,7 @@ module.exports = {
 
     				            promisePid.then(function(success) {
     					            if(success === -1) {
-    						           log(uid,"610: pid not found after page insert");
+    						           logError(uid,"610: pid not found after page insert");
     						            response.end('err');
     					            } else {
     						            var pid = success;
@@ -467,7 +475,7 @@ module.exports = {
     						            /* retrieve the user's password */
     						            connection.query(qryPage, function(err, rows, fields) {
     										if (err) {
-    											log(uid,"611: " + err);
+    											logError(uid,"611: " + err);
     											response.end('err');
     										} else {
     											fs.mkdir(__dirname + "/../public_html/xample-media/" + uid + "/" + pid);
@@ -476,13 +484,13 @@ module.exports = {
     									});
     								}
     							}, function(error) {
-    								log(uid,"612: searchPid() Promise Error");
+    								logError(uid,"612: searchPid() Promise Error");
     							});
     						}
     					});
     				}
     			}, function(error) {
-    				log("system.txt","613: searchPagename() Promise Error");
+    				logError(0,"613: searchPagename() Promise Error");
     			});
                 connection.release();
             });
@@ -498,7 +506,7 @@ module.exports = {
         pool.getConnection(function(err, connection) {
     		connection.query(qry, function(err, rows, fields) {
     			if(err) {
-    				log(uid,"614: " + err);
+    				logError(uid,"614: " + err);
     				response.end('err');
     			} else {
     				var pages = "";
@@ -532,7 +540,7 @@ module.exports = {
 
     			connection.query(qry, function(err, rows, fields) {
     				if(err) {
-    					log(uid,"614: " + err);
+    					logError(uid,"614: " + err);
     					response.end('err');
     				} else {
     					var pagename = rows[0].pagename;
@@ -541,7 +549,7 @@ module.exports = {
 
     					connection.query(qry, function(err, rows, fields) {
     						if(err) {
-    						log(uid,"615: " + err);
+    						logError(uid,"615: " + err);
     						response.end('err');
     						} else {
     							var pagedata = pid + ",";
@@ -588,7 +596,7 @@ module.exports = {
 	        /* prevent overload attacks */
 	        if (body.length > 1e5) {
 				request.connection.destroy();
-				log("system.txt",'616: Overload Attack!');
+				logError(0,'616: Overload Attack!');
 			}
 
 	        /* when the request ends, parse the POST data, & process the sql queries */
@@ -610,7 +618,7 @@ module.exports = {
     		        promisePage.then(function(success) {
 
     			        if(success === -1) {
-    				        log("system.txt","617: change pagename error");
+    				        logError(0,"617: change pagename error");
     			        } else {
 
     				        /* truncate (remove all rows) from the table */
@@ -618,7 +626,7 @@ module.exports = {
 
     						connection.query(qryTruncate, function(err, rows, fields) {
     							if(err) {
-    								log("system.txt","618: " + err);
+    								logError(0,"618: " + err);
     								response.end('err');
     							} else {
 
@@ -642,7 +650,7 @@ module.exports = {
 
     							        connection.query(qryInsert, function(err, rows, fields) {
     										if(err) {
-    											log("system.txt","618: " + err);
+    											logError(0,"618: " + err);
     											response.end('err');
     										} else {
     											response.end('blockssaved');
@@ -656,7 +664,7 @@ module.exports = {
     			        }
 
     		        }, function(error) {
-    					 log("system.txt","619: changePagename() Promise Error");
+    					 logError(0,"619: changePagename() Promise Error");
     				});
                     connection.release();
                 });
@@ -697,7 +705,7 @@ module.exports = {
 			        promise.then(function(success) {
 			        	response.end(domain + success);
 			        }, function(error) {
-				        log("system.txt","620: convertMedia() Promise Error");
+				        logError(0,"620: convertMedia() Promise Error");
 			        });
 		        });
 		    });
