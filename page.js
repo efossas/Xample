@@ -29,7 +29,7 @@ function logError(logFile,error){
 
   fs.appendFile("/log/"+logFile, error, function(err) {
       if(err) {
-          return console.(err);
+          return console.log(err);
       }
   });
   response.end();
