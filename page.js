@@ -1,22 +1,26 @@
 /*
-	Title: page
-	About: This is the back-end for Xample
+	Title: Page
+	This is the back-end for Xample
 */
 
 /*
 	Section: Globals
-	About: These are the global variables xample uses
+	These are the global variables xample uses
 	
 	domain - the domain name, used for links
 	reroute - used to reroute paths from the server location to the public_html, the domain's base path
 */
+
+// reroute to your version of the front-end & your database
+var frontend = "navigation.js";
+var xdata = "xample";
 
 var domain = "http://abaganon.com/";
 var reroute = "../public_html/";
 
 /*
 	Section: MySql Connection
-	About: Imports the MySQL module and sets up the connection pool
+	Imports the MySQL module and sets up the connection pool
 */
 
 var mysql = require('mysql');
@@ -26,12 +30,12 @@ var pool  = mysql.createPool({
   host     : 'localhost',
   user     : 'nodesql',
   password : 'Vup}Ur34',
-  database : 'xample'
+  database : xdata
 });
 
 /*
 	Section: Helper Functions
-	About: These are functions that are either used in several routes or are just separated for clarity
+	These are functions that are either used in several routes or are just separated for clarity
 */	
 
 /*
@@ -46,30 +50,31 @@ var pool  = mysql.createPool({
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 function loadPage(response,script) {
 	
 	/* define the library & style links here */
-	headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
-	codehighlightstyle = "<link rel='stylesheet' href='" + domain + "css/vs.css'>";
-	blockstyle = "<link rel='stylesheet' href='" + domain + "css/block.css'>";
-	pdfjs = "<script src='" + domain + "xample-scripts/pdf.js'></script>";
-	codehighlightjs = "<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js'></script>";
-	mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
-	xamplejs = "<script src='" + domain + "xample-scripts/navigation.js'></script>";
-	mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' } });</script>";
-	headend = "<title>Abaganon Xample</title></head>";
-	body = "<body class='xample'><div class='content' id='content'></div>";
+	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
+	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+	var codehighlightstyle = "<link rel='stylesheet' href='" + domain + "css/vs.css'>";
+	var blockstyle = "<link rel='stylesheet' href='" + domain + "css/block.css'>";
+	var pdfjs = "<script src='" + domain + "xample-scripts/pdf.min.js'></script>";
+	var codehighlightjs = "<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js'></script>";
+	var mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
+	var xamplejs = "<script src='" + domain + "xample-scripts/" + frontend + "'></script>";
+	var mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, messageStyle: 'none' });</script>";
+	var headend = "<title>Abaganon Xample</title></head>";
+	var body = "<body class='xample'><div id='content'></div>";
 	
 	/* write the <head> */
-	response.write(headstart + codehighlightstyle + blockstyle + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
+	response.write(headstart + viewport + codehighlightstyle + blockstyle + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
 
 	/* write the <script> */
 	response.write(script);
 
 	/* close tags & send the http response */
-	response.end("</body></html>");
+	response.end("<footer></footer></body></html>");
 }
 
 /*
@@ -301,23 +306,22 @@ function randomText() {
 */
 function removeMedia(file) {
 
-		var exec = require('child_process').exec;
-		var child;
-        
-        /* set up the remove command, "reroute" is a global variable defined at the top */
-        command = "rm " + reroute + file;
+	var exec = require('child_process').exec;
+	var child;
+    
+    /* set up the remove command, "reroute" is a global variable defined at the top */
+    command = "rm " + reroute + file;
 
-		/* execute the remove command */
-		child = exec(command, function (error, stdout, stderr) {
-			if (error !== null) {
-				console.log('Exec Error (removemedia): ' + error);
-				return -1;
-			}
-			else {
-				return 1;
-			}
-		});
-
+	/* execute the remove command */
+	child = exec(command, function (error, stdout, stderr) {
+		if (error !== null) {
+			console.log('Exec Error (removemedia): ' + error);
+			return -1;
+		}
+		else {
+			return 1;
+		}
+	});
 }
 
 /*
@@ -387,7 +391,121 @@ function convertMedia(oldfile,dir,btype) {
 }
 
 /*
-	Function: absentQuery
+	Function: deleteMedia
+	
+	This searches for media files in a page's folder that are not in the page's database table. If there are any, this function runs a shell command to remove those files from the folder.
+	
+	Parameters:
+	
+		uid - the user id
+		pid - the page id
+	
+	Returns:
+	
+		success - number, 1
+		error - number, -1
+*/
+function deleteMedia(connection,uid,pid) {
+
+	/* get list of media file names in the page table */
+	var promise = new Promise(function(resolve, reject) {
+		
+		/* username must have connection.escape() already applied, which adds '' */
+		var qry = "SELECT mediaContent FROM p_" + uid + "_" + pid + " WHERE mediaType='image' OR mediaType='audio' OR mediaType='video' OR mediaType='slide'";
+
+		/* query the database */
+		connection.query(qry, function(err, rows, fields) {
+			if(err) {
+				console.log(err);
+				resolve(-1);
+			} else {
+				var table = [];
+				if(typeof rows[0] !== 'undefined') {
+					var mediaCount = rows.length;
+					
+					/* get only the file name */
+					for (var i = 0; i < mediaCount; i++) {
+						table[i] = rows[i].mediaContent.replace(domain + "xample-media/" + uid + "/" + pid + "/", "");
+					}
+					resolve(table);
+				} else {
+					resolve(table);
+				}
+			}
+		});
+	});
+
+	promise.then(function(success) {
+		
+		if(success !== -1)
+		{		
+			var exec = require('child_process').exec;
+			var childls;
+			var childrm;
+		    
+		    /* set up command to find all files in the folder */
+		    command = "ls " + reroute + "xample-media/" + uid + "/" + pid + "/";
+		
+			/* execute the find files command */
+			childls = exec(command, function (error, stdout, stderr) {
+				if (error !== null) {
+					console.log('Exec Error (deletemedia-ls): ' + error);
+					return -1;
+				}
+				else {
+					/* turn list of files into array, pop() removes empty line */
+					var existing = stdout.split("\n");
+					existing.pop();
+					
+					/* find difference between existing files & file on page table */
+					var exists = false;
+					var difference = existing.filter(function(existingfile) {
+						exists = false;
+						success.forEach(function(tablefile) {
+							if (tablefile == existingfile) {
+								exists = true;
+							}
+						})
+						return !exists;
+					});
+
+					/* if there are files to be deleted, create command and remove them */				
+					if (difference.length > 0) {
+						command = "rm ";
+						difference.forEach(function(filename) {
+							command += reroute + "xample-media/" + uid + "/" + pid + "/" + filename + " ";
+						})
+						
+						childrm = exec(command, function (error, stdout, stderr) {
+							if (error !== null) {
+								console.log('Exec Error (deletemedia-rm): ' + error);
+								return -1;
+							}
+							else {
+								/* successful deletion */
+								return 1;
+							}
+						});
+					}
+						
+					/* nothing to delete */
+					return 1;
+				}
+			});
+		} else {
+			/* no rows */
+			return 1;
+		}
+	}, function(error) {
+		/* promise error */
+		return -1;
+	});
+
+}
+
+
+/*
+	Function: absentRequest
 	
 	This is returns a 404 type page where a user tried to access a page that could not be found in the database.
 	
@@ -398,7 +516,7 @@ function convertMedia(oldfile,dir,btype) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 function absentRequest(request,response) {
 	// replace this with loadpage() that loads a 404 type page not found template */
@@ -407,7 +525,7 @@ function absentRequest(request,response) {
 
 /*
 	Section: Page Functions
-	About: These functions are exported to the server file xample.js where page requests are routed to these functions.
+	These functions are exported to the server (xample.js), page requests route to these functions.
 */
 module.exports = {
 	
@@ -423,7 +541,7 @@ module.exports = {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */		
 notfound: function(request,response) {
 	// replace this with loadpage() that loads a 404 page not found template */
@@ -442,7 +560,7 @@ notfound: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */		
 start: function(request,response) {
 
@@ -468,7 +586,7 @@ start: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */		
 signup: function(request,response) {
 	var qs = require('querystring');
@@ -570,7 +688,7 @@ signup: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */	
 login: function(request,response) {
 	var qs = require('querystring');
@@ -646,7 +764,7 @@ login: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 logout: function(request,response) {
 	/* easy enough, regardless of whether the user was logged in or not, destroying the session will ensure log out */
@@ -667,7 +785,7 @@ logout: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 createpage: function(request,response) {
 	var qs = require('querystring');
@@ -764,7 +882,7 @@ createpage: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 getpages: function(request,response) {
 
@@ -805,7 +923,7 @@ getpages: function(request,response) {
 /*
 	Function: editpage
 	
-	Ajax, used to get a list of page & block data for a user's page. The data given to the http response is a comma-separate string in this format. pid,pagename,mediaType,mediaContent, If the user does not have a page with that pid, they will receive "err" in the response. If the user has no media on that page, the user will on receive the pid and pagename.
+	Page Edit Mode, used to get a list of page & block data for a user's page. The data given to the http response is a comma-separate string in this format. pid,pagename,mediaType,mediaContent, If the user does not have a page with that pid, they will receive "err" in the response. If the user has no media on that page, the user will on receive the pid and pagename.
 	
 	Parameters:
 	
@@ -814,7 +932,7 @@ getpages: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 editpage: function(request,response) {
 	
@@ -825,7 +943,7 @@ editpage: function(request,response) {
 	var pid = request.query.page;
 
 	/* redirect the user to the index page if they're not logged in */ 
-	if(typeof uid === 'undefined') { response.redirect('/xample'); } else {
+	if(typeof uid === 'undefined') { response.redirect('/xample/'); } else {
 
         pool.getConnection(function(err, connection) {
 			var qry = "SELECT pagename FROM u_" + uid + " WHERE pid=" + pid;
@@ -893,7 +1011,7 @@ editpage: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 saveblocks: function(request,response) {
 	var qs = require('querystring');
@@ -976,6 +1094,7 @@ saveblocks: function(request,response) {
 											console.log("618: " + err);
 											response.end('err');
 										} else {
+											deleteMedia(connection,uid,pid);
 											response.end('blockssaved');
 										}
 									});
@@ -1008,7 +1127,7 @@ saveblocks: function(request,response) {
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 uploadmedia: function(request,response) {
 	var fs = require('fs');

@@ -1,12 +1,14 @@
 /*
-	Title: xample
-	About: This is the server for Xample
+	Section: Xample
+
+	This is the server for Xample
 */
 
-/*
+/* 
 	Section: Modules
-	About: These are the modules xample uses
-	
+
+	These are the modules xample uses
+
 	page - imports the functions that handl xample url requests
 	http - ??? was using this to start a server, but this might not be needed since express module is used now
 	express - used to start a server and page routing
@@ -22,7 +24,7 @@ var busboy = require('connect-busboy');
 
 /*
 	Section: Server Exit
-	About: These functions handle uncaught errors and program exit procedure
+	These functions handle uncaught errors and program exit procedure
 */
 
 /* prevents node from exiting on error */
@@ -35,7 +37,6 @@ process.stdin.resume();
 
 /*
 	Function: exitHandler
-	
 	Used to run code when the program exits. Called on SIGINT (ctrl^c)
 	
 	Parameters:
@@ -44,19 +45,29 @@ process.stdin.resume();
 	
 	Returns:
 	
-		nothing
+		nothing - *
 */
 function exitHandler() {
 	console.log('\nClean up routine complete. Xample app terminated.');
     process.exit();
 }
 
-/* calls exitHandler() on SIGINT, ctrl^c
+/* calls exitHandler() on SIGINT, ctrl^c */
 process.on('SIGINT', exitHandler);
 
 /*
 	Section: Create Server
-	About: These functions create a server, set it up, and route url addresses
+	These functions create a server, set it up, and route url addresses. An asterisks indicates that a get link may follow.
+	
+	index - start
+	signup - signup
+	login - login
+	logout - logout
+	createpage - createpage
+	getpages - getpages
+	editpage* - editpage
+	saveblocks - saveblocks
+	uploadmedia* - uploadmedia
 */
 
 /* create express server */

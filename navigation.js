@@ -231,6 +231,7 @@ function displaySignUp() {
 function logoutBtn() {
 	var logout = document.createElement('button');
 	logout.setAttribute('type', 'button');
+	logout.setAttribute('class', 'menubtn logout-btn');
 	logout.setAttribute('value', 'submit-logout');
 	logout.setAttribute('onclick', 'logout();');
 	logout.innerHTML = "Log Out";
@@ -337,7 +338,7 @@ function displayHome() {
 		{
 			var link = document.createElement('a');
 			link.setAttribute('class', 'pagelink');
-			link.setAttribute('href', 'xample/editpage?page=' + pagearray[i]);
+			link.setAttribute('href', 'editpage?page=' + pagearray[i]);
 			link.setAttribute('target', '_blank');
 			link.innerHTML = pagearray[i+1];
 			pagesdiv.appendChild(link);
@@ -370,6 +371,10 @@ function displayHome() {
 */
 function editPage(pagedata) {
 	
+	/* create top div to wrap all header elements */
+	var menu = document.createElement("div");
+	menu.setAttribute("class", "block-menu");
+	
 	/* log out button */
 	var logout = logoutBtn();
 	
@@ -388,6 +393,7 @@ function editPage(pagedata) {
 	var title = document.createElement('input');
 	title.setAttribute('type', 'text');
 	title.setAttribute('name', 'pagename');
+	title.setAttribute('class', 'page-title');
 	title.setAttribute('maxlength', '50');
 	title.setAttribute('value', pagename);
 	
@@ -395,8 +401,15 @@ function editPage(pagedata) {
 	var savebtn = document.createElement('button');
 	savebtn.setAttribute('type', 'button');
 	savebtn.setAttribute('name', 'save-blocks');
+	savebtn.setAttribute('class', 'menubtn save-btn');
 	savebtn.setAttribute('onclick', 'saveBlocks()');
-	savebtn.innerHTML = "save";
+	savebtn.innerHTML = "Save";
+		
+	/* attach elements to menu div */
+	menu.appendChild(logout);
+	menu.appendChild(pageid);
+	menu.appendChild(title);
+	menu.appendChild(savebtn);
 		
 	/* blocks */
 	var blocksdiv = document.createElement('div');
@@ -459,10 +472,7 @@ function editPage(pagedata) {
 
 	/* grab the main div and append all of these elements */
 	var main = document.getElementById('content');
-	main.appendChild(logout);
-	main.appendChild(pageid);
-	main.appendChild(title);
-	main.appendChild(savebtn);
+	main.appendChild(menu);
 	main.appendChild(blocksdiv);
 	main.appendChild(fileform);
 	
@@ -581,14 +591,24 @@ function insertContent(block, btype, content) {
 	if(btype == "xtext")
 	{
 		/* WYSIWIG uses iframe */
-		var str = '<iframe class="xTex" maxlength="1023">' + content + '</iframe>'; // remove "content"???
-		block.innerHTML = str;
+		var xtext = document.createElement("iframe");
+		xtext.setAttribute("class", "xTex");
+		xtext.setAttribute("maxlength", "1023");
+		
+		block.appendChild(xtext);
 
-		/* iframe has to be put with document first or some bullshit, so wait one second for that to happen and then insert content */
+		/* iframe has to be put with document first or some bullshit, so wait one millisecond for that to happen and then insert content */
 		setTimeout(function() {
 			
-			var iframe = block.childNodes[0].contentDocument; 
+			/* create link to css style for iframe content */
+			var cssLink = document.createElement("link");
+			cssLink.href = "http://abaganon.com/css/block.css";
+			cssLink.rel = "stylesheet";
+			cssLink.type = "text/css";
+			
+			var iframe = block.childNodes[0].contentDocument;
 			iframe.open();
+			//iframe.head.appendChild(cssLink); this can be used in show mode, not in edit mode
 			iframe.write(content);
 			iframe.close();
 			
@@ -607,8 +627,22 @@ function insertContent(block, btype, content) {
 	}
 	if(btype == "xcode")
 	{
-		var str = '<code class="xCde" onblur="renderCode(this);" contenteditable>' + content + '</code>';
-		block.innerHTML = str;
+		var xcode = document.createElement("code");
+		xcode.setAttribute("class", "xCde");
+		xcode.setAttribute("onblur", "renderCode(this)");
+		xcode.contentEditable = "true";
+		xcode.innerHTML = content;
+		
+		block.appendChild(xcode);
+		
+		/* attach keyboard shortcuts to iframe */
+		if (xcode.addEventListener) {
+		    xcode.addEventListener("keydown", codeKeys.bind(null,block), false);
+		} else if (iframe.attachEvent) {
+		    xcode.attachEvent("onkeydown", codeKeys.bind(null,block));
+		} else {
+		    xcode.onkeydown = codeKeys.bind(null,block);
+		}
 	}
 	if(btype == "xmath")
 	{
@@ -624,24 +658,49 @@ function insertContent(block, btype, content) {
 	}
 	if(btype == "image")
 	{
-		var str = '<img class="xImg" src="' + content + '">';
-		block.innerHTML = str;
+		var ximg = document.createElement("img");
+		ximg.setAttribute("class", "xImg");
+		ximg.src = content;
+		
+		block.appendChild(ximg);
 	}
 	if(btype == "audio")
 	{
-		var str = '<audio class="xAud" controls><source src="' + content + '" type="audio/mpeg"></audio>';
-		block.innerHTML = str;
+		var audio = document.createElement("audio");
+		audio.setAttribute("class", "xAud");
+		audio.volume = 0.8;
+		audio.setAttribute("controls", "controls");
+		
+		var source = document.createElement("source");
+		source.setAttribute("src", content);
+		source.setAttribute("type", "audio/mpeg");
+		
+		audio.appendChild(source);
+		block.appendChild(audio);
 	}
 	if(btype == "video")
 	{
-		var str = '<video class="xVid" controls><source src="' + content + '" type="video/mp4"></video>';
-		block.innerHTML = str;
+		var video = document.createElement("video");
+		video.setAttribute("class", "xVid");
+		video.volume = 0.8;
+		video.setAttribute("controls", "controls");
+		
+		var source = document.createElement("source");
+		source.setAttribute("src", content);
+		source.setAttribute("type", "video/mp4");
+		
+		video.appendChild(source);
+		block.appendChild(video);
 	}
 	if(btype == "slide")
 	{
 		/* data-page attribute keeps track of which page is being displayed */
-		var str = '<canvas class="xSli" id="' + content + '" data-page="1"></canvas>';
-		block.innerHTML = str;
+		var canvas = document.createElement("canvas");
+		canvas.setAttribute("class", "xSli");
+		canvas.setAttribute("id", content);
+		canvas.setAttribute("data-page", "1");
+		
+		block.appendChild(canvas);
 
 		/* if block was just made, don't try to load pdf */
 		if (content !== "") {
@@ -666,7 +725,7 @@ function insertContent(block, btype, content) {
 			var pageCount = pdfObjects[pdfID].numPages;
 			
 			/* determine whether left or right side was clicked, then render prev or next page */
-			if(X > this.offsetWidth / 2) {
+			if(X > this.offsetWidth / 1.7) {
 				if(pageNum < pageCount) {
 					pageNum++;
 					canvas.setAttribute("data-page",pageNum);
@@ -682,8 +741,51 @@ function insertContent(block, btype, content) {
 			}
 		}
 	}
+	if(btype == "title")
+	{
+		var str = '<input type="text" class="xTit" maxlength="64" value="' + content + '">';
+		block.innerHTML = str;
+	}
 	
 	return block;
+}
+
+/*
+	Function: codeKeys
+	
+	This function is attached as the event listener to the code block. It detects key presses and applies styling.
+	
+	Parameters:
+	
+		block - the <code> tag
+		event - the keydown event that triggers the function
+		
+	Returns:
+	
+		none
+*/
+function codeKeys(block,event) {
+	/* tab */
+    if (event.keyCode === 9) {
+	    
+	    /* prevent default tab behavior */
+        event.preventDefault();
+
+		/* grab the cursor location */
+        var doc = block.ownerDocument.defaultView;
+        var sel = doc.getSelection();
+        var range = sel.getRangeAt(0);
+
+		/* insert 4 spaces representing a tab */
+        var tabNode = document.createTextNode("\u00a0\u00a0\u00a0\u00a0");
+        range.insertNode(tabNode);
+
+		/* replace cursor to after tab location */
+        range.setStartAfter(tabNode);
+        range.setEndAfter(tabNode); 
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
 }
 
 /*
@@ -736,6 +838,11 @@ function detectKey(iframe,event) {
 	if(event.shiftKey && event.ctrlKey && event.keyCode == 70)
 	{
 		iframe.contentDocument.execCommand('justifyFull',false,null);
+	}
+	/* tab : indent */
+	if(event.keyCode == 9)
+	{
+		iframe.contentDocument.execCommand('insertHTML', false, '&nbsp;&nbsp;&nbsp;&nbsp;');
 	}
 	/* h - hyperlink */
 	if(event.shiftKey && event.ctrlKey && event.keyCode == 72)
@@ -945,41 +1052,55 @@ function blockButtons(bid) {
 	
 	var txtBtn = document.createElement('button');
 	txtBtn.setAttribute("onclick", "addBlock(" + bid + ",'xtext')");
+	txtBtn.setAttribute("class", "blockbtn addbtn");
 	txtBtn.innerHTML = "text";
 	
 	var cdeBtn = document.createElement('button');
 	cdeBtn.setAttribute("onclick", "addBlock(" + bid + ",'xcode')");
+	cdeBtn.setAttribute("class", "blockbtn addbtn");
 	cdeBtn.innerHTML = "code";
 	
 	var matBtn = document.createElement('button');
 	matBtn.setAttribute("onclick", "addBlock(" + bid + ",'xmath')");
+	matBtn.setAttribute("class", "blockbtn addbtn");
 	matBtn.innerHTML = "math";
 	
 	var ltxBtn = document.createElement('button');
 	ltxBtn.setAttribute("onclick", "addBlock(" + bid + ",'latex')");
+	ltxBtn.setAttribute("class", "blockbtn addbtn");
 	ltxBtn.innerHTML = "latex";
 	
 	var imgBtn = document.createElement('button');
 	imgBtn.setAttribute("onclick", "addBlock(" + bid + ",'image')");
+	imgBtn.setAttribute("class", "blockbtn addbtn");
 	imgBtn.innerHTML = "image";
 	
 	var audBtn = document.createElement('button');
 	audBtn.setAttribute("onclick", "addBlock(" + bid + ",'audio')");
+	audBtn.setAttribute("class", "blockbtn addbtn");
 	audBtn.innerHTML = "audio";
 	
 	var vidBtn = document.createElement('button');
 	vidBtn.setAttribute("onclick", "addBlock(" + bid + ",'video')");
+	vidBtn.setAttribute("class", "blockbtn addbtn");
 	vidBtn.innerHTML = "video";
 	
 	var sliBtn = document.createElement('button');
 	sliBtn.setAttribute("onclick", "addBlock(" + bid + ",'slide')");
+	sliBtn.setAttribute("class", "blockbtn addbtn");
 	sliBtn.innerHTML = "slides";
+	
+	var titBtn = document.createElement('button');
+	titBtn.setAttribute("onclick", "addBlock(" + bid + ",'title')");
+	titBtn.setAttribute("class", "blockbtn addbtn");
+	titBtn.innerHTML = "title";
 	
 	var delBtn = document.createElement('button');
 	delBtn.setAttribute('id', 'd' + bid);
 	delBtn.setAttribute('onclick', 'deleteBlock(' + bid + ')');
+	delBtn.setAttribute("class", "blockbtn delbtn");
 	delBtn.style.visibility='hidden';
-	delBtn.innerHTML = "delete &darr;";
+	delBtn.innerHTML = "&darr;";
 	
 	/* append the buttons to the div that holds them */
 	buttonDiv.appendChild(txtBtn);
@@ -990,6 +1111,7 @@ function blockButtons(bid) {
 	buttonDiv.appendChild(audBtn);
 	buttonDiv.appendChild(vidBtn);
 	buttonDiv.appendChild(sliBtn);
+	buttonDiv.appendChild(titBtn);
 	buttonDiv.appendChild(delBtn);
 	
 	return buttonDiv;
@@ -1141,7 +1263,7 @@ function addBlock(bid,btype) {
 	}
 	
 	/* these blocks call createBlock() to add the block */
-	if (["xcode","xmath","latex"].indexOf(btype) > -1)
+	if (["xcode","xmath","latex","title"].indexOf(btype) > -1)
 	{
 		createBlock(bid,btype);
 	}
@@ -1710,6 +1832,12 @@ function saveBlocks() {
 				var str = document.getElementById('a' + bid).children[0].id;
 				blockContent[i] = str.replace(location.href.substring(0, location.href.lastIndexOf('/')+1), "");
 			}
+			else if (btype == "title") {
+				blockContent[i] = document.getElementById('a' + bid).children[0].value;
+				
+				// NEED SOLUTION
+				blockContent[i] = blockContent[i].replace(/'/g, " ").replace(/,/g, " ").replace(/&/g, " ");
+			}
 			
 			i++;
 			bid++;
@@ -1759,3 +1887,13 @@ function saveBlocks() {
 	    
 	xmlhttp.send(params);
 }
+
+
+
+
+
+
+
+
+
+

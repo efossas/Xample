@@ -339,7 +339,15 @@ Thus, the block goes like this, block div -> <input type="text"> content block
 
 content block class - xTit
 
+Section: Styles
 
+Topic: Blocks
+
+Section: Minify
+
+Topic: JS & CSS
+
+Javascript & CSS files are minified before being uploaded. The only site I have found that has properly minified the files is the following. http://www.danstools.com/javascript-minify/
 
 
 
