@@ -23,9 +23,78 @@ footer {
 }
 
 .block-menu {
+	width: 100%;
 	max-width: 720px;
 	margin: 10px auto 0 auto;
+	padding: 10px 0px;
 	position: relative;
+}
+
+.block-menu::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  background: rgba(118, 118, 118, 0.75);
+  z-index: -1;
+}
+
+/* Grid System */
+
+.row {
+	box-sizing: border-box;
+	margin: 5px 0;
+}
+
+.row:before,
+.row:after {
+    content: " ";
+    display: table;
+}
+
+.row:after {
+    clear: both;
+}
+
+.col-15 {
+	box-sizing: border-box;
+	position: relative;
+    float: left;
+    min-height: 1px;
+    width: 15%;
+}
+
+.col-50 {
+	box-sizing: border-box;
+	position: relative;
+    float: left;
+    min-height: 1px;
+    width: 50%;
+    
+    padding: 0 10px;
+}
+
+.col-70 {
+	box-sizing: border-box;
+	position: relative;
+    float: left;
+    min-height: 1px;
+    width: 70%;
+    
+    padding: 0 14px;
+}
+
+.col-100 {
+	box-sizing: border-box;
+	position: relative;
+    float: left;
+    min-height: 1px;
+    width: 100%;
+    
+    padding: 0 10px;
 }
 
 #blocks {
@@ -58,7 +127,7 @@ footer {
 }
 
 .logout-btn {
-	width: 15%;
+	width: 100%;
 	background-color: #ff1111;
 }
 
@@ -66,8 +135,26 @@ footer {
 	background-color: #d31e1e;
 }
 
+.profile-btn {
+	width: 100%;
+	background-color: #00ffe1;
+}
+
+.profile-btn:hover {
+	background-color: #00a895;
+}
+
+.revert-btn {
+	width: 100%;
+	background-color: #00ffe1;
+}
+
+.revert-btn:hover {
+	background-color: #00a895;
+}
+
 .save-btn {
-	width: 10%;
+	width: 100%;
 	background-color: #00ffe1;
 }
 
@@ -75,15 +162,34 @@ footer {
 	background-color: #00a895;
 }
 
+.temp-btn {
+	width: 100%;
+	background-color: #00ffe1;
+}
+
+.temp-btn:hover {
+	background-color: #00a895;
+}
+
+.perm-btn {
+	width: 100%;
+	background-color: #00ffe1;
+}
+
+.perm-btn:hover {
+	background-color: #00a895;
+}
+
 .page-title {
 	display: inline-block;
-	width: 50%;
+	width: 100%;
 	height: 30px;
 	border: 1px solid black;
 	border-radius: 4px;
 	
 	padding: 0px 0px;
 	margin: 0px;
+	box-sizing: border-box;
 	
 	text-align: center;
 	
@@ -139,7 +245,7 @@ footer {
 /* Block Styles */
 .xtext { 
 	max-width: 720px; 
-	margin: 0px auto 0 auto; 
+	margin: 0px auto 0 auto;
 }
 
 iframe.xTex {
@@ -152,6 +258,7 @@ iframe.xTex {
 	
 	padding: 0px;
 	margin: 0px;
+	box-sizing: border-box;
 	
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 1em;
@@ -161,12 +268,12 @@ iframe.xTex {
 
 .xcode { 
 	max-width: 720px; 
-	margin: 0px auto 0 auto; 
+	margin: 0px auto 0 auto;
 }
 
 .xCde {
 	display: inline-block;
-	width: 708px;
+	width: 720px;
 	height: 300px;
 	border: 1px solid black;
 	border-radius: 4px;
@@ -184,6 +291,7 @@ iframe.xTex {
 	
 	padding: 4px 6px;
 	margin: 0px;
+	box-sizing: border-box;
 }
 
 .latex { 
@@ -193,7 +301,7 @@ iframe.xTex {
 
 .xLtx {
 	display: inline-block;
-	width: 708px;
+	width: 720px;
 	height: 100px;
 	border: 1px solid black;
 	border-radius: 4px;
@@ -201,11 +309,12 @@ iframe.xTex {
 	
 	padding: 4px 6px;
 	margin: 2px 0 0 0;
+	box-sizing: border-box;
 }
 
 .latexImage {
 	display: inline-block;
-	width: 708px;
+	width: 720px;
 	height: 200px;
 	border: 1px solid black;
 	border-radius: 4px;
@@ -213,6 +322,7 @@ iframe.xTex {
 	
 	padding: 4px 6px;
 	margin: 0px;
+	box-sizing: border-box;
 }
 
 .xmath { 
@@ -222,7 +332,7 @@ iframe.xTex {
 
 .xMat {
 	display: inline-block;
-	width: 708px;
+	width: 720px;
 	height: 100px;
 	border: 1px solid black;
 	border-radius: 4px;
@@ -230,13 +340,14 @@ iframe.xTex {
 	
 	padding: 4px 6px;
 	margin: 2px 0 0 0;
+	box-sizing: border-box;
 	
 	font-family: Arial, Helvetica, sans-serif;
 }
 
 .mathImage {
 	display: inline-block;
-	width: 708px;
+	width: 720px;
 	height: 200px;
 	border: 1px solid black;
 	border-radius: 4px;
@@ -244,6 +355,7 @@ iframe.xTex {
 	
 	padding: 4px 6px;
 	margin: 0px;
+	box-sizing: border-box;
 }
 
 .image { 
@@ -260,6 +372,7 @@ iframe.xTex {
 	
 	padding: 0px;
 	margin: 0px;
+	box-sizing: border-box;
 }
 
 .audio { 
@@ -273,6 +386,7 @@ iframe.xTex {
 	
 	padding: 0px;
 	margin: 0px;
+	box-sizing: border-box;
 }
 
 .video { 
@@ -289,6 +403,7 @@ iframe.xTex {
 	
 	padding: 0px;
 	margin: 0px;
+	box-sizing: border-box;
 }
 
 .slide { 
@@ -305,6 +420,7 @@ iframe.xTex {
 	
 	padding: 0px;
 	margin: 0px;
+	box-sizing: border-box;
 }
 
 .title { 
@@ -314,13 +430,14 @@ iframe.xTex {
 
 .xTit {
 	display: inline-block;
-	width: 708px;
+	width: 720px;
 	height: 30px;
 	border: 1px solid black;
 	border-radius: 4px;
 	
 	padding: 4px 6px;
 	margin: 0px;
+	box-sizing: border-box;
 	
 	text-align: center;
 	
@@ -330,10 +447,31 @@ iframe.xTex {
 	color: black;
 }
 
-/* Medium Size */
+/* Mobile Size */
 
 @media screen and (max-width: 720px) {
 	#content { width: 96%; }
+	
+	.col-15-left {
+		float: none;
+	    min-height: 1px;
+	    width: auto;
+	}
+	
+	.col-15-right {
+		float: none;
+	    min-height: 1px;
+	    width: auto;
+	}
+	
+	.col-70 {
+		float: none;
+	    min-height: 1px;
+	    width: auto;
+	    
+	    margin: 0;
+	    padding: 0;
+	}
 	
 	.logout-btn { width: 100%; }
 	.save-btn { width: 100%; }
@@ -348,14 +486,14 @@ iframe.xTex {
 	iframe.xTex { width: 100%; }
 	
 	.xcode { max-width: 100%; margin: 0px auto 0 auto; }
-	.xCde { width: 98%; }
+	.xCde { width: 100%; }
 	
 	.latex { max-width: 100%; margin: 0px auto 0 auto; }
-	.xLtx { width: 98%; }
+	.xLtx { width: 100%; }
 	.latexImage { width: 100%; }
 	
 	.xmath { max-width: 100%; margin: 0px auto 0 auto; }
-	.xMat { width: 98%; }
+	.xMat { width: 100%; }
 	.mathImage { width: 100%; }
 	
 	.image { max-width: 100%; margin: 0px auto 0 auto; }
@@ -371,7 +509,7 @@ iframe.xTex {
 	.xSli { width: 100%; height: 80%; }
 	
 	.title { max-width: 100%; margin: 0px auto 0 auto; }
-	.xTit { width: 98%; }
+	.xTit { width: 100%; }
 }
 
 

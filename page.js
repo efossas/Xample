@@ -194,6 +194,45 @@ function searchPid(connection,uid,pagename) {
 }
 
 /*
+	Function: searchPageStatus
+	
+	This finds the save status of a user's page.
+	
+	Parameters:
+	
+		connection - a MySQL connection
+		uid - the user's id
+		pid - the page id
+	
+	Returns:
+	
+		success - promise, status (0 temp, 1 perm)
+		error - promise, -1
+*/
+function searchPageStatus(connection,uid,pid) {
+	var promise = new Promise(function(resolve, reject) {
+
+		/* username must have connection.escape() already applied, which adds '' */
+		var qry = "SELECT status FROM u_" + uid + " WHERE pid=" + pid;
+
+		/* query the database */
+		connection.query(qry, function(err, rows, fields) {
+			if(err) {
+				resolve(-1);
+			} else {
+				if(typeof rows[0] !== 'undefined') {
+					resolve(rows[0].status);
+				} else {
+					resolve(-1);
+				}
+			}
+		});
+	});
+
+	return promise;
+}
+
+/*
 	Function: changePagename
 	
 	This changes the name of a user's page.
@@ -502,7 +541,6 @@ function deleteMedia(connection,uid,pid) {
 	});
 
 }
-
 
 /*
 	Function: absentRequest
@@ -841,20 +879,29 @@ createpage: function(request,response) {
 					            } else {
 						            var pid = success;
 
-									/* create the page's media table */
+									/* create the page's permanent table */
 						            var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
 
-						            /* retrieve the user's password */
 						            connection.query(qryPage, function(err, rows, fields) {
 										if (err) {
-											console.log("610: " + err);
+											console.log("610-1: " + err);
 											response.end('err');
-										} else {
-											/* make a folder in user's media folder to store future media uploads */
-											fs.mkdir(__dirname + "/../public_html/xample-media/" + uid + "/" + pid);
-											response.end(pid.toString());
 										}
 									});
+									
+									/* create the page's temporary table */
+									var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
+
+									connection.query(qryTemp, function(err, rows, fields) {
+										if (err) {
+											console.log("610-2: " + err);
+											response.end('err');
+										}
+									});
+									
+									/* make a folder in user's media folder to store future media uploads */
+									fs.mkdir(__dirname + "/../public_html/xample-media/" + uid + "/" + pid);
+									response.end(pid.toString());
 								}
 							}, function(error) {
 								console.log("611: searchPid() Promise Error");
@@ -941,60 +988,91 @@ editpage: function(request,response) {
 	
 	/* get the pid from the get request */
 	var pid = request.query.page;
+	
+	/* get table identifier */
+	var temp = request.query.temp;
+	
+	/* if searchstatus is set to false, don't bother with page status, user is coming from choose page */
+	var tid;
+	var searchstatus;
+	
+	if(temp == "true") {
+		tid = "t_";
+		searchstatus = false;
+	} else if (temp == "false") {
+		tid = "p_";
+		searchstatus = false;
+	} else {
+		tid = "p_";
+		searchstatus = true;
+	}
 
 	/* redirect the user to the index page if they're not logged in */ 
 	if(typeof uid === 'undefined') { response.redirect('/xample/'); } else {
-
+		
         pool.getConnection(function(err, connection) {
-			var qry = "SELECT pagename FROM u_" + uid + " WHERE pid=" + pid;
-
-			connection.query(qry, function(err, rows, fields) {
-				if(err) {
-					console.log("614: " + err);
-					response.end('err');
-				} else {
-					/* sql query is undefined if a user tries to edit page with invalid pid */
-					if(typeof rows[0] === 'undefined') {
-						absentRequest(request,response);
-					} else {
-						var pagename = rows[0].pagename;
-	
-						var qry = "SELECT mediaType,mediaContent FROM p_" + uid + "_" + pid;
-	
-						connection.query(qry, function(err, rows, fields) {
-							if(err) {
-								console.log("615: " + err);
-								response.end('err');
+	        
+	        var promise = searchPageStatus(connection,uid,pid);
+	        
+	        promise.then(function(success) {
+		        if(searchstatus && success == 0) {
+			        /* load the edit page with the page data */
+					loadPage(response,"<script>choosePage('" + pid + "');</script>");
+		        } else {
+	        
+					var qry = "SELECT pagename FROM u_" + uid + " WHERE pid=" + pid;
+		
+					connection.query(qry, function(err, rows, fields) {
+						if(err) {
+							console.log("614: " + err);
+							response.end('err');
+						} else {
+							/* sql query is undefined if a user tries to edit page with invalid pid */
+							if(typeof rows[0] === 'undefined') {
+								absentRequest(request,response);
 							} else {
-								var pagedata = pid + ",";
-								pagedata += pagename;
-	
-								/* i is for accessing row array, j is for keeping track of rows left to parse */
-								var i = 0;
-								var j = rows.length;
-								
-								/* append commas to each row except for the last one */
-								if(j > 0)
-								{
-									pagedata += ",";
-								}
-								while(j > 1) {
-									pagedata += rows[i].mediaType + "," + rows[i].mediaContent + ",";
-									i++;
-									j--;
-								}
-								if(j === 1) {
-									pagedata += rows[i].mediaType + "," + rows[i].mediaContent;
-								}
-	
-								/* load the edit page with the page data */
-								loadPage(response,"<script>editPage('" + pagedata + "');</script>");
+								var pagename = rows[0].pagename;
+			
+								var qry = "SELECT mediaType,mediaContent FROM " + tid + uid + "_" + pid;
+			
+								connection.query(qry, function(err, rows, fields) {
+									if(err) {
+										console.log("615: " + err);
+										response.end('err');
+									} else {
+										var pagedata = pid + ",";
+										pagedata += pagename;
+			
+										/* i is for accessing row array, j is for keeping track of rows left to parse */
+										var i = 0;
+										var j = rows.length;
+										
+										/* append commas to each row except for the last one */
+										if(j > 0)
+										{
+											pagedata += ",";
+										}
+										while(j > 1) {
+											pagedata += rows[i].mediaType + "," + rows[i].mediaContent + ",";
+											i++;
+											j--;
+										}
+										if(j === 1) {
+											pagedata += rows[i].mediaType + "," + rows[i].mediaContent;
+										}
+			
+										/* load the edit page with the page data */
+										loadPage(response,"<script>editPage('" + pagedata + "');</script>");
+									}
+								});
 							}
-						});
-					}
+						}
+					});
+					connection.release();
 				}
+			}, function(error) {
+				console.log("searchPageStatus error");
 			});
-            connection.release();
         });
 	}
 },
@@ -1045,6 +1123,24 @@ saveblocks: function(request,response) {
 		        var pagename = connection.escape(POST.pagename);
 		        var mediaType = POST.mediaType;
 		        var mediaContent = POST.mediaContent;
+		        
+		        var tid;
+		        var qryStatus;
+		        /* 1 -> perm, 0 -> temp */
+		        if (POST.tabid == 1) {
+			        tid = "p_";
+			        qryStatus = "UPDATE u_" + uid + " SET status=1 WHERE pid=" + pid;
+		        } else {
+			        tid = "t_";
+			        qryStatus = "UPDATE u_" + uid + " SET status=0 WHERE pid=" + pid;
+		        }
+		        
+		        connection.query(qryStatus, function(err, rows, fields) {
+			        if(err) {
+						console.log("616-1: " + err);
+						response.end('err');
+					}
+		        });
 
 				/* get arrays of the media types and content */
 		        var types = mediaType.split(',');
@@ -1056,11 +1152,11 @@ saveblocks: function(request,response) {
 		        promisePage.then(function(success) {
 
 			        if(success === -1) {
-				        console.log("616: change pagename error");
+				        console.log("616-2: change pagename error");
 			        } else {
 
 				        /* truncate (remove all rows) from the table */
-						var qryTruncate = "TRUNCATE TABLE p_" + uid + "_" + pid;
+						var qryTruncate = "TRUNCATE TABLE " + tid + uid + "_" + pid;
 
 						connection.query(qryTruncate, function(err, rows, fields) {
 							if(err) {
@@ -1072,17 +1168,13 @@ saveblocks: function(request,response) {
 								if(types[0] !== 'undefined') {
 
 									/* create the query and remove unused media from user's page folder as well */
-									var qryInsert = "INSERT INTO p_" + uid + "_" + pid + " (bid,mediatype,mediacontent) VALUES ";
+									var qryInsert = "INSERT INTO " + tid + uid + "_" + pid + " (bid,mediatype,mediacontent) VALUES ";
 
 							        var i = 0;
 							        var stop = types.length - 1;
 
 							        while(i < stop)
-							        {
-    							        //
-    							        // check for type, get media file names, check folder for files that don't match, delete those extra files
-    							        //
-    							        
+							        {    							        
 								        qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
 								        i++
 							        }

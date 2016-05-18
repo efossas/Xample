@@ -21,9 +21,11 @@
 	Section: Globals
 	These are the global variables xample uses
 	
+	domain - the domain name, including the http://
 	pdfObjects - pdf.js generates pdf objects that can be used to render individual pages to <canvas>
 */
 
+var domain = "http://abaganon.com/";
 var pdfObjects = {};
 
 /*
@@ -240,6 +242,30 @@ function logoutBtn() {
 }
 
 /*
+	Function: profileBtn
+	
+	Creates a profile button.
+	
+	Parameters:
+	
+		none
+		
+	Returns:
+	
+		success - html node, profile button
+*/
+function profileBtn() {
+	var profile = document.createElement('button');
+	profile.setAttribute('type', 'button');
+	profile.setAttribute('class', 'menubtn profile-btn');
+	profile.setAttribute('value', 'submit-profile');
+	profile.setAttribute('onclick', 'profile();');
+	profile.innerHTML = "Profile";
+	
+	return profile;
+}
+
+/*
 	Function: displayLanding
 	
 	Displays the Landing Page (index page for logged out users). Currently creates a log in form and button to display sign up form. Then both are appended to the main div.
@@ -371,12 +397,34 @@ function displayHome() {
 */
 function editPage(pagedata) {
 	
+	/* MENU */
+	
 	/* create top div to wrap all header elements */
 	var menu = document.createElement("div");
 	menu.setAttribute("class", "block-menu");
 	
+	/* row 1 */
+	var row_one = document.createElement("div");
+	row_one.setAttribute("class", "row");
+	
+	var col_one_left = document.createElement("div");
+	col_one_left.setAttribute("class", "col-15");
+	
+	var col_one_middle = document.createElement("div");
+	col_one_middle.setAttribute("class", "col-70");
+	
+	var col_one_right = document.createElement("div");
+	col_one_right.setAttribute("class", "col-15");
+	
+	row_one.appendChild(col_one_left);
+	row_one.appendChild(col_one_middle);
+	row_one.appendChild(col_one_right);
+	
 	/* log out button */
 	var logout = logoutBtn();
+	
+	/* profile button */
+	var profile = profileBtn();
 	
 	/* block array -> pid,pagename,mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
 	var blockarray = pagedata.split(',');
@@ -390,6 +438,46 @@ function editPage(pagedata) {
 	pageid.setAttribute('name', 'pageid');
 	pageid.setAttribute('value', pid);
 	
+	var statusid = document.createElement('input');
+	statusid.setAttribute('type', 'hidden');
+	statusid.setAttribute('name', 'statusid');
+	statusid.setAttribute('value', '1');
+	
+	/* append elements to row 1 */
+	col_one_left.appendChild(logout);
+	col_one_right.appendChild(profile);
+	
+	/* append row 1 to the menu */
+	menu.appendChild(pageid);
+	menu.appendChild(statusid);
+	menu.appendChild(row_one);
+	
+	/* row 2 */
+	var row_two = document.createElement("div");
+	row_two.setAttribute("class", "row");
+	
+	var col_two_left = document.createElement("div");
+	col_two_left.setAttribute("class", "col-15");
+	
+	var col_two_middle = document.createElement("div");
+	col_two_middle.setAttribute("class", "col-70");
+	
+	var col_two_right = document.createElement("div");
+	col_two_right.setAttribute("class", "col-15");
+	
+	row_two.appendChild(col_two_left);
+	row_two.appendChild(col_two_middle);
+	row_two.appendChild(col_two_right);
+	
+	/* revert btn */
+	var revertbtn = document.createElement('button');
+	revertbtn.setAttribute('type', 'button');
+	revertbtn.setAttribute('name', 'revert-blocks');
+	revertbtn.setAttribute('class', 'menubtn revert-btn');
+	revertbtn.setAttribute('onclick', 'revertBlocks()');
+	revertbtn.innerHTML = "Revert";
+	
+	/* page title input */
 	var title = document.createElement('input');
 	title.setAttribute('type', 'text');
 	title.setAttribute('name', 'pagename');
@@ -397,20 +485,24 @@ function editPage(pagedata) {
 	title.setAttribute('maxlength', '50');
 	title.setAttribute('value', pagename);
 	
-	/* save btns */
+	/* save btn */
 	var savebtn = document.createElement('button');
 	savebtn.setAttribute('type', 'button');
 	savebtn.setAttribute('name', 'save-blocks');
 	savebtn.setAttribute('class', 'menubtn save-btn');
-	savebtn.setAttribute('onclick', 'saveBlocks()');
+	savebtn.setAttribute('onclick', 'saveBlocks(true)');
 	savebtn.innerHTML = "Save";
 		
-	/* attach elements to menu div */
-	menu.appendChild(logout);
-	menu.appendChild(pageid);
-	menu.appendChild(title);
-	menu.appendChild(savebtn);
-		
+	/* append elements to row 2 */
+	col_two_left.appendChild(revertbtn);
+	col_two_middle.appendChild(title);
+	col_two_right.appendChild(savebtn);
+	
+	/* append row 2 to the menu */
+	menu.appendChild(row_two);
+	
+	/* BLOCKS */
+	
 	/* blocks */
 	var blocksdiv = document.createElement('div');
 	blocksdiv.setAttribute('class', 'blocks');
@@ -447,6 +539,8 @@ function editPage(pagedata) {
 		i++;
 	}
 	
+	/* HIDDEN FILE FORM */
+	
 	/* hidden form for media uploads */
 	var fileinput = document.createElement('input');
 	fileinput.setAttribute('type', 'file');
@@ -470,11 +564,15 @@ function editPage(pagedata) {
 	fileform.appendChild(fileinput);
 	fileform.appendChild(filebtn);
 
+	/* MAIN */
+
 	/* grab the main div and append all of these elements */
 	var main = document.getElementById('content');
 	main.appendChild(menu);
 	main.appendChild(blocksdiv);
 	main.appendChild(fileform);
+	
+	/* AFTER STUFF */
 	
 	/* make delete buttons visible & last button invisible */
 	var i = 0;
@@ -513,6 +611,121 @@ function editPage(pagedata) {
 	for (i = 0; i < cntL; i++) {
 		insertLatex(latexblocks[i]);
 	}
+	
+	/* prevent user from exiting page if Revert or Save has not been clicked */
+	window.onbeforeunload = function() {
+		var status = document.getElementsByName("statusid")[0].value;
+		if(status == 0) {
+	    	return "Please click Revert or Save before exiting.";
+	    }
+	    return null;
+	};
+}
+
+/*
+	Function: choosePage
+	
+	This function loads the choose page display. A user is given the option to either load their last permanent save or their last temporary save.
+	
+	Parameters:
+	
+		pid - the page id
+		
+	Returns:
+	
+		nothing - *
+*/
+function choosePage(pid) {
+
+	/* row 1 */
+	var row_one = document.createElement("div");
+	row_one.setAttribute("class", "row");
+	
+	var col_middle = document.createElement("div");
+	col_middle.setAttribute("class", "col-100");
+	
+	var center_paragraph = document.createElement("p");
+	center_paragraph.innerHTML = "You are viewing this because the page was closed without Revert or Save being clicked. Please choose which page you want to save.";
+	
+	col_middle.appendChild(center_paragraph);
+	row_one.appendChild(col_middle);
+
+	/* row 2 */
+	var row_two = document.createElement("div");
+	row_two.setAttribute("class", "row");
+	
+	var col_left = document.createElement("div");
+	col_left.setAttribute("class", "col-50");
+	
+	var col_right = document.createElement("div");
+	col_right.setAttribute("class", "col-50");
+	
+	row_two.appendChild(col_left);
+	row_two.appendChild(col_right);
+	
+	var left_paragraph = document.createElement("p");
+	left_paragraph.innerHTML = "This is your last temporary save. This save contains the blocks from the last time you added a block.";
+	
+	var tempBtn = document.createElement('button');
+	tempBtn.setAttribute('type', 'button');
+	tempBtn.setAttribute('class', 'menubtn temp-btn');
+	tempBtn.setAttribute('value', 'submit-temp');
+	tempBtn.setAttribute('onclick', 'loadTempPage(' + pid + ');');
+	tempBtn.innerHTML = "Temporary Page";
+	
+	var right_paragraph = document.createElement("p");
+	right_paragraph.innerHTML = "This is you last permanent save. This save contains the blocks from the last time you clicked Save.";
+	
+	var permBtn = document.createElement('button');
+	permBtn.setAttribute('type', 'button');
+	permBtn.setAttribute('class', 'menubtn perm-btn');
+	permBtn.setAttribute('value', 'submit-perm');
+	permBtn.setAttribute('onclick', 'loadPermPage(' + pid + ');');
+	permBtn.innerHTML = "Permanent Page";
+	
+	col_left.appendChild(tempBtn);
+	col_left.appendChild(left_paragraph);
+	col_right.appendChild(permBtn);
+	col_right.appendChild(right_paragraph);
+	
+	/* main */
+	var main = document.getElementById("content");
+	main.appendChild(row_one);
+	main.appendChild(row_two);
+}
+
+/*
+	Function: loadTempPage
+	
+	This function loads the user's temporary page.
+	
+	Parameters:
+	
+		pid - the page id
+		
+	Returns:
+	
+		nothing - *
+*/
+function loadTempPage(pid) {
+	window.location = domain + "xample/editpage?page=" + pid + "&temp=true";
+}
+
+/*
+	Function: loadPermPage
+	
+	This function loads the user's permanent page.
+	
+	Parameters:
+	
+		pid - the page id
+		
+	Returns:
+	
+		nothing - *
+*/
+function loadPermPage(pid) {
+	window.location = domain + "xample/editpage?page=" + pid + "&temp=false";
 }
 
 /*
@@ -1231,6 +1444,9 @@ function createBlock(bid,btype) {
 		document.getElementById('d' + i).style.visibility = 'visible';
 		i++;
 	}
+	
+	/* save blocks to temp table, indicated by false */
+	saveBlocks(false);
 }
 
 /*
@@ -1484,7 +1700,6 @@ function uploadMedia(bid,btype) {
 	}		
 }
 
-
 /*
 	Function: login
 	
@@ -1654,6 +1869,23 @@ function logout() {
 }
 
 /*
+	Function: profile
+	
+	This function opens the profile page in a different window.
+	
+	Parameters:
+	
+		none
+		
+	Returns:
+	
+		nothing - *
+*/
+function profile() {
+	alert("Haven't Coded This Yet");
+}
+
+/*
 	Function: createpage
 	
 	This function creates a user page.
@@ -1691,11 +1923,10 @@ function createpage() {
 			if(xmlhttp.status == 200) {
 	        	if(xmlhttp.responseText == "pageexists") {
 		        	alert("You Already Have A Page With That Name.");
-	        	} else if (xmlhttp.responseText == "pageexists") {
+	        	} else if (xmlhttp.responseText == "err") {
 		        	alert("An Error Occured. Please Try Again Later");
 		        } else {
-		        	emptyDiv('content');
-		        	editPage(xmlhttp.responseText + "," + pagename);
+		        	window.location = domain + "xample/editpage?page=" + xmlhttp.responseText;
 	        	}
 			}
 			else {
@@ -1765,13 +1996,23 @@ function getPages() {
 	
 	Parameters:
 	
-		none
+		which - should be a boolean. false saves blocks to database temporary table, true saves blocks to database permanent table.
 		
 	Returns:
 	
 		nothing - *
 */
-function saveBlocks() {
+function saveBlocks(which) {
+	
+	/* set parameter to be sent to back-end that determines which table to save to, temp or perm */
+	var table;
+	if(which === false) {
+		table = 0;
+	} else {
+		table = 1;
+	}
+	
+	document.getElementsByName('statusid')[0].setAttribute('value', table);
 	
 	/* variables for storing block data */
 	var blockType = [];
@@ -1861,7 +2102,7 @@ function saveBlocks() {
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "mediaType=" + types + "&mediaContent=" + contents + "&pid=" + pid + "&pagename=" + pagename;
+	var params = "mediaType=" + types + "&mediaContent=" + contents + "&pid=" + pid + "&pagename=" + pagename + "&tabid=" + table;
 	
 	xmlhttp.open("POST", url, true);
 	
@@ -1871,8 +2112,7 @@ function saveBlocks() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
 			if(xmlhttp.status == 200) {
 	        	if(xmlhttp.responseText == "blockssaved") {
-			        	// change status div to saved
-			        	console.log("saved!");
+			        	// successful save
 		        	} else if (xmlhttp.responseText == "nosaveloggedout") {
 			        	alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.")
 		        	} else {
@@ -1888,7 +2128,22 @@ function saveBlocks() {
 	xmlhttp.send(params);
 }
 
-
+/*
+	Function: revertBlocks
+	
+	This function loads the page with last permanent save data.
+	
+	Parameters:
+	
+		none
+		
+	Returns:
+	
+		nothing - *
+*/
+function revertBlocks() {
+	alert("Haven't Coded This Yet");
+}
 
 
 
