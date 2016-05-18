@@ -1263,6 +1263,32 @@ uploadmedia: function(request,response) {
 	        });
 	    });
 	}
+},
+
+/*
+	Function: profile
+	
+	Grabs profile information and returns it to the front-end to display the profile page.
+	
+	Parameters:
+	
+		request - http request
+		response - http response
+	
+	Returns:
+	
+		nothing - *
+*/		
+profile: function(request,response) {
+	/* grab the user's id */
+	var uid = request.session.uid;
+	
+	var profiledata = "";
+	
+	if(typeof uid === 'undefined') { response.end('noprofileloggedout'); } else {
+		loadPage(response,"<script>profilePage('" + profiledata + "');</script>")
+	}		
 }
+
 }
 

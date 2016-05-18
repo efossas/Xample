@@ -255,11 +255,11 @@ function logoutBtn() {
 		success - html node, profile button
 */
 function profileBtn() {
-	var profile = document.createElement('button');
-	profile.setAttribute('type', 'button');
-	profile.setAttribute('class', 'menubtn profile-btn');
-	profile.setAttribute('value', 'submit-profile');
-	profile.setAttribute('onclick', 'profile();');
+	var profile = document.createElement('a');
+	profile.setAttribute('class', 'profile-btn');
+	profile.setAttribute('href', domain + "xample/profile")
+	profile.setAttribute('target', '_blank');
+	profile.setAttribute('value', 'Profile');
 	profile.innerHTML = "Profile";
 	
 	return profile;
@@ -726,6 +726,23 @@ function loadTempPage(pid) {
 */
 function loadPermPage(pid) {
 	window.location = domain + "xample/editpage?page=" + pid + "&temp=false";
+}
+
+/*
+	Function: profilePage
+	
+	This function displays a user's profile page.
+	
+	Parameters:
+	
+		profiledata - the user's profile data
+		
+	Returns:
+	
+		nothing - *
+*/
+function profilePage(profiledata) {
+	document.getElementById("content").innerHTML = "Haven't Coded This Yet";
 }
 
 /*
