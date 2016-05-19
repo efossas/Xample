@@ -1266,6 +1266,98 @@ uploadmedia: function(request,response) {
 },
 
 /*
+	Function: revert
+	
+	Copies the temporary table to the permanent table, then sends the rows of data.
+	
+	Parameters:
+	
+		request - http request
+		response - http response
+	
+	Returns:
+	
+		nothing - *
+*/		
+revert: function(request,response) {
+	var qs = require('querystring');
+	
+	/* grab the user's id */
+	var uid = request.session.uid;
+	
+	if(typeof uid === 'undefined') { response.end('norevertloggedout'); } else {
+		
+		var body = '';
+
+        /* when the request gets data, append it to the body string */
+        request.on('data', function (data) {
+            body += data;
+        });
+
+        /* prevent overload attacks */
+        if (body.length > 1e5) {
+			request.connection.destroy();
+			console.log('Overload Attack!');
+		}
+
+		request.on('end',function() {
+			
+			/* save the POST data */
+			var POST =  qs.parse(body);
+			
+			if(typeof POST.pid === 'undefined') { response.end('nopid'); } else {
+				var pid = POST.pid;
+				
+	            pool.getConnection(function(err, connection) {
+									
+					/* update the page status */
+					var qryStatus = "UPDATE u_" + uid + " SET status=1 WHERE pid=" + pid;
+					
+					connection.query(qryStatus, function(err, rows, fields) {
+						if(err) {
+							console.log("623: " + err);
+							response.end('err');
+						} else {
+					
+							var qryPageData = "SELECT mediaType,mediaContent FROM p_" + uid + "_" + pid;
+			
+							connection.query(qryPageData, function(err, rows, fields) {
+								if(err) {
+									console.log("624: " + err);
+									response.end('err');
+								} else {
+									var pagedata = "";
+		
+									/* i is for accessing row array, j is for keeping track of rows left to parse */
+									var i = 0;
+									var j = rows.length;
+									
+									/* append commas to each row except for the last one */
+									if(j > 0)
+									{
+										pagedata += ",";
+									}
+									while(j > 1) {
+										pagedata += rows[i].mediaType + "," + rows[i].mediaContent + ",";
+										i++;
+										j--;
+									}
+									if(j === 1) {
+										pagedata += rows[i].mediaType + "," + rows[i].mediaContent;
+									}
+									response.end(pagedata);
+								}
+							});
+						}
+					});
+			        connection.release();
+			    });
+			}
+		});
+	}		
+},
+
+/*
 	Function: profile
 	
 	Grabs profile information and returns it to the front-end to display the profile page.
@@ -1286,7 +1378,7 @@ profile: function(request,response) {
 	var profiledata = "";
 	
 	if(typeof uid === 'undefined') { response.end('noprofileloggedout'); } else {
-		loadPage(response,"<script>profilePage('" + profiledata + "');</script>")
+		loadPage(response,"<script>profilePage('" + profiledata + "');</script>");
 	}		
 }
 

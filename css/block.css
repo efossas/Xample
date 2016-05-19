@@ -135,12 +135,30 @@ footer {
 	background-color: #d31e1e;
 }
 
-.profile-btn {
-	width: 100%;
+a.profile-btn {
+	color: black;
+	border: 1px solid transparent;
+	border-color: black;
+	border-radius: 4px;
+	
+	padding: 8px 0px 7px 0px;
+	text-align: center;
+	
+	cursor: pointer;
+	transition: background-color .5s;
+	touch-action: manipulation;
+	
+	font-size: 1em;
+	font-weight: 400;
+	
+	display:inline-block;
+	width: 99%;
 	background-color: #00ffe1;
+
+    text-decoration: none;
 }
 
-.profile-btn:hover {
+a.profile-btn:hover {
 	background-color: #00a895;
 }
 
@@ -452,13 +470,13 @@ iframe.xTex {
 @media screen and (max-width: 720px) {
 	#content { width: 96%; }
 	
-	.col-15-left {
+	.col-15 {
 		float: none;
 	    min-height: 1px;
 	    width: auto;
 	}
 	
-	.col-15-right {
+	.col-50 {
 		float: none;
 	    min-height: 1px;
 	    width: auto;
@@ -473,8 +491,16 @@ iframe.xTex {
 	    padding: 0;
 	}
 	
+	.col-100 {
+		float: none;
+	    min-height: 1px;
+	    width: auto;
+	}
+	
 	.logout-btn { width: 100%; }
 	.save-btn { width: 100%; }
+	a.profile-btn { width: 99.5%; }
+	.revert-btn { width: 100%; }
 	.page-title { width: 100%; }
 	
 	/* Block Styles */

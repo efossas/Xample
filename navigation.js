@@ -21,11 +21,9 @@
 	Section: Globals
 	These are the global variables xample uses
 	
-	domain - the domain name, including the http://
 	pdfObjects - pdf.js generates pdf objects that can be used to render individual pages to <canvas>
 */
 
-var domain = "http://abaganon.com/";
 var pdfObjects = {};
 
 /*
@@ -255,9 +253,14 @@ function logoutBtn() {
 		success - html node, profile button
 */
 function profileBtn() {
+	
+	var url = window.location.href;
+	var splitUrl = url.split("/");
+	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/profile";
+	
 	var profile = document.createElement('a');
 	profile.setAttribute('class', 'profile-btn');
-	profile.setAttribute('href', domain + "xample/profile")
+	profile.setAttribute('href', url)
 	profile.setAttribute('target', '_blank');
 	profile.setAttribute('value', 'Profile');
 	profile.innerHTML = "Profile";
@@ -708,7 +711,12 @@ function choosePage(pid) {
 		nothing - *
 */
 function loadTempPage(pid) {
-	window.location = domain + "xample/editpage?page=" + pid + "&temp=true";
+	
+	var url = window.location.href;
+	var splitUrl = url.split("/");
+	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/editpage?page=" + pid + "&temp=true";
+	
+	window.location = url;
 }
 
 /*
@@ -725,7 +733,12 @@ function loadTempPage(pid) {
 		nothing - *
 */
 function loadPermPage(pid) {
-	window.location = domain + "xample/editpage?page=" + pid + "&temp=false";
+	
+	var url = window.location.href;
+	var splitUrl = url.split("/");
+	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/editpage?page=" + pid + "&temp=false";
+	
+	window.location = url;
 }
 
 /*
@@ -1921,7 +1934,9 @@ function createpage() {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/createpage";
+	var baseurl = splitUrl[0] + "//" + splitUrl[2];
+	
+	url = baseurl + "/xample/createpage";
 	
 	/* get the page name */
 	var pagename = document.getElementsByName('pagename-create')[0].value;
@@ -1943,7 +1958,7 @@ function createpage() {
 	        	} else if (xmlhttp.responseText == "err") {
 		        	alert("An Error Occured. Please Try Again Later");
 		        } else {
-		        	window.location = domain + "xample/editpage?page=" + xmlhttp.responseText;
+		        	window.location = baseurl + "xample/editpage?page=" + xmlhttp.responseText;
 	        	}
 			}
 			else {
@@ -2159,7 +2174,46 @@ function saveBlocks(which) {
 		nothing - *
 */
 function revertBlocks() {
-	alert("Haven't Coded This Yet");
+	/* create the url destination for the ajax request */
+	var url = window.location.href;
+	var splitUrl = url.split("/");
+	
+	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/revert";
+	
+	/* get the pid & page name */
+	var pid = document.getElementsByName('pageid')[0].value;
+	var pagename = document.getElementsByName('pagename')[0].value;
+	
+	var xmlhttp;
+	xmlhttp = new XMLHttpRequest();
+	
+	var params = "pid=" + pid;
+	
+	xmlhttp.open("POST", url, true);
+	
+	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	
+	xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+			if(xmlhttp.status == 200) {
+	        	if(xmlhttp.responseText == "nopid") {
+		        	alert("This Page Is Not Meant To Be Visited Directly.");
+	        	} else if (xmlhttp.responseText == "norevertloggedout") {
+		        	alert("Revert Error. You Are Not Logged In.");
+	        	} else if (xmlhttp.responseText == "err") {
+		        	alert("An Error Occured. Please Try Again Later");
+		        } else {
+		        	emptyDiv("content");
+		        	editPage(pid + "," + pagename + xmlhttp.responseText);
+	        	}
+			}
+			else {
+				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+			}
+        }
+    }
+	    
+	xmlhttp.send(params);
 }
 
 
