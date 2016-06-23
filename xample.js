@@ -73,6 +73,9 @@ process.on('SIGINT', exitHandler);
 /* create express server */
 app = express();
 
+/* remove from http headers */
+app.disable('x-powered-by');
+
 /* set up sessions */
 app.use(session({
 	secret: 'KZtX0C0qlhvi)d',
@@ -95,6 +98,7 @@ app.post('/saveblocks',page.saveblocks);
 app.post('/uploadmedia*',page.uploadmedia); // breaks REST ?? uses get query with post method
 app.get('/profile',page.profile);
 app.post('/revert',page.revert);
+app.get('/test',page.test);
 
 app.all('*',page.notfound);
 

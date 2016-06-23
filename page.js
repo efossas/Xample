@@ -4,6 +4,40 @@
 */
 
 /*
+	Section: Prototypes
+	These are additions or changes to js prototypes
+	
+	Object - __stack, __line, __function, are all set using v8 engine stacktrace API functions
+*/
+
+/* These set __line & __function to return the current line number & function name where they are used. They are used for logging errors.  */
+Object.defineProperty(global, '__stack', {
+get: function() {
+        var orig = Error.prepareStackTrace;
+        Error.prepareStackTrace = function(_, stack) {
+            return stack;
+        };
+        var err = new Error;
+        Error.captureStackTrace(err, arguments.callee);
+        var stack = err.stack;
+        Error.prepareStackTrace = orig;
+        return stack;
+    }
+});
+
+Object.defineProperty(global, '__line', {
+get: function() {
+        return __stack[1].getLineNumber();
+    }
+});
+
+Object.defineProperty(global, '__function', {
+get: function() {
+        return __stack[1].getFunctionName();
+    }
+});
+
+/*
 	Section: Globals
 	These are the global variables xample uses
 	
@@ -14,6 +48,7 @@
 // reroute to your version of the front-end & your database
 var frontend = "navigation.js";
 var xdata = "xample";
+var xjournal = "xanalytics";
 
 var domain = "http://abaganon.com/";
 var reroute = "../public_html/";
@@ -25,7 +60,7 @@ var reroute = "../public_html/";
 
 var mysql = require('mysql');
 
-var pool  = mysql.createPool({
+var pool = mysql.createPool({
   connectionLimit : 100,
   host     : 'localhost',
   user     : 'nodesql',
@@ -33,10 +68,58 @@ var pool  = mysql.createPool({
   database : xdata
 });
 
+var stats = mysql.createPool({
+  connectionLimit : 100,
+  host     : 'localhost',
+  user     : 'nodesql',
+  password : 'Vup}Ur34',
+  database : xjournal
+});
+
 /*
 	Section: Helper Functions
 	These are functions that are either used in several routes or are just separated for clarity
 */	
+
+/*
+	Function: journal
+	
+	This is used to log data to an analytics database. Actions and errors should be logged with this.
+	
+	Parameters:
+	
+		isError - boolean, true for logging to error database, false for logging to action database.
+		idNumber - number, id number for the error or action. (0-255 only)
+		userID - number, user ID associated with log. set to 0 if not applicable.
+		message - string, the error message, if there is one.
+		lineNumber - number, line number where the error or action occurred. should be set with global __line
+		functionName - string, function where the error or action occurred. should be set with global __function
+		scriptName - string, script file where the error or action occurred. shooud be set with global __filename
+	
+	Returns:
+	
+		nothing - *
+*/
+function journal(isError,idNumber,userID,message,lineNumber,functionName,scriptName) {
+	fileName = scriptName.split("/").pop();
+	
+	var qry = "";
+	if(isError) {
+		qry = "INSERT INTO xerror (id, scriptName, functionName, lineNumber, userID, eventTime, message) VALUES (" + idNumber + ", '" + fileName + "', '" + functionName + "', " + lineNumber + ", " + userID + ", NOW(), '" + message + "')";
+	} else {
+		qry = "INSERT INTO xdata (scriptName, functionName, lineNumber, userID, eventTime) VALUES ('" + fileName + "', '" + functionName + "', " + lineNumber + ", " + userID + ", NOW() )";
+	}
+	
+	stats.getConnection(function(err, connection) {
+		
+		connection.query(qry, function(err, rows, fields) {
+			if (err)
+				console.log("FAILURE TO CONNECT TO DATABASE FOR JOURNALING!");
+		});
+		
+		connection.release();
+	});
+}
 
 /*
 	Function: loadPage
@@ -988,6 +1071,7 @@ editpage: function(request,response) {
 	
 	/* get the pid from the get request */
 	var pid = request.query.page;
+	if(typeof pid === 'undefined') { response.redirect('/xample/'); }
 	
 	/* get table identifier */
 	var temp = request.query.temp;

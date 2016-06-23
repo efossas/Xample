@@ -2,6 +2,7 @@
 Useful Commands
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+CREATE DATABASE database;
 USE database;
 CREATE TABLE table (column type, PRIMARY KEY (column) );
 SHOW TABLES;
@@ -20,6 +21,8 @@ LOAD DATA INFILE '/tmp/file.txt' INTO TABLE table COLUMNS TERMINATED BY '$' LINE
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Commands For Interface Queries
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+DATABASE: -> xample
 
 [Users]
 1. uid (primary key)
@@ -44,6 +47,31 @@ CREATE TABLE Users (uid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, username VARCHA
 CREATE TABLE u_ (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50) NOT NULL, status BOOLEAN NOT NULL);
 
 CREATE TABLE p_ (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) );
+
+DATABASE: -> xanalytics
+
+[xerror]
+
+1. id
+2. scriptName
+3. functionName
+4. lineNumber
+5. userID
+6. eventTime
+7. message
+		
+[xdata]
+
+1. scriptName
+2. functionName
+3. lineNumber
+4. userID
+5. eventTime
+
+CREATE TABLE xerror (id TINYINT UNSIGNED, scriptName VARCHAR(32), functionName VARCHAR(32), lineNumber SMALLINT UNSIGNED, userID INT UNSIGNED, eventTime DATETIME, message VARCHAR(256) );
+
+CREATE TABLE xdata (scriptName VARCHAR(32), functionName VARCHAR(32), lineNumber SMALLINT UNSIGNED, userID INT UNSIGNED, eventTime DATETIME );
+
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
