@@ -10,7 +10,7 @@
 	Object - __stack, __line, __function, are all set using v8 engine stacktrace API functions
 */
 
-/* These set __line & __function to return the current line number & function name where they are used. They are used for logging errors.  */
+/* These set __line to return the current line number where they are used. They are used for logging errors.  */
 Object.defineProperty(global, '__stack', {
 get: function() {
         var orig = Error.prepareStackTrace;
@@ -28,12 +28,6 @@ get: function() {
 Object.defineProperty(global, '__line', {
 get: function() {
         return __stack[1].getLineNumber();
-    }
-});
-
-Object.defineProperty(global, '__function', {
-get: function() {
-        return __stack[1].getFunctionName();
     }
 });
 
@@ -93,14 +87,14 @@ var stats = mysql.createPool({
 		userID - number, user ID associated with log. set to 0 if not applicable.
 		message - string, the error message, if there is one.
 		lineNumber - number, line number where the error or action occurred. should be set with global __line
-		functionName - string, function where the error or action occurred. should be set with global __function
+		functionName - string, function where the error or action occurred. define __function
 		scriptName - string, script file where the error or action occurred. shooud be set with global __filename
 	
 	Returns:
 	
 		nothing - *
 */
-function journal(isError,idNumber,userID,message,lineNumber,functionName,scriptName) {
+function journal(isError,idNumber,message,userID,lineNumber,functionName,scriptName) {
 	fileName = scriptName.split("/").pop();
 	
 	var qry = "";
@@ -184,7 +178,7 @@ function searchUid(connection,username) {
 		/* query the database */
 		connection.query(qry, function(err, rows, fields) {
 			if(err) {
-				resolve(-1);
+				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
 					resolve(rows[0].uid);
@@ -223,7 +217,7 @@ function searchPagename(connection,uid,pagename) {
 		/* query the database */
 		connection.query(qry, function(err, rows, fields) {
 			if(err) {
-				resolve(-1);
+				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
 					resolve(rows[0].pagename);
@@ -262,7 +256,7 @@ function searchPid(connection,uid,pagename) {
 		/* query the database */
 		connection.query(qry, function(err, rows, fields) {
 			if(err) {
-				resolve(-1);
+				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
 					resolve(rows[0].pid);
@@ -301,7 +295,7 @@ function searchPageStatus(connection,uid,pid) {
 		/* query the database */
 		connection.query(qry, function(err, rows, fields) {
 			if(err) {
-				resolve(-1);
+				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
 					resolve(rows[0].status);
@@ -341,7 +335,7 @@ function changePagename(connection,uid,pid,pagename) {
 		/* query the database */
 		connection.query(qry, function(err, rows, fields) {
 			if(err) {
-				resolve(-1);
+				reject(err);
 			} else {
 				resolve(1);
 			}
@@ -376,7 +370,7 @@ function truncateTable(connection,uid,pid) {
 		/* query the database */
 		connection.query(qry, function(err, rows, fields) {
 			if(err) {
-				resolve(-1);
+				reject(err);
 			} else {
 				resolve(1);
 			}
@@ -420,13 +414,16 @@ function randomText() {
 	Parameters:
 	
 		file - the path to the file to remove, relative to the domain name (everything after .com/)
+		uid - optional, user id, this is purely for debugging if something goes wrong
+		pid - optional, page id, this is purely for debigging if something goes wrong
 	
 	Returns:
 	
 		success - number, 1
 		error - number, -1
 */
-function removeMedia(file) {
+function removeMedia(file,uid = 0,pid = 0) {
+	var __function = "removeMedia";
 
 	var exec = require('child_process').exec;
 	var child;
@@ -437,7 +434,7 @@ function removeMedia(file) {
 	/* execute the remove command */
 	child = exec(command, function (error, stdout, stderr) {
 		if (error !== null) {
-			console.log('Exec Error (removemedia): ' + error);
+			journal(true,111,'Exec Error (removemedia) (uid:' + uid + ') (pid:' + pid + ' -> ' + stdout + stderr,0,__line,__function,__filename);
 			return -1;
 		}
 		else {
@@ -456,13 +453,15 @@ function removeMedia(file) {
 		oldfile - the path to the file, relative to the domain name (everything after .com/)
 		dir - the relative path to the folder that contains the file (everything after .com/)
 		btype - the media type, "image" "audio" "video" "slide"
+		uid - optional, user id, this is purely for debugging if something goes wrong
+		pid - optional, page id, this is purely for debigging if something goes wrong
 	
 	Returns:
 	
 		success - promise, new file path, relative to the domain name
 		error - promise, -1
 */
-function convertMedia(oldfile,dir,btype) {
+function convertMedia(oldfile,dir,btype,uid = 0,pid = 0) {
 	var promise = new Promise(function(resolve, reject) {
 
 		/* spawn the process */
@@ -495,18 +494,21 @@ function convertMedia(oldfile,dir,btype) {
                 var command = "";
         }
 
-		/* execute the command */
-		child = exec(command, function (error, stdout, stderr) {
-			/* delete the old uploaded file no matter what */
-			removeMedia(oldfile);
-			
-			if (error !== null) {
-				console.log('Exec Error (createmedia): ' + stdout + stderr);
-				resolve(-1);
-			} else {
-				resolve(newfile);
-			}
-		});
+		if(newfile !== "error") {
+			/* execute the command */
+			child = exec(command, function (error, stdout, stderr) {
+				/* delete the old uploaded file no matter what */
+				removeMedia(oldfile,uid,pid);
+				
+				if (error !== null) {
+					reject('Exec Error (createmedia) (uid:' + uid + ') (pid:' + pid + ' -> ' + stdout + stderr);
+				} else {
+					resolve(newfile);
+				}
+			});
+		} else {
+			reject('Bad btype provided in convertMedia()');
+		}
 	});
 
 	return promise;
@@ -684,14 +686,17 @@ notfound: function(request,response) {
 		nothing - *
 */		
 start: function(request,response) {
+	var __function = "start";
 
 	/* detect is the user is logged in by checking for a session */
 	if(request.session.uid) {
 		/* user is logged in, display home page */
 		loadPage(response,"<script>displayHome();</script>");
+		journal(false,0,"",request.session.uid,__line,__function,__filename);
 	} else {
 		/* user is not logged in, display landing page */
 		loadPage(response,"<script>displayLanding();</script>");
+		journal(false,0,"",0,__line,__function,__filename);
 	}
 },
 
@@ -710,6 +715,8 @@ start: function(request,response) {
 		nothing - *
 */		
 signup: function(request,response) {
+	var __function = "signup";
+	
 	var qs = require('querystring');
 	var ps = require('password-hash');
 	var fs = require('fs');
@@ -719,13 +726,13 @@ signup: function(request,response) {
     /* when the request gets data, append it to the body string */
     request.on('data', function (data) {
         body += data;
+        
+        /* prevent overload attacks */
+	    if (body.length > 1e6) {
+			request.connection.destroy();
+			journal(true,199,"Overload Attack!",0,__line,__function,__filename);
+		}
     });
-
-    /* prevent overload attacks */
-    if (body.length > 1e5) {
-		request.connection.destroy();
-		console.log('Overload Attack!');
-	}
 
     /* when the request ends, parse the POST data, & process the sql queries */
     request.on('end',function(){
@@ -757,16 +764,16 @@ signup: function(request,response) {
 					connection.query(qryUser, function(err, rows, fields) {
 
 						if (err) {
-							console.log("602: " + err);
 							response.end('err');
+							journal(true,201,err,0,__line,__function,__filename);
 						} else {
 				            var qryUid = "SELECT uid FROM Users WHERE username = " + username;
 
 				            /* retrieve the user's new uid */
 				            connection.query(qryUid, function(err, rows, fields) {
 								if (err) {
-									console.log("603: " + err);
 									response.end('err');
+									journal(true,202,err,0,__line,__function,__filename);
 								} else {
 									var uid = rows[0].uid;
 									var qryTable = "CREATE TABLE u_" + uid + " (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN)";
@@ -774,13 +781,18 @@ signup: function(request,response) {
 									/* create the user's page table */
 									connection.query(qryTable, function(err, rows, fields) {
 										if (err) {
-											console.log("604: " + err);
 											response.end('err');
+											journal(true,203,err,0,__line,__function,__filename);
 										} else {
 											/* make the user's directory to store pages in later */
 											request.session.uid = uid;
-											fs.mkdir(__dirname + "/../public_html/xample-media/" + uid);
+											fs.mkdir(__dirname + "/../public_html/xample-media/" + uid,function(err) {
+												if(err) {
+													journal(true,120,err,0,__line,__function,__filename);
+												}
+											});
 											response.end('success');
+											journal(false,0,"",uid,__line,__function,__filename);
 										}
 									});
 								}
@@ -790,7 +802,8 @@ signup: function(request,response) {
 				}
 
 			}, function(error) {
-				console.log("605: searchUid() Promise Error");
+				response.end('err');
+				journal(true,200,error,0,__line,__function,__filename);
 			});
             connection.release();
         });
@@ -812,6 +825,8 @@ signup: function(request,response) {
 		nothing - *
 */	
 login: function(request,response) {
+	var __function = "login";
+	
 	var qs = require('querystring');
 	var ps = require('password-hash');
 
@@ -820,13 +835,13 @@ login: function(request,response) {
     /* when the request gets data, append it to the body string */
     request.on('data', function (data) {
         body += data;
+        
+        /* prevent overload attacks */
+	    if (body.length > 1e6) {
+			request.connection.destroy();
+			journal(true,199,"Overload Attack!",0,__line,__function,__filename);
+		}
     });
-
-    /* prevent overload attacks */
-    if (body.length > 1e5) {
-		request.connection.destroy();
-		console.log('Overload Attack!');
-	}
 
     /* when the request ends, parse the POST data, & process the sql queries */
     request.on('end',function(){
@@ -851,14 +866,15 @@ login: function(request,response) {
 		            /* retrieve the user's password */
 		            connection.query(qry, function(err, rows, fields) {
 						if (err) {
-							console.log("606: " + err);
 							response.end('err');
+							journal(true,201,err,0,__line,__function,__filename);
 						} else {
 							/* check that the entered password matches the stored password */
 							if(ps.verify(POST.password,rows[0].password)) {
 								/* set the user's session, this indicates logged in status */
 								request.session.uid = uid;
 								response.end('loggedin');
+								journal(false,0,"",uid,__line,__function,__filename);
 							} else {
 								response.end('incorrect');
 							}
@@ -866,7 +882,8 @@ login: function(request,response) {
 					});
 				}
 			}, function(error) {
-				console.log("607: searchUid() Promise Error");
+				response.end('err');
+				journal(true,200,error,0,__line,__function,__filename);
 			});
             connection.release();
         });
@@ -888,10 +905,17 @@ login: function(request,response) {
 		nothing - *
 */
 logout: function(request,response) {
+	var __function = "logout";
+	
+	/* store the uid for journaling */
+	var uid = request.session.uid;
+	
 	/* easy enough, regardless of whether the user was logged in or not, destroying the session will ensure log out */
 	request.session.destroy();
 
 	response.end('loggedout');
+	journal(false,0,"",uid,__line,__function,__filename);
+	uid = "";
 },
 
 /*
@@ -909,95 +933,108 @@ logout: function(request,response) {
 		nothing - *
 */
 createpage: function(request,response) {
+	var __function = "createpage";
+	
 	var qs = require('querystring');
 	var fs = require('fs');
+	
+	/* get the user's id */
+	var uid = request.session.uid;
+	
+	/* if the user is not logged in, respond with 'nosaveloggedout' */
+    if(typeof uid === 'undefined') { response.end('nocreateloggedout'); } else {
 
-	var body = '';
-
-    /* when the request gets data, append it to the body string */
-    request.on('data', function (data) {
-        body += data;
-    });
-
-    /* prevent overload attacks */
-    if (body.length > 1e5) {
-		request.connection.destroy();
-		console.log('Overload Attack!');
-	}
-
-    /* when the request ends, parse the POST data, & process the sql queries */
-    request.on('end',function() {
-        pool.getConnection(function(err, connection) {
-	        var POST =  qs.parse(body);
-
-	        /* get the uid */
-	        var uid = request.session.uid;
+		var body = '';
+	
+	    /* when the request gets data, append it to the body string */
+	    request.on('data', function (data) {
+	        body += data;
 	        
-	        /* escape the page name to prevent Sql injection */
-	        var pagename = connection.escape(POST.pagename);
-
-	        /* check if page name exists */
-	        var promise = searchPagename(connection,uid,pagename);
-
-	        promise.then(function(success) {
-
-	        	if(success !== -1) {
-		            response.end('pageexists');
-	            } else {
-			        /* insert page into user's page table */
-					var qryUser = "INSERT INTO u_" + uid + " (pagename, status) VALUES (" + pagename + ", 1)";
-
-				    connection.query(qryUser, function(err, rows, fields) {
-				    	if (err) {
-							console.log("608: " + err);
-							response.end('err');
-						} else {
-							/* grab the pid of the new page name from the user's page table */
-				            var promisePid = searchPid(connection,uid,pagename);
-
-				            promisePid.then(function(success) {
-					            if(success === -1) {
-						            console.log("609: pid not found after page insert");
-						            response.end('err');
-					            } else {
-						            var pid = success;
-
-									/* create the page's permanent table */
-						            var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
-
-						            connection.query(qryPage, function(err, rows, fields) {
-										if (err) {
-											console.log("610-1: " + err);
-											response.end('err');
-										}
-									});
-									
-									/* create the page's temporary table */
-									var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
-
-									connection.query(qryTemp, function(err, rows, fields) {
-										if (err) {
-											console.log("610-2: " + err);
-											response.end('err');
-										}
-									});
-									
-									/* make a folder in user's media folder to store future media uploads */
-									fs.mkdir(__dirname + "/../public_html/xample-media/" + uid + "/" + pid);
-									response.end(pid.toString());
-								}
-							}, function(error) {
-								console.log("611: searchPid() Promise Error");
-							});
-						}
-					});
-				}
-			}, function(error) {
-				console.log("612: searchPagename() Promise Error");
-			});
-            connection.release();
-        });
-	});
+	        /* prevent overload attacks */
+		    if (body.length > 1e6) {
+				request.connection.destroy();
+				journal(true,199,"Overload Attack!",0,__line,__function,__filename);
+			}
+	    });
+	
+	    /* when the request ends, parse the POST data, & process the sql queries */
+	    request.on('end',function() {
+	        pool.getConnection(function(err, connection) {
+		        var POST =  qs.parse(body);
+		        
+		        /* escape the page name to prevent Sql injection */
+		        var pagename = connection.escape(POST.pagename);
+	
+		        /* check if page name exists */
+		        var promise = searchPagename(connection,uid,pagename);
+	
+		        promise.then(function(success) {
+	
+		        	if(success !== -1) {
+			            response.end('pageexists');
+		            } else {
+				        /* insert page into user's page table */
+						var qryUser = "INSERT INTO u_" + uid + " (pagename, status) VALUES (" + pagename + ", 1)";
+	
+					    connection.query(qryUser, function(err, rows, fields) {
+					    	if (err) {
+								response.end('err');
+								journal(true,201,err,uid,__line,__function,__filename);
+							} else {
+								/* grab the pid of the new page name from the user's page table */
+					            var promisePid = searchPid(connection,uid,pagename);
+	
+					            promisePid.then(function(success) {
+						            if(success === -1) {
+							            response.end('err');
+							            journal(true,203,"pid not found after page insert",uid,__line,__function,__filename);
+						            } else {
+							            var pid = success;
+	
+										/* create the page's permanent table */
+							            var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
+	
+							            connection.query(qryPage, function(err, rows, fields) {
+											if (err) {
+												response.end('err');
+												journal(true,204,err,uid,__line,__function,__filename);
+											}
+										});
+										
+										/* create the page's temporary table */
+										var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
+	
+										connection.query(qryTemp, function(err, rows, fields) {
+											if (err) {
+												response.end('err');
+												journal(true,205,err,uid,__line,__function,__filename);
+											}
+										});
+										
+										/* make a folder in user's media folder to store future media uploads */
+										fs.mkdir(__dirname + "/../public_html/xample-media/" + uid + "/" + pid, function(err) {
+											if(err) {
+												journal(true,120,err,uid,__line,__function,__filename);
+											}
+										});
+										response.end(pid.toString());
+										journal(false,0,"",uid,__line,__function,__filename);
+									}
+								}, function(error) {
+									response.end('err');
+									journal(true,202,error,uid,__line,__function,__filename);
+								});
+							}
+						});
+					}
+				}, function(error) {
+					response.end('err');
+					journal(true,200,error,0,__line,__function,__filename);
+				});
+	            connection.release();
+	        });
+		});
+	}
 },
 
 /*
@@ -1015,17 +1052,18 @@ createpage: function(request,response) {
 		nothing - *
 */
 getpages: function(request,response) {
+	var __function = "getpages";
 
 	/* get the user's id */
-    var uid = request.session.uid;
+	var uid = request.session.uid;
 
     var qry = "SELECT pid,pagename FROM u_" + uid;
 
     pool.getConnection(function(err, connection) {
 		connection.query(qry, function(err, rows, fields) {
 			if(err) {
-				console.log("613: " + err);
 				response.end('err');
+				journal(true,200,err,uid,__line,__function,__filename);
 			} else {
 				var pages = "";
 
@@ -1044,6 +1082,7 @@ getpages: function(request,response) {
 				}
 
 				response.end(pages);
+				journal(false,0,"",uid,__line,__function,__filename);
 			}
 		});
         connection.release();
@@ -1065,34 +1104,34 @@ getpages: function(request,response) {
 		nothing - *
 */
 editpage: function(request,response) {
+	var __function = "editpage";
 	
 	/* get the user's id, getting it from the session ensures user's can edit other users pages */
 	var uid = request.session.uid;
 	
 	/* get the pid from the get request */
 	var pid = request.query.page;
-	if(typeof pid === 'undefined') { response.redirect('/xample/'); }
 	
-	/* get table identifier */
-	var temp = request.query.temp;
+	/* redirect users if logged out or no page id provided */
+	if(typeof uid === 'undefined' || typeof pid === 'undefined') { response.redirect('/xample/'); } else {
 	
-	/* if searchstatus is set to false, don't bother with page status, user is coming from choose page */
-	var tid;
-	var searchstatus;
-	
-	if(temp == "true") {
-		tid = "t_";
-		searchstatus = false;
-	} else if (temp == "false") {
-		tid = "p_";
-		searchstatus = false;
-	} else {
-		tid = "p_";
-		searchstatus = true;
-	}
-
-	/* redirect the user to the index page if they're not logged in */ 
-	if(typeof uid === 'undefined') { response.redirect('/xample/'); } else {
+		/* get table identifier */
+		var temp = request.query.temp;
+		
+		/* if searchstatus is set to false, don't bother with page status, user is coming from choose page */
+		var tid;
+		var searchstatus;
+		
+		if(temp == "true") {
+			tid = "t_";
+			searchstatus = false;
+		} else if (temp == "false") {
+			tid = "p_";
+			searchstatus = false;
+		} else {
+			tid = "p_";
+			searchstatus = true;
+		}
 		
         pool.getConnection(function(err, connection) {
 	        
@@ -1108,8 +1147,8 @@ editpage: function(request,response) {
 		
 					connection.query(qry, function(err, rows, fields) {
 						if(err) {
-							console.log("614: " + err);
 							response.end('err');
+							journal(true,201,err,uid,__line,__function,__filename);
 						} else {
 							/* sql query is undefined if a user tries to edit page with invalid pid */
 							if(typeof rows[0] === 'undefined') {
@@ -1121,8 +1160,8 @@ editpage: function(request,response) {
 			
 								connection.query(qry, function(err, rows, fields) {
 									if(err) {
-										console.log("615: " + err);
 										response.end('err');
+										journal(true,202,err,uid,__line,__function,__filename);
 									} else {
 										var pagedata = pid + ",";
 										pagedata += pagename;
@@ -1147,6 +1186,7 @@ editpage: function(request,response) {
 			
 										/* load the edit page with the page data */
 										loadPage(response,"<script>editPage('" + pagedata + "');</script>");
+										journal(false,0,"",uid,__line,__function,__filename);
 									}
 								});
 							}
@@ -1155,7 +1195,8 @@ editpage: function(request,response) {
 					connection.release();
 				}
 			}, function(error) {
-				console.log("searchPageStatus error");
+				response.end('err');
+				journal(true,200,error,uid,__line,__function,__filename);
 			});
         });
 	}
@@ -1176,6 +1217,8 @@ editpage: function(request,response) {
 		nothing - *
 */
 saveblocks: function(request,response) {
+	var __function = "saveblocks";
+	
 	var qs = require('querystring');
 
 	/* get the user's id */
@@ -1189,13 +1232,13 @@ saveblocks: function(request,response) {
         /* when the request gets data, append it to the body string */
         request.on('data', function (data) {
             body += data;
+            
+            /* prevent overload attacks */
+	        if (body.length > 1e6) {
+				request.connection.destroy();
+				journal(true,199,"Overload Attack!",uid,__line,__function,__filename);
+			}
         });
-
-        /* prevent overload attacks */
-        if (body.length > 1e5) {
-			request.connection.destroy();
-			console.log('Overload Attack!');
-		}
 
         /* when the request ends, parse the POST data, & process the sql queries */
         request.on('end',function() {
@@ -1221,8 +1264,8 @@ saveblocks: function(request,response) {
 		        
 		        connection.query(qryStatus, function(err, rows, fields) {
 			        if(err) {
-						console.log("616-1: " + err);
 						response.end('err');
+						journal(true,200,err,uid,__line,__function,__filename);
 					}
 		        });
 
@@ -1235,55 +1278,52 @@ saveblocks: function(request,response) {
 
 		        promisePage.then(function(success) {
 
-			        if(success === -1) {
-				        console.log("616-2: change pagename error");
-			        } else {
+			        /* truncate (remove all rows) from the table */
+					var qryTruncate = "TRUNCATE TABLE " + tid + uid + "_" + pid;
 
-				        /* truncate (remove all rows) from the table */
-						var qryTruncate = "TRUNCATE TABLE " + tid + uid + "_" + pid;
+					connection.query(qryTruncate, function(err, rows, fields) {
+						if(err) {
+							response.end('err');
+							journal(true,202,err,uid,__line,__function,__filename);
+						} else {
 
-						connection.query(qryTruncate, function(err, rows, fields) {
-							if(err) {
-								console.log("617: " + err);
-								response.end('err');
+							/* check that blocks exist to be saved */
+							if(types[0] !== 'undefined') {
+
+								/* create the query and remove unused media from user's page folder as well */
+								var qryInsert = "INSERT INTO " + tid + uid + "_" + pid + " (bid,mediatype,mediacontent) VALUES ";
+
+						        var i = 0;
+						        var stop = types.length - 1;
+
+						        while(i < stop)
+						        {    							        
+							        qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
+							        i++
+						        }
+						        qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ")";
+
+								/* save the blocks */
+						        connection.query(qryInsert, function(err, rows, fields) {
+									if(err) {
+										response.end('err');
+										journal(true,203,err,uid,__line,__function,__filename);
+									} else {
+										deleteMedia(connection,uid,pid);
+										response.end('blockssaved');
+										journal(false,0,"",uid,__line,__function,__filename);
+									}
+								});
 							} else {
-
-								/* check that blocks exist to be saved */
-								if(types[0] !== 'undefined') {
-
-									/* create the query and remove unused media from user's page folder as well */
-									var qryInsert = "INSERT INTO " + tid + uid + "_" + pid + " (bid,mediatype,mediacontent) VALUES ";
-
-							        var i = 0;
-							        var stop = types.length - 1;
-
-							        while(i < stop)
-							        {    							        
-								        qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
-								        i++
-							        }
-							        qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ")";
-
-									/* save the blocks */
-							        connection.query(qryInsert, function(err, rows, fields) {
-										if(err) {
-											console.log("618: " + err);
-											response.end('err');
-										} else {
-											deleteMedia(connection,uid,pid);
-											response.end('blockssaved');
-										}
-									});
-								} else {
-									/* in this case, just the page name was saved, since no blocks exist yet */
-									response.end('blockssaved');
-								}
+								/* in this case, just the page name was saved, since no blocks exist yet */
+								response.end('blockssaved');
+								journal(false,0,"",uid,__line,__function,__filename);
 							}
-						});
-			        }
+						}
+					});
 
 		        }, function(error) {
-					console.log("619: changePagename() Promise Error");
+					journal(true,201,error,uid,__line,__function,__filename);
 				});
                 connection.release();
             });
@@ -1306,6 +1346,8 @@ saveblocks: function(request,response) {
 		nothing - *
 */
 uploadmedia: function(request,response) {
+	var __function = "uploadmedia";
+	
 	var fs = require('fs');
 
 	/* grab the user's id */
@@ -1336,13 +1378,15 @@ uploadmedia: function(request,response) {
 	        fstream.on('close', function () {
 
 		        /* media conversion */
-		        var promise = convertMedia(link,dir,btype);
+		        var promise = convertMedia(link,dir,btype,uid,pid);
 
 		        promise.then(function(success) {
 			        /* respond with the absolute url to the uploaded file */
 		        	response.end(domain + success);
+		        	journal(false,0,"",uid,__line,__function,__filename);
 		        }, function(error) {
-			        console.log("620: convertMedia() Promise Error");
+			        response.end('err');
+			        journal(true,110,error,uid,__line,__function,__filename);
 		        });
 	        });
 	    });
@@ -1364,6 +1408,8 @@ uploadmedia: function(request,response) {
 		nothing - *
 */		
 revert: function(request,response) {
+	var __function = "revert";
+	
 	var qs = require('querystring');
 	
 	/* grab the user's id */
@@ -1376,13 +1422,13 @@ revert: function(request,response) {
         /* when the request gets data, append it to the body string */
         request.on('data', function (data) {
             body += data;
+            
+            /* prevent overload attacks */
+	        if (body.length > 1e6) {
+				request.connection.destroy();
+				journal(true,199,"Overload Attack!",uid,__line,__function,__filename);
+			}
         });
-
-        /* prevent overload attacks */
-        if (body.length > 1e5) {
-			request.connection.destroy();
-			console.log('Overload Attack!');
-		}
 
 		request.on('end',function() {
 			
@@ -1399,16 +1445,16 @@ revert: function(request,response) {
 					
 					connection.query(qryStatus, function(err, rows, fields) {
 						if(err) {
-							console.log("623: " + err);
 							response.end('err');
+							journal(true,200,err,uid,__line,__function,__filename);
 						} else {
 					
 							var qryPageData = "SELECT mediaType,mediaContent FROM p_" + uid + "_" + pid;
 			
 							connection.query(qryPageData, function(err, rows, fields) {
 								if(err) {
-									console.log("624: " + err);
 									response.end('err');
+									journal(true,201,err,uid,__line,__function,__filename);
 								} else {
 									var pagedata = "";
 		
@@ -1430,6 +1476,7 @@ revert: function(request,response) {
 										pagedata += rows[i].mediaType + "," + rows[i].mediaContent;
 									}
 									response.end(pagedata);
+									journal(false,0,"",uid,__line,__function,__filename);
 								}
 							});
 						}
@@ -1456,6 +1503,8 @@ revert: function(request,response) {
 		nothing - *
 */		
 profile: function(request,response) {
+	var __function = "profile";
+	
 	/* grab the user's id */
 	var uid = request.session.uid;
 	

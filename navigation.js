@@ -1679,10 +1679,19 @@ function uploadMedia(bid,btype) {
 				xmlhttp.onreadystatechange = function() {
 			        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
 						if(xmlhttp.status == 200){
-				        	resolve(xmlhttp.response);
+							if(xmlhttp.responseText == "err") {
+								reject("err");
+							} else if (xmlhttp.responseText == "nouploadloggedout") {
+								deleteBlock(bid - 1);
+								alert("You Can't Upload Media Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
+								reject("err");
+							} else {
+								resolve(xmlhttp.responseText);
+							}
 						}
 						else {
 							alert('Error:' + xmlhttp.status + ": Please Try Again");
+							reject("err");
 						}
 			        }
 			    }
@@ -1692,39 +1701,34 @@ function uploadMedia(bid,btype) {
 			
 			promise.then(function(success) { 
 				
-				if (success == "nouploadloggedout") {
-					deleteBlock(bid - 1);
-					alert("You Can't Upload Media Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
-				} else {
-					/* set the image source */
-					if (btype == "image") {
-						var tag = document.getElementById('a' + bid).childNodes[0];
-						tag.src = success;
-					}
-					/* audio & video divs have their src set in an extra child node */
-					else if(btype == "audio" || btype == "video") {
-						var tag = document.getElementById('a' + bid).childNodes[0].childNodes[0];
-						tag.src = success;
-						tag.parentNode.load(); 
-					}
-					else if(btype == "slide")
-					{
-						/* add the pdf to the pdfObjects array and render the first page */
-						PDFJS.getDocument(success).then(function (pdfObj) {
-						    
-						    pdfObjects[success] = pdfObj;
-						    
-						    var tag = document.getElementById('a' + bid).childNodes[0];
-						    tag.setAttribute("id", success);
-						    
-							renderPDF(pdfObj,1,tag);
-						});
-					}
+				/* set the image source */
+				if (btype == "image") {
+					var tag = document.getElementById('a' + bid).childNodes[0];
+					tag.src = success;
+				}
+				/* audio & video divs have their src set in an extra child node */
+				else if(btype == "audio" || btype == "video") {
+					var tag = document.getElementById('a' + bid).childNodes[0].childNodes[0];
+					tag.src = success;
+					tag.parentNode.load(); 
+				}
+				else if(btype == "slide")
+				{
+					/* add the pdf to the pdfObjects array and render the first page */
+					PDFJS.getDocument(success).then(function (pdfObj) {
+					    
+					    pdfObjects[success] = pdfObj;
+					    
+					    var tag = document.getElementById('a' + bid).childNodes[0];
+					    tag.setAttribute("id", success);
+					    
+						renderPDF(pdfObj,1,tag);
+					});
 				}
 				
-				
 			}, function(error) {
-					/* error is data passed thorugh reject */
+				/* error is data passed thorugh reject */
+				console.log("Error uploadMedia() promise");
 			});
 		}
 	}		
@@ -1955,9 +1959,11 @@ function createpage() {
 			if(xmlhttp.status == 200) {
 	        	if(xmlhttp.responseText == "pageexists") {
 		        	alert("You Already Have A Page With That Name.");
-	        	} else if (xmlhttp.responseText == "err") {
-		        	alert("An Error Occured. Please Try Again Later");
-		        } else {
+	        	} else if (xmlhttp.responseText == "nocreateloggedout") {
+		        	alert("Unable To Create Page. You Are Logged Out.");
+		        } else if (xmlhttp.responseText == "err") {
+			    	alert("An Error Occured. Please Try Again Later.");
+			    } else {
 		        	window.location = baseurl + "xample/editpage?page=" + xmlhttp.responseText;
 	        	}
 			}
@@ -2004,7 +2010,7 @@ function getPages() {
 	        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
 				if(xmlhttp.status == 200) {
 		        	if(xmlhttp.responseText == "err") {
-			        	alert("An Unknown Error Occurred");
+			        	reject("err");
 		        	} else {
 			        	resolve(xmlhttp.responseText);
 		        	}

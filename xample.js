@@ -98,7 +98,6 @@ app.post('/saveblocks',page.saveblocks);
 app.post('/uploadmedia*',page.uploadmedia); // breaks REST ?? uses get query with post method
 app.get('/profile',page.profile);
 app.post('/revert',page.revert);
-app.get('/test',page.test);
 
 app.all('*',page.notfound);
 
