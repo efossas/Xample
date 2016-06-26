@@ -27,9 +27,29 @@ var busboy = require('connect-busboy');
 	These functions handle uncaught errors and program exit procedure
 */
 
+function slack(message) {
+	var request = require('request');
+	
+	var postData = {};
+	postData.username = "xample-error";
+	postData.icon_emoji = ":rage:";
+	postData.text = message;
+	
+	var option = {
+		url:   'https://hooks.slack.com/services/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',
+		body:  JSON.stringify(postData)
+	};
+
+	request.post(option, function(err, res, body) {
+		if(body == "ok") { console.log("Error Sent To Slack"); }
+	});
+}
+
 /* prevents node from exiting on error */
 process.on('uncaughtException', function (err) {
-  console.log('666 Caught Exception: ' + err);
+	console.log('666 ' + err);
+
+	slack(err);
 });
 
 /* ensures stdin continues after uncaught exception */
