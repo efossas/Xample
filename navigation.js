@@ -411,13 +411,13 @@ function editPage(pagedata) {
 	row_one.setAttribute("class", "row");
 	
 	var col_one_left = document.createElement("div");
-	col_one_left.setAttribute("class", "col-15");
+	col_one_left.setAttribute("class", "col col-15");
 	
 	var col_one_middle = document.createElement("div");
-	col_one_middle.setAttribute("class", "col-70");
+	col_one_middle.setAttribute("class", "col col-70 pad-10");
 	
 	var col_one_right = document.createElement("div");
-	col_one_right.setAttribute("class", "col-15");
+	col_one_right.setAttribute("class", "col col-15");
 	
 	row_one.appendChild(col_one_left);
 	row_one.appendChild(col_one_middle);
@@ -460,13 +460,13 @@ function editPage(pagedata) {
 	row_two.setAttribute("class", "row");
 	
 	var col_two_left = document.createElement("div");
-	col_two_left.setAttribute("class", "col-15");
+	col_two_left.setAttribute("class", "col col-15");
 	
 	var col_two_middle = document.createElement("div");
-	col_two_middle.setAttribute("class", "col-70");
+	col_two_middle.setAttribute("class", "col col-70 pad-10");
 	
 	var col_two_right = document.createElement("div");
-	col_two_right.setAttribute("class", "col-15");
+	col_two_right.setAttribute("class", "col col-15");
 	
 	row_two.appendChild(col_two_left);
 	row_two.appendChild(col_two_middle);
@@ -645,7 +645,7 @@ function choosePage(pid) {
 	row_one.setAttribute("class", "row");
 	
 	var col_middle = document.createElement("div");
-	col_middle.setAttribute("class", "col-100");
+	col_middle.setAttribute("class", "col col-100 pad-10");
 	
 	var center_paragraph = document.createElement("p");
 	center_paragraph.innerHTML = "You are viewing this because the page was closed without Revert or Save being clicked. Please choose which page you want to save.";
@@ -658,10 +658,10 @@ function choosePage(pid) {
 	row_two.setAttribute("class", "row");
 	
 	var col_left = document.createElement("div");
-	col_left.setAttribute("class", "col-50");
+	col_left.setAttribute("class", "col col-50 pad-10");
 	
 	var col_right = document.createElement("div");
-	col_right.setAttribute("class", "col-50");
+	col_right.setAttribute("class", "col col-50 pad-10");
 	
 	row_two.appendChild(col_left);
 	row_two.appendChild(col_right);
@@ -755,7 +755,191 @@ function loadPermPage(pid) {
 		nothing - *
 */
 function profilePage(profiledata) {
-	document.getElementById("content").innerHTML = "Haven't Coded This Yet";
+	
+	// if profiledata == "err" handle this
+	// if profiledata == "noprofileloggedout" handle this
+	
+	var profileinfo = JSON.parse(profiledata);
+	
+	/* MENU */
+	
+	/* create top div to wrap all header elements */
+	var menu = document.createElement("div");
+	menu.setAttribute("class", "block-menu");
+	
+	/* menu row 1 */
+	var menu_row_one = document.createElement("div");
+	menu_row_one.setAttribute("class", "row");
+	
+	var menu_col_one_left = document.createElement("div");
+	menu_col_one_left.setAttribute("class", "col col-15");
+	
+	var menu_col_one_middle = document.createElement("div");
+	menu_col_one_middle.setAttribute("class", "col col-70 pad-10");
+	
+	var menu_col_one_right = document.createElement("div");
+	menu_col_one_right.setAttribute("class", "col col-15");
+	
+	menu_row_one.appendChild(menu_col_one_left);
+	menu_row_one.appendChild(menu_col_one_middle);
+	menu_row_one.appendChild(menu_col_one_right);
+	
+	/* log out button */
+	var logout = logoutBtn();
+	
+	/* append elements to row 1 */
+	menu_col_one_left.appendChild(logout);
+	
+	/* append row 1 to the menu */
+	menu.appendChild(menu_row_one);
+	
+	/* PROFILE */
+		
+	// GET THIS DATA FROM MYSQL
+	var user = profileinfo.username;
+	var email = profileinfo.email;
+	var phone = profileinfo.phone;
+	var auto = profileinfo.autosave;
+	
+	/* create a div to hold the page links */
+	var profilediv = document.createElement('div');
+	profilediv.setAttribute('class', 'profilelist');
+	
+	/* profile row 1 */
+	var row_one = document.createElement("div");
+	row_one.setAttribute("class", "row");
+	
+	var col_one_left = document.createElement("div");
+	col_one_left.setAttribute("class", "col col-15");
+	
+	var col_one_middle = document.createElement("div");
+	col_one_middle.setAttribute("class", "col col-70 pad-10");
+	
+	var col_one_right = document.createElement("div");
+	col_one_right.setAttribute("class", "col col-15");
+	
+	row_one.appendChild(col_one_left);
+	row_one.appendChild(col_one_middle);
+	row_one.appendChild(col_one_right);
+	
+	/* username input */
+	var username = document.createElement('input');
+	username.setAttribute('type', 'text');
+	username.setAttribute('name', 'username');
+	username.setAttribute('class', 'text-input');
+	username.setAttribute('maxlength', '50');
+	username.setAttribute('value', user);
+	
+	/* save username btn */
+	var saveusernameBtn = document.createElement('button');
+	saveusernameBtn.setAttribute('type', 'button');
+	saveusernameBtn.setAttribute('name', 'save-username');
+	saveusernameBtn.setAttribute('class', 'menubtn save-btn');
+	saveusernameBtn.setAttribute('onclick', 'saveProfileInfo("username")');
+	saveusernameBtn.innerHTML = "Save";
+	
+	col_one_left.innerHTML = "Username:";
+	col_one_middle.appendChild(username);
+	col_one_right.appendChild(saveusernameBtn);
+	
+	/* profile row 2 */
+	var row_two = document.createElement("div");
+	row_two.setAttribute("class", "row");
+	
+	var col_two_left = document.createElement("div");
+	col_two_left.setAttribute("class", "col col-15");
+	
+	var col_two_middle_left = document.createElement("div");
+	col_two_middle_left.setAttribute("class", "col col-35 pad-10-left");
+	
+	var col_two_middle_right = document.createElement("div");
+	col_two_middle_right.setAttribute("class", "col col-35 pad-10-right");
+	
+	var col_two_right = document.createElement("div");
+	col_two_right.setAttribute("class", "col col-15");
+	
+	row_two.appendChild(col_two_left);
+	row_two.appendChild(col_two_middle_left);
+	row_two.appendChild(col_two_middle_right);
+	row_two.appendChild(col_two_right);
+	
+	/* currentPass input */
+	var currentPass = document.createElement('input');
+	currentPass.setAttribute('type', 'password');
+	currentPass.setAttribute('name', 'currentPass');
+	currentPass.setAttribute('class', 'text-input');
+	currentPass.setAttribute('maxlength', '50');
+	currentPass.setAttribute('placeholder', 'Current Password');
+	
+	/* newPass input */
+	var newPass = document.createElement('input');
+	newPass.setAttribute('type', 'password');
+	newPass.setAttribute('name', 'newPass');
+	newPass.setAttribute('class', 'text-input');
+	newPass.setAttribute('maxlength', '50');
+	newPass.setAttribute('placeholder', 'New Password');
+	
+	/* save password btn */
+	var savepasswordBtn = document.createElement('button');
+	savepasswordBtn.setAttribute('type', 'button');
+	savepasswordBtn.setAttribute('name', 'save-password');
+	savepasswordBtn.setAttribute('class', 'menubtn save-btn');
+	savepasswordBtn.setAttribute('onclick', 'saveProfileInfo("password")');
+	savepasswordBtn.innerHTML = "Save";
+	
+	col_two_left.innerHTML = "Password:";
+	col_two_middle_left.appendChild(currentPass);
+	col_two_middle_right.appendChild(newPass);
+	col_two_right.appendChild(savepasswordBtn);
+	
+	/* profile row 2 */
+	var row_three = document.createElement("div");
+	row_three.setAttribute("class", "row");
+	
+	var col_three_left = document.createElement("div");
+	col_three_left.setAttribute("class", "col col-15");
+	
+	var col_three_middle = document.createElement("div");
+	col_three_middle.setAttribute("class", "col col-70 pad-10");
+	
+	var col_three_right = document.createElement("div");
+	col_three_right.setAttribute("class", "col col-15");
+	
+	row_three.appendChild(col_three_left);
+	row_three.appendChild(col_three_middle);
+	row_three.appendChild(col_three_right);
+	
+	/* autosave input */
+	var autosave = document.createElement('input');
+	autosave.setAttribute('type', 'text');
+	autosave.setAttribute('name', 'autosave');
+	autosave.setAttribute('class', 'text-input');
+	autosave.setAttribute('maxlength', '50');
+	autosave.setAttribute('value', auto);
+	
+	/* save autosave btn */
+	var saveautosaveBtn = document.createElement('button');
+	saveautosaveBtn.setAttribute('type', 'button');
+	saveautosaveBtn.setAttribute('name', 'save-autosave');
+	saveautosaveBtn.setAttribute('class', 'menubtn save-btn');
+	saveautosaveBtn.setAttribute('onclick', 'saveProfileInfo("autosave")');
+	saveautosaveBtn.innerHTML = "Save";
+	
+	col_three_left.innerHTML = "Auto Save:";
+	col_three_middle.appendChild(autosave);
+	col_three_right.appendChild(saveautosaveBtn);
+	
+	/* append rows to profilediv */
+	profilediv.appendChild(row_one);
+	profilediv.appendChild(row_two);
+	profilediv.appendChild(row_three);
+	
+	/* MAIN */
+
+	/* grab the main div and append all of these elements */
+	var main = document.getElementById('content');
+	main.appendChild(menu);
+	main.appendChild(profilediv);
 }
 
 /*
@@ -1903,23 +2087,6 @@ function logout() {
 }
 
 /*
-	Function: profile
-	
-	This function opens the profile page in a different window.
-	
-	Parameters:
-	
-		none
-		
-	Returns:
-	
-		nothing - *
-*/
-function profile() {
-	alert("Haven't Coded This Yet");
-}
-
-/*
 	Function: createpage
 	
 	This function creates a user page.
@@ -2222,8 +2389,9 @@ function revertBlocks() {
 	xmlhttp.send(params);
 }
 
-
-
+function saveProfileInfo(name) {
+	console.log("saving not implemented");
+}
 
 
 

@@ -1508,11 +1508,32 @@ profile: function(request,response) {
 	/* grab the user's id */
 	var uid = request.session.uid;
 	
-	var profiledata = "";
-	
-	if(typeof uid === 'undefined') { response.end('noprofileloggedout'); } else {
-		loadPage(response,"<script>profilePage('" + profiledata + "');</script>");
-	}		
+	if(typeof uid === 'undefined') { loadPage(response,"<script>profilePage('noprofileloggedout');</script>"); } else {
+		
+		var qry = "SELECT username,email,phone,autosave FROM Users WHERE uid=" + uid;
+
+		pool.getConnection(function(err, connection) {
+			connection.query(qry, function(err, rows, fields) {
+				if(err) {
+					loadPage(response,"<script>profilePage('err');</script>");
+					journal(true,200,err,uid,__line,__function,__filename);
+				} else {
+					var data = {};
+					
+					data["username"] = rows[0].username;
+					data["email"] = rows[0].email;
+					data["phone"] = rows[0].phone;
+					data["autosave"] = rows[0].autosave;
+					
+					profiledata = JSON.stringify(data);
+		
+					loadPage(response,"<script>profilePage('" + profiledata + "');</script>");
+					journal(false,0,"",uid,__line,__function,__filename);
+				}
+			});
+		    connection.release();
+		});	
+	}
 }
 
 }
