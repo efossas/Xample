@@ -99,10 +99,10 @@ app.disable('x-powered-by');
 var session = require('express-session');
 var MySQLStore = require('express-mysql-session')(session);
 var sessionStore = new MySQLStore({host: 'localhost',
-															    user: 'nodesql',
-															    password: 'Vup}Ur34',
-															    database: "xsessionstore"});
-
+	user: 'nodesql',
+	password: 'Vup}Ur34',
+	database: "xsessionstore"
+});
 
 /* set up sessions */
  app.use(session({
