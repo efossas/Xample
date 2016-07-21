@@ -40,12 +40,13 @@ get: function() {
 */
 
 // reroute to your version of the front-end & your database
-var frontend = "navigation.js";
-var xdata = "xample";
-var xjournal = "xanalytics";
+var g_frontend = "navigation.js";
+var g_mediaFolder = "xample-media";
+var g_xmain = "xample";
+var g_xjournal = "xanalytics";
 
-var domain = "http://abaganon.com/";
-var reroute = "../public_html/";
+var g_domain = "http://abaganon.com/";
+var g_reroute = "../public_html/";
 
 /*
 	Section: MySql Connection
@@ -59,7 +60,7 @@ var pool = mysql.createPool({
   host     : 'localhost',
   user     : 'nodesql',
   password : 'Vup}Ur34',
-  database : xdata
+  database : g_xmain
 });
 
 var stats = mysql.createPool({
@@ -67,7 +68,7 @@ var stats = mysql.createPool({
   host     : 'localhost',
   user     : 'nodesql',
   password : 'Vup}Ur34',
-  database : xjournal
+  database : g_xjournal
 });
 
 /*
@@ -134,12 +135,12 @@ function loadPage(response,script) {
 	/* define the library & style links here */
 	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
 	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
-	var codehighlightstyle = "<link rel='stylesheet' href='" + domain + "css/vs.css'>";
-	var blockstyle = "<link rel='stylesheet' href='" + domain + "css/block.css'>";
-	var pdfjs = "<script src='" + domain + "xample-scripts/pdf.min.js'></script>";
+	var codehighlightstyle = "<link rel='stylesheet' href='" + g_domain + "css/vs.css'>";
+	var blockstyle = "<link rel='stylesheet' href='" + g_domain + "css/block.css'>";
+	var pdfjs = "<script src='" + g_domain + "xample-scripts/pdf.min.js'></script>";
 	var codehighlightjs = "<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js'></script>";
 	var mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
-	var xamplejs = "<script src='" + domain + "xample-scripts/" + frontend + "'></script>";
+	var xamplejs = "<script src='" + g_domain + "xample-scripts/" + g_frontend + "'></script>";
 	var mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, messageStyle: 'none' });</script>";
 	var headend = "<title>Abaganon Xample</title></head>";
 	var body = "<body class='xample'><div id='content'></div>";
@@ -428,8 +429,8 @@ function removeMedia(file,uid = 0,pid = 0) {
 	var exec = require('child_process').exec;
 	var child;
     
-    /* set up the remove command, "reroute" is a global variable defined at the top */
-    command = "rm " + reroute + file;
+    /* set up the remove command, "g_reroute" is a global variable defined at the top */
+    command = "rm " + g_reroute + file;
 
 	/* execute the remove command */
 	child = exec(command, function (error, stdout, stderr) {
@@ -475,19 +476,19 @@ function convertMedia(oldfile,dir,btype,uid = 0,pid = 0) {
         switch(btype) {
             case "image":
             	newfile += ".jpg";
-                var command = "convert " + reroute + oldfile + " -resize '1280x720>' " + reroute + newfile;
+                var command = "convert " + g_reroute + oldfile + " -resize '1280x720>' " + g_reroute + newfile;
                 break;
             case "audio":
             	newfile += ".mp3";
-                var command = "ffmpeg/ffmpeg -i " + reroute + oldfile + " " + reroute + newfile + " 2>&1";
+                var command = "ffmpeg/ffmpeg -i " + g_reroute + oldfile + " " + g_reroute + newfile + " 2>&1";
                 break;
             case "video":
             	newfile += ".mp4";
-                var command = "ffmpeg/ffmpeg -i " + reroute + oldfile + " -vcodec h264 -s 1280x720 -acodec aac " + reroute + newfile + " 2>&1";
+                var command = "ffmpeg/ffmpeg -i " + g_reroute + oldfile + " -vcodec h264 -s 1280x720 -acodec aac " + g_reroute + newfile + " 2>&1";
                 break;
             case "slide":
             	newfile += ".pdf";
-            	var command = "unoconv -f pdf -o " + reroute + newfile + " " + reroute + oldfile;
+            	var command = "unoconv -f pdf -o " + g_reroute + newfile + " " + g_reroute + oldfile;
             	break;
             default:
             	newfile = "error";
@@ -549,7 +550,7 @@ function deleteMedia(connection,uid,pid) {
 					
 					/* get only the file name */
 					for (var i = 0; i < mediaCount; i++) {
-						table[i] = rows[i].mediaContent.replace(domain + "xample-media/" + uid + "/" + pid + "/", "");
+						table[i] = rows[i].mediaContent.replace(g_domain + g_mediaFolder + "/" + uid + "/" + pid + "/", "");
 					}
 					resolve(table);
 				} else {
@@ -568,7 +569,7 @@ function deleteMedia(connection,uid,pid) {
 			var childrm;
 		    
 		    /* set up command to find all files in the folder */
-		    command = "ls " + reroute + "xample-media/" + uid + "/" + pid + "/";
+		    command = "ls " + g_reroute + g_mediaFolder + "/" + uid + "/" + pid + "/";
 		
 			/* execute the find files command */
 			childls = exec(command, function (error, stdout, stderr) {
@@ -597,7 +598,7 @@ function deleteMedia(connection,uid,pid) {
 					if (difference.length > 0) {
 						command = "rm ";
 						difference.forEach(function(filename) {
-							command += reroute + "xample-media/" + uid + "/" + pid + "/" + filename + " ";
+							command += g_reroute + g_mediaFolder + "/" + uid + "/" + pid + "/" + filename + " ";
 						})
 						
 						childrm = exec(command, function (error, stdout, stderr) {
@@ -787,7 +788,7 @@ signup: function(request,response) {
 										} else {
 											/* make the user's directory to store pages in later */
 											request.session.uid = uid;
-											fs.mkdir(__dirname + "/../public_html/xample-media/" + uid,function(err) {
+											fs.mkdir(__dirname + "/../public_html/" + g_mediaFolder + "/" + uid,function(err) {
 												if(err) {
 													journal(true,120,err,0,__line,__function,__filename);
 												}
@@ -1013,7 +1014,7 @@ createpage: function(request,response) {
 										});
 										
 										/* make a folder in user's media folder to store future media uploads */
-										fs.mkdir(__dirname + "/../public_html/xample-media/" + uid + "/" + pid, function(err) {
+										fs.mkdir(__dirname + "/../public_html/" + g_mediaFolder + "/" + uid + "/" + pid, function(err) {
 											if(err) {
 												journal(true,120,err,uid,__line,__function,__filename);
 											}
@@ -1366,7 +1367,7 @@ uploadmedia: function(request,response) {
 
 	    request.busboy.on('file', function (fieldname, file, filename) {
 	        /* set path to save the file, then pipe/save the file to that path */
-	        var dir = "xample-media/" + uid + "/" + pid + "/";
+	        var dir = g_mediaFolder + "/" + uid + "/" + pid + "/";
 	        
 	        /* replace spaces with underscores, fixes issues with shell commands */
 	        var link = dir + filename.replace(/ /g,"_");
@@ -1383,7 +1384,7 @@ uploadmedia: function(request,response) {
 
 		        promise.then(function(success) {
 			        /* respond with the absolute url to the uploaded file */
-		        	response.end(domain + success);
+		        	response.end(g_domain + success);
 		        	journal(false,0,"",uid,__line,__function,__filename);
 		        }, function(error) {
 			        response.end('err');
