@@ -256,7 +256,7 @@ function profileBtn() {
 	
 	var url = window.location.href;
 	var splitUrl = url.split("/");
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/profile";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/profile";
 	
 	var profile = document.createElement('a');
 	profile.setAttribute('class', 'profile-btn');
@@ -383,6 +383,31 @@ function displayHome() {
 	}, function(error) {
 		console.log("getPages promise error");
 	});
+}
+
+/*
+	Function: errorPage
+	
+	This function loads an error page that displays info no the error that occurred.
+	
+	Parameters:
+	
+		error - string indicating the type of error
+		
+	Returns:
+	
+		nothing - *
+*/
+function errorPage(error) {
+	var errorMessage = document.createElement("div");
+	if(error == "noeditloggedout") {
+		errorMessage.innerHTML = "You Cannot Edit The Requested Page Because You Are Logged Out.";
+	} else if(error == "notfound") {
+		errorMessage.innerHTML = "There URL You Requested Does Not Exist";
+	}
+	
+	var main = document.getElementById('content');
+	main.appendChild(errorMessage);
 }
 
 /*
@@ -556,7 +581,7 @@ function editPage(pagedata) {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/uploadmedia";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/uploadmedia";
 	
 	var fileform = document.createElement('form');
 	fileform.setAttribute('id', 'file-form');
@@ -714,7 +739,7 @@ function loadTempPage(pid) {
 	
 	var url = window.location.href;
 	var splitUrl = url.split("/");
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/editpage?page=" + pid + "&temp=true";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/editpage?page=" + pid + "&temp=true";
 	
 	window.location = url;
 }
@@ -736,7 +761,7 @@ function loadPermPage(pid) {
 	
 	var url = window.location.href;
 	var splitUrl = url.split("/");
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/editpage?page=" + pid + "&temp=false";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/editpage?page=" + pid + "&temp=false";
 	
 	window.location = url;
 }
@@ -1855,7 +1880,7 @@ function uploadMedia(bid,btype) {
 				var splitUrl = url.split("/");
 				
 				/* [0] refers to "http:" & [2] refers to the domain "abaganon.com", [1] is just empty */
-				url = splitUrl[0] + "//" + splitUrl[2] + "/xample/uploadmedia?" + "pid=" + pid + "&btype=" + btype;
+				url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/uploadmedia?" + "pid=" + pid + "&btype=" + btype;
 				
 				var xmlhttp = new XMLHttpRequest();
 				xmlhttp.open('POST', url, true);
@@ -1937,7 +1962,7 @@ function login() {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/login";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/login";
 	
 	/* get the entered username and password */
 	var username = document.getElementsByName('username-login')[0].value;
@@ -1997,7 +2022,7 @@ function signup() {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/signup";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/signup";
 	
 	/* get the user information */
 	var username = document.getElementsByName('username-signup')[0].value;
@@ -2058,7 +2083,7 @@ function logout() {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/logout";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/logout";
 	
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
@@ -2105,9 +2130,9 @@ function createpage() {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	var baseurl = splitUrl[0] + "//" + splitUrl[2];
+	var baseurl = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3];
 	
-	url = baseurl + "/xample/createpage";
+	url = baseurl + "/createpage";
 	
 	/* get the page name */
 	var pagename = document.getElementsByName('pagename-create')[0].value;
@@ -2131,7 +2156,7 @@ function createpage() {
 		        } else if (xmlhttp.responseText == "err") {
 			    	alert("An Error Occured. Please Try Again Later.");
 			    } else {
-		        	window.location = baseurl + "xample/editpage?page=" + xmlhttp.responseText;
+		        	window.location = baseurl + "/editpage?page=" + xmlhttp.responseText;
 	        	}
 			}
 			else {
@@ -2164,7 +2189,7 @@ function getPages() {
 		var url = window.location.href;
 		var splitUrl = url.split("/");
 	
-		url = splitUrl[0] + "//" + splitUrl[2] + "/xample/getpages";
+		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/getpages";
 		
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();
@@ -2298,7 +2323,7 @@ function saveBlocks(which) {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/saveblocks";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/saveblocks";
 	
 	/* get pagename & pageid */
 	var pid = document.getElementsByName('pageid')[0].value;
@@ -2351,7 +2376,7 @@ function revertBlocks() {
 	var url = window.location.href;
 	var splitUrl = url.split("/");
 	
-	url = splitUrl[0] + "//" + splitUrl[2] + "/xample/revert";
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/revert";
 	
 	/* get the pid & page name */
 	var pid = document.getElementsByName('pageid')[0].value;

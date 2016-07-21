@@ -667,8 +667,9 @@ module.exports = {
 		nothing - *
 */		
 notfound: function(request,response) {
-	// replace this with loadpage() that loads a 404 page not found template */
-	response.end('Page Not Found');
+	/* 404 page not found */
+	response.status(404);
+	loadPage(response,"<script>errorPage('notfound');</script>");
 },
 
 /*
@@ -1113,7 +1114,7 @@ editpage: function(request,response) {
 	var pid = request.query.page;
 	
 	/* redirect users if logged out or no page id provided */
-	if(typeof uid === 'undefined' || typeof pid === 'undefined') { response.redirect('/xample/'); } else {
+	if(typeof uid === 'undefined' || typeof pid === 'undefined') { loadPage(response,"<script>errorPage('noeditloggedout');</script>"); } else {
 	
 		/* get table identifier */
 		var temp = request.query.temp;

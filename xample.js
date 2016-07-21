@@ -4,7 +4,7 @@
 	This is the server for Xample
 */
 
-/*
+/* 
 	Section: Modules
 
 	These are the modules xample uses
@@ -29,12 +29,13 @@ var busboy = require('connect-busboy');
 
 function slack(message) {
 	var request = require('request');
-
+	
 	var postData = {};
 	postData.username = "xample-error";
 	postData.icon_emoji = ":rage:";
+	//postData.channel = "#error";
 	postData.text = message;
-
+	
 	var option = {
 		url:   'https://hooks.slack.com/services/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',
 		body:  JSON.stringify(postData)
@@ -58,13 +59,13 @@ process.stdin.resume();
 /*
 	Function: exitHandler
 	Used to run code when the program exits. Called on SIGINT (ctrl^c)
-
+	
 	Parameters:
-
+	
 		none
-
+	
 	Returns:
-
+	
 		nothing - *
 */
 function exitHandler() {
@@ -78,7 +79,7 @@ process.on('SIGINT', exitHandler);
 /*
 	Section: Create Server
 	These functions create a server, set it up, and route url addresses. An asterisks indicates that a get link may follow.
-
+	
 	index - start
 	signup - signup
 	login - login
@@ -95,22 +96,12 @@ app = express();
 
 /* remove from http headers */
 app.disable('x-powered-by');
-/*import express-sessions library*/
-var session = require('express-session');
-var MySQLStore = require('express-mysql-session')(session);
-var sessionStore = new MySQLStore({host: 'localhost',
-	user: 'nodesql',
-	password: 'Vup}Ur34',
-	database: "xsessionstore"
-});
 
 /* set up sessions */
- app.use(session({
-   key : 'xamplekey',
+app.use(session({
 	secret: 'KZtX0C0qlhvi)d',
 	resave: false,
-  saveUninitialized: false,
-	store: sessionStore
+    saveUninitialized: false
 }));
 
 /* set up busboy */
@@ -133,3 +124,4 @@ app.all('*',page.notfound);
 
 /* activate the server */
 app.listen(2020);
+
