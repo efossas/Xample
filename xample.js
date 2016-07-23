@@ -97,11 +97,22 @@ app = express();
 /* remove from http headers */
 app.disable('x-powered-by');
 
+/*import express-sessions library*/
+var session = require('express-session');
+var MySQLStore = require('express-mysql-session')(session);
+var sessionStore = new MySQLStore({host: 'localhost',
+	user: 'nodesql',
+	password: 'Vup}Ur34',
+	database: "xsessionstore"
+});
+
 /* set up sessions */
 app.use(session({
+	key : 'xamplekey',
 	secret: 'KZtX0C0qlhvi)d',
 	resave: false,
-    saveUninitialized: false
+	saveUninitialized: false,
+	store: sessionStore
 }));
 
 /* set up busboy */
