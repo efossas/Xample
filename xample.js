@@ -19,8 +19,9 @@
 var page = require('./page.js');
 var http = require('http');
 var express = require('express');
-var session = require('express-session');
 var busboy = require('connect-busboy');
+var session = require('express-session');
+var MySQLStore = require('express-mysql-session')(session);
 
 /*
 	Section: Server Exit
@@ -97,22 +98,17 @@ app = express();
 /* remove from http headers */
 app.disable('x-powered-by');
 
-/*import express-sessions library*/
-var session = require('express-session');
-var MySQLStore = require('express-mysql-session')(session);
-var sessionStore = new MySQLStore({host: 'localhost',
-	user: 'nodesql',
-	password: 'Vup}Ur34',
-	database: "xsessionstore"
-});
-
 /* set up sessions */
 app.use(session({
-	key : 'xamplekey',
+	key : 'xsessionkey',
 	secret: 'KZtX0C0qlhvi)d',
 	resave: false,
 	saveUninitialized: false,
-	store: sessionStore
+	store: new MySQLStore({host: 'localhost',
+		user: 'nodesql',
+		password: 'Vup}Ur34',
+		database: "xsessionstore"
+	})
 }));
 
 /* set up busboy */
@@ -135,4 +131,3 @@ app.all('*',page.notfound);
 
 /* activate the server */
 app.listen(2020);
-
