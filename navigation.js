@@ -783,6 +783,11 @@ function profilePage(profiledata) {
 	
 	// if profiledata == "err" handle this
 	// if profiledata == "noprofileloggedout" handle this
+	if(profiledata == "err") {
+		console.log("profile error");
+	} else if (profiledata == "noprofileloggedout") {
+		console.log("profile logged out");
+	}
 	
 	var profileinfo = JSON.parse(profiledata);
 	
@@ -860,7 +865,7 @@ function profilePage(profiledata) {
 	saveusernameBtn.setAttribute('type', 'button');
 	saveusernameBtn.setAttribute('name', 'save-username');
 	saveusernameBtn.setAttribute('class', 'menubtn save-btn');
-	saveusernameBtn.setAttribute('onclick', 'saveProfileInfo("username")');
+	saveusernameBtn.setAttribute('onclick', 'saveProfileInfo(this,["username"])');
 	saveusernameBtn.innerHTML = "Save";
 	
 	col_one_left.innerHTML = "Username:";
@@ -909,7 +914,7 @@ function profilePage(profiledata) {
 	savepasswordBtn.setAttribute('type', 'button');
 	savepasswordBtn.setAttribute('name', 'save-password');
 	savepasswordBtn.setAttribute('class', 'menubtn save-btn');
-	savepasswordBtn.setAttribute('onclick', 'saveProfileInfo("password")');
+	savepasswordBtn.setAttribute('onclick', 'saveProfileInfo(this,["currentPass","newPass"])');
 	savepasswordBtn.innerHTML = "Save";
 	
 	col_two_left.innerHTML = "Password:";
@@ -947,7 +952,7 @@ function profilePage(profiledata) {
 	saveautosaveBtn.setAttribute('type', 'button');
 	saveautosaveBtn.setAttribute('name', 'save-autosave');
 	saveautosaveBtn.setAttribute('class', 'menubtn save-btn');
-	saveautosaveBtn.setAttribute('onclick', 'saveProfileInfo("autosave")');
+	saveautosaveBtn.setAttribute('onclick', 'saveProfileInfo(this,["autosave"])');
 	saveautosaveBtn.innerHTML = "Save";
 	
 	col_three_left.innerHTML = "Auto Save:";
@@ -2414,10 +2419,69 @@ function revertBlocks() {
 	xmlhttp.send(params);
 }
 
-function saveProfileInfo(name) {
-	console.log("saving not implemented");
-}
+/*
+	Function: saveProfileInfo
+	
+	This function save profile data on the profile page.
+	
+	Parameters:
+	
+		btn - the button tag that was clicked. should be passed in with 'this' keyword.
+		fields - an array of field parameters which should match the 'name' field of the input holding the data.
+		
+	Returns:
+	
+		nothing - *
+*/
+function saveProfileInfo(btn,fields) {
+	
+	var params = "";
+	var i = 0;
+	var count = fields.length;
+	
+	if(count > 0) {	
+		params = fields[i] + "=" + document.getElementsByName(fields[i])[0].value;
+		i++
+	}
+	while(i < count) {
+		params += "&" + fields[i] + "=" + document.getElementsByName(fields[i])[0].value;
+		i++;
+	}
 
+	/* create the url destination for the ajax request */
+	var url = window.location.href;
+	var splitUrl = url.split("/");
+
+	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/saveprofile";
+
+	var xmlhttp;
+	xmlhttp = new XMLHttpRequest();
+
+	xmlhttp.open("POST", url, true);
+	
+	xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+	
+	xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+			if(xmlhttp.status == 200) {
+	        	if(xmlhttp.responseText == "profilesaved") {
+			        	btn.style = "background-color: #00ffe1";
+		        	} else if (xmlhttp.responseText == "nosaveloggedout") {
+			        	btn.style = "background-color: #e83e3e";
+			        	alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.")
+		        	} else {
+			        	btn.style = "background-color: #e83e3e";
+			        	alert("An Unknown Error Occurred");
+		        	}
+			}
+			else {
+				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+			}
+        }
+    }
+	    
+	xmlhttp.send(params);
+}
 
 
 
