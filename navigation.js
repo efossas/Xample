@@ -27,8 +27,8 @@
 var pdfObjects = {};
 
 /*
-	Section: Display Functions
-	These are functions to remove or show page elements (except for blocks).
+	Section: Helper & Display Functions
+	These are helper functions and functions to remove or show page elements (except for blocks).
 */
 
 /*
@@ -267,6 +267,136 @@ function profileBtn() {
 	
 	return profile;
 }
+
+/*
+	Function: profileRow
+	
+	Creates a profile row div.
+	
+	Parameters:
+	
+		field - string, the name of the field, must match the column name in MySQL database
+		description - string, short description shown on the left of input tag
+		data - the current profile data for that field, will populate the input tag
+		
+	Returns:
+	
+		success - html node, profile row div
+*/
+function profileRow(field,description,data) {
+
+	var row = document.createElement("div");
+	row.setAttribute("class", "row");
+	
+	var col_left = document.createElement("div");
+	col_left.setAttribute("class", "col col-15");
+	
+	var col_middle = document.createElement("div");
+	col_middle.setAttribute("class", "col col-70 pad-10");
+	
+	var col_right = document.createElement("div");
+	col_right.setAttribute("class", "col col-15");
+	
+	/* username input */
+	var fieldInput = document.createElement('input');
+	fieldInput.setAttribute('type', 'text');
+	fieldInput.setAttribute('name', field);
+	fieldInput.setAttribute('class', 'text-input');
+	fieldInput.setAttribute('maxlength', '50');
+	fieldInput.setAttribute('value', data);
+	
+	/* save username btn */
+	var saveBtn = document.createElement('button');
+	saveBtn.setAttribute('type', 'button');
+	saveBtn.setAttribute('name', 'save-' + field);
+	saveBtn.setAttribute('class', 'menubtn save-btn');
+	saveBtn.setAttribute('onclick', 'saveProfileInfo(this,["' + field + '"])');
+	saveBtn.innerHTML = "Save";
+	
+	col_left.innerHTML = description;
+	col_middle.appendChild(fieldInput);
+	col_right.appendChild(saveBtn);
+	
+	row.appendChild(col_left);
+	row.appendChild(col_middle);
+	row.appendChild(col_right);
+	
+	return row;
+}
+
+/*
+	Function: profileRowCheck
+	
+	Creates a profile row div when input must be validated (like chaning a password, requires entering current & new password). The back end must have a check for accepting the check and field names. Probably in the route function that saves profile data.
+	
+	Parameters:
+	
+		check - string, the name of the field to validate
+		field - string, the name of the new data field
+		placeholders - an array with two strings, first the placeholder text for check, second for field
+		description - string, short description shown on the left of input tag
+		
+	Returns:
+	
+		success - html node, profile row div
+*/
+function profileRowCheck(check,field,placeholders,description) {
+	var row = document.createElement("div");
+	row.setAttribute("class", "row");
+	
+	var col_left = document.createElement("div");
+	col_left.setAttribute("class", "col col-15");
+	
+	var col_middle_left = document.createElement("div");
+	col_middle_left.setAttribute("class", "col col-35 pad-10-left");
+	
+	var col_middle_right = document.createElement("div");
+	col_middle_right.setAttribute("class", "col col-35 pad-10-right");
+	
+	var col_right = document.createElement("div");
+	col_right.setAttribute("class", "col col-15");
+	
+	/* first input */
+	var first = document.createElement('input');
+	first.setAttribute('type', 'password');
+	first.setAttribute('name', check);
+	first.setAttribute('class', 'text-input');
+	first.setAttribute('maxlength', '50');
+	first.setAttribute('placeholder', placeholders[0]);
+	
+	/* second input */
+	var second = document.createElement('input');
+	second.setAttribute('type', 'password');
+	second.setAttribute('name', field);
+	second.setAttribute('class', 'text-input');
+	second.setAttribute('maxlength', '50');
+	second.setAttribute('placeholder', placeholders[1]);
+	
+	/* save btn */
+	var saveBtn = document.createElement('button');
+	saveBtn.setAttribute('type', 'button');
+	saveBtn.setAttribute('name', 'save-' + field);
+	saveBtn.setAttribute('class', 'menubtn save-btn');
+	saveBtn.setAttribute('onclick', 'saveProfileInfo(this,["'+ check + '","'+ field + '"])');
+	saveBtn.innerHTML = "Save";
+	
+	col_left.innerHTML = description;
+	col_middle_left.appendChild(first);
+	col_middle_right.appendChild(second);
+	col_right.appendChild(saveBtn);
+	
+	row.appendChild(col_left);
+	row.appendChild(col_middle_left);
+	row.appendChild(col_middle_right);
+	row.appendChild(col_right);
+	
+	return row;
+}
+
+/*
+	Section: Page Functions
+	These are functions for displaying pages.
+*/
 
 /*
 	Function: displayLanding
@@ -824,145 +954,28 @@ function profilePage(profiledata) {
 	menu.appendChild(menu_row_one);
 	
 	/* PROFILE */
-		
-	// GET THIS DATA FROM MYSQL
-	var user = profileinfo.username;
-	var email = profileinfo.email;
-	var phone = profileinfo.phone;
-	var auto = profileinfo.autosave;
 	
 	/* create a div to hold the page links */
 	var profilediv = document.createElement('div');
 	profilediv.setAttribute('class', 'profilelist');
 	
-	/* profile row 1 */
-	var row_one = document.createElement("div");
-	row_one.setAttribute("class", "row");
+	/* make mandatory profile rows */
+	var row_one = profileRow("username","Username:",profileinfo.username);
+	var row_two = profileRowCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
+	var row_three = profileRow("autosave","Auto Save:",profileinfo.autosave);
 	
-	var col_one_left = document.createElement("div");
-	col_one_left.setAttribute("class", "col col-15");
+	/* make recovery profile rows */
+	var row_four = profileRow("email","Email:",profileinfo.email);
+	var row_five = profileRow("phone","Phone:",profileinfo.phone);
 	
-	var col_one_middle = document.createElement("div");
-	col_one_middle.setAttribute("class", "col col-70 pad-10");
-	
-	var col_one_right = document.createElement("div");
-	col_one_right.setAttribute("class", "col col-15");
-	
-	row_one.appendChild(col_one_left);
-	row_one.appendChild(col_one_middle);
-	row_one.appendChild(col_one_right);
-	
-	/* username input */
-	var username = document.createElement('input');
-	username.setAttribute('type', 'text');
-	username.setAttribute('name', 'username');
-	username.setAttribute('class', 'text-input');
-	username.setAttribute('maxlength', '50');
-	username.setAttribute('value', user);
-	
-	/* save username btn */
-	var saveusernameBtn = document.createElement('button');
-	saveusernameBtn.setAttribute('type', 'button');
-	saveusernameBtn.setAttribute('name', 'save-username');
-	saveusernameBtn.setAttribute('class', 'menubtn save-btn');
-	saveusernameBtn.setAttribute('onclick', 'saveProfileInfo(this,["username"])');
-	saveusernameBtn.innerHTML = "Save";
-	
-	col_one_left.innerHTML = "Username:";
-	col_one_middle.appendChild(username);
-	col_one_right.appendChild(saveusernameBtn);
-	
-	/* profile row 2 */
-	var row_two = document.createElement("div");
-	row_two.setAttribute("class", "row");
-	
-	var col_two_left = document.createElement("div");
-	col_two_left.setAttribute("class", "col col-15");
-	
-	var col_two_middle_left = document.createElement("div");
-	col_two_middle_left.setAttribute("class", "col col-35 pad-10-left");
-	
-	var col_two_middle_right = document.createElement("div");
-	col_two_middle_right.setAttribute("class", "col col-35 pad-10-right");
-	
-	var col_two_right = document.createElement("div");
-	col_two_right.setAttribute("class", "col col-15");
-	
-	row_two.appendChild(col_two_left);
-	row_two.appendChild(col_two_middle_left);
-	row_two.appendChild(col_two_middle_right);
-	row_two.appendChild(col_two_right);
-	
-	/* currentPass input */
-	var currentPass = document.createElement('input');
-	currentPass.setAttribute('type', 'password');
-	currentPass.setAttribute('name', 'currentPass');
-	currentPass.setAttribute('class', 'text-input');
-	currentPass.setAttribute('maxlength', '50');
-	currentPass.setAttribute('placeholder', 'Current Password');
-	
-	/* newPass input */
-	var newPass = document.createElement('input');
-	newPass.setAttribute('type', 'password');
-	newPass.setAttribute('name', 'newPass');
-	newPass.setAttribute('class', 'text-input');
-	newPass.setAttribute('maxlength', '50');
-	newPass.setAttribute('placeholder', 'New Password');
-	
-	/* save password btn */
-	var savepasswordBtn = document.createElement('button');
-	savepasswordBtn.setAttribute('type', 'button');
-	savepasswordBtn.setAttribute('name', 'save-password');
-	savepasswordBtn.setAttribute('class', 'menubtn save-btn');
-	savepasswordBtn.setAttribute('onclick', 'saveProfileInfo(this,["currentPass","newPass"])');
-	savepasswordBtn.innerHTML = "Save";
-	
-	col_two_left.innerHTML = "Password:";
-	col_two_middle_left.appendChild(currentPass);
-	col_two_middle_right.appendChild(newPass);
-	col_two_right.appendChild(savepasswordBtn);
-	
-	/* profile row 2 */
-	var row_three = document.createElement("div");
-	row_three.setAttribute("class", "row");
-	
-	var col_three_left = document.createElement("div");
-	col_three_left.setAttribute("class", "col col-15");
-	
-	var col_three_middle = document.createElement("div");
-	col_three_middle.setAttribute("class", "col col-70 pad-10");
-	
-	var col_three_right = document.createElement("div");
-	col_three_right.setAttribute("class", "col col-15");
-	
-	row_three.appendChild(col_three_left);
-	row_three.appendChild(col_three_middle);
-	row_three.appendChild(col_three_right);
-	
-	/* autosave input */
-	var autosave = document.createElement('input');
-	autosave.setAttribute('type', 'text');
-	autosave.setAttribute('name', 'autosave');
-	autosave.setAttribute('class', 'text-input');
-	autosave.setAttribute('maxlength', '50');
-	autosave.setAttribute('value', auto);
-	
-	/* save autosave btn */
-	var saveautosaveBtn = document.createElement('button');
-	saveautosaveBtn.setAttribute('type', 'button');
-	saveautosaveBtn.setAttribute('name', 'save-autosave');
-	saveautosaveBtn.setAttribute('class', 'menubtn save-btn');
-	saveautosaveBtn.setAttribute('onclick', 'saveProfileInfo(this,["autosave"])');
-	saveautosaveBtn.innerHTML = "Save";
-	
-	col_three_left.innerHTML = "Auto Save:";
-	col_three_middle.appendChild(autosave);
-	col_three_right.appendChild(saveautosaveBtn);
+	/* make optional profile rows */
 	
 	/* append rows to profilediv */
 	profilediv.appendChild(row_one);
 	profilediv.appendChild(row_two);
 	profilediv.appendChild(row_three);
+	profilediv.appendChild(row_four);
+	profilediv.appendChild(row_five);
 	
 	/* MAIN */
 
@@ -1333,10 +1346,10 @@ function renderCode(block) {
 	/* add code formatting */
 	hljs.highlightBlock(block);
 	
-	// alert the user if they have surpassed our limit
+	// notify the user if they have surpassed our limit
 	if(block.textContent.length > 1024)
 	{
-		alert("There is too much in this code block. The block will not save correctly. Please remove some of its content.");
+		alertify.alert("There is too much in this code block. The block will not save correctly. Please remove some of its content.");
 	}
 }
 
@@ -1863,7 +1876,7 @@ function uploadMedia(bid,btype) {
 		
 		if(notvalid) {
 			
-			alert("Invalid File Format");
+			alertify.alert("Invalid File Format");
 			
 		} else {
 		
@@ -1897,14 +1910,14 @@ function uploadMedia(bid,btype) {
 								reject("err");
 							} else if (xmlhttp.responseText == "nouploadloggedout") {
 								deleteBlock(bid - 1);
-								alert("You Can't Upload Media Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
+								alertify.alert("You Can't Upload Media Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
 								reject("err");
 							} else {
 								resolve(xmlhttp.responseText);
 							}
 						}
 						else {
-							alert('Error:' + xmlhttp.status + ": Please Try Again");
+							alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
 							reject("err");
 						}
 			        }
@@ -1992,15 +2005,15 @@ function login() {
 		        	displayHome();
 	        	}
 	        	else if(xmlhttp.responseText == "incorrect") {
-		        	alert("The Passowrd Was Incorrect");
+		        	alertify.alert("The Passowrd Was Incorrect");
 	        	} else if(xmlhttp.responseText == "notfound") {
-		        	alert("The Username Could Not Be Found");
+		        	alertify.alert("The Username Could Not Be Found");
 		        } else {
-		        	alert("An Unknown Error Occurred");
+		        	alertify.alert("An Unknown Error Occurred");
 	        	}
 			}
 			else {
-				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
         }
     }
@@ -2055,13 +2068,13 @@ function signup() {
 		        	displayHome();
 	        	}
 	        	else if(xmlhttp.responseText == "exists") {
-		        	alert("That Username Already Exists.\nPlease Choose A Different One.");
+		        	alertify.alert("That Username Already Exists.\nPlease Choose A Different One.");
 	        	} else {
-		        	alert("An Unknown Error Occurred");
+		        	alertify.alert("An Unknown Error Occurred");
 	        	}
 			}
 			else {
-				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
         }
     }
@@ -2104,11 +2117,11 @@ function logout() {
 		        	emptyDiv('content');
 		        	displayLanding();
 	        	} else {
-		        	alert("An Unknown Error Occurred");
+		        	alertify.alert("An Unknown Error Occurred");
 	        	}
 			}
 			else {
-				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
         }
     }
@@ -2155,17 +2168,17 @@ function createpage() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
 			if(xmlhttp.status == 200) {
 	        	if(xmlhttp.responseText == "pageexists") {
-		        	alert("You Already Have A Page With That Name.");
+		        	alertify.alert("You Already Have A Page With That Name.");
 	        	} else if (xmlhttp.responseText == "nocreateloggedout") {
-		        	alert("Unable To Create Page. You Are Logged Out.");
+		        	alertify.alert("Unable To Create Page. You Are Logged Out.");
 		        } else if (xmlhttp.responseText == "err") {
-			    	alert("An Error Occured. Please Try Again Later.");
+			    	alertify.alert("An Error Occured. Please Try Again Later.");
 			    } else {
 		        	window.location = baseurl + "/editpage?page=" + xmlhttp.responseText;
 	        	}
 			}
 			else {
-				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
         }
     }
@@ -2213,7 +2226,7 @@ function getPages() {
 		        	}
 				}
 				else {
-					alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 				}
 	        }
 	    }
@@ -2349,13 +2362,13 @@ function saveBlocks(which) {
 	        	if(xmlhttp.responseText == "blockssaved") {
 			        	// successful save
 		        	} else if (xmlhttp.responseText == "nosaveloggedout") {
-			        	alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.")
+			        	alertify.alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.")
 		        	} else {
-			        	alert("An Unknown Error Occurred");
+			        	alertify.alert("An Unknown Error Occurred");
 		        	}
 			}
 			else {
-				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
         }
     }
@@ -2400,18 +2413,18 @@ function revertBlocks() {
         if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
 			if(xmlhttp.status == 200) {
 	        	if(xmlhttp.responseText == "nopid") {
-		        	alert("This Page Is Not Meant To Be Visited Directly.");
+		        	alertify.alert("This Page Is Not Meant To Be Visited Directly.");
 	        	} else if (xmlhttp.responseText == "norevertloggedout") {
-		        	alert("Revert Error. You Are Not Logged In.");
+		        	alertify.alert("Revert Error. You Are Not Logged In.");
 	        	} else if (xmlhttp.responseText == "err") {
-		        	alert("An Error Occured. Please Try Again Later");
+		        	alertify.alert("An Error Occured. Please Try Again Later");
 		        } else {
 		        	emptyDiv("content");
 		        	editPage(pid + "," + pagename + xmlhttp.responseText);
 	        	}
 			}
 			else {
-				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
         }
     }
@@ -2466,16 +2479,17 @@ function saveProfileInfo(btn,fields) {
 			if(xmlhttp.status == 200) {
 	        	if(xmlhttp.responseText == "profilesaved") {
 			        	btn.style = "background-color: #00ffe1";
+			        	alertify.log("Saved!","success");
 		        	} else if (xmlhttp.responseText == "nosaveloggedout") {
 			        	btn.style = "background-color: #e83e3e";
-			        	alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.")
+			        	alertify.alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.")
 		        	} else {
 			        	btn.style = "background-color: #e83e3e";
-			        	alert("An Unknown Error Occurred");
+			        	alertify.alert("An Unknown Error Occurred");
 		        	}
 			}
 			else {
-				alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
         }
     }

@@ -136,8 +136,11 @@ function loadPage(response,script) {
 	/* define the library & style links here */
 	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
 	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+	var alertifycorestyle = "<link rel='stylesheet' href='" + g_domain + "css/alertify.core.css'>";
+	var alertifydefaultstyle = "<link rel='stylesheet' href='" + g_domain + "css/alertify.default.css'>";
 	var codehighlightstyle = "<link rel='stylesheet' href='" + g_domain + "css/vs.css'>";
 	var blockstyle = "<link rel='stylesheet' href='" + g_domain + "css/block.css'>";
+	var alertifyjs = "<script src='" + g_domain + "xample-scripts/alertify.min.js'></script>";
 	var pdfjs = "<script src='" + g_domain + "xample-scripts/pdf.min.js'></script>";
 	var codehighlightjs = "<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js'></script>";
 	var mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
@@ -147,7 +150,7 @@ function loadPage(response,script) {
 	var body = "<body class='xample'><div id='content'></div>";
 	
 	/* write the <head> */
-	response.write(headstart + viewport + codehighlightstyle + blockstyle + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
+	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + codehighlightstyle + blockstyle + alertifyjs + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
 
 	/* write the <script> */
 	response.write(script);
