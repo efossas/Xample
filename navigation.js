@@ -596,6 +596,8 @@ function editPage(pagedata) {
 	pageid.setAttribute('name', 'pageid');
 	pageid.setAttribute('value', pid);
 	
+	/* this is set to 0 after block adds and deletes & 1 after saves */
+	/* it is checked when exiting a window to notify the user that the page hasn't been saved */
 	var statusid = document.createElement('input');
 	statusid.setAttribute('type', 'hidden');
 	statusid.setAttribute('name', 'statusid');
@@ -774,6 +776,7 @@ function editPage(pagedata) {
 	window.onbeforeunload = function() {
 		var status = document.getElementsByName("statusid")[0].value;
 		if(status == 0) {
+			// this text isn't being displayed... some default is instead
 	    	return "Please click Revert or Save before exiting.";
 	    }
 	    return null;
@@ -1736,13 +1739,13 @@ function addBlock(bid,btype) {
 	}
 	
 	/* these blocks call createBlock() to add the block */
-	if (["xcode","xmath","latex","title"].indexOf(btype) > -1)
+	else if (["xcode","xmath","latex","title"].indexOf(btype) > -1)
 	{
 		createBlock(bid,btype);
 	}
 	
 	/* these blocks call uploadMedia() which uploads media and then calls createBlock() */
-	if (["image","audio","video","slide"].indexOf(btype) > -1)
+	else if (["image","audio","video","slide"].indexOf(btype) > -1)
 	{
 		uploadMedia(bid + 1,btype);
 	}
@@ -1835,6 +1838,9 @@ function deleteBlock(bid) {
 		i++;
 	}
 	document.getElementById('d' + i).style.visibility = 'hidden';
+	
+	/* save blocks to temp table, indicated by false */
+	saveBlocks(false);
 }
 
 /*
