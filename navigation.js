@@ -268,6 +268,13 @@ function profileBtn() {
 	return profile;
 }
 
+function autosaveDisplay() {
+	var autosave = document.createElement("div");
+	autosave.setAttribute("id", "autosave");
+	
+	return autosave;
+}
+
 /*
 	Function: profileRow
 	
@@ -581,6 +588,9 @@ function editPage(pagedata) {
 	/* log out button */
 	var logout = logoutBtn();
 	
+	/* auto save timer div */
+	var autosave = autosaveDisplay();
+	
 	/* profile button */
 	var profile = profileBtn();
 	
@@ -605,6 +615,7 @@ function editPage(pagedata) {
 	
 	/* append elements to row 1 */
 	col_one_left.appendChild(logout);
+	col_one_middle.appendChild(autosave);
 	col_one_right.appendChild(profile);
 	
 	/* append row 1 to the menu */
@@ -771,6 +782,9 @@ function editPage(pagedata) {
 	for (i = 0; i < cntL; i++) {
 		insertLatex(latexblocks[i]);
 	}
+	
+	/* start auto save timer */
+	autosaveTimer(autosave);
 	
 	/* prevent user from exiting page if Revert or Save has not been clicked */
 	window.onbeforeunload = function() {
@@ -2503,6 +2517,87 @@ function saveProfileInfo(btn,fields) {
 	xmlhttp.send(params);
 }
 
+/*
+   Function: autosaveTimer
 
+   Display the autosave timer on the page.
 
+   Parameters:
+
+      div - html div, the div that will contain the timer
+
+   Returns:
+
+      Nothing.
+*/
+function autosaveTimer(div) {
+	
+	var promise = getUserFields(["autosave"]);
+	
+	promise.then(function(data) {
+		var time = data.autosave;
+		
+		if(time != 0) {
+		    var timer = time, minutes, seconds;
+		    setInterval(function () {
+		        minutes = parseInt(timer / 60, 10)
+		        seconds = parseInt(timer % 60, 10);
+		
+		        minutes = minutes < 10 ? "0" + minutes : minutes;
+		        seconds = seconds < 10 ? "0" + seconds : seconds;
+		
+		        div.textContent = minutes + ":" + seconds;
+		
+		        if (--timer < 0) {
+			        saveBlocks(true);
+		            timer = time;
+		        }
+		    }, 1000);
+		}
+	}, function(error) {
+		alertify.alert("Error. Auto Save Could Not Be Initiated.");
+	});
+}
+
+function getUserFields(fields) {
+	
+	/* wrap the ajax request in a promise */
+	var promise = new Promise(function(resolve, reject) {
+		var params = "fields=" + fields.join(",");
+	
+		/* create the url destination for the ajax request */
+		var url = window.location.href;
+		var splitUrl = url.split("/");
+	
+		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/getprofiledata";
+	
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+	
+		xmlhttp.open("POST", url, true);
+		
+		xmlhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		
+		xmlhttp.onreadystatechange = function() {
+	        if (xmlhttp.readyState == XMLHttpRequest.DONE ) {
+				if(xmlhttp.status == 200) {
+		        	if(xmlhttp.responseText == "err") {
+				        	reject("err");
+			        	} else if (xmlhttp.responseText == "noprofiledataloggedout") {
+				        	reject("noprofiledataloggedout");
+			        	} else {
+				        	resolve(JSON.parse(xmlhttp.responseText));
+			        	}
+				}
+				else {
+					reject("err");
+				}
+	        }
+	    }
+		    
+		xmlhttp.send(params);
+	});
+	
+	return promise;
+}
 
