@@ -1,10 +1,11 @@
+/* eslint-env node, es6 */
 /*
 	Section: Xample
 
 	This is the server for Xample
 */
 
-/* 
+/*
 	Section: Modules
 
 	These are the modules xample uses
@@ -16,8 +17,10 @@
 	busboy - used to parse media data (file uploads)
 */
 
+/* global require:true */
+/* global process:true */
+
 var page = require('./page.js');
-var http = require('http');
 var express = require('express');
 var busboy = require('connect-busboy');
 var session = require('express-session');
@@ -30,25 +33,27 @@ var MySQLStore = require('express-mysql-session')(session);
 
 function slack(message) {
 	var request = require('request');
-	
+
 	var postData = {};
 	postData.username = "xample-error";
 	postData.icon_emoji = ":rage:";
-	//postData.channel = "#error";
+	// postData.channel = "#error";
 	postData.text = message;
-	
+
 	var option = {
 		url:   'https://hooks.slack.com/services/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',
 		body:  JSON.stringify(postData)
 	};
 
-	request.post(option, function(err, res, body) {
-		if(body == "ok") { console.log("Error Sent To Slack"); }
+	request.post(option,function(err,res,body) {
+		if(body == "ok" && !err) {
+			console.log("Error Sent To Slack");
+		}
 	});
 }
 
 /* prevents node from exiting on error */
-process.on('uncaughtException', function (err) {
+process.on('uncaughtException',function(err) {
 	console.log('666 ' + err);
 
 	slack(err);
@@ -60,13 +65,13 @@ process.stdin.resume();
 /*
 	Function: exitHandler
 	Used to run code when the program exits. Called on SIGINT (ctrl^c)
-	
+
 	Parameters:
-	
+
 		none
-	
+
 	Returns:
-	
+
 		nothing - *
 */
 function exitHandler() {
@@ -75,12 +80,12 @@ function exitHandler() {
 }
 
 /* calls exitHandler() on SIGINT, ctrl^c */
-process.on('SIGINT', exitHandler);
+process.on('SIGINT',exitHandler);
 
 /*
 	Section: Create Server
 	These functions create a server, set it up, and route url addresses. An asterisks indicates that a get link may follow.
-	
+
 	index - start
 	signup - signup
 	login - login
@@ -93,10 +98,13 @@ process.on('SIGINT', exitHandler);
 */
 
 /* create express server */
-app = express();
+var app = express();
 
 /* remove from http headers */
 app.disable('x-powered-by');
+
+/* set up static file routes */
+app.use(express.static('../public_html'));
 
 /* set up sessions */
 app.use(session({
