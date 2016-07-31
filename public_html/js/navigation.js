@@ -60,6 +60,33 @@ function emptyDiv(divId) {
 }
 
 /*
+	Function: createURL
+
+	Detects local or remote host and constructs desired url.
+
+	Parameters:
+
+		path - The path or the url after the host, like http://localhost:80 + path
+
+	Returns:
+
+		nothing - *
+*/
+function createURL(path) {
+	var url = window.location.href;
+	var splitUrl = url.split("/");
+
+	/* detect local or remote routes */
+	if(splitUrl[2].match(/localhost.*/)) {
+		url = splitUrl[0] + "//" + splitUrl[2] + path;
+	} else {
+		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + path;
+	}
+
+	return url;
+}
+
+/*
 	Function: loginForm
 
 	Create a log in form. This returns an html node containing the form. On submit, the form calls login()
@@ -260,9 +287,7 @@ function logoutBtn() {
 */
 function profileBtn() {
 
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/profile";
+	var url = createURL("/profile");
 
 	var profile = document.createElement('a');
 	profile.setAttribute('class','profile-btn');
@@ -764,10 +789,7 @@ function editPage(pagedata) {
 	filebtn.setAttribute('type','submit');
 	filebtn.setAttribute('id','upload-button');
 
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/uploadmedia";
+	var url = createURL("/uploadmedia");
 
 	var fileform = document.createElement('form');
 	fileform.setAttribute('id','file-form');
@@ -926,9 +948,7 @@ function choosePage(pid) {
 */
 function loadTempPage(pid) {
 
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/editpage?page=" + pid + "&temp=true";
+	var url = createURL("/editpage?page=" + pid + "&temp=true");
 
 	window.location = url;
 }
@@ -948,9 +968,7 @@ function loadTempPage(pid) {
 */
 function loadPermPage(pid) {
 
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/editpage?page=" + pid + "&temp=false";
+	var url = createURL("/editpage?page=" + pid + "&temp=false");
 
 	window.location = url;
 }
@@ -1939,11 +1957,7 @@ function uploadMedia(bid,btype) {
 				var pid = document.getElementsByName('pageid')[0].value;
 
 				/* grab the domain and create the url destination for the ajax request */
-				var url = window.location.href;
-				var splitUrl = url.split("/");
-
-				/* [0] refers to "http:" & [2] refers to the domain "abaganon.com", [1] is just empty */
-				url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/uploadmedia?pid=" + pid + "&btype=" + btype;
+				var url = createURL("/uploadmedia?pid=" + pid + "&btype=" + btype);
 
 				var xmlhttp = new XMLHttpRequest();
 				xmlhttp.open('POST',url,true);
@@ -2021,10 +2035,7 @@ function uploadMedia(bid,btype) {
 function login() {
 
 	/* create the url destination for the ajax request */
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/login";
+	var url = createURL("/login");
 
 	/* get the entered username and password */
 	var username = document.getElementsByName('username-login')[0].value;
@@ -2079,10 +2090,7 @@ function login() {
 function signup() {
 
 	/* create the url destination for the ajax request */
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/signup";
+	var url = createURL("/signup");
 
 	/* get the user information */
 	var username = document.getElementsByName('username-signup')[0].value;
@@ -2141,10 +2149,7 @@ function signup() {
 function logout() {
 
 	/* create the url destination for the ajax request */
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/logout";
+	var url = createURL("/logout");
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
@@ -2187,12 +2192,7 @@ function logout() {
 function createpage() {
 
 	/* create the url destination for the ajax request */
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	var baseurl = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3];
-
-	url = baseurl + "/createpage";
+	var url = createURL("/createpage");
 
 	/* get the page name */
 	var pagename = document.getElementsByName('pagename-create')[0].value;
@@ -2216,7 +2216,7 @@ function createpage() {
 				} else if (xmlhttp.responseText == "err") {
 					alertify.alert("An Error Occured. Please Try Again Later.");
 				} else {
-					window.location = baseurl + "/editpage?page=" + xmlhttp.responseText;
+					window.location = createURL("/editpage?page=" + xmlhttp.responseText);
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -2245,10 +2245,7 @@ function getPages() {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* create the url destination for the ajax request */
-		var url = window.location.href;
-		var splitUrl = url.split("/");
-
-		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/getpages";
+		var url = createURL("/getpages");
 
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();
@@ -2372,10 +2369,7 @@ function saveBlocks(which) {
 	}
 
 	/* create the url destination for the ajax request */
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/saveblocks";
+	var url = createURL("/saveblocks");
 
 	/* get pagename & pageid */
 	var pid = document.getElementsByName('pageid')[0].value;
@@ -2442,10 +2436,7 @@ function saveBlocks(which) {
 */
 function revertBlocks() {
 	/* create the url destination for the ajax request */
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/revert";
+	var url = createURL("/revert");
 
 	/* get the pid & page name */
 	var pid = document.getElementsByName('pageid')[0].value;
@@ -2512,10 +2503,7 @@ function saveProfileInfo(btn,fields) {
 	}
 
 	/* create the url destination for the ajax request */
-	var url = window.location.href;
-	var splitUrl = url.split("/");
-
-	url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/saveprofile";
+	var url = createURL("/saveprofile");
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
@@ -2597,10 +2585,7 @@ function getUserFields(fields) {
 		var params = "fields=" + fields.join(",");
 
 		/* create the url destination for the ajax request */
-		var url = window.location.href;
-		var splitUrl = url.split("/");
-
-		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + "/getprofiledata";
+		var url = createURL("/getprofiledata");
 
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();

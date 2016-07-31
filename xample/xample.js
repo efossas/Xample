@@ -5,13 +5,50 @@
 	This is the server for Xample
 */
 
+/* grab command line arguments, 0 -> node, 1 -> path to .js, 2+ -> actual arguments */
+var port;
+var host;
+
+switch(process.argv.length) {
+	case 4:
+		port = Number(process.argv[3]);
+		host = process.argv[2];
+		break;
+	case 3:
+		port = 2020;
+		host = process.argv[2];
+		break;
+	default:
+		console.log("Wrong number of arguments. Usage: node xample.js [local|remote] [port]");
+		process.exit();
+}
+
+/* check for that valid port number was given */
+if(port > 65535 || port < 1) {
+	console.log("Invalid port number. Port argument must be between 1 & 65535");
+	process.exit();
+}
+
+/* check that valid host option was given */
+var root;
+switch(host) {
+	case "local":
+		root = "http://localhost:" + port + "/";
+		break;
+	case "remote":
+		root = "http://abaganon.com/xample/";
+		break;
+	default:
+		console.log("Incorrect value for arg 1. Usage: node xample.js [local|remote] [port]");
+		process.exit();
+}
+
 /*
 	Section: Modules
 
 	These are the modules xample uses
 
 	page - imports the functions that handl xample url requests
-	http - ??? was using this to start a server, but this might not be needed since express module is used now
 	express - used to start a server and page routing
 	session - used with express to add sessions for users
 	busboy - used to parse media data (file uploads)
@@ -25,6 +62,14 @@ var express = require('express');
 var busboy = require('connect-busboy');
 var session = require('express-session');
 var MySQLStore = require('express-mysql-session')(session);
+
+/*
+	Section: Prototypes
+	These are additions or changes to js prototypes
+*/
+
+/* express requests will have root which is the http path to this server */
+express.request.root = root;
 
 /*
 	Section: Server Exit
@@ -107,17 +152,28 @@ app.disable('x-powered-by');
 app.use(express.static('../public_html'));
 
 /* set up sessions */
-app.use(session({
-	key : 'xsessionkey',
-	secret: 'KZtX0C0qlhvi)d',
-	resave: false,
-	saveUninitialized: false,
-	store: new MySQLStore({host: 'localhost',
-		user: 'nodesql',
-		password: 'Vup}Ur34',
-		database: "xsessionstore"
-	})
-}));
+// todo: this is a hack, sessionStore needs to work on remote & local.
+if(host === "local") {
+	app.use(session({
+		key : 'xsessionkey',
+		secret: 'KZtX0C0qlhvi)d',
+		resave: false,
+		saveUninitialized: false
+	}));
+} else {
+	app.use(session({
+		key : 'xsessionkey',
+		secret: 'KZtX0C0qlhvi)d',
+		resave: false,
+		saveUninitialized: false,
+		store: new MySQLStore({host: 'localhost',
+			user: 'nodesql',
+			password: 'Vup}Ur34',
+			database: "xsessionstore"
+		})
+	}));
+}
+
 
 /* set up busboy */
 app.use(busboy());
@@ -140,4 +196,4 @@ app.post('/revert',page.revert);
 app.all('*',page.notfound);
 
 /* activate the server */
-app.listen(2020);
+app.listen(port);

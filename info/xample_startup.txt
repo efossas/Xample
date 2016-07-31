@@ -1,0 +1,124 @@
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* If you are on Ubuntu, don't install Homebrew & replace "brew" with "apt-get"
+* If you are on Windows, go buy a different computer
+
+Work Flow:
+1. Edit files in your local Git folder.
+2. When ready for testing, copy files from Git folder to Test folder.
+3. Run the software inside the Test folder for testing.
+4. When ready, push files to remote Git repo from local Git folder.
+
+!! Important, only share these files between Git & Test folder:
+xample/page.js
+xample/xample.js
+public_html/css/*
+public_html/js/*
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Start Up:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install NVM:
+$> curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.3/install.sh | bash
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Node:
+$> nvm install node
+$> nvm use node
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Homebrew:
+$> /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Node & NPM:
+$> brew install npm
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install ESLint:
+npm install eslint -g
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Download Git Repo:
+$> git clone https://github.com/efossas/JS-Xample
+
+Create Test Folder:
+$> mkdir (<TEST-FOLDER>)
+$> cp (<GIT-FOLDER>)/public_html (<TEST-FOLDER>)/public_html
+$> cp (<GIT-FOLDER>)/xample (<TEST-FOLDER>)/xample
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Atom From:
+https://atom.io/
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Atom Plugins:
+$> apm install linter-eslint
+$> apm install remote-ftp
+$> apm install git-plus
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Xample Dependencies In Test Folder:
+$> cd (<TEST-FOLDER>)/xample
+
+$> npm install
+
+$> brew install imagemagick
+$> brew install mysql
+
+Install Libre Office 4.3.7.2 From:
+https://downloadarchive.documentfoundation.org/libreoffice/old/
+
+$> brew install unoconv
+
+Download Static Build FFMPEG From:
+https://ffmpeg.org/download.html
+
+Unzip ffmpeg into "xample/" & rename ffmpeg folder to "ffmpeg"
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Configure MySQL:
+
+* the following two lines are needed hack for MAC OSX
+$> sudo mkdir /var/mysql
+$> sudo ln -s /tmp/mysql.sock /var/mysql/mysql.sock
+
+Start MySQL, log in, & configure the databases.
+$> sudo brew services start mysql
+
+$> mysql -uroot
+$> source (<GIT-FOLDER>)/db/initialize.sql
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can leave mysql running or stop it in between testing.
+start mysql: $> sudo brew services start mysql
+stop mysql: $> sudo brew services stop mysql
+
+To test, make sure mysql is running.
+$> cd (<TEST-FOLDER>)/xample
+$> node xample.js local 2020
+
+"2020" is the port number. If not included it defaults to 2020,
+or you can specify a different one if needed.
+
+Now go to your web browser and type: http://localhost:2020
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Important Tools
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Slack
+Draw.io
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -8,7 +8,7 @@
 	Section: Prototypes
 	These are additions or changes to js prototypes
 
-	Object - __stack, __line, __function, are all set using v8 engine stacktrace API functions
+	Object - __stack, __line, are all set using v8 engine stacktrace API functions
 */
 
 /* These set __line to return the current line number where they are used. They are used for logging errors.  */
@@ -44,13 +44,7 @@ get: function() {
 /* global __filename:true */
 /* global __line:true */
 
-/* reroute to your version of the front-end & your database */
-var GLOBALfrontend = "navigation.js";
-var GLOBALmediaFolder = "xample-media";
-var GLOBALxmain = "xample";
-var GLOBALxjournal = "xanalytics";
-
-var GLOBALdomain = "http://abaganon.com/xample/";
+/* reroute from server to public folder */
 var GLOBALreroute = "../public_html/";
 
 /*
@@ -65,7 +59,7 @@ var pool = mysql.createPool({
   host     : 'localhost',
   user     : 'nodesql',
   password : 'Vup}Ur34',
-  database : GLOBALxmain
+  database : 'xample'
 });
 
 var stats = mysql.createPool({
@@ -73,7 +67,7 @@ var stats = mysql.createPool({
   host     : 'localhost',
   user     : 'nodesql',
   password : 'Vup}Ur34',
-  database : GLOBALxjournal
+  database : 'xanalytics'
 });
 
 /*
@@ -140,20 +134,20 @@ function journal(isError,idNumber,message,userID,lineNumber,functionName,scriptN
 
 		nothing - *
 */
-function loadPage(response,script) {
+function loadPage(request,response,script) {
 
 	/* define the library & style links here */
 	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
 	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
-	var alertifycorestyle = "<link rel='stylesheet' href='" + GLOBALdomain + "css/alertify.core.css'>";
-	var alertifydefaultstyle = "<link rel='stylesheet' href='" + GLOBALdomain + "css/alertify.default.css'>";
-	var codehighlightstyle = "<link rel='stylesheet' href='" + GLOBALdomain + "css/vs.css'>";
-	var blockstyle = "<link rel='stylesheet' href='" + GLOBALdomain + "css/block.css'>";
-	var alertifyjs = "<script src='" + GLOBALdomain + "xample-scripts/alertify.min.js'></script>";
-	var pdfjs = "<script src='" + GLOBALdomain + "xample-scripts/pdf.min.js'></script>";
+	var alertifycorestyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.core.css'>";
+	var alertifydefaultstyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.default.css'>";
+	var codehighlightstyle = "<link rel='stylesheet' href='" + request.root + "css/vs.css'>";
+	var blockstyle = "<link rel='stylesheet' href='" + request.root + "css/block.css'>";
+	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
+	var pdfjs = "<script src='http://abaganon.com/js/pdf.min.js'></script>";
 	var codehighlightjs = "<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js'></script>";
 	var mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
-	var xamplejs = "<script src='" + GLOBALdomain + "xample-scripts/" + GLOBALfrontend + "'></script>";
+	var xamplejs = "<script src='" + request.root + "js/navigation.js'></script>";
 	var mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, messageStyle: 'none' });</script>";
 	var headend = "<title>Abaganon Xample</title></head>";
 	var body = "<body class='xample'><div id='content'></div>";
@@ -564,7 +558,7 @@ function deleteMedia(connection,uid,pid) {
 
 					/* get only the file name */
 					for (var i = 0; i < mediaCount; i++) {
-						table[i] = rows[i].mediaContent.replace(GLOBALmediaFolder + "/" + uid + "/" + pid + "/","");
+						table[i] = rows[i].mediaContent.replace("xm/" + uid + "/" + pid + "/","");
 					}
 					resolve(table);
 				} else {
@@ -580,7 +574,7 @@ function deleteMedia(connection,uid,pid) {
 			var exec = require('child_process').exec;
 
             /* set up command to find all files in the folder */
-            var command = "ls " + GLOBALreroute + GLOBALmediaFolder + "/" + uid + "/" + pid + "/";
+            var command = "ls " + GLOBALreroute + "xm/" + uid + "/" + pid + "/";
 
 			/* execute the find files command */
             // todo: this had childls = exec before
@@ -609,7 +603,7 @@ function deleteMedia(connection,uid,pid) {
 					if (difference.length > 0) {
 						command = "rm ";
 						difference.forEach(function(filename) {
-							command += GLOBALreroute + GLOBALmediaFolder + "/" + uid + "/" + pid + "/" + filename + " ";
+							command += GLOBALreroute + "xm/" + uid + "/" + pid + "/" + filename + " ";
 						});
 
                         // todo: this had childrm = exec before
@@ -681,7 +675,7 @@ module.exports = {
 notfound: function(request,response) {
 	/* 404 page not found */
 	response.status(404);
-	loadPage(response,"<script>errorPage('notfound');</script>");
+	loadPage(request,response,"<script>errorPage('notfound');</script>");
 },
 
 /*
@@ -704,11 +698,11 @@ start: function(request,response) {
 	/* detect is the user is logged in by checking for a session */
 	if(request.session.uid) {
 		/* user is logged in, display home page */
-		loadPage(response,"<script>displayHome();</script>");
+		loadPage(request,response,"<script>displayHome();</script>");
 		journal(false,0,"",request.session.uid,__line,__function,__filename);
 	} else {
 		/* user is not logged in, display landing page */
-		loadPage(response,"<script>displayLanding();</script>");
+		loadPage(request,response,"<script>displayLanding();</script>");
 		journal(false,0,"",0,__line,__function,__filename);
 	}
 },
@@ -803,7 +797,7 @@ signup: function(request,response) {
 										} else {
 											/* make the user's directory to store pages in later */
 											request.session.uid = uid;
-											fs.mkdir(__dirname + "/../public_html/" + GLOBALmediaFolder + "/" + uid,function(err) {
+											fs.mkdir(__dirname + "/../public_html/" + "xm/" + uid,function(err) {
 												if(err) {
 													journal(true,120,err,0,__line,__function,__filename);
 												}
@@ -1039,7 +1033,7 @@ createpage: function(request,response) {
 										});
 
 										/* make a folder in user's media folder to store future media uploads */
-										fs.mkdir(__dirname + "/../public_html/" + GLOBALmediaFolder + "/" + uid + "/" + pid,function(err) {
+										fs.mkdir(__dirname + "/../public_html/" + "xm/" + uid + "/" + pid,function(err) {
 											if(err) {
 												journal(true,120,err,uid,__line,__function,__filename);
 											}
@@ -1145,7 +1139,7 @@ editpage: function(request,response) {
 
 	/* redirect users if logged out or no page id provided */
 	if(typeof uid === 'undefined' || typeof pid === 'undefined') {
-        loadPage(response,"<script>errorPage('noeditloggedout');</script>");
+        loadPage(request,response,"<script>errorPage('noeditloggedout');</script>");
     } else {
 
 		/* get table identifier */
@@ -1176,7 +1170,7 @@ editpage: function(request,response) {
             promise.then(function(success) {
                 if(searchstatus && success == 0) {
                     /* load the edit page with the page data */
-                    loadPage(response,"<script>choosePage('" + pid + "');</script>");
+                    loadPage(request,response,"<script>choosePage('" + pid + "');</script>");
                 } else {
 
 					var qry = "SELECT pagename FROM u_" + uid + " WHERE pid=" + pid;
@@ -1220,7 +1214,7 @@ editpage: function(request,response) {
 										}
 
 										/* load the edit page with the page data */
-										loadPage(response,"<script>editPage('" + pagedata + "');</script>");
+										loadPage(request,response,"<script>editPage('" + pagedata + "');</script>");
 										journal(false,0,"",uid,__line,__function,__filename);
 									}
 								});
@@ -1410,7 +1404,7 @@ uploadmedia: function(request,response) {
 
         request.busboy.on('file',function(fieldname,file,filename) {
             /* set path to save the file, then pipe/save the file to that path */
-            var dir = GLOBALmediaFolder + "/" + uid + "/" + pid + "/";
+            var dir = "xm/" + uid + "/" + pid + "/";
 
             /* replace spaces with underscores, fixes issues with shell commands */
             var link = dir + filename.replace(/ /g,"_");
@@ -1427,7 +1421,7 @@ uploadmedia: function(request,response) {
 
                 promise.then(function(success) {
                     /* respond with the absolute url to the uploaded file */
-                    response.end(GLOBALdomain + success);
+                    response.end(request.root + success);
                     journal(false,0,"",uid,__line,__function,__filename);
                 },function(error) {
                     response.end('err');
@@ -1560,7 +1554,7 @@ profile: function(request,response) {
 	var uid = request.session.uid;
 
 	if(typeof uid === 'undefined') {
-        loadPage(response,"<script>profilePage('noprofileloggedout');</script>");
+        loadPage(request,response,"<script>profilePage('noprofileloggedout');</script>");
     } else {
 
 		var qry = "SELECT username,email,phone,autosave FROM Users WHERE uid=" + uid;
@@ -1572,7 +1566,7 @@ profile: function(request,response) {
 
 			connection.query(qry,function(err,rows,fields) {
 				if(err) {
-					loadPage(response,"<script>profilePage('err');</script>");
+					loadPage(request,response,"<script>profilePage('err');</script>");
 					journal(true,200,err,uid,__line,__function,__filename);
 				} else {
 					var data = {};
@@ -1584,7 +1578,7 @@ profile: function(request,response) {
 
 					var profiledata = JSON.stringify(data);
 
-					loadPage(response,"<script>profilePage('" + profiledata + "');</script>");
+					loadPage(request,response,"<script>profilePage('" + profiledata + "');</script>");
 					journal(false,0,"",uid,__line,__function,__filename);
 				}
 			});
