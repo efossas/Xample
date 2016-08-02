@@ -1424,7 +1424,7 @@ uploadmedia: function(request,response) {
                     response.end(request.root + success);
                     journal(false,0,"",uid,__line,__function,__filename);
                 },function(error) {
-                    response.end('err');
+                    response.end('convertmediaerr');
                     journal(true,110,error,uid,__line,__function,__filename);
                 });
             });

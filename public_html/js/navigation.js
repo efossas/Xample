@@ -325,6 +325,7 @@ function saveProgressDisplay() {
 	var saveprogress = document.createElement("div");
 	saveprogress.setAttribute("id","saveprogress");
 	saveprogress.style.visibility = 'hidden';
+	saveprogress.style.display = "none";
 
 	var progressbar = document.createElement("progress");
 	progressbar.setAttribute("value",100);
@@ -656,10 +657,15 @@ function editPage(pagedata) {
 	var savestatus = saveStatusDisplay();
 	var autosave = autoSaveDisplay();
 
-	/* append save status & autosave divs to save bar */
+	/* wrap status and autosave in saveinfo div */
+	var saveinfo = document.createElement("div");
+	saveinfo.setAttribute("id","saveinfo");
+	saveinfo.appendChild(savestatus);
+	saveinfo.appendChild(autosave);
+
+	/* append save progress & save info divs to save bar */
 	savebar.appendChild(saveprogress);
-	savebar.appendChild(savestatus);
-	savebar.appendChild(autosave);
+	savebar.appendChild(saveinfo);
 
 	/* profile button */
 	var profile = profileBtn();
@@ -1670,17 +1676,17 @@ function makeSpace(bid,count) {
 	var track = count;
 	while(bid < track) {
 		/* change blocks to this value */
-		var next = count + 1;
+		var next = track + 1;
 
 		/* replace the button IDs */
 		var buttons = blockButtons(next);
-		document.getElementById('b' + count).parentNode.replaceChild(buttons,document.getElementById('b' + count));
+		document.getElementById('b' + track).parentNode.replaceChild(buttons,document.getElementById('b' + track));
 
 		/* replace the content block id */
-		document.getElementById('a' + count).setAttribute('id','a' + next);
+		document.getElementById('a' + track).setAttribute('id','a' + next);
 
 		/* replace the block id */
-		document.getElementById(count).setAttribute('id',next);
+		document.getElementById(track).setAttribute('id',next);
 
 		/* update the count */
 		track--;
@@ -1962,11 +1968,36 @@ function uploadMedia(bid,btype) {
 				var xmlhttp = new XMLHttpRequest();
 				xmlhttp.open('POST',url,true);
 
+				xmlhttp.upload.onprogress = function(e) {
+					if (e.lengthComputable) {
+						document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.loaded);
+						document.getElementById("saveprogress").childNodes[0].setAttribute("max",e.total);
+					}
+				};
+				xmlhttp.upload.onloadstart = function(e) {
+					document.getElementById("saveinfo").style.visibility = "hidden";
+					document.getElementById("saveinfo").style.display = "none";
+
+					document.getElementById("saveprogress").childNodes[0].setAttribute("value",0);
+					document.getElementById("saveprogress").style.visibility = "visible";
+					document.getElementById("saveprogress").style.display = "block";
+				};
+				xmlhttp.upload.onloadend = function(e) {
+					document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.total);
+					document.getElementById("saveprogress").style.visibility = "hidden";
+					document.getElementById("saveprogress").style.display = "none";
+
+					document.getElementById("saveinfo").style.visibility = "visible";
+					document.getElementById("saveinfo").style.display = "block";
+				};
+
 				xmlhttp.onreadystatechange = function() {
 					if (xmlhttp.readyState == XMLHttpRequest.DONE) {
 						if(xmlhttp.status == 200) {
 							if(xmlhttp.responseText == "err") {
 								reject("err");
+							} else if(xmlhttp.responseText == "convertmediaerr") {
+								reject("convertmediaerr");
 							} else if (xmlhttp.responseText == "nouploadloggedout") {
 								deleteBlock(bid - 1);
 								alertify.alert("You Can't Upload Media Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
@@ -2012,8 +2043,11 @@ function uploadMedia(bid,btype) {
 				saveBlocks(false);
 
 			},function(error) {
-				/* error is data passed thorugh reject */
-				console.log("Error uploadMedia() promise");
+				if(error === "convertmediaerr") {
+					alertify.log("There was an error with that media format. Please try a different file type.");
+				} else {
+					console.log("uploadMedia() promise error");
+				}
 			});
 		}
 	};
@@ -2378,9 +2412,6 @@ function saveBlocks(which) {
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	// show progress & hide others
-	// hide progress & show others
-
 	xmlhttp.upload.onprogress = function(e) {
 		if (e.lengthComputable) {
 			document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.loaded);
@@ -2388,12 +2419,20 @@ function saveBlocks(which) {
 		}
 	};
 	xmlhttp.upload.onloadstart = function(e) {
+		document.getElementById("saveinfo").style.visibility = "hidden";
+		document.getElementById("saveinfo").style.display = "none";
+
 		document.getElementById("saveprogress").childNodes[0].setAttribute("value",0);
-		document.getElementById("saveprogress").childNodes[0].style.visibility = "visible";
+		document.getElementById("saveprogress").style.visibility = "visible";
+		document.getElementById("saveprogress").style.display = "block";
 	};
 	xmlhttp.upload.onloadend = function(e) {
 		document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.total);
-		document.getElementById("saveprogress").childNodes[0].style.visibility = "hidden";
+		document.getElementById("saveprogress").style.visibility = "hidden";
+		document.getElementById("saveprogress").style.display = "none";
+
+		document.getElementById("saveinfo").style.visibility = "visible";
+		document.getElementById("saveinfo").style.display = "block";
 	};
 
 	var params = "mediaType=" + types + "&mediaContent=" + contents + "&pid=" + pid + "&pagename=" + pagename + "&tabid=" + table;
@@ -2572,6 +2611,9 @@ function autosaveTimer(asdiv) {
 					timer = time;
 				}
 			},1000);
+		} else {
+			asdiv.style.visibility = "hidden";
+			asdiv.style.display = "none";
 		}
 	},function(error) {
 		alertify.alert("Error. Auto Save Could Not Be Initiated.");
