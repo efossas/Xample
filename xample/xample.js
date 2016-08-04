@@ -5,6 +5,13 @@
 	This is the server for Xample
 */
 
+/*
+	Section: Command Line
+	This section processes command line arguments
+*/
+
+// <<<code>>>
+
 /* grab command line arguments, 0 -> node, 1 -> path to .js, 2+ -> actual arguments */
 var port;
 var host;
@@ -43,16 +50,21 @@ switch(host) {
 		process.exit();
 }
 
+// <<<fold>>>
+
 /*
 	Section: Modules
 
 	These are the modules xample uses
 
-	page - imports the functions that handl xample url requests
+	page - imports the functions that handle xample url requests
 	express - used to start a server and page routing
-	session - used with express to add sessions for users
 	busboy - used to parse media data (file uploads)
+	session - used with express to add sessions for users
+	MySQLStore - used for persistent sessions
 */
+
+// <<<code>>>
 
 /* global require:true */
 /* global process:true */
@@ -63,18 +75,26 @@ var busboy = require('connect-busboy');
 var session = require('express-session');
 var MySQLStore = require('express-mysql-session')(session);
 
+// <<<fold>>>
+
 /*
 	Section: Prototypes
 	These are additions or changes to js prototypes
 */
 
+// <<<code>>>
+
 /* express requests will have root which is the http path to this server */
 express.request.root = root;
+
+// <<<fold>>>
 
 /*
 	Section: Server Exit
 	These functions handle uncaught errors and program exit procedure
 */
+
+// <<<code>>>
 
 function slack(message) {
 	var request = require('request');
@@ -127,20 +147,14 @@ function exitHandler() {
 /* calls exitHandler() on SIGINT, ctrl^c */
 process.on('SIGINT',exitHandler);
 
+// <<<fold>>>
+
 /*
 	Section: Create Server
 	These functions create a server, set it up, and route url addresses. An asterisks indicates that a get link may follow.
-
-	index - start
-	signup - signup
-	login - login
-	logout - logout
-	createpage - createpage
-	getpages - getpages
-	editpage* - editpage
-	saveblocks - saveblocks
-	uploadmedia* - uploadmedia
 */
+
+// <<<code>>>
 
 /* create express server */
 var app = express();
@@ -197,3 +211,5 @@ app.all('*',page.notfound);
 
 /* activate the server */
 app.listen(port);
+
+// <<<fold>>>

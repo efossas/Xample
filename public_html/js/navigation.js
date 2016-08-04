@@ -1,4 +1,5 @@
 /* eslint-env browser, es6 */
+
 /*
 	Title: Navigation
 	This is the front-end for Xample
@@ -6,14 +7,14 @@
 	Topic: Important Terms
 
 		Block ID - Blocks are just <div> tags with the attribute id=""
-		Block Type - Blocks are given the attribute class="". This is also used to insert the correct html into the block <div>
+		Block Type - Blocks are given the attribute class="". Used to insert the correct html into the block <div>
 		Block Content - The actual content of the block (not the html). This could be text, image link, etc.
 		Block Count - The number of blocks currently on the page. Used a lot for inserting or changing block id's.
 		Page Table - Pages are stored in the database as p_uid_pid, where uid = user id & pid = page id.
 
 	Topic: Important Divs
 
-		content - This class is a div that holds all of the content of the page, nothing - * other than scripts goes outside of it. It is referred to as the "main div".
+		content - This class is a div that holds all of the content of the page. Known as the "main div"
 		blocks - This class holds all of the page blocks.
 
 */
@@ -25,6 +26,8 @@
 	pdfObjects - pdf.js generates pdf objects that can be used to render individual pages to <canvas>
 */
 
+// <<<code>>>
+
 /* global MathJax:true */
 /* global PDFJS:true */
 /* global hljs:true */
@@ -32,10 +35,14 @@
 
 var pdfObjects = {};
 
+// <<<fold>>>
+
 /*
-	Section: Helper & Display Functions
-	These are helper functions and functions to remove or show page elements (except for blocks).
+	Section: Helper Functions
+	These are helper functions.
 */
+
+// <<<code>>>
 
 /*
 	Function: emptyDiv
@@ -85,6 +92,15 @@ function createURL(path) {
 
 	return url;
 }
+
+// <<<fold>>>
+
+/*
+	Section: Display Functions
+	These are functions to create, remove, or show page elements (except for blocks).
+*/
+
+// <<<code>>>
 
 /*
 	Function: loginForm
@@ -299,6 +315,19 @@ function profileBtn() {
 	return profile;
 }
 
+/*
+	Function: saveBar
+
+	Creates the save bar. The save holds other divs that display save status & messages.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, save bar
+*/
 function saveBar() {
 	var savebar = document.createElement("div");
 	savebar.setAttribute("id","savebar");
@@ -306,6 +335,19 @@ function saveBar() {
 	return savebar;
 }
 
+/*
+	Function: saveStatusDisplay
+
+	Creates the save status display div.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, save status display
+*/
 function saveStatusDisplay() {
 	var savestatus = document.createElement("div");
 	savestatus.setAttribute("id","savestatus");
@@ -314,6 +356,19 @@ function saveStatusDisplay() {
 	return savestatus;
 }
 
+/*
+	Function: autoSaveDisplay
+
+	Creates the auto save display div.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, auto save display.
+*/
 function autoSaveDisplay() {
 	var autosave = document.createElement("div");
 	autosave.setAttribute("id","autosave");
@@ -321,6 +376,19 @@ function autoSaveDisplay() {
 	return autosave;
 }
 
+/*
+	Function: saveProgressDisplay
+
+	Create the progress display. Inside which is a <progress> tag.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, progress display.
+*/
 function saveProgressDisplay() {
 	var saveprogress = document.createElement("div");
 	saveprogress.setAttribute("id","saveprogress");
@@ -334,6 +402,42 @@ function saveProgressDisplay() {
 	saveprogress.appendChild(progressbar);
 
 	return saveprogress;
+}
+
+/*
+	Function: initializeProgress
+
+	
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, save bar
+*/
+function initializeProgress(max) {
+	document.getElementById("saveinfo").style.visibility = "hidden";
+	document.getElementById("saveinfo").style.display = "none";
+
+	document.getElementById("saveprogress").childNodes[0].setAttribute("value",0);
+	document.getElementById("saveprogress").childNodes[0].setAttribute("max",max);
+	document.getElementById("saveprogress").style.visibility = "visible";
+	document.getElementById("saveprogress").style.display = "block";
+}
+
+function updateProgress(value) {
+	document.getElementById("saveprogress").childNodes[0].setAttribute("value",value);
+}
+
+function finalizeProgress(max) {
+	document.getElementById("saveprogress").childNodes[0].setAttribute("value",max);
+	document.getElementById("saveprogress").style.visibility = "hidden";
+	document.getElementById("saveprogress").style.display = "none";
+
+	document.getElementById("saveinfo").style.visibility = "visible";
+	document.getElementById("saveinfo").style.display = "block";
 }
 
 /*
@@ -461,10 +565,14 @@ function profileRowCheck(check,field,placeholders,description) {
 	return row;
 }
 
+// <<<fold>>>
+
 /*
 	Section: Page Functions
-	These are functions for displaying pages.
+	These are functions for displaying full pages. They are commonly called by the back-end.
 */
+
+// <<<code>>>
 
 /*
 	Function: displayLanding
@@ -1068,10 +1176,14 @@ function profilePage(profiledata) {
 	main.appendChild(profilediv);
 }
 
+// <<<fold>>>
+
 /*
 	Section: Block Functions
-	These are functions handle the block generator
+	These are functions that handle the block generator
 */
+
+// <<<code>>>
 
 /*
 	Function: countBlocks
@@ -1906,10 +2018,14 @@ function deleteBlock(cbid) {
 	saveBlocks(false);
 }
 
+// <<<fold>>>
+
 /*
 	Section: AJAX Functions
 	These functions send ajax requests
 */
+
+// <<<code>>>
 
 /*
 	Function: uploadMedia
@@ -1968,27 +2084,58 @@ function uploadMedia(bid,btype) {
 				var xmlhttp = new XMLHttpRequest();
 				xmlhttp.open('POST',url,true);
 
+				/* upload progress */
 				xmlhttp.upload.onprogress = function(e) {
 					if (e.lengthComputable) {
-						document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.loaded);
-						document.getElementById("saveprogress").childNodes[0].setAttribute("max",e.total);
+						updateProgress(e.loaded);
 					}
 				};
 				xmlhttp.upload.onloadstart = function(e) {
-					document.getElementById("saveinfo").style.visibility = "hidden";
-					document.getElementById("saveinfo").style.display = "none";
-
-					document.getElementById("saveprogress").childNodes[0].setAttribute("value",0);
-					document.getElementById("saveprogress").style.visibility = "visible";
-					document.getElementById("saveprogress").style.display = "block";
+					initializeProgress(e.total);
 				};
 				xmlhttp.upload.onloadend = function(e) {
-					document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.total);
-					document.getElementById("saveprogress").style.visibility = "hidden";
-					document.getElementById("saveprogress").style.display = "none";
+					finalizeProgress(e.total);
+				};
 
-					document.getElementById("saveinfo").style.visibility = "visible";
-					document.getElementById("saveinfo").style.display = "block";
+				function counter(reset) {
+					if(typeof counter.track === 'undefined' || counter.track === 0) {
+						counter.track = 1;
+						return 1;
+					} else if(reset) {
+						counter.track = 0;
+						return 0;
+					} else {
+						counter.track++;
+					}
+					return counter.track;
+				}
+
+				function position(spot) {
+					if(typeof position.prev === 'undefined') {
+						position.prev = 0;
+						position.curr = spot;
+					} else if (position.curr !== spot) {
+						position.prev = position.curr;
+						position.curr = spot;
+					}
+					return [position.prev,position.curr];
+				}
+
+				/* conversion progress */
+				xmlhttp.onprogress = function(e) {
+					var spotArray = position(xmlhttp.responseText.length);
+					var current = counter(false);
+					if(current === 1) {
+						initializeProgress(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
+					} else {
+						updateProgress(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
+					}
+				};
+
+				xmlhttp.onloadend = function(e) {
+					var spotArray = position(xmlhttp.responseText.length);
+					finalizeProgress(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
+					counter(true);
 				};
 
 				xmlhttp.onreadystatechange = function() {
@@ -2003,7 +2150,11 @@ function uploadMedia(bid,btype) {
 								alertify.alert("You Can't Upload Media Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
 								reject("err");
 							} else {
-								resolve(xmlhttp.responseText);
+								var spotArray = position(xmlhttp.responseText.length);
+								resolve(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
+								// reset position. wow, this is hacky...
+								position(0);
+								position(0);
 							}
 						} else {
 							alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
@@ -2620,6 +2771,19 @@ function autosaveTimer(asdiv) {
 	});
 }
 
+/*
+   Function: getUserFields
+
+   Use this to get any user information from the user database.
+
+   Parameters:
+
+      fields - array, each element in the array must match a database column name
+
+   Returns:
+
+      Promise - on error: "err", on success: json object
+*/
 function getUserFields(fields) {
 
 	/* wrap the ajax request in a promise */
@@ -2657,3 +2821,5 @@ function getUserFields(fields) {
 
 	return promise;
 }
+
+// <<<fold>>>

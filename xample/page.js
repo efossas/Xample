@@ -11,6 +11,8 @@
 	Object - __stack, __line, are all set using v8 engine stacktrace API functions
 */
 
+// <<<code>>>
+
 /* These set __line to return the current line number where they are used. They are used for logging errors.  */
 Object.defineProperty(global,'__stack',{
 get: function stacker() {
@@ -32,13 +34,16 @@ get: function() {
     }
 });
 
+// <<<fold>>>
+
 /*
 	Section: Globals
 	These are the global variables xample uses
 
-	domain - the domain name, used for links
 	reroute - used to reroute paths from the server location to the public_html, the domain's base path
 */
+
+// <<<code>>>
 
 /* global __stack:true */
 /* global __filename:true */
@@ -47,10 +52,14 @@ get: function() {
 /* reroute from server to public folder */
 var GLOBALreroute = "../public_html/";
 
+// <<<fold>>>
+
 /*
 	Section: MySql Connection
 	Imports the MySQL module and sets up the connection pool
 */
+
+// <<<code>>>
 
 var mysql = require('mysql');
 
@@ -70,10 +79,14 @@ var stats = mysql.createPool({
   database : 'xanalytics'
 });
 
+// <<<fold>>>
+
 /*
 	Section: Helper Functions
 	These are functions that are either used in several routes or are just separated for clarity
 */
+
+// <<<code>>>
 
 /*
 	Function: journal
@@ -354,41 +367,6 @@ function changePagename(connection,uid,pid,pagename) {
 }
 
 /*
-	Function: truncateTable
-
-	This removes all rows from a user's page table. Page tables have their rows deleted before saving the new rows.
-
-	Parameters:
-
-		connection - a MySQL connection
-		uid - the user's id
-		pid - the page's id
-
-	Returns:
-
-		success - promise, 1
-		error - promise, -1
-*/
-function truncateTable(connection,uid,pid) {
-	var promise = new Promise(function(resolve,reject) {
-
-		/* truncate (remove all rows) from the table */
-		var qry = "TRUNCATE TABLE p_" + uid + "_" + pid;
-
-		/* query the database */
-		connection.query(qry,function(err,rows,fields) {
-			if(err) {
-				reject(err);
-			} else {
-				resolve(1);
-			}
-		});
-	});
-
-	return promise;
-}
-
-/*
 	Function: randomText
 
 	This returns a random string of 8 characters. It's used to generate random file names.
@@ -469,7 +447,7 @@ function removeMedia(file,uid = 0,pid = 0) {
 		success - promise, new file path, relative to the domain name
 		error - promise, -1
 */
-function convertMedia(oldfile,dir,btype,uid = 0,pid = 0) {
+function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* spawn the process */
@@ -503,9 +481,9 @@ function convertMedia(oldfile,dir,btype,uid = 0,pid = 0) {
         }
 
 		if(newfile !== "error") {
-            // todo: this had child = exec before
 			/* execute the command */
-			exec(command,function(error,stdout,stderr) {
+			var child = exec(command,function(error,stdout,stderr) {
+
 				/* delete the old uploaded file no matter what */
 				removeMedia(oldfile,uid,pid);
 
@@ -515,6 +493,44 @@ function convertMedia(oldfile,dir,btype,uid = 0,pid = 0) {
 					resolve(newfile);
 				}
 			});
+
+            /* this is necessary to allow browsers to continually receive responses, opposed to just one at the end */
+            response.writeHead(200,{'Content-Type':'text/plain','X-Content-Type-Options':'nosniff'});
+
+            /* handle progress responses based on media type */
+            if(btype === "image") {
+
+            } else if(btype === "audio" || btype === "video") {
+                child.stdout.on('data',function(data) {
+                    /* search for initial value, which is media length */
+                    var initial = data.toString().match(/Duration: .{11}/g);
+                    if(initial !== null) {
+                        var istr = initial[0];
+                        var ihours = Number(istr[10] + istr[11]);
+                        var iminutes = Number(istr[13] + istr[14]);
+                        var iseconds = Number(istr[16] + istr[17]);
+
+                        /* return time duration as seconds */
+                        var totaltime = (ihours * 360) + (iminutes * 60) + iseconds;
+                        response.write(String(totaltime));
+                    }
+
+                    /* search for time marker indicating position of conversion */
+                    var matches = data.toString().match(/time=.{11}/g);
+                    if(matches !== null) {
+                        var str = matches[0];
+                        var hours = Number(str[5] + str[6]);
+                        var minutes = Number(str[8] + str[9]);
+                        var seconds = Number(str[11] + str[12]);
+
+                        /* return time progress as seconds */
+                        var timeprogress = (hours * 360) + (minutes * 60) + seconds;
+                        response.write(String(timeprogress));
+                    }
+                });
+            } else if (btype === "slide") {
+
+            }
 		} else {
 			reject('Bad btype provided in convertMedia()');
 		}
@@ -652,10 +668,15 @@ function absentRequest(request,response) {
 	response.end('Page Not Found');
 }
 
+// <<<fold>>>
+
 /*
 	Section: Page Functions
 	These functions are exported to the server (xample.js), page requests route to these functions.
 */
+
+// <<<code>>>
+
 module.exports = {
 
 /*
@@ -1417,7 +1438,7 @@ uploadmedia: function(request,response) {
             fstream.on('close',function() {
 
                 /* media conversion */
-                var promise = convertMedia(link,dir,btype,uid,pid);
+                var promise = convertMedia(response,link,dir,btype,uid,pid);
 
                 promise.then(function(success) {
                     /* respond with the absolute url to the uploaded file */
@@ -1773,3 +1794,5 @@ getprofiledata: function(request,response) {
 }
 
 };
+
+// <<<fold>>>

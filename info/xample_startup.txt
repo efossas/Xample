@@ -42,7 +42,8 @@ $> brew install npm
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Install ESLint:
-npm install eslint -g
+$> npm install eslint -g
+$> npm install node-gyp -g
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Download Git Repo:
@@ -60,8 +61,24 @@ https://atom.io/
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Install Atom Plugins:
 $> apm install linter-eslint
-$> apm install remote-ftp
+$> apm install minimap
+$> apm install jumpy
+$> apm install file-icons
+$> apm install pigments
+$> apm install color-picker
+$> apm install file-icons
+$> apm install atom-minify
+$> apm install terminal-plus
+$> apm install atom-minify
+$> apm install node-debugger
 $> apm install git-plus
+$> apm install merge-conflicts
+$> apm install git-time-machine
+$> apm install remote-ftp
+$> apm install data-atom
+
+$> apm install custom-folds
+* set open & close tags for custom-folds: <<<code>>> & <<<fold>>>
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Install Xample Dependencies In Test Folder:
