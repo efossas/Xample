@@ -21,7 +21,7 @@ get: function stacker() {
             return stack;
         };
         var err = new Error();
-        Error.captureStackTrace(err,stacker); // was arguments.callee instead of stacker
+        Error.captureStackTrace(err,stacker); /// was arguments.callee instead of stacker
         var stack = err.stack;
         Error.prepareStackTrace = orig;
         return stack;
@@ -417,7 +417,7 @@ function removeMedia(file,uid = 0,pid = 0) {
     /* set up the remove command, "GLOBALreroute" is a global variable defined at the top */
     var command = "rm " + GLOBALreroute + file;
 
-    // todo: this had child = exec before
+    /// todo: this had child = exec before
 	/* execute the remove command */
 	exec(command,function(error,stdout,stderr) {
 		if (error !== null) {
@@ -593,7 +593,7 @@ function deleteMedia(connection,uid,pid) {
             var command = "ls " + GLOBALreroute + "xm/" + uid + "/" + pid + "/";
 
 			/* execute the find files command */
-            // todo: this had childls = exec before
+            /// todo: this had childls = exec before
 			exec(command,function(error,stdout,stderr) {
 				if (error !== null) {
 					console.log('Exec Error (deletemedia-ls): ' + error);
@@ -622,7 +622,7 @@ function deleteMedia(connection,uid,pid) {
 							command += GLOBALreroute + "xm/" + uid + "/" + pid + "/" + filename + " ";
 						});
 
-                        // todo: this had childrm = exec before
+                        /// todo: this had childrm = exec before
 						exec(command,function(error,stdout,stderr) {
 							if (error !== null) {
 								console.log('Exec Error (deletemedia-rm): ' + error);
@@ -664,7 +664,7 @@ function deleteMedia(connection,uid,pid) {
 		nothing - *
 */
 function absentRequest(request,response) {
-	// replace this with loadpage() that loads a 404 type page not found template */
+	/// replace this with loadpage() that loads a 404 type page not found template */
 	response.end('Page Not Found');
 }
 
@@ -1329,7 +1329,7 @@ saveblocks: function(request,response) {
                 var types = mediaType.split(',');
                 var contents = mediaContent.split(',');
 
-                // update page name regardless of whether it was changed, this could be removed with checks later
+                /// update page name regardless of whether it was changed, this could be removed with checks later
                 var promisePage = changePagename(connection,uid,pid,pagename);
 
                 promisePage.then(function(success) {
@@ -1680,7 +1680,7 @@ saveprofile: function(request,response) {
 										response.end('err');
 										journal(true,201,err,uid,__line,__function,__filename);
 									} else {
-										// if only
+										/// if only
 									}
 								});
 							}

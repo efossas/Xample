@@ -102,7 +102,6 @@
         "no-useless-escape": ["error"],
         "no-useless-rename": ["error"],
         "no-void": ["error"],
-        "no-warning-comments": ["warn"],
         "no-whitespace-before-property": ["error"],
         "no-with": ["error"],
         "linebreak-style": ["error","unix"],
@@ -119,7 +118,6 @@
         "space-in-parens": ["error"],
         "space-infix-ops": ["error"],
         "space-unary-ops": ["error"],
-        "spaced-comment": ["error"],
         "template-curly-spacing": ["error"],
         "unicode-bom": ["error"],
         "use-isnan": ["error"],
@@ -128,9 +126,3 @@
         "yoda": ["error"]
     }
 }
-
-
-
-
-
-

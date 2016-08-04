@@ -1,5 +1,4 @@
 /* eslint-env browser, es6 */
-
 /*
 	Title: Navigation
 	This is the front-end for Xample
@@ -407,7 +406,7 @@ function saveProgressDisplay() {
 /*
 	Function: initializeProgress
 
-	
+
 
 	Parameters:
 
@@ -598,7 +597,7 @@ function displayLanding() {
 
 	var main = document.getElementById('content');
 	main.appendChild(login);
-	main.appendChild(document.createElement('hr')); // remove this later, when you style
+	main.appendChild(document.createElement('hr')); /// remove this later, when you style
 	main.appendChild(signupbtn);
 }
 
@@ -683,7 +682,7 @@ function displayHome() {
 		}
 
 		/* append the page links to the main div */
-		main.appendChild(document.createElement('hr')); // remove this later, when you style
+		main.appendChild(document.createElement('hr')); /// remove this later, when you style
 		main.appendChild(pagesdiv);
 
 	},function(error) {
@@ -968,7 +967,7 @@ function editPage(pagedata) {
 	window.onbeforeunload = function() {
 		var status = document.getElementsByName("statusid")[0].value;
 		if(status == 0) {
-			// this text isn't being displayed... some default is instead
+			/// this text isn't being displayed... some default is instead
 			return "Please click Revert or Save before exiting.";
 		}
 		return null;
@@ -1102,8 +1101,8 @@ function loadPermPage(pid) {
 */
 function profilePage(profiledata) {
 
-	// if profiledata == "err" handle this
-	// if profiledata == "noprofileloggedout" handle this
+	/// if profiledata == "err" handle this
+	/// if profiledata == "noprofileloggedout" handle this
 	if(profiledata == "err") {
 		console.log("profile error");
 	} else if (profiledata == "noprofileloggedout") {
@@ -1273,7 +1272,7 @@ function insertContent(bid,btype,content) {
 
 			var iframe = block.childNodes[0].contentDocument;
 			iframe.open();
-			// iframe.head.appendChild(cssLink); this can be used in show mode,not in edit mode
+			/// iframe.head.appendChild(cssLink); this can be used in show mode,not in edit mode
 			iframe.write(content);
 			iframe.close();
 
@@ -1374,7 +1373,7 @@ function insertContent(bid,btype,content) {
 		/* event listener for changing slides left & right */
 		block.onmouseup = function(event) {
 			var X = event.pageX - this.offsetLeft;
-			// var Y = event.pageY - this.offsetTop;
+			/// var Y = event.pageY - this.offsetTop;
 
 			/* get the <canvas> tag, current page, pdf url/id, and the pdf total page count */
 			var canvas = this.childNodes[0];
@@ -1508,7 +1507,7 @@ function detectKey(iframe,event) {
 		alertify.prompt('Enter the link: ',callback,'http://');
 	}
 
-	// is this necessary ??
+	/// is this necessary ??
     event.stopPropagation();
 }
 
@@ -1530,7 +1529,7 @@ function renderCode(block) {
 	/* add code formatting */
 	hljs.highlightBlock(block);
 
-	// notify the user if they have surpassed our limit
+	/// notify the user if they have surpassed our limit
 	if(block.textContent.length > 1024) {
 		alertify.alert("There is too much in this code block. The block will not save correctly. Please remove some of its content.");
 	}
@@ -1605,7 +1604,7 @@ function renderLatex(block) {
 */
 function renderPDF(pdfDoc,pageNum,canvas) {
 
-	// I have no idea what scale does, but it's needed
+	/// I have no idea what scale does, but it's needed
 	var scale = 0.8;
 
 	/* call pdfDoc object's getPage function to get desired page to render */
@@ -1626,7 +1625,7 @@ function renderPDF(pdfDoc,pageNum,canvas) {
 		var renderTask = page.render(renderContext);
 
 		renderTask.promise.then(function() {
-			// update stuff here, page has been rendered
+			/// update stuff here, page has been rendered
 		});
     });
 }
@@ -2055,8 +2054,8 @@ function uploadMedia(bid,btype) {
 		/* grab the selected file */
 		var file = fileSelect.files[0];
 
-		// place some checks here
-		// file.type.match('image.*')
+		/// place some checks here
+		/// file.type.match('image.*')
 		var notvalid = false;
 
 		if(notvalid) {
@@ -2152,7 +2151,7 @@ function uploadMedia(bid,btype) {
 							} else {
 								var spotArray = position(xmlhttp.responseText.length);
 								resolve(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
-								// reset position. wow, this is hacky...
+								/// reset position. wow, this is hacky...
 								position(0);
 								position(0);
 							}
@@ -2226,7 +2225,7 @@ function login() {
 	var username = document.getElementsByName('username-login')[0].value;
 	var password = document.getElementsByName('password-login')[0].value;
 
-	// instant validation needed
+	/// instant validation needed
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
@@ -2284,9 +2283,9 @@ function signup() {
 	var password = document.getElementsByName('password-signup')[0].value;
 	var passwordcheck = document.getElementsByName('password-signup-check')[0].value;
 
-	// todo: instant validation needed
+	/// todo: instant validation needed
 	if(password !== passwordcheck) {
-		// oh fuck
+		/// oh fuck
 	}
 
 	var xmlhttp;
@@ -2493,10 +2492,10 @@ function saveBlocks(which) {
 	var blockCount = countBlocks();
 	var bid = 1;
 
-	//
-	// need solution for escaping: ' , & in the xtext,xcode,latex,xmath blocks
-	// ' breaks strings , breaks arrays & breaks ajax params
-	//
+	///
+	/// need solution for escaping: ' , & in the xtext,xcode,latex,xmath blocks
+	/// ' breaks strings , breaks arrays & breaks ajax params
+	///
 
 	/* get the block types & contents */
 	if(blockCount > 0) {
@@ -2512,21 +2511,21 @@ function saveBlocks(which) {
 				/* execCommand() applies style tags to <body> tag inside <iframe>, hence .getElementsByTagName('body')[0] */
 				blockContent[i] = document.getElementById('a' + bid).children[0].contentDocument.getElementsByTagName('body')[0].innerHTML;
 
-				// NEED SOLUTION
+				/// NEED SOLUTION
 				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
 			} else if (btype == "xcode") {
 				blockContent[i] = document.getElementById('a' + bid).children[0].textContent;
 
-				// this needs to grab innerHTML instead and will need to be passed through a parse
-				// needs to ignore all span classes: "<span" to next ">" and "</span>"
+				/// this needs to grab innerHTML instead and will need to be passed through a parse
+				/// needs to ignore all span classes: "<span" to next ">" and "</span>"
 
-				// NEED SOLUTION
+				/// NEED SOLUTION
 				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
 			} else if (btype == "latex" || btype == "xmath") {
 				/* replace() is for escaping backslashes */
 				blockContent[i] = document.getElementById('a' + bid).children[1].innerHTML.replace(/\\/g,"\\\\");
 
-				// NEED SOLUTION
+				/// NEED SOLUTION
 				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
 			} else if (btype === "image") {
 				var imagestr = document.getElementById('a' + bid).children[0].src;
@@ -2540,7 +2539,7 @@ function saveBlocks(which) {
 			} else if (btype === "title") {
 				blockContent[i] = document.getElementById('a' + bid).children[0].value;
 
-				// NEED SOLUTION
+				/// NEED SOLUTION
 				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
 			}
 
@@ -2596,7 +2595,7 @@ function saveBlocks(which) {
         if (xmlhttp.readyState == XMLHttpRequest.DONE) {
 			if(xmlhttp.status == 200) {
 				if(xmlhttp.responseText == "blockssaved") {
-						// successful save
+						/// successful save
 					} else if (xmlhttp.responseText == "nosaveloggedout") {
 						alertify.alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
 					} else {

@@ -47,9 +47,9 @@ File: Xample Overview  (manual_docs/manual.txt)
 
 Group: Files  {
 
-   File: Server  (no auto-title, xample.js)
-   File: Back-End  (no auto-title, page.js)
-   File: Front-End  (no auto-title, navigation.js)
+   File: Navigation  (public_html/js/navigation.js)
+   File: Page  (xample/page.js)
+   File: Xample  (xample/xample.js)
    }  # Group: Files
 
 Group: Index  {

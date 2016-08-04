@@ -1,4 +1,5 @@
 /* eslint-env node, es6 */
+// random test comment
 /*
 	Section: Xample
 
@@ -106,7 +107,7 @@ function slack(message) {
 	postData.text = message;
 
 	var option = {
-		url:   'https://hooks.slack.com/services/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',
+		url:   'https:///hooks.slack.com/services/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',
 		body:  JSON.stringify(postData)
 	};
 
@@ -166,7 +167,7 @@ app.disable('x-powered-by');
 app.use(express.static('../public_html'));
 
 /* set up sessions */
-// todo: this is a hack, sessionStore needs to work on remote & local.
+/// todo: this is a hack, sessionStore needs to work on remote & local.
 if(host === "local") {
 	app.use(session({
 		key : 'xsessionkey',
@@ -198,10 +199,10 @@ app.post('/signup',page.signup);
 app.post('/login',page.login);
 app.post('/logout',page.logout);
 app.post('/createpage',page.createpage);
-app.post('/getpages',page.getpages); // breaks REST ??
+app.post('/getpages',page.getpages); /// breaks REST ??
 app.get('/editpage*',page.editpage);
 app.post('/saveblocks',page.saveblocks);
-app.post('/uploadmedia*',page.uploadmedia); // breaks REST ?? uses get query with post method
+app.post('/uploadmedia*',page.uploadmedia); /// breaks REST ?? uses get query with post method
 app.get('/profile',page.profile);
 app.post('/saveprofile',page.saveprofile);
 app.post('/getprofiledata',page.getprofiledata);

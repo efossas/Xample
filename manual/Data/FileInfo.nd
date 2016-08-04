@@ -1,6 +1,11 @@
 1.52
 JavaScript
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/manual_docs/manual.txt	1463018646	1	Xample Overview
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/navigation.js	1463019012	1	Navigation
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/page.js	1463010642	1	Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample.js	1463010416	1	Xample
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/page.js	1470286836	1	Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/public_html/js/navigation.min.js	1470275104	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/public_html/js/navigation.min.js
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/destroy.sql	1469982764	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/destroy.sql
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/public_html/js/navigation.js	1470286796	1	Navigation
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/public_html/js/alertify.min.js	1381317658	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/public_html/js/alertify.min.js
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/libs/alertify/alertify.js	1381317658	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/libs/alertify/alertify.js
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/manual_docs/manual.txt	1470339108	1	Xample Overview
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/initialize.sql	1469979012	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/initialize.sql
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/xample.js	1470286898	1	Xample
