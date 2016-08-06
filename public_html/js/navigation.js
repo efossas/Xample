@@ -391,12 +391,13 @@ function autoSaveDisplay() {
 function saveProgressDisplay() {
 	var saveprogress = document.createElement("div");
 	saveprogress.setAttribute("id","saveprogress");
-	saveprogress.style.visibility = 'hidden';
-	saveprogress.style.display = "none";
 
 	var progressbar = document.createElement("progress");
+	progressbar.setAttribute("id","progressbar");
 	progressbar.setAttribute("value",100);
 	progressbar.setAttribute("max",100);
+	progressbar.style.visibility = 'hidden';
+	progressbar.style.display = "none";
 
 	saveprogress.appendChild(progressbar);
 
@@ -406,37 +407,40 @@ function saveProgressDisplay() {
 /*
 	Function: initializeProgress
 
-
-
 	Parameters:
 
-		none
+		msg - string, for displaying what is being progressed
+		max - int, the value representing a completed progress load
 
 	Returns:
 
-		success - html node, save bar
+		none - *
 */
-function initializeProgress(max) {
-	document.getElementById("saveinfo").style.visibility = "hidden";
-	document.getElementById("saveinfo").style.display = "none";
+function initializeProgress(msg,max) {
+	document.getElementById("autosave").style.visibility = "hidden";
+	document.getElementById("autosave").style.display = "none";
 
-	document.getElementById("saveprogress").childNodes[0].setAttribute("value",0);
-	document.getElementById("saveprogress").childNodes[0].setAttribute("max",max);
-	document.getElementById("saveprogress").style.visibility = "visible";
-	document.getElementById("saveprogress").style.display = "block";
+	document.getElementById("progressbar").setAttribute("value",0);
+	document.getElementById("progressbar").setAttribute("max",max);
+	document.getElementById("progressbar").style.visibility = "visible";
+	document.getElementById("progressbar").style.display = "block";
+
+	document.getElementById("savestatus").innerHTML = msg;
 }
 
 function updateProgress(value) {
-	document.getElementById("saveprogress").childNodes[0].setAttribute("value",value);
+	document.getElementById("progressbar").setAttribute("value",value);
 }
 
-function finalizeProgress(max) {
-	document.getElementById("saveprogress").childNodes[0].setAttribute("value",max);
-	document.getElementById("saveprogress").style.visibility = "hidden";
-	document.getElementById("saveprogress").style.display = "none";
+function finalizeProgress(msg,max) {
+	document.getElementById("progressbar").setAttribute("value",max);
+	document.getElementById("progressbar").style.visibility = "hidden";
+	document.getElementById("progressbar").style.display = "none";
 
-	document.getElementById("saveinfo").style.visibility = "visible";
-	document.getElementById("saveinfo").style.display = "block";
+	document.getElementById("autosave").style.visibility = "visible";
+	document.getElementById("autosave").style.display = "block";
+
+	document.getElementById("savestatus").innerHTML = msg;
 }
 
 /*
@@ -705,9 +709,9 @@ function displayHome() {
 */
 function errorPage(error) {
 	var errorMessage = document.createElement("div");
-	if(error == "noeditloggedout") {
+	if(error === "noeditloggedout") {
 		errorMessage.innerHTML = "You Cannot Edit The Requested Page Because You Are Logged Out.";
-	} else if(error == "notfound") {
+	} else if(error === "notfound") {
 		errorMessage.innerHTML = "There URL You Requested Does Not Exist";
 	}
 
@@ -767,8 +771,10 @@ function editPage(pagedata) {
 	/* wrap status and autosave in saveinfo div */
 	var saveinfo = document.createElement("div");
 	saveinfo.setAttribute("id","saveinfo");
+
+	/* append status & autosave to other divs */
 	saveinfo.appendChild(savestatus);
-	saveinfo.appendChild(autosave);
+	saveprogress.appendChild(autosave);
 
 	/* append save progress & save info divs to save bar */
 	savebar.appendChild(saveprogress);
@@ -1103,9 +1109,9 @@ function profilePage(profiledata) {
 
 	/// if profiledata == "err" handle this
 	/// if profiledata == "noprofileloggedout" handle this
-	if(profiledata == "err") {
+	if(profiledata === "err") {
 		console.log("profile error");
-	} else if (profiledata == "noprofileloggedout") {
+	} else if (profiledata === "noprofileloggedout") {
 		console.log("profile logged out");
 	}
 
@@ -1202,7 +1208,7 @@ function countBlocks() {
 	/* block IDs are just numbers, so count the number of IDs */
 	var num = 0;
 	var miss = true;
-	while (miss == true) {
+	while (miss === true) {
 		num++;
 
 		/* undefined is double banged to false, and node is double banged to true */
@@ -1307,7 +1313,6 @@ function insertContent(bid,btype,content) {
 			xcode.onkeydown = codeKeys.bind(null,block);
 		}
 	} else if(btype === "xmath") {
-
 		var mathpreview = '<div class="mathImage"></div>';
 		var mathstr = '<div class="xMat" onblur="renderMath(this);" contenteditable>' + content + '</code>';
 		block.innerHTML = mathpreview + mathstr;
@@ -1317,14 +1322,12 @@ function insertContent(bid,btype,content) {
 		var latexstr = '<div class="xLtx" onblur="renderLatex(this);" contenteditable>' + content + '</code>';
 		block.innerHTML = latexpreview + latexstr;
 	} else if(btype === "image") {
-
 		var ximg = document.createElement("img");
 		ximg.setAttribute("class","xImg");
 		ximg.src = content;
 
 		block.appendChild(ximg);
 	} else if(btype === "audio") {
-
 		var audio = document.createElement("audio");
 		audio.setAttribute("class","xAud");
 		audio.volume = 0.8;
@@ -1337,7 +1340,6 @@ function insertContent(bid,btype,content) {
 		audio.appendChild(audiosource);
 		block.appendChild(audio);
 	} else if(btype === "video") {
-
 		var video = document.createElement("video");
 		video.setAttribute("class","xVid");
 		video.volume = 0.8;
@@ -1349,6 +1351,22 @@ function insertContent(bid,btype,content) {
 
 		video.appendChild(videosource);
 		block.appendChild(video);
+	} else if (btype === "xsvgs") {
+		var xsvgs = document.createElement("div");
+		xsvgs.setAttribute("class","xSvg");
+		xsvgs.setAttribute("data-link",content);
+
+		if(content !== "") {
+			getLocalLinkContent(content).then(function(svgdata) {
+				/* remove the first line, which is just a DOCTYPE tag */
+				var svgArray = svgdata.split("\n");
+				xsvgs.innerHTML = svgArray[1];
+			},function(error) {
+				/* don't load anything on error */
+			});
+		}
+
+		block.appendChild(xsvgs);
 	} else if(btype === "slide") {
 
 		/* data-page attribute keeps track of which page is being displayed */
@@ -1460,39 +1478,39 @@ function codeKeys(block,event) {
 function detectKey(iframe,event) {
 
     /* b : bold */
-    if(event.shiftKey && event.ctrlKey && event.keyCode == 66) {
+    if(event.shiftKey && event.ctrlKey && event.keyCode === 66) {
 		iframe.contentDocument.execCommand('bold',false,null);
 	}
 	/* i : italics */
-	if(event.shiftKey && event.ctrlKey && event.keyCode == 73) {
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 73) {
 		iframe.contentDocument.execCommand('italic',false,null);
 	}
 	/* l : list */
-	if(event.shiftKey && event.ctrlKey && event.keyCode == 76) {
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 76) {
 		iframe.contentDocument.execCommand('insertUnorderedList',false,null);
 	}
 	/* + : superscript */
-	if(event.shiftKey && event.ctrlKey && event.keyCode == 187) {
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 187) {
 		iframe.contentDocument.execCommand('superscript',false,null);
 	}
 	/* - : subscript */
-	if(event.shiftKey && event.ctrlKey && event.keyCode == 189) {
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 189) {
 		iframe.contentDocument.execCommand('subscript',false,null);
 	}
 	/* j : justify left */
-	if(event.shiftKey && event.ctrlKey && event.keyCode == 74) {
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 74) {
 		iframe.contentDocument.execCommand('justifyLeft',false,null);
 	}
 	/* f : justify full */
-	if(event.shiftKey && event.ctrlKey && event.keyCode == 70) {
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 70) {
 		iframe.contentDocument.execCommand('justifyFull',false,null);
 	}
 	/* tab : indent */
-	if(event.keyCode == 9) {
+	if(event.keyCode === 9) {
 		iframe.contentDocument.execCommand('insertHTML',false,'&nbsp;&nbsp;&nbsp;&nbsp;');
 	}
 	/* h - hyperlink */
-	if(event.shiftKey && event.ctrlKey && event.keyCode == 72) {
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 72) {
 		var callback = function(event,str) {
 			if(event) {
 				if (str.indexOf("http://") < 0 && str.indexOf("https://") < 0) {
@@ -1742,6 +1760,11 @@ function blockButtons(bid) {
 	sliBtn.setAttribute("class","blockbtn addbtn");
 	sliBtn.innerHTML = "slides";
 
+	var svgBtn = document.createElement('button');
+	svgBtn.setAttribute("onclick","addBlock(" + bid + ",'xsvgs')");
+	svgBtn.setAttribute("class","blockbtn addbtn");
+	svgBtn.innerHTML = "svg";
+
 	var titBtn = document.createElement('button');
 	titBtn.setAttribute("onclick","addBlock(" + bid + ",'title')");
 	titBtn.setAttribute("class","blockbtn addbtn");
@@ -1762,7 +1785,8 @@ function blockButtons(bid) {
 	buttonDiv.appendChild(imgBtn);
 	buttonDiv.appendChild(audBtn);
 	buttonDiv.appendChild(vidBtn);
-	buttonDiv.appendChild(sliBtn);
+	/// buttonDiv.appendChild(sliBtn);
+	buttonDiv.appendChild(svgBtn);
 	buttonDiv.appendChild(titBtn);
 	buttonDiv.appendChild(delBtn);
 
@@ -1919,7 +1943,7 @@ function addBlock(bid,btype) {
 
 		/* save blocks to temp table, indicated by false */
 		saveBlocks(false);
-	} else if (["image","audio","video","slide"].indexOf(btype) > -1) {
+	} else if (["image","audio","video","slide","xsvgs"].indexOf(btype) > -1) {
 		/* these blocks call uploadMedia() which uploads media and then calls createBlock() */
 		uploadMedia(bid + 1,btype);
 	}
@@ -2045,6 +2069,27 @@ function uploadMedia(bid,btype) {
 	/* get the hidden file-select object that will store the user's file selection */
 	var fileSelect = document.getElementById('file-select');
 
+	/* change file-select to only accept files based on btype */
+	switch(btype) {
+		case "image":
+			fileSelect.setAttribute("accept",".bmp,.bmp2,.bmp3,.jpeg,.jpg,.pdf,.png,.svg");
+			break;
+		case "audio":
+			fileSelect.setAttribute("accept",".aac,.aiff,.m4a,.mp3,.ogg,.ra,.wav,.wma");
+			break;
+		case "video":
+			fileSelect.setAttribute("accept",".avi,.flv,.mov,.mp4,.mpeg,.ogg,.rm,.webm,.wmv");
+			break;
+		case "xsvgs":
+			fileSelect.setAttribute("accept",".svg");
+			break;
+		case "slide":
+			fileSelect.setAttribute("accept",".pdf,.ppt,.pptx,.pps,.ppsx");
+			break;
+		default:
+			fileSelect.setAttribute("accept","");
+	}
+
 	/* uploadMedia() is called when a block button is pressed, to show file select pop-up box, force click the file-select object */
 	fileSelect.click();
 
@@ -2054,16 +2099,25 @@ function uploadMedia(bid,btype) {
 		/* grab the selected file */
 		var file = fileSelect.files[0];
 
-		/// place some checks here
-		/// file.type.match('image.*')
 		var notvalid = false;
-
-		if(notvalid) {
-
-			alertify.alert("Invalid File Format");
-
+		var nofile = false;
+		var errorMsg;
+		console.log(fileSelect.files.length);
+		if(fileSelect.files.length > 0) {
+			if(file.size > 4294967295) {
+				notvalid = true;
+				errorMsg = "Files Must Be Less Than 4.3 GB";
+			}
 		} else {
+			nofile = true;
+		}
 
+		if(nofile) {
+			/* do nothing, no file selected */
+			console.log("nofile");
+		} else if(notvalid) {
+			alertify.alert(errorMsg);
+		} else {
 			/* create the block to host the media */
 			createBlock(bid - 1,btype);
 
@@ -2084,16 +2138,16 @@ function uploadMedia(bid,btype) {
 				xmlhttp.open('POST',url,true);
 
 				/* upload progress */
+				xmlhttp.upload.onloadstart = function(e) {
+					initializeProgress("Uploading...",e.total);
+				};
 				xmlhttp.upload.onprogress = function(e) {
 					if (e.lengthComputable) {
 						updateProgress(e.loaded);
 					}
 				};
-				xmlhttp.upload.onloadstart = function(e) {
-					initializeProgress(e.total);
-				};
 				xmlhttp.upload.onloadend = function(e) {
-					finalizeProgress(e.total);
+					finalizeProgress("Uploaded",e.total);
 				};
 
 				function counter(reset) {
@@ -2124,36 +2178,37 @@ function uploadMedia(bid,btype) {
 				xmlhttp.onprogress = function(e) {
 					var spotArray = position(xmlhttp.responseText.length);
 					var current = counter(false);
+					var val = xmlhttp.responseText.slice(spotArray[0],spotArray[1]).split(",");
 					if(current === 1) {
-						initializeProgress(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
+						initializeProgress("Converting...",val[val.length - 1]);
 					} else {
-						updateProgress(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
+						updateProgress(val[val.length - 1]);
 					}
 				};
-
 				xmlhttp.onloadend = function(e) {
 					var spotArray = position(xmlhttp.responseText.length);
-					finalizeProgress(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
+					var val = xmlhttp.responseText.slice(spotArray[0],spotArray[1]).split(",");
+					finalizeProgress("Not Saved",val[val.length - 1]);
 					counter(true);
 				};
 
 				xmlhttp.onreadystatechange = function() {
-					if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-						if(xmlhttp.status == 200) {
-							if(xmlhttp.responseText == "err") {
+					if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+						if(xmlhttp.status === 200) {
+							if(xmlhttp.responseText === "err") {
 								reject("err");
-							} else if(xmlhttp.responseText == "convertmediaerr") {
+							} else if(xmlhttp.responseText === "convertmediaerr") {
 								reject("convertmediaerr");
-							} else if (xmlhttp.responseText == "nouploadloggedout") {
+							} else if (xmlhttp.responseText === "nouploadloggedout") {
 								deleteBlock(bid - 1);
 								alertify.alert("You Can't Upload Media Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
 								reject("err");
 							} else {
 								var spotArray = position(xmlhttp.responseText.length);
-								resolve(xmlhttp.responseText.slice(spotArray[0],spotArray[1]));
-								/// reset position. wow, this is hacky...
-								position(0);
-								position(0);
+								var val = xmlhttp.responseText.slice(spotArray[0],spotArray[1]).split(",");
+								/* reset position */
+								position(0); position(0);
+								resolve(val[val.length - 1]);
 							}
 						} else {
 							alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
@@ -2176,6 +2231,17 @@ function uploadMedia(bid,btype) {
 					var mediatag = document.getElementById('a' + bid).childNodes[0].childNodes[0];
 					mediatag.src = success;
 					mediatag.parentNode.load();
+				} else if (btype === "xsvgs") {
+					/* load the svg file's contents into the block */
+					var svgtag = document.getElementById('a' + bid).childNodes[0];
+					svgtag.setAttribute("data-link",success);
+					getLocalLinkContent(success).then(function(svgdata) {
+						/* remove the first line, which is just a DOCTYPE tag */
+						var svgArray = svgdata.split("\n");
+						svgtag.innerHTML = svgArray[1];
+					},function(error) {
+						/* don't load anything on error */
+					});
 				} else if(btype === "slide") {
 					/* add the pdf to the pdfObjects array and render the first page */
 					PDFJS.getDocument(success).then(function(pdfObj) {
@@ -2237,14 +2303,14 @@ function login() {
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-			if(xmlhttp.status == 200) {
-				if(xmlhttp.responseText == "loggedin") {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "loggedin") {
 					emptyDiv('content');
 					displayHome();
-				} else if(xmlhttp.responseText == "incorrect") {
+				} else if(xmlhttp.responseText === "incorrect") {
 					alertify.alert("The Passowrd Was Incorrect");
-				} else if(xmlhttp.responseText == "notfound") {
+				} else if(xmlhttp.responseText === "notfound") {
 					alertify.alert("The Username Could Not Be Found");
 				} else {
 					alertify.alert("An Unknown Error Occurred");
@@ -2298,12 +2364,12 @@ function signup() {
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-			if(xmlhttp.status == 200) {
-				if(xmlhttp.responseText == "success") {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "success") {
 					emptyDiv('content');
 					displayHome();
-				} else if(xmlhttp.responseText == "exists") {
+				} else if(xmlhttp.responseText === "exists") {
 					alertify.alert("That Username Already Exists.\nPlease Choose A Different One.");
 				} else {
 					alertify.alert("An Unknown Error Occurred");
@@ -2343,9 +2409,9 @@ function logout() {
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-			if(xmlhttp.status == 200) {
-				if(xmlhttp.responseText == "loggedout") {
+		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "loggedout") {
 					emptyDiv('content');
 					displayLanding();
 				} else {
@@ -2391,13 +2457,13 @@ function createpage() {
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-			if(xmlhttp.status == 200) {
-				if(xmlhttp.responseText == "pageexists") {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "pageexists") {
 					alertify.alert("You Already Have A Page With That Name.");
-				} else if (xmlhttp.responseText == "nocreateloggedout") {
+				} else if (xmlhttp.responseText === "nocreateloggedout") {
 					alertify.alert("Unable To Create Page. You Are Logged Out.");
-				} else if (xmlhttp.responseText == "err") {
+				} else if (xmlhttp.responseText === "err") {
 					alertify.alert("An Error Occured. Please Try Again Later.");
 				} else {
 					window.location = createURL("/editpage?page=" + xmlhttp.responseText);
@@ -2439,9 +2505,9 @@ function getPages() {
 		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-				if(xmlhttp.status == 200) {
-					if(xmlhttp.responseText == "err") {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					if(xmlhttp.responseText === "err") {
 						reject("err");
 					} else {
 						resolve(xmlhttp.responseText);
@@ -2506,14 +2572,14 @@ function saveBlocks(which) {
 			blockType[i] = btype;
 
 			/* grab block content based on block type */
-			if (btype == "xtext") {
+			if (btype === "xtext") {
 
 				/* execCommand() applies style tags to <body> tag inside <iframe>, hence .getElementsByTagName('body')[0] */
 				blockContent[i] = document.getElementById('a' + bid).children[0].contentDocument.getElementsByTagName('body')[0].innerHTML;
 
 				/// NEED SOLUTION
 				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
-			} else if (btype == "xcode") {
+			} else if (btype === "xcode") {
 				blockContent[i] = document.getElementById('a' + bid).children[0].textContent;
 
 				/// this needs to grab innerHTML instead and will need to be passed through a parse
@@ -2521,7 +2587,7 @@ function saveBlocks(which) {
 
 				/// NEED SOLUTION
 				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
-			} else if (btype == "latex" || btype == "xmath") {
+			} else if (btype === "latex" || btype === "xmath") {
 				/* replace() is for escaping backslashes */
 				blockContent[i] = document.getElementById('a' + bid).children[1].innerHTML.replace(/\\/g,"\\\\");
 
@@ -2533,6 +2599,9 @@ function saveBlocks(which) {
 			} else if (btype === "audio" || btype === "video") {
 				var mediastr = document.getElementById('a' + bid).children[0].children[0].src;
 				blockContent[i] = mediastr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
+			} else if (btype === "xsvgs") {
+				var svgstr = document.getElementById('a' + bid).childNodes[0].getAttribute("data-link");
+				blockContent[i] = svgstr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 			} else if (btype === "slide") {
 				var slidestr = document.getElementById('a' + bid).children[0].id;
 				blockContent[i] = slidestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
@@ -2562,28 +2631,20 @@ function saveBlocks(which) {
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	xmlhttp.upload.onprogress = function(e) {
-		if (e.lengthComputable) {
-			document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.loaded);
-			document.getElementById("saveprogress").childNodes[0].setAttribute("max",e.total);
-		}
-	};
-	xmlhttp.upload.onloadstart = function(e) {
-		document.getElementById("saveinfo").style.visibility = "hidden";
-		document.getElementById("saveinfo").style.display = "none";
-
-		document.getElementById("saveprogress").childNodes[0].setAttribute("value",0);
-		document.getElementById("saveprogress").style.visibility = "visible";
-		document.getElementById("saveprogress").style.display = "block";
-	};
-	xmlhttp.upload.onloadend = function(e) {
-		document.getElementById("saveprogress").childNodes[0].setAttribute("value",e.total);
-		document.getElementById("saveprogress").style.visibility = "hidden";
-		document.getElementById("saveprogress").style.display = "none";
-
-		document.getElementById("saveinfo").style.visibility = "visible";
-		document.getElementById("saveinfo").style.display = "block";
-	};
+	/* if this is temp save, don't show saving progress */
+	if(which !== false) {
+		xmlhttp.upload.onprogress = function(e) {
+			if (e.lengthComputable) {
+				updateProgress(e.loaded);
+			}
+		};
+		xmlhttp.upload.onloadstart = function(e) {
+			initializeProgress("Saving...",e.total);
+		};
+		xmlhttp.upload.onloadend = function(e) {
+			finalizeProgress("Saved",e.total);
+		};
+	}
 
 	var params = "mediaType=" + types + "&mediaContent=" + contents + "&pid=" + pid + "&pagename=" + pagename + "&tabid=" + table;
 
@@ -2592,11 +2653,11 @@ function saveBlocks(which) {
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-			if(xmlhttp.status == 200) {
-				if(xmlhttp.responseText == "blockssaved") {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "blockssaved") {
 						/// successful save
-					} else if (xmlhttp.responseText == "nosaveloggedout") {
+					} else if (xmlhttp.responseText === "nosaveloggedout") {
 						alertify.alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
 					} else {
 						alertify.alert("An Unknown Error Occurred");
@@ -2641,13 +2702,13 @@ function revertBlocks() {
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-			if(xmlhttp.status == 200) {
-				if(xmlhttp.responseText == "nopid") {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "nopid") {
 					alertify.alert("This Page Is Not Meant To Be Visited Directly.");
-				} else if (xmlhttp.responseText == "norevertloggedout") {
+				} else if (xmlhttp.responseText === "norevertloggedout") {
 					alertify.alert("Revert Error. You Are Not Logged In.");
-				} else if (xmlhttp.responseText == "err") {
+				} else if (xmlhttp.responseText === "err") {
 					alertify.alert("An Error Occured. Please Try Again Later");
 				} else {
 					emptyDiv("content");
@@ -2702,12 +2763,12 @@ function saveProfileInfo(btn,fields) {
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-			if(xmlhttp.status == 200) {
-				if(xmlhttp.responseText == "profilesaved") {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "profilesaved") {
 						btn.style = "background-color: #00ffe1";
 						alertify.log("Saved!","success");
-					} else if (xmlhttp.responseText == "nosaveloggedout") {
+					} else if (xmlhttp.responseText === "nosaveloggedout") {
 						btn.style = "background-color: #e83e3e";
 						alertify.alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
 					} else {
@@ -2771,6 +2832,53 @@ function autosaveTimer(asdiv) {
 }
 
 /*
+   Function: getLocalLinkContent
+
+   Use this to get the text from a local file link.
+
+   Parameters:
+
+      url - string, the url of the file link to fetch
+
+   Returns:
+
+      Promise - on error: "err", on success: string, text data
+*/
+function getLocalLinkContent(link) {
+
+	/* wrap the ajax request in a promise */
+	var promise = new Promise(function(resolve,reject) {
+		/* create the url destination for the ajax request */
+		var url = createURL("/" + link);
+
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+
+		xmlhttp.open("GET",url,true);
+
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					if(xmlhttp.responseText === "err") {
+						reject("err");
+						} else {
+							resolve(xmlhttp.responseText);
+						}
+				} else {
+					reject("err");
+				}
+			}
+		};
+
+		xmlhttp.send();
+	});
+
+	return promise;
+}
+
+/*
    Function: getUserFields
 
    Use this to get any user information from the user database.
@@ -2800,11 +2908,11 @@ function getUserFields(fields) {
 		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState == XMLHttpRequest.DONE) {
-				if(xmlhttp.status == 200) {
-					if(xmlhttp.responseText == "err") {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					if(xmlhttp.responseText === "err") {
 						reject("err");
-						} else if (xmlhttp.responseText == "noprofiledataloggedout") {
+						} else if (xmlhttp.responseText === "noprofiledataloggedout") {
 							reject("noprofiledataloggedout");
 						} else {
 							resolve(JSON.parse(xmlhttp.responseText));

@@ -222,10 +222,23 @@ a.profile-btn:hover {
 	text-align: center;
 	height: 32px;
 	width: 100%;
+
+	background-color: white;
+	border: 1px solid transparent;
+	border-color: black;
+	border-radius: 4px;
 }
 
 #saveprogress {
 	width: 100%;
+	height: 12px;
+
+	padding-top: 1px;
+}
+
+#saveinfo {
+	width: 100%;
+	height: 19px;
 }
 
 progress {
@@ -455,6 +468,28 @@ iframe.xTex {
 	box-sizing: border-box;
 }
 
+svg {
+	width: 100%;
+	height: 100%
+}
+
+.xsvgs {
+	max-width: 720px;
+	margin: 0px auto 0 auto;
+}
+
+.xSvg {
+	display: inline-block;
+	width: 720px;
+	height: 405px;
+	border: 1px solid black;
+	border-radius: 4px;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
 .title {
 	max-width: 720px;
 	margin: 0px auto 0 auto;
@@ -544,6 +579,9 @@ iframe.xTex {
 
 	.video { max-width: 100%; margin: 0px auto 0 auto; }
 	.xVid { width: 100%; height: 80%; }
+
+	.xsvgs { max-width: 100%; margin: 0px auto 0 auto; }
+	.xSvg { width: 100%; height: 80%; }
 
 	.slide { max-width: 100%; margin: 0px auto 0 auto; }
 	.xSli { width: 100%; height: 80%; }

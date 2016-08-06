@@ -461,7 +461,7 @@ function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
         switch(btype) {
             case "image":
                 newfile += ".jpg";
-                command = "convert " + GLOBALreroute + oldfile + " -resize '1280x720>' " + GLOBALreroute + newfile;
+                command = "convert -verbose -monitor " + GLOBALreroute + oldfile + " -resize '1280x720>' " + GLOBALreroute + newfile + " 2>&1";
                 break;
             case "audio":
                 newfile += ".mp3";
@@ -470,6 +470,10 @@ function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
             case "video":
                 newfile += ".mp4";
                 command = "ffmpeg/ffmpeg -i " + GLOBALreroute + oldfile + " -vcodec h264 -s 1280x720 -acodec aac " + GLOBALreroute + newfile + " 2>&1";
+                break;
+            case "xsvgs":
+                newfile += ".svg";
+                command = "mv " + GLOBALreroute + oldfile + " " + GLOBALreroute + newfile;
                 break;
             case "slide":
                 newfile += ".pdf";
@@ -490,7 +494,7 @@ function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
 				if (error !== null) {
 					reject('Exec Error (createmedia) (uid:' + uid + ') (pid:' + pid + ' -> ' + stdout + stderr);
 				} else {
-					resolve(newfile);
+					resolve("," + newfile);
 				}
 			});
 
@@ -499,7 +503,54 @@ function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
 
             /* handle progress responses based on media type */
             if(btype === "image") {
-
+                var printCount = 0;
+                var dataArray;
+                var completion;
+                var current;
+                /* imagemagick prints progress in three stages */
+                child.stdout.on('data',function(data) {
+                    if(printCount === 0) {
+                        response.write(",300");
+                        printCount = 1;
+                    } else if(printCount === 1) {
+                        /* load progress 0-100 */
+                        dataArray = data.toString().match(/, [0-9]{2,3}% com/g);
+                        current = dataArray[dataArray.length - 1];
+                        completion = current.slice(2,4);
+                        if(current[5] === "%") {
+                            response.write(",100");
+                            printCount = 2;
+                        } else {
+                            response.write("," + completion);
+                        }
+                    } else if (printCount === 2) {
+                        /* resize progress 0-100 */
+                        dataArray = data.toString().match(/, [0-9]{2,3}% com/g);
+                        if(dataArray !== null) {
+                            current = dataArray[dataArray.length - 1];
+                            completion = current.slice(2,4);
+                            if(current[5] === "%") {
+                                response.write(",200");
+                                printCount = 3;
+                            } else {
+                                response.write("," + String(Number(completion) + 100));
+                            }
+                        }
+                    } else if (printCount === 3) {
+                        /* save progress 0-100 */
+                        dataArray = data.toString().match(/, [0-9]{2,3}% com/g);
+                        if(dataArray !== null) {
+                            current = dataArray[dataArray.length - 1];
+                            completion = current.slice(2,4);
+                            if(current[5] === "%") {
+                                response.write(",300");
+                                printCount = 4;
+                            } else {
+                                response.write("," + String(Number(completion) + 200));
+                            }
+                        }
+                    }
+                });
             } else if(btype === "audio" || btype === "video") {
                 child.stdout.on('data',function(data) {
                     /* search for initial value, which is media length */
@@ -512,7 +563,7 @@ function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
 
                         /* return time duration as seconds */
                         var totaltime = (ihours * 360) + (iminutes * 60) + iseconds;
-                        response.write(String(totaltime));
+                        response.write("," + String(totaltime));
                     }
 
                     /* search for time marker indicating position of conversion */
@@ -525,11 +576,17 @@ function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
 
                         /* return time progress as seconds */
                         var timeprogress = (hours * 360) + (minutes * 60) + seconds;
-                        response.write(String(timeprogress));
+                        response.write("," + String(timeprogress));
                     }
                 });
+            } else if (btype === "xsvgs") {
+                child.stdout.on('data',function(data) {
+                    /* mv does not stdout progress, there is a hack though, check the boards */
+                });
             } else if (btype === "slide") {
-
+                child.stdout.on('data',function(data) {
+                    /* unfortunately, unoconv & libreoffice don't stdout progress */
+                });
             }
 		} else {
 			reject('Bad btype provided in convertMedia()');
@@ -560,7 +617,7 @@ function deleteMedia(connection,uid,pid) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT mediaContent FROM p_" + uid + "_" + pid + " WHERE mediaType='image' OR mediaType='audio' OR mediaType='video' OR mediaType='slide'";
+		var qry = "SELECT mediaContent FROM p_" + uid + "_" + pid + " WHERE mediaType='image' OR mediaType='audio' OR mediaType='video' OR mediaType='xsvgs' OR mediaType='slide'";
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
@@ -593,7 +650,6 @@ function deleteMedia(connection,uid,pid) {
             var command = "ls " + GLOBALreroute + "xm/" + uid + "/" + pid + "/";
 
 			/* execute the find files command */
-            /// todo: this had childls = exec before
 			exec(command,function(error,stdout,stderr) {
 				if (error !== null) {
 					console.log('Exec Error (deletemedia-ls): ' + error);
@@ -601,6 +657,8 @@ function deleteMedia(connection,uid,pid) {
 				} else {
 					/* turn list of files into array, pop() removes empty line */
 					var existing = stdout.split("\n");
+                    console.log(existing);
+                    console.log(success);
 					existing.pop();
 
 					/* find difference between existing files & file on page table */
@@ -818,7 +876,7 @@ signup: function(request,response) {
 										} else {
 											/* make the user's directory to store pages in later */
 											request.session.uid = uid;
-											fs.mkdir(__dirname + "/../public_html/" + "xm/" + uid,function(err) {
+											fs.mkdir(__dirname + "/" + GLOBALreroute + "xm/" + uid,function(err) {
 												if(err) {
 													journal(true,120,err,0,__line,__function,__filename);
 												}
@@ -1054,7 +1112,7 @@ createpage: function(request,response) {
 										});
 
 										/* make a folder in user's media folder to store future media uploads */
-										fs.mkdir(__dirname + "/../public_html/" + "xm/" + uid + "/" + pid,function(err) {
+										fs.mkdir(__dirname + "/" + GLOBALreroute + "xm/" + uid + "/" + pid,function(err) {
 											if(err) {
 												journal(true,120,err,uid,__line,__function,__filename);
 											}
@@ -1373,8 +1431,12 @@ saveblocks: function(request,response) {
 									}
 								});
 							} else {
-								/* in this case, just the page name was saved, since no blocks exist yet */
+								/* in this case, only page save, since no blocks */
 								response.end('blockssaved');
+                                /* there could have been blocks deleted though, so delete if perm save */
+                                if(POST.tabid == 1) {
+                                    deleteMedia(connection,uid,pid);
+                                }
 								journal(false,0,"",uid,__line,__function,__filename);
 							}
 						}
@@ -1436,7 +1498,6 @@ uploadmedia: function(request,response) {
             file.pipe(fstream);
 
             fstream.on('close',function() {
-
                 /* media conversion */
                 var promise = convertMedia(response,link,dir,btype,uid,pid);
 
@@ -1446,6 +1507,7 @@ uploadmedia: function(request,response) {
                     journal(false,0,"",uid,__line,__function,__filename);
                 },function(error) {
                     response.end('convertmediaerr');
+                    /// remove bad media
                     journal(true,110,error,uid,__line,__function,__filename);
                 });
             });

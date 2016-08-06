@@ -112,7 +112,7 @@ function slack(message) {
 	};
 
 	request.post(option,function(err,res,body) {
-		if(body == "ok" && !err) {
+		if(body === "ok" && !err) {
 			console.log("Error Sent To Slack");
 		}
 	});

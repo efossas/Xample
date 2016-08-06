@@ -38,22 +38,23 @@ If you are on Ubuntu, don't install Homebrew & replace "brew" with "apt-get".
 If you are on Windows, go buy a different computer.
 
 !! Important, only share these files between Git & Test folder:
-xample/page.js
-xample/xample.js
-public_html/css/*
-public_html/js/*
 
-Set up an bash script that use rsync to synchronize these files.
+o xample/page.js
+o xample/xample.js
+o public_html/css/*
+o public_html/js/*
+
+Set up a bash script that uses rsync to synchronize these files.
 You can run the script inside atom using the "script" package.
 
 Topic: Work Flow
 
 Follow these steps for editing & testing code.
 
-1. Edit files in your local Git folder.
-2. When ready for testing, copy files from Git folder to Test folder.
-3. Run the software inside the Test folder for testing.
-4. When ready, push files to remote Git repo from local Git folder.
+1 - Edit files in your local Git folder.
+2 - When ready for testing, copy files from Git folder to Test folder.
+3 - Run the software inside the Test folder for testing.
+4 - When ready, push files to remote Git repo from local Git folder.
 
 Topic: Install NVM
 
@@ -122,10 +123,10 @@ These plug-ins for Atom help stream-line work flow.
 > apm install file-icons
 > apm install pigments
 > apm install color-picker
-> apm install file-icons
+> apm install atom-ternjs
 > apm install atom-minify
-> apm install terminal-plus
-> apm install atom-minify
+> apm install regex-railroad-diagram
+> apm install atom-terminal-panel
 > apm install script
 > apm install git-plus
 > apm install merge-conflicts
@@ -145,15 +146,17 @@ These OS & Node dependencies are required for Xample to work.
 > npm install
 
 > brew install imagemagick
+
+- Use "mysql-server", if you're on Ubuntu.
 > brew install mysql
 
-Install Libre Office 4.3.7.2 From
+Install Libre Office 4.3.7.2 From:
 
 https://downloadarchive.documentfoundation.org/libreoffice/old/
 
 > brew install unoconv
 
-Download Static Build FFMPEG From
+Download Static Build FFMPEG From:
 
 https://ffmpeg.org/download.html
 
@@ -192,6 +195,22 @@ To test, make sure mysql is running.
 or you can specify a different one if needed.
 
 Now go to your web browser and type: http://localhost:2020
+
+Section: Tools
+
+These are work flow tools used for communication.
+
+Topic: Zenhub
+
+Zenhub adds storyboards to the Github.
+
+Topic: Slack
+
+Slack is used for all communication due to its channels.
+
+Topic: Draw.io
+
+Draw.io is used for creating flow charts.
 
 Section: Files
 
@@ -698,3 +717,591 @@ Section: Minify
 Topic: JS & CSS
 
 Javascript & CSS files are minified before being uploaded. Use the atom-minify plug-in for minifying content before uploading javascript and css files to the production server.
+
+Section: Persistent Media
+
+We allow for these file extensions.
+
+Topic: ImageMagick
+
+We allow for these image file extensions.
+
+- .bmp
+- .bmp2
+- .bmp3
+- .jpeg
+- .jpg
+- .pdf
+- .png
+- .svg
+
+However, ImageMagick supports all of the following extensions. You can view a full list with the following command.
+
+> identify -list format
+
+> DNG
+> AAI*
+> AI
+> ART*
+> ARW
+> AVI
+> AVS*
+> BGR*
+> BGRA*
+> BGRO*
+> BMP*
+> BMP2*
+> BMP3*
+> BRF*
+> CAL*
+> CALS*
+> CANVAS*
+> CAPTION*
+> CIN*
+> CIP*
+> CLIP*
+> CMYK*
+> CMYKA*
+> CR2
+> CRW
+> CUR*
+> CUT*
+> DATA*
+> DCM*
+> DICOM
+> DCR
+> DCX*
+> DDS*
+> DFONT*
+> DNG
+> DOT
+> DPX*
+> DXT5*
+> EPDF
+> EPI
+> EPS
+> EPS2*
+> EPS3*
+> EPSF
+> EPSI
+> EPT
+> EPT2
+> EPT3
+> ERF
+> FAX*
+> FAX
+> FRACTAL*
+> FTS*
+> G3*
+> GIF*
+> GIF87*
+> GRADIENT*
+> GRAY*
+> GROUP4*
+> GV
+> H*
+> HALD*
+> HDR*
+> HISTOGRAM*
+> HRZ*
+> HTM*
+> HTML*
+> ICB*
+> ICO*
+> ICON*
+> IIQ
+> INFO
+> INLINE*
+> IPL*
+> ISOBRL*
+> ISOBRL6*
+> JNG*
+> See
+> format
+> JNX*
+> JPE*
+> JPEG*
+> JPG*
+> JPS*
+> JSON
+> K25
+> KDC
+> LABEL*
+> M2V
+> M4V
+> MAC*
+> MAGICK*
+> MAP*
+> MASK*
+> MAT
+> MATTE*
+> MEF
+> MIFF*
+> MKV
+> MNG*
+> MONO*
+> MOV
+> MP4
+> MPC*
+> MPEG
+> MPG
+> MRW
+> MSL*
+> MSVG
+> MTV*
+> MVG*
+> NEF
+> NRW
+> NULL*
+> ORF
+> OTB*
+> OTF*
+> PAL*
+> PALM*
+> PAM*
+> PANGO*
+> PATTERN*
+> PBM*
+> PCD*
+> PCDS*
+> PCL
+> PCT*
+> PCX*
+> PDB*
+> PDF
+> PDFA
+> PEF
+> PES*
+> PFA*
+> PFB*
+> PFM*
+> PGM*
+> PICON*
+> PICT*
+> PIX*
+> PJPEG*
+> PLASMA*
+> PNG*
+> PNG00*
+> PNG24*
+> PNG32*
+> PNG48*
+> PNG64*
+> PNG8*
+> PNM*
+> PPM*
+> PREVIEW*
+> PS
+> PS2*
+> PS3*
+> PSB*
+> PSD*
+> PTIF*
+> PWP*
+> RAF
+> RAS*
+> RAW
+> RGB*
+> RGBA*
+> RGBO*
+> RGF*
+> RLA*
+> RLE*
+> RMF
+> RW2
+> SCR*
+> SCT*
+> SFW*
+> SGI*
+> SHTML*
+> SIX*
+> SIXEL*
+> SR2
+> SRF
+> STEGANO*
+> SUN*
+> SVG
+> SVGZ
+> TEXT*
+> TGA*
+> THUMBNAIL*
+> TIFF*
+> TIFF64*
+> TILE*
+> TIM*
+> TTC*
+> TTF*
+> TXT*
+> UBRL*
+> UBRL6*
+> UIL*
+> UYVY*
+> VDA*
+> VICAR*
+> VID*
+> VIFF*
+> VIPS*
+> VST*
+> WBMP*
+> WMV
+> WPG*
+> X3F
+> XBM*
+> XC*
+> XCF*
+> XPM*
+> XPS
+> XV*
+> YCbCr*
+> YCbCrA*
+> YUV*
+
+Topic: FFMPEG
+
+We allow for these audio & video file extensions.
+
+Audio extensions are,
+
+- .aac
+- .aiff
+- .m4a
+- .mp3
+- .ogg
+- .ra
+- .wav
+- .wma
+
+Video extensions are,
+
+- .avi
+- .flv
+- .mov
+- .mp4
+- .mpeg
+- .ogg
+- .rm
+- .webm
+- .wmv
+
+However, FFMPEG supports all the following file extensions. You can view a full list with the following command.
+
+> ./ffmpeg -formats
+
+> 3g2
+> 3gp
+> 4xm
+> a64
+> aa
+> aac
+> ac3
+> acm
+> act
+> adf
+> adp
+> ads
+> adts
+> adx
+> aea
+> afc
+> aiff
+> aix
+> alaw
+> alias
+> amr
+> anm
+> apc
+> ape
+> apng
+> aqtitle
+> asf
+> asf
+> asf
+> ass
+> ast
+> au
+> avi
+> avm2
+> avr
+> avs
+> bethsoftvid
+> bfi
+> bfstm
+> bin
+> bink
+> bit
+> bmp
+> bmv
+> boa
+> brender
+> brstm
+> c93
+> caf
+> cavsvideo
+> cdg
+> cdxl
+> cine
+> concat
+> crc
+> dash
+> data
+> daud
+> dcstr
+> dds
+> dfa
+> dirac
+> dnxhd
+> dpx
+> dsf
+> dsicin
+> dss
+> dts
+> dtshd
+> dv
+> dvbsub
+> dvbtxt
+> dvd
+> dxa
+> ea
+> ea
+> eac3
+> epaf
+> exr
+> f32be
+> f32le
+> f4v
+> f64be
+> f64le
+> ffm
+> ffmetadata
+> film
+> filmstrip
+> flac
+> flic
+> flv
+> framecrc
+> framehash
+> framemd5
+> frm
+> fsb
+> g722
+> g723
+> g729
+> genh
+> gif
+> gsm
+> gxf
+> h261
+> h263
+> h264
+> hash
+> hds
+> hevc
+> hls
+> hls
+> applehttp
+> hnm
+> ico
+> idcin
+> idf
+> iff
+> ilbc
+> image2
+> image2pipe
+> ingenient
+> ipmovie
+> ipod
+> ircam
+> ismv
+> iss
+> iv8
+> ivf
+> ivr
+> j2k
+> jacosub
+> jpeg
+> jpegls
+> jv
+> latm
+> lavfi
+> live
+> lmlm4
+> loas
+> lrc
+> lvf
+> lxf
+> m4v
+> matroska
+> webm
+> md5
+> mgsts
+> microdvd
+> mjpeg
+> mkvtimestamp
+> mlp
+> mlv
+> mm
+> mmf
+> mov
+> mp4
+> m4a
+> 3gp
+> 3g2
+> mj2
+> mp2
+> mp3
+> mp4
+> mpc
+> mpc8
+> mpeg
+> mpeg1video
+> mpeg2video
+> mpegts
+> mpegtsraw
+> mpegvideo
+> mpjpeg
+> mpl2
+> mpsub
+> msf
+> msnwctcp
+> mtaf
+> mtv
+> mulaw
+> musx
+> mv
+> mvi
+> mxf
+> mxf
+> mxf
+> mxg
+> nc
+> nistsphere
+> nsv
+> null
+> nut
+> nuv
+> oga
+> ogg
+> oma
+> opus
+> paf
+> pam
+> pbm
+> pcx
+> pgm
+> pgmyuv
+> pictor
+> pjs
+> pmp
+> png
+> ppm
+> psp
+> psxstr
+> pva
+> pvf
+> qcp
+> qdraw
+> r3d
+> rawvideo
+> realtext
+> redspark
+> rl2
+> rm
+> roq
+> rpl
+> rsd
+> rso
+> rtp
+> rtp
+> rtsp
+> s16be
+> s16le
+> s24be
+> s24le
+> s32be
+> s32le
+> s8
+> sami
+> sap
+> sbg
+> sdp
+> sdr2
+> segment
+> sgi
+> shn
+> siff
+> singlejpeg
+> sln
+> smjpeg
+> smk
+> smoothstreaming
+> smush
+> sol
+> sox
+> spdif
+> spx
+> srt
+> stl
+> stream
+> ssegment
+> subviewer
+> subviewer1
+> sunrast
+> sup
+> svag
+> svcd
+> swf
+> tak
+> tedcaptions
+> tee
+> thp
+> tiertexseq
+> tiff
+> tmv
+> truehd
+> tta
+> tty
+> txd
+> u16be
+> u16le
+> u24be
+> u24le
+> u32be
+> u32le
+> u8
+> uncodedframecrc
+> v210
+> v210x
+> vag
+> vc1
+> vc1test
+> vcd
+> vivo
+> vmd
+> vob
+> vobsub
+> voc
+> vpk
+> vplayer
+> vqf
+> w64
+> wav
+> wc3movie
+> webm
+> webm
+> webm
+> webp
+> webp
+> webvtt
+> wsaud
+> wsd
+> wsvqa
+> wtv
+> wv
+> wve
+> xa
+> xbin
+> xmv
+> xvag
+> xwma
+> yop
+> yuv4mpegpipe
