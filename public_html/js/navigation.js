@@ -2266,6 +2266,8 @@ function uploadMedia(bid,btype) {
 				}
 			});
 		}
+		/* this resets the selection to nothing, in case the user decides to upload the same file, onchange will still fire */
+		this.value = null;
 	};
 }
 
