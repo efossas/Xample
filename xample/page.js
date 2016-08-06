@@ -461,7 +461,11 @@ function convertMedia(response,oldfile,dir,btype,uid = 0,pid = 0) {
         switch(btype) {
             case "image":
                 newfile += ".jpg";
-                command = "convert -verbose -monitor " + GLOBALreroute + oldfile + " -resize '1280x720>' " + GLOBALreroute + newfile + " 2>&1";
+                var firstpage = "";
+                if(oldfile.match(/.pdf/)) {
+                    firstpage = "[0]";
+                }
+                command = "convert -verbose -monitor " + GLOBALreroute + oldfile + firstpage + " -resize '1280x720>' " + GLOBALreroute + newfile + " 2>&1";
                 break;
             case "audio":
                 newfile += ".mp3";
@@ -657,8 +661,6 @@ function deleteMedia(connection,uid,pid) {
 				} else {
 					/* turn list of files into array, pop() removes empty line */
 					var existing = stdout.split("\n");
-                    console.log(existing);
-                    console.log(success);
 					existing.pop();
 
 					/* find difference between existing files & file on page table */
