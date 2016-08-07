@@ -44,28 +44,6 @@ var pdfObjects = {};
 // <<<code>>>
 
 /*
-	Function: emptyDiv
-
-	Find a div by id and remove its contents.
-
-	Parameters:
-
-		divId - The id of the div whose contents will be removed
-
-	Returns:
-
-		nothing - *
-*/
-function emptyDiv(divId) {
-
-	var node = document.getElementById(divId);
-
-	while (node.hasChildNodes()) {
-		node.removeChild(node.lastChild);
-	}
-}
-
-/*
 	Function: createURL
 
 	Detects local or remote host and constructs desired url.
@@ -92,6 +70,28 @@ function createURL(path) {
 	return url;
 }
 
+/*
+	Function: emptyDiv
+
+	Find a div by id and remove its contents.
+
+	Parameters:
+
+		divId - The id of the div whose contents will be removed
+
+	Returns:
+
+		nothing - *
+*/
+function emptyDiv(divId) {
+
+	var node = document.getElementById(divId);
+
+	while (node.hasChildNodes()) {
+		node.removeChild(node.lastChild);
+	}
+}
+
 // <<<fold>>>
 
 /*
@@ -102,7 +102,169 @@ function createURL(path) {
 // <<<code>>>
 
 /*
-	Function: loginForm
+	Function: btnLogOut
+
+	Creates a logout button.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, logout button
+*/
+function btnLogOut() {
+	var logout = document.createElement('button');
+	logout.setAttribute('type','');
+	logout.setAttribute('class','menubtn logout-btn');
+	logout.setAttribute('value','submit-logout');
+	logout.setAttribute('onclick','logout();');
+	logout.innerHTML = "Log Out";
+
+	return logout;
+}
+
+/*
+	Function: btnProfile
+
+	Creates a profile button.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, profile button
+*/
+function btnProfile() {
+
+	var url = createURL("/profile");
+
+	var profile = document.createElement('a');
+	profile.setAttribute('class','profile-btn');
+	profile.setAttribute('href',url);
+	profile.setAttribute('target','_blank');
+	profile.setAttribute('value','Profile');
+	profile.innerHTML = "Profile";
+
+	return profile;
+}
+
+/*
+	Function: dashAutoSave
+
+	Creates the auto save display div.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, auto save display.
+*/
+function dashAutoSave() {
+	var autosave = document.createElement("div");
+	autosave.setAttribute("id","autosave");
+
+	return autosave;
+}
+
+/*
+	Function: dashSaveBar
+
+	Creates the save bar. The save holds other divs that display save status & messages.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, save bar
+*/
+function dashSaveBar() {
+	var savebar = document.createElement("div");
+	savebar.setAttribute("id","savebar");
+
+	return savebar;
+}
+
+/*
+	Function: dashSaveStatus
+
+	Creates the save status display div.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, save status display
+*/
+function dashSaveStatus() {
+	var savestatus = document.createElement("div");
+	savestatus.setAttribute("id","savestatus");
+	savestatus.innerHTML = "Saved";
+
+	return savestatus;
+}
+
+/*
+	Function: dashSaveProgress
+
+	Create the progress display. Inside which is a <progress> tag.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, progress display.
+*/
+function dashSaveProgress() {
+	var saveprogress = document.createElement("div");
+	saveprogress.setAttribute("id","saveprogress");
+
+	var progressbar = document.createElement("progress");
+	progressbar.setAttribute("id","progressbar");
+	progressbar.setAttribute("value",100);
+	progressbar.setAttribute("max",100);
+	progressbar.style.visibility = 'hidden';
+	progressbar.style.display = "none";
+
+	saveprogress.appendChild(progressbar);
+
+	return saveprogress;
+}
+
+/*
+	Function: displaySignUp
+
+	Handles displaying the sign up form.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		nothing - *
+*/
+function displaySignUp() {
+	var signup = formSignUp();
+
+	var main = document.getElementById('content');
+	main.appendChild(signup);
+	main.removeChild(document.getElementById('signupbtn'));
+}
+
+/*
+	Function: formLogin
 
 	Create a log in form. This returns an html node containing the form. On submit, the form calls login()
 
@@ -119,7 +281,7 @@ function createURL(path) {
 
 		success - html node, log in form
 */
-function loginForm() {
+function formLogin() {
 
 	/* create parent <div> */
 	var login = document.createElement('div');
@@ -156,7 +318,7 @@ function loginForm() {
 }
 
 /*
-	Function: signupForm
+	Function: formSignUp
 
 	Create a sign up form. This returns an html node containing the form. On submit, the form calls signup()
 
@@ -176,7 +338,7 @@ function loginForm() {
 
 		success - html node, sign up form
 */
-function signupForm() {
+function formSignUp() {
 
 	/* create parent <div> */
 	var signup = document.createElement('div');
@@ -243,169 +405,47 @@ function signupForm() {
 }
 
 /*
-	Function: displaySignUp
+	Function: loadTempPage
 
-	Handles displaying the sign up form.
+	This function loads the user's temporary page.
 
 	Parameters:
 
-		none
+		pid - the page id
 
 	Returns:
 
 		nothing - *
 */
-function displaySignUp() {
-	var signup = signupForm();
+function loadTempPage(pid) {
 
-	var main = document.getElementById('content');
-	main.appendChild(signup);
-	main.removeChild(document.getElementById('signupbtn'));
+	var url = createURL("/editpage?page=" + pid + "&temp=true");
+
+	window.location = url;
 }
 
 /*
-	Function: logoutBtn
+	Function: loadPermPage
 
-	Creates a logout button.
+	This function loads the user's permanent page.
 
 	Parameters:
 
-		none
+		pid - the page id
 
 	Returns:
 
-		success - html node, logout button
+		nothing - *
 */
-function logoutBtn() {
-	var logout = document.createElement('button');
-	logout.setAttribute('type','');
-	logout.setAttribute('class','menubtn logout-btn');
-	logout.setAttribute('value','submit-logout');
-	logout.setAttribute('onclick','logout();');
-	logout.innerHTML = "Log Out";
+function loadPermPage(pid) {
 
-	return logout;
+	var url = createURL("/editpage?page=" + pid + "&temp=false");
+
+	window.location = url;
 }
 
 /*
-	Function: profileBtn
-
-	Creates a profile button.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - html node, profile button
-*/
-function profileBtn() {
-
-	var url = createURL("/profile");
-
-	var profile = document.createElement('a');
-	profile.setAttribute('class','profile-btn');
-	profile.setAttribute('href',url);
-	profile.setAttribute('target','_blank');
-	profile.setAttribute('value','Profile');
-	profile.innerHTML = "Profile";
-
-	return profile;
-}
-
-/*
-	Function: saveBar
-
-	Creates the save bar. The save holds other divs that display save status & messages.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - html node, save bar
-*/
-function saveBar() {
-	var savebar = document.createElement("div");
-	savebar.setAttribute("id","savebar");
-
-	return savebar;
-}
-
-/*
-	Function: saveStatusDisplay
-
-	Creates the save status display div.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - html node, save status display
-*/
-function saveStatusDisplay() {
-	var savestatus = document.createElement("div");
-	savestatus.setAttribute("id","savestatus");
-	savestatus.innerHTML = "Saved";
-
-	return savestatus;
-}
-
-/*
-	Function: autoSaveDisplay
-
-	Creates the auto save display div.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - html node, auto save display.
-*/
-function autoSaveDisplay() {
-	var autosave = document.createElement("div");
-	autosave.setAttribute("id","autosave");
-
-	return autosave;
-}
-
-/*
-	Function: saveProgressDisplay
-
-	Create the progress display. Inside which is a <progress> tag.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - html node, progress display.
-*/
-function saveProgressDisplay() {
-	var saveprogress = document.createElement("div");
-	saveprogress.setAttribute("id","saveprogress");
-
-	var progressbar = document.createElement("progress");
-	progressbar.setAttribute("id","progressbar");
-	progressbar.setAttribute("value",100);
-	progressbar.setAttribute("max",100);
-	progressbar.style.visibility = 'hidden';
-	progressbar.style.display = "none";
-
-	saveprogress.appendChild(progressbar);
-
-	return saveprogress;
-}
-
-/*
-	Function: initializeProgress
+	Function: progressFinalize
 
 	Parameters:
 
@@ -416,23 +456,7 @@ function saveProgressDisplay() {
 
 		none - *
 */
-function initializeProgress(msg,max) {
-	document.getElementById("autosave").style.visibility = "hidden";
-	document.getElementById("autosave").style.display = "none";
-
-	document.getElementById("progressbar").setAttribute("value",0);
-	document.getElementById("progressbar").setAttribute("max",max);
-	document.getElementById("progressbar").style.visibility = "visible";
-	document.getElementById("progressbar").style.display = "block";
-
-	document.getElementById("savestatus").innerHTML = msg;
-}
-
-function updateProgress(value) {
-	document.getElementById("progressbar").setAttribute("value",value);
-}
-
-function finalizeProgress(msg,max) {
+function progressFinalize(msg,max) {
 	document.getElementById("progressbar").setAttribute("value",max);
 	document.getElementById("progressbar").style.visibility = "hidden";
 	document.getElementById("progressbar").style.display = "none";
@@ -444,63 +468,46 @@ function finalizeProgress(msg,max) {
 }
 
 /*
-	Function: profileRow
-
-	Creates a profile row div.
+	Function: progressInitialize
 
 	Parameters:
 
-		field - string, the name of the field, must match the column name in MySQL database
-		description - string, short description shown on the left of input tag
-		data - the current profile data for that field, will populate the input tag
+		msg - string, for displaying what is being progressed
+		max - int, the value representing a completed progress load
 
 	Returns:
 
-		success - html node, profile row div
+		none - *
 */
-function profileRow(field,description,data) {
+function progressInitialize(msg,max) {
+	document.getElementById("autosave").style.visibility = "hidden";
+	document.getElementById("autosave").style.display = "none";
 
-	var row = document.createElement("div");
-	row.setAttribute("class","row");
+	document.getElementById("progressbar").setAttribute("value",0);
+	document.getElementById("progressbar").setAttribute("max",max);
+	document.getElementById("progressbar").style.visibility = "visible";
+	document.getElementById("progressbar").style.display = "block";
 
-	var colLeft = document.createElement("div");
-	colLeft.setAttribute("class","col col-15");
-
-	var colMiddle = document.createElement("div");
-	colMiddle.setAttribute("class","col col-70 pad-10");
-
-	var colRight = document.createElement("div");
-	colRight.setAttribute("class","col col-15");
-
-	/* username input */
-	var fieldInput = document.createElement('input');
-	fieldInput.setAttribute('type','text');
-	fieldInput.setAttribute('name',field);
-	fieldInput.setAttribute('class','text-input');
-	fieldInput.setAttribute('maxlength','50');
-	fieldInput.setAttribute('value',data);
-
-	/* save username btn */
-	var saveBtn = document.createElement('button');
-	saveBtn.setAttribute('type','button');
-	saveBtn.setAttribute('name','save-' + field);
-	saveBtn.setAttribute('class','menubtn save-btn');
-	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
-	saveBtn.innerHTML = "Save";
-
-	colLeft.innerHTML = description;
-	colMiddle.appendChild(fieldInput);
-	colRight.appendChild(saveBtn);
-
-	row.appendChild(colLeft);
-	row.appendChild(colMiddle);
-	row.appendChild(colRight);
-
-	return row;
+	document.getElementById("savestatus").innerHTML = msg;
 }
 
 /*
-	Function: profileRowCheck
+	Function: progressUpdate
+
+	Parameters:
+
+		value - int, represent current progress
+
+	Returns:
+
+		none - *
+*/
+function progressUpdate(value) {
+	document.getElementById("progressbar").setAttribute("value",value);
+}
+
+/*
+	Function: rowProfileCheck
 
 	Creates a profile row div when input must be validated (like chaning a password, requires entering current & new password). The back end must have a check for accepting the check and field names. Probably in the route function that saves profile data.
 
@@ -515,7 +522,7 @@ function profileRow(field,description,data) {
 
 		success - html node, profile row div
 */
-function profileRowCheck(check,field,placeholders,description) {
+function rowProfileCheck(check,field,placeholders,description) {
 	var row = document.createElement("div");
 	row.setAttribute("class","row");
 
@@ -568,6 +575,62 @@ function profileRowCheck(check,field,placeholders,description) {
 	return row;
 }
 
+/*
+	Function: profileRow
+
+	Creates a profile row div.
+
+	Parameters:
+
+		field - string, the name of the field, must match the column name in MySQL database
+		description - string, short description shown on the left of input tag
+		data - the current profile data for that field, will populate the input tag
+
+	Returns:
+
+		success - html node, profile row div
+*/
+function rowProfileSingle(field,description,data) {
+
+	var row = document.createElement("div");
+	row.setAttribute("class","row");
+
+	var colLeft = document.createElement("div");
+	colLeft.setAttribute("class","col col-15");
+
+	var colMiddle = document.createElement("div");
+	colMiddle.setAttribute("class","col col-70 pad-10");
+
+	var colRight = document.createElement("div");
+	colRight.setAttribute("class","col col-15");
+
+	/* username input */
+	var fieldInput = document.createElement('input');
+	fieldInput.setAttribute('type','text');
+	fieldInput.setAttribute('name',field);
+	fieldInput.setAttribute('class','text-input');
+	fieldInput.setAttribute('maxlength','50');
+	fieldInput.setAttribute('value',data);
+
+	/* save username btn */
+	var saveBtn = document.createElement('button');
+	saveBtn.setAttribute('type','button');
+	saveBtn.setAttribute('name','save-' + field);
+	saveBtn.setAttribute('class','menubtn save-btn');
+	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
+	saveBtn.innerHTML = "Save";
+
+	colLeft.innerHTML = description;
+	colMiddle.appendChild(fieldInput);
+	colRight.appendChild(saveBtn);
+
+	row.appendChild(colLeft);
+	row.appendChild(colMiddle);
+	row.appendChild(colRight);
+
+	return row;
+}
+
 // <<<fold>>>
 
 /*
@@ -578,149 +641,79 @@ function profileRowCheck(check,field,placeholders,description) {
 // <<<code>>>
 
 /*
-	Function: displayLanding
+	Function: pageChoose
 
-	Displays the Landing Page (index page for logged out users). Currently creates a log in form and button to display sign up form. Then both are appended to the main div.
+	This function loads the choose page display. A user is given the option to either load their last permanent save or their last temporary save.
 
 	Parameters:
 
-		none
+		pid - the page id
 
 	Returns:
 
 		nothing - *
 */
-function displayLanding() {
-	var login = loginForm();
+function pageChoose(pid) {
 
-	var signupbtn = document.createElement('button');
-	signupbtn.setAttribute('type','button');
-	signupbtn.setAttribute('id','signupbtn');
-	signupbtn.setAttribute('onclick','displaySignUp();');
-	signupbtn.innerHTML = "Sign Up";
+	/* row 1 */
+	var rowOne = document.createElement("div");
+	rowOne.setAttribute("class","row");
 
-	var main = document.getElementById('content');
-	main.appendChild(login);
-	main.appendChild(document.createElement('hr')); /// remove this later, when you style
-	main.appendChild(signupbtn);
+	var colMiddle = document.createElement("div");
+	colMiddle.setAttribute("class","col col-100 pad-10");
+
+	var centerParagraph = document.createElement("p");
+	centerParagraph.innerHTML = "You are viewing this because the page was closed without Revert or Save being clicked. Please choose which page you want to save.";
+
+	colMiddle.appendChild(centerParagraph);
+	rowOne.appendChild(colMiddle);
+
+	/* row 2 */
+	var rowTwo = document.createElement("div");
+	rowTwo.setAttribute("class","row");
+
+	var colLeft = document.createElement("div");
+	colLeft.setAttribute("class","col col-50 pad-10");
+
+	var colRight = document.createElement("div");
+	colRight.setAttribute("class","col col-50 pad-10");
+
+	rowTwo.appendChild(colLeft);
+	rowTwo.appendChild(colRight);
+
+	var leftParagraph = document.createElement("p");
+	leftParagraph.innerHTML = "This is your last temporary save. This save contains the blocks from the last time you added a block.";
+
+	var tempBtn = document.createElement('button');
+	tempBtn.setAttribute('type','button');
+	tempBtn.setAttribute('class','menubtn temp-btn');
+	tempBtn.setAttribute('value','submit-temp');
+	tempBtn.setAttribute('onclick','loadTempPage(' + pid + ');');
+	tempBtn.innerHTML = "Temporary Page";
+
+	var rightParagraph = document.createElement("p");
+	rightParagraph.innerHTML = "This is you last permanent save. This save contains the blocks from the last time you clicked Save.";
+
+	var permBtn = document.createElement('button');
+	permBtn.setAttribute('type','button');
+	permBtn.setAttribute('class','menubtn perm-btn');
+	permBtn.setAttribute('value','submit-perm');
+	permBtn.setAttribute('onclick','loadPermPage(' + pid + ');');
+	permBtn.innerHTML = "Permanent Page";
+
+	colLeft.appendChild(tempBtn);
+	colLeft.appendChild(leftParagraph);
+	colRight.appendChild(permBtn);
+	colRight.appendChild(rightParagraph);
+
+	/* main */
+	var main = document.getElementById("content");
+	main.appendChild(rowOne);
+	main.appendChild(rowTwo);
 }
 
 /*
-	Function: displayHome
-
-	Displays the Home Page (index page for logged in users). Currently displays log out button, makes and shows page creation form, and fetches and links to existing user pages.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		nothing - *
-*/
-function displayHome() {
-
-	/* get a log out button */
-	var logout = logoutBtn();
-
-	/* create a form for page creation */
-	var header = document.createElement('div');
-	header.setAttribute('class','form');
-	header.setAttribute('id','form-header');
-
-	/* input element is for page name */
-	var title = document.createElement('input');
-	title.setAttribute('type','text');
-	title.setAttribute('name','pagename-create');
-	title.setAttribute('maxlength','50');
-	title.setAttribute('placeholder','Page Name');
-
-	/* submit button that calls createpage() */
-	var submit = document.createElement('button');
-	submit.setAttribute('type','button');
-	submit.setAttribute('value','submit-createpage');
-	submit.setAttribute('onclick','createpage();');
-	submit.innerHTML = "Create Page";
-
-	/* append the log out button and form elements to form div */
-	header.appendChild(logout);
-	header.appendChild(title);
-	header.appendChild(submit);
-
-	/* append the form to the main div */
-	var main = document.getElementById('content');
-	main.appendChild(logout);
-	main.appendChild(header);
-
-	/* fetch user pages */
-	var promise = getPages();
-
-	promise.then(function(pages) {
-		/* get the page data from comma-separated string */
-		var pagearray = pages.split(',');
-
-		/* create a div to hold the page links */
-		var pagesdiv = document.createElement('div');
-		pagesdiv.setAttribute('class','pagelist');
-
-		/* get number of pages, each page has two data (link,name), so 1 is empty */
-		var count;
-		if(pagearray.length === 1) {
-			count = 0;
-		} else {
-			count = pagearray.length / 2;
-		}
-
-		/* create page links and append to pages div */
-		var i = 0;
-		while(count > 0) {
-			var link = document.createElement('a');
-			link.setAttribute('class','pagelink');
-			link.setAttribute('href','editpage?page=' + pagearray[i]);
-			link.setAttribute('target','_blank');
-			link.innerHTML = pagearray[i + 1];
-			pagesdiv.appendChild(link);
-
-			i += 2;
-			count--;
-		}
-
-		/* append the page links to the main div */
-		main.appendChild(document.createElement('hr')); /// remove this later, when you style
-		main.appendChild(pagesdiv);
-
-	},function(error) {
-		console.log("getPages promise error");
-	});
-}
-
-/*
-	Function: errorPage
-
-	This function loads an error page that displays info no the error that occurred.
-
-	Parameters:
-
-		error - string indicating the type of error
-
-	Returns:
-
-		nothing - *
-*/
-function errorPage(error) {
-	var errorMessage = document.createElement("div");
-	if(error === "noeditloggedout") {
-		errorMessage.innerHTML = "You Cannot Edit The Requested Page Because You Are Logged Out.";
-	} else if(error === "notfound") {
-		errorMessage.innerHTML = "There URL You Requested Does Not Exist";
-	}
-
-	var main = document.getElementById('content');
-	main.appendChild(errorMessage);
-}
-
-/*
-	Function: editPage
+	Function: pageEdit
 
 	This function loads page data in edit mode.
 
@@ -732,7 +725,7 @@ function errorPage(error) {
 
 		nothing - *
 */
-function editPage(pagedata) {
+function pageEdit(pagedata) {
 
 	/* MENU */
 
@@ -758,15 +751,15 @@ function editPage(pagedata) {
 	rowOne.appendChild(colOneRight);
 
 	/* log out button */
-	var logout = logoutBtn();
+	var logout = btnLogOut();
 
 	/* save bar */
-	var savebar = saveBar();
+	var savebar = dashSaveBar();
 
 	/* save progress bar div, save status div, & auto save timer div */
-	var saveprogress = saveProgressDisplay();
-	var savestatus = saveStatusDisplay();
-	var autosave = autoSaveDisplay();
+	var saveprogress = dashSaveProgress();
+	var savestatus = dashSaveStatus();
+	var autosave = dashAutoSave();
 
 	/* wrap status and autosave in saveinfo div */
 	var saveinfo = document.createElement("div");
@@ -781,7 +774,7 @@ function editPage(pagedata) {
 	savebar.appendChild(saveinfo);
 
 	/* profile button */
-	var profile = profileBtn();
+	var profile = btnProfile();
 
 	/* block array -> pid,pagename,mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
 	var blockarray = pagedata.split(',');
@@ -981,119 +974,149 @@ function editPage(pagedata) {
 }
 
 /*
-	Function: choosePage
+	Function: pageError
 
-	This function loads the choose page display. A user is given the option to either load their last permanent save or their last temporary save.
+	This function loads an error page that displays info no the error that occurred.
 
 	Parameters:
 
-		pid - the page id
+		error - string indicating the type of error
 
 	Returns:
 
 		nothing - *
 */
-function choosePage(pid) {
+function pageError(error) {
+	var errorMessage = document.createElement("div");
+	if(error === "noeditloggedout") {
+		errorMessage.innerHTML = "You Cannot Edit The Requested Page Because You Are Logged Out.";
+	} else if(error === "notfound") {
+		errorMessage.innerHTML = "There URL You Requested Does Not Exist";
+	}
 
-	/* row 1 */
-	var rowOne = document.createElement("div");
-	rowOne.setAttribute("class","row");
-
-	var colMiddle = document.createElement("div");
-	colMiddle.setAttribute("class","col col-100 pad-10");
-
-	var centerParagraph = document.createElement("p");
-	centerParagraph.innerHTML = "You are viewing this because the page was closed without Revert or Save being clicked. Please choose which page you want to save.";
-
-	colMiddle.appendChild(centerParagraph);
-	rowOne.appendChild(colMiddle);
-
-	/* row 2 */
-	var rowTwo = document.createElement("div");
-	rowTwo.setAttribute("class","row");
-
-	var colLeft = document.createElement("div");
-	colLeft.setAttribute("class","col col-50 pad-10");
-
-	var colRight = document.createElement("div");
-	colRight.setAttribute("class","col col-50 pad-10");
-
-	rowTwo.appendChild(colLeft);
-	rowTwo.appendChild(colRight);
-
-	var leftParagraph = document.createElement("p");
-	leftParagraph.innerHTML = "This is your last temporary save. This save contains the blocks from the last time you added a block.";
-
-	var tempBtn = document.createElement('button');
-	tempBtn.setAttribute('type','button');
-	tempBtn.setAttribute('class','menubtn temp-btn');
-	tempBtn.setAttribute('value','submit-temp');
-	tempBtn.setAttribute('onclick','loadTempPage(' + pid + ');');
-	tempBtn.innerHTML = "Temporary Page";
-
-	var rightParagraph = document.createElement("p");
-	rightParagraph.innerHTML = "This is you last permanent save. This save contains the blocks from the last time you clicked Save.";
-
-	var permBtn = document.createElement('button');
-	permBtn.setAttribute('type','button');
-	permBtn.setAttribute('class','menubtn perm-btn');
-	permBtn.setAttribute('value','submit-perm');
-	permBtn.setAttribute('onclick','loadPermPage(' + pid + ');');
-	permBtn.innerHTML = "Permanent Page";
-
-	colLeft.appendChild(tempBtn);
-	colLeft.appendChild(leftParagraph);
-	colRight.appendChild(permBtn);
-	colRight.appendChild(rightParagraph);
-
-	/* main */
-	var main = document.getElementById("content");
-	main.appendChild(rowOne);
-	main.appendChild(rowTwo);
+	var main = document.getElementById('content');
+	main.appendChild(errorMessage);
 }
 
 /*
-	Function: loadTempPage
+	Function: pageHome
 
-	This function loads the user's temporary page.
+	Displays the Home Page (index page for logged in users). Currently displays log out button, makes and shows page creation form, and fetches and links to existing user pages.
 
 	Parameters:
 
-		pid - the page id
+		none
 
 	Returns:
 
 		nothing - *
 */
-function loadTempPage(pid) {
+function pageHome() {
 
-	var url = createURL("/editpage?page=" + pid + "&temp=true");
+	/* get a log out button */
+	var logout = btnLogOut();
 
-	window.location = url;
+	/* create a form for page creation */
+	var header = document.createElement('div');
+	header.setAttribute('class','form');
+	header.setAttribute('id','form-header');
+
+	/* input element is for page name */
+	var title = document.createElement('input');
+	title.setAttribute('type','text');
+	title.setAttribute('name','pagename-create');
+	title.setAttribute('maxlength','50');
+	title.setAttribute('placeholder','Page Name');
+
+	/* submit button that calls createpage() */
+	var submit = document.createElement('button');
+	submit.setAttribute('type','button');
+	submit.setAttribute('value','submit-createpage');
+	submit.setAttribute('onclick','createpage();');
+	submit.innerHTML = "Create Page";
+
+	/* append the log out button and form elements to form div */
+	header.appendChild(logout);
+	header.appendChild(title);
+	header.appendChild(submit);
+
+	/* append the form to the main div */
+	var main = document.getElementById('content');
+	main.appendChild(logout);
+	main.appendChild(header);
+
+	/* fetch user pages */
+	var promise = getPages();
+
+	promise.then(function(pages) {
+		/* get the page data from comma-separated string */
+		var pagearray = pages.split(',');
+
+		/* create a div to hold the page links */
+		var pagesdiv = document.createElement('div');
+		pagesdiv.setAttribute('class','pagelist');
+
+		/* get number of pages, each page has two data (link,name), so 1 is empty */
+		var count;
+		if(pagearray.length === 1) {
+			count = 0;
+		} else {
+			count = pagearray.length / 2;
+		}
+
+		/* create page links and append to pages div */
+		var i = 0;
+		while(count > 0) {
+			var link = document.createElement('a');
+			link.setAttribute('class','pagelink');
+			link.setAttribute('href','editpage?page=' + pagearray[i]);
+			link.setAttribute('target','_blank');
+			link.innerHTML = pagearray[i + 1];
+			pagesdiv.appendChild(link);
+
+			i += 2;
+			count--;
+		}
+
+		/* append the page links to the main div */
+		main.appendChild(document.createElement('hr')); /// remove this later, when you style
+		main.appendChild(pagesdiv);
+
+	},function(error) {
+		console.log("getPages promise error");
+	});
 }
 
 /*
-	Function: loadPermPage
+	Function: pageLanding
 
-	This function loads the user's permanent page.
+	Displays the Landing Page (index page for logged out users). Currently creates a log in form and button to display sign up form. Then both are appended to the main div.
 
 	Parameters:
 
-		pid - the page id
+		none
 
 	Returns:
 
 		nothing - *
 */
-function loadPermPage(pid) {
+function pageLanding() {
+	var login = formLogin();
 
-	var url = createURL("/editpage?page=" + pid + "&temp=false");
+	var signupbtn = document.createElement('button');
+	signupbtn.setAttribute('type','button');
+	signupbtn.setAttribute('id','signupbtn');
+	signupbtn.setAttribute('onclick','displaySignUp();');
+	signupbtn.innerHTML = "Sign Up";
 
-	window.location = url;
+	var main = document.getElementById('content');
+	main.appendChild(login);
+	main.appendChild(document.createElement('hr')); /// remove this later, when you style
+	main.appendChild(signupbtn);
 }
 
 /*
-	Function: profilePage
+	Function: pageProfile
 
 	This function displays a user's profile page.
 
@@ -1105,7 +1128,7 @@ function loadPermPage(pid) {
 
 		nothing - *
 */
-function profilePage(profiledata) {
+function pageProfile(profiledata) {
 
 	/// if profiledata == "err" handle this
 	/// if profiledata == "noprofileloggedout" handle this
@@ -1141,7 +1164,7 @@ function profilePage(profiledata) {
 	menuRowOne.appendChild(menuColOneRight);
 
 	/* log out button */
-	var logout = logoutBtn();
+	var logout = btnLogOut();
 
 	/* append elements to row 1 */
 	menuColOneLeft.appendChild(logout);
@@ -1156,13 +1179,13 @@ function profilePage(profiledata) {
 	profilediv.setAttribute('class','profilelist');
 
 	/* make mandatory profile rows */
-	var rowOne = profileRow("username","Username:",profileinfo.username);
-	var rowTwo = profileRowCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
-	var rowThree = profileRow("autosave","Auto Save:",profileinfo.autosave);
+	var rowOne = rowProfileSingle("username","Username:",profileinfo.username);
+	var rowTwo = rowProfileCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
+	var rowThree = rowProfileSingle("autosave","Auto Save:",profileinfo.autosave);
 
 	/* make recovery profile rows */
-	var rowFour = profileRow("email","Email:",profileinfo.email);
-	var rowFive = profileRow("phone","Phone:",profileinfo.phone);
+	var rowFour = rowProfileSingle("email","Email:",profileinfo.email);
+	var rowFive = rowProfileSingle("phone","Phone:",profileinfo.phone);
 
 	/* make optional profile rows */
 
@@ -2102,7 +2125,6 @@ function uploadMedia(bid,btype) {
 		var notvalid = false;
 		var nofile = false;
 		var errorMsg;
-		console.log(fileSelect.files.length);
 		if(fileSelect.files.length > 0) {
 			if(file.size > 4294967295) {
 				notvalid = true;
@@ -2139,15 +2161,15 @@ function uploadMedia(bid,btype) {
 
 				/* upload progress */
 				xmlhttp.upload.onloadstart = function(e) {
-					initializeProgress("Uploading...",e.total);
+					progressInitialize("Uploading...",e.total);
 				};
 				xmlhttp.upload.onprogress = function(e) {
 					if (e.lengthComputable) {
-						updateProgress(e.loaded);
+						progressUpdate(e.loaded);
 					}
 				};
 				xmlhttp.upload.onloadend = function(e) {
-					finalizeProgress("Uploaded",e.total);
+					progressFinalize("Uploaded",e.total);
 				};
 
 				function counter(reset) {
@@ -2180,15 +2202,15 @@ function uploadMedia(bid,btype) {
 					var current = counter(false);
 					var val = xmlhttp.responseText.slice(spotArray[0],spotArray[1]).split(",");
 					if(current === 1) {
-						initializeProgress("Converting...",val[val.length - 1]);
+						progressInitialize("Converting...",val[val.length - 1]);
 					} else {
-						updateProgress(val[val.length - 1]);
+						progressUpdate(val[val.length - 1]);
 					}
 				};
 				xmlhttp.onloadend = function(e) {
 					var spotArray = position(xmlhttp.responseText.length);
 					var val = xmlhttp.responseText.slice(spotArray[0],spotArray[1]).split(",");
-					finalizeProgress("Not Saved",val[val.length - 1]);
+					progressFinalize("Not Saved",val[val.length - 1]);
 					counter(true);
 				};
 
@@ -2309,7 +2331,7 @@ function login() {
 			if(xmlhttp.status === 200) {
 				if(xmlhttp.responseText === "loggedin") {
 					emptyDiv('content');
-					displayHome();
+					pageHome();
 				} else if(xmlhttp.responseText === "incorrect") {
 					alertify.alert("The Passowrd Was Incorrect");
 				} else if(xmlhttp.responseText === "notfound") {
@@ -2370,7 +2392,7 @@ function signup() {
 			if(xmlhttp.status === 200) {
 				if(xmlhttp.responseText === "success") {
 					emptyDiv('content');
-					displayHome();
+					pageHome();
 				} else if(xmlhttp.responseText === "exists") {
 					alertify.alert("That Username Already Exists.\nPlease Choose A Different One.");
 				} else {
@@ -2415,7 +2437,7 @@ function logout() {
 			if(xmlhttp.status === 200) {
 				if(xmlhttp.responseText === "loggedout") {
 					emptyDiv('content');
-					displayLanding();
+					pageLanding();
 				} else {
 					alertify.alert("An Unknown Error Occurred");
 				}
@@ -2637,14 +2659,14 @@ function saveBlocks(which) {
 	if(which !== false) {
 		xmlhttp.upload.onprogress = function(e) {
 			if (e.lengthComputable) {
-				updateProgress(e.loaded);
+				progressUpdate(e.loaded);
 			}
 		};
 		xmlhttp.upload.onloadstart = function(e) {
-			initializeProgress("Saving...",e.total);
+			progressInitialize("Saving...",e.total);
 		};
 		xmlhttp.upload.onloadend = function(e) {
-			finalizeProgress("Saved",e.total);
+			progressFinalize("Saved",e.total);
 		};
 	}
 
@@ -2714,7 +2736,7 @@ function revertBlocks() {
 					alertify.alert("An Error Occured. Please Try Again Later");
 				} else {
 					emptyDiv("content");
-					editPage(pid + "," + pagename + xmlhttp.responseText);
+					pageEdit(pid + "," + pagename + xmlhttp.responseText);
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");

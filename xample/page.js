@@ -677,7 +677,7 @@ function deleteMedia(connection,uid,pid) {
 
 					/* if there are files to be deleted, create command and remove them */
 					if (difference.length > 0) {
-						command = "rm ";
+						command = "rm ";d
 						difference.forEach(function(filename) {
 							command += GLOBALreroute + "xm/" + uid + "/" + pid + "/" + filename + " ";
 						});
@@ -756,7 +756,7 @@ module.exports = {
 notfound: function(request,response) {
 	/* 404 page not found */
 	response.status(404);
-	loadPage(request,response,"<script>errorPage('notfound');</script>");
+	loadPage(request,response,"<script>pageError('notfound');</script>");
 },
 
 /*
@@ -779,11 +779,11 @@ start: function(request,response) {
 	/* detect is the user is logged in by checking for a session */
 	if(request.session.uid) {
 		/* user is logged in, display home page */
-		loadPage(request,response,"<script>displayHome();</script>");
+		loadPage(request,response,"<script>pageHome();</script>");
 		journal(false,0,"",request.session.uid,__line,__function,__filename);
 	} else {
 		/* user is not logged in, display landing page */
-		loadPage(request,response,"<script>displayLanding();</script>");
+		loadPage(request,response,"<script>pageLanding();</script>");
 		journal(false,0,"",0,__line,__function,__filename);
 	}
 },
@@ -1220,7 +1220,7 @@ editpage: function(request,response) {
 
 	/* redirect users if logged out or no page id provided */
 	if(typeof uid === 'undefined' || typeof pid === 'undefined') {
-        loadPage(request,response,"<script>errorPage('noeditloggedout');</script>");
+        loadPage(request,response,"<script>pageError('noeditloggedout');</script>");
     } else {
 
 		/* get table identifier */
@@ -1251,7 +1251,7 @@ editpage: function(request,response) {
             promise.then(function(success) {
                 if(searchstatus && success == 0) {
                     /* load the edit page with the page data */
-                    loadPage(request,response,"<script>choosePage('" + pid + "');</script>");
+                    loadPage(request,response,"<script>pageChoose('" + pid + "');</script>");
                 } else {
 
 					var qry = "SELECT pagename FROM u_" + uid + " WHERE pid=" + pid;
@@ -1295,7 +1295,7 @@ editpage: function(request,response) {
 										}
 
 										/* load the edit page with the page data */
-										loadPage(request,response,"<script>editPage('" + pagedata + "');</script>");
+										loadPage(request,response,"<script>pageEdit('" + pagedata + "');</script>");
 										journal(false,0,"",uid,__line,__function,__filename);
 									}
 								});
@@ -1639,7 +1639,7 @@ profile: function(request,response) {
 	var uid = request.session.uid;
 
 	if(typeof uid === 'undefined') {
-        loadPage(request,response,"<script>profilePage('noprofileloggedout');</script>");
+        loadPage(request,response,"<script>pageProfile('noprofileloggedout');</script>");
     } else {
 
 		var qry = "SELECT username,email,phone,autosave FROM Users WHERE uid=" + uid;
@@ -1651,7 +1651,7 @@ profile: function(request,response) {
 
 			connection.query(qry,function(err,rows,fields) {
 				if(err) {
-					loadPage(request,response,"<script>profilePage('err');</script>");
+					loadPage(request,response,"<script>pageProfile('err');</script>");
 					journal(true,200,err,uid,__line,__function,__filename);
 				} else {
 					var data = {};
@@ -1663,7 +1663,7 @@ profile: function(request,response) {
 
 					var profiledata = JSON.stringify(data);
 
-					loadPage(request,response,"<script>profilePage('" + profiledata + "');</script>");
+					loadPage(request,response,"<script>pageProfile('" + profiledata + "');</script>");
 					journal(false,0,"",uid,__line,__function,__filename);
 				}
 			});
