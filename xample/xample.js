@@ -1,5 +1,5 @@
 /* eslint-env node, es6 */
-// random test comment
+
 /*
 	Section: Xample
 
@@ -200,6 +200,7 @@ app.post('/login',page.login);
 app.post('/logout',page.logout);
 app.post('/createpage',page.createpage);
 app.post('/getpages',page.getpages); /// breaks REST ??
+app.post('/getsubjects',page.getsubjects);
 app.get('/editpage*',page.editpage);
 app.post('/saveblocks',page.saveblocks);
 app.post('/uploadmedia*',page.uploadmedia); /// breaks REST ?? uses get query with post method

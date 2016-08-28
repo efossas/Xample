@@ -1,0 +1,24 @@
+{
+    "computer science":
+        {
+        "data":
+            ["regex","structures","algorithms"]
+        ,"programming":
+                ["procedural","object oriented","functional"]
+        ,"systems":
+            ["binary","assembly","memory"]
+        ,"terminal":
+            ["commands","bash","version control"]
+        ,"visual":
+            ["latex","svg"]
+        ,"web":
+            ["html","css","php","sql","javascript"]
+        },
+    "music lexicon":
+        {
+        "rhythm":
+            ["tempo","rhythm","time signature","dots & ties","tuplets","meter","syncopation","polyrhythm","metric modulation"]
+        ,"pitch":
+            ["pitch","staff","tab"]
+        }
+}

@@ -23,6 +23,7 @@
 	These are the global variables xample uses
 
 	pdfObjects - pdf.js generates pdf objects that can be used to render individual pages to <canvas>
+	globalScope - attach needed global variables as properties to this object
 */
 
 // <<<code>>>
@@ -33,6 +34,7 @@
 /* global alertify:true */
 
 var pdfObjects = {};
+var globalScope = {};
 
 // <<<fold>>>
 
@@ -83,13 +85,138 @@ function createURL(path) {
 
 		nothing - *
 */
-function emptyDiv(divId) {
+function emptyDiv(node) {
 
-	var node = document.getElementById(divId);
+	if(typeof node === "string") {
+		var nodeDiv = document.getElementById(node);
 
-	while (node.hasChildNodes()) {
-		node.removeChild(node.lastChild);
+		while (nodeDiv.hasChildNodes()) {
+			nodeDiv.removeChild(nodeDiv.lastChild);
+		}
+	} else if (typeof node === "object") {
+		while (node.hasChildNodes()) {
+			node.removeChild(node.lastChild);
+		}
 	}
+}
+
+/*
+	Function: greyFirstSelect
+
+	Sets first select option grey if selected.
+
+	Parameters:
+
+		select - the select element
+
+	Returns:
+
+		nothing - *
+*/
+function greyFirstSelect(selectTag) {
+	if(selectTag.selectedIndex === 0) {
+		selectTag.style = "color: grey";
+	} else {
+		selectTag.style = "color: black";
+	}
+}
+
+function goToPage() {
+	var selectBox = document.getElementById("page-select");
+	var link = createURL("/editpage?page=" + selectBox.value);
+
+	window.open(link,"_blank");
+}
+
+function loadCategories(listSubjects) {
+
+	/* get the selected subject */
+	var subject = listSubjects.options[listSubjects.selectedIndex].value;
+
+	/* get & empty the category selection element */
+	var listCategories = document.getElementById("select-category");
+	emptyDiv(listCategories);
+
+	/* create the default first selection */
+	var optionCategory = document.createElement('option');
+	optionCategory.setAttribute("value","");
+	optionCategory.innerHTML = "choose category";
+	listCategories.appendChild(optionCategory);
+
+	/* get & empty the topic selection element */
+	var listTopics = document.getElementById("select-topic");
+	emptyDiv(listTopics);
+
+	/* create the default first selection */
+	var optionTopic = document.createElement('option');
+	optionTopic.setAttribute("value","");
+	optionTopic.innerHTML = "choose topic";
+	listTopics.appendChild(optionTopic);
+
+	if(subject !== "") {
+
+		/* get the categories for that subject */
+		var categories = Object.keys(globalScope.subjects[subject]);
+		var count = categories.length;
+
+		/* fill the selection element with categories */
+		for(var i = 0; i < count; i++) {
+			optionCategory = document.createElement('option');
+			optionCategory.setAttribute('value',categories[i]);
+			optionCategory.innerHTML = categories[i];
+			listCategories.appendChild(optionCategory);
+		}
+
+		/* reset the selection to "choose category" */
+		listCategories.selectedIndex = 0;
+	}
+
+	/* grey the first selected */
+	greyFirstSelect(listSubjects);
+	greyFirstSelect(listCategories);
+}
+
+function loadTopics(listCategories) {
+
+	/* get the selected category */
+	var category = listCategories.options[listCategories.selectedIndex].value;
+
+	/* get the selected subject using id */
+	var selectSubject = document.getElementById("select-subject");
+	var subject = selectSubject.options[selectSubject.selectedIndex].value;
+
+	/* get & empty the topic selection element */
+	var listTopics = document.getElementById("select-topic");
+	emptyDiv(listTopics);
+
+	/* create the default first option */
+	var optionTopic = document.createElement('option');
+	optionTopic.innerHTML = "choose topic";
+	optionTopic.setAttribute("value","");
+	listTopics.appendChild(optionTopic);
+
+	/* just in case subject hasn't been selected */
+	if(subject !== "" && category !== "") {
+
+		/* get the topics for the category */
+		var topics = globalScope.subjects[subject][category];
+		var count = topics.length;
+
+		/* fill the selection element with topics */
+		for(var i = 0; i < count; i++) {
+			optionTopic = document.createElement('option');
+			optionTopic.setAttribute('value',topics[i]);
+			optionTopic.innerHTML = topics[i];
+			listTopics.appendChild(optionTopic);
+		}
+
+		/* reset the selection to "choose topic" */
+		listTopics.selectedIndex = 0;
+	}
+
+	/* grey the first selected */
+	greyFirstSelect(listCategories);
+	greyFirstSelect(listTopics);
 }
 
 // <<<fold>>>
@@ -150,6 +277,17 @@ function btnProfile() {
 	profile.innerHTML = "Profile";
 
 	return profile;
+}
+
+function btnSubmit(text,funcName) {
+	var submit = document.createElement('button');
+	submit.setAttribute('type','');
+	submit.setAttribute('class','menubtn generic-btn');
+	submit.setAttribute('value','submit');
+	submit.setAttribute('onclick',funcName + '();');
+	submit.innerHTML = text;
+
+	return submit;
 }
 
 /*
@@ -1013,37 +1151,143 @@ function pageError(error) {
 */
 function pageHome() {
 
-	/* get a log out button */
-	var logout = btnLogOut();
+	/* row 1 */
+	var row_HomeLinks = document.createElement("div");
+	row_HomeLinks.setAttribute("class","row");
 
-	/* create a form for page creation */
-	var header = document.createElement('div');
-	header.setAttribute('class','form');
-	header.setAttribute('id','form-header');
+	var colLeft_HomeLinks = document.createElement("div");
+	colLeft_HomeLinks.setAttribute("class","col col-15");
+
+	var colMiddle_HomeLinks = document.createElement("div");
+	colMiddle_HomeLinks.setAttribute("class","col col-70 pad-10");
+
+	var colRight_HomeLinks = document.createElement("div");
+	colRight_HomeLinks.setAttribute("class","col col-15");
+
+	row_HomeLinks.appendChild(colLeft_HomeLinks);
+	row_HomeLinks.appendChild(colMiddle_HomeLinks);
+	row_HomeLinks.appendChild(colRight_HomeLinks);
+
+	/* get a log out button */
+	var logoutBtn = btnLogOut();
+
+	/* get a profile button */
+	var profileBtn = btnProfile();
+
+	/* append elements to row one */
+	colLeft_HomeLinks.appendChild(profileBtn);
+	colRight_HomeLinks.appendChild(logoutBtn);
+
+	/* row 2 */
+	var row_SubjectSelect = document.createElement("div");
+	row_SubjectSelect.setAttribute("class","row");
+
+	var colLeft_SubjectSelect = document.createElement("div");
+	colLeft_SubjectSelect.setAttribute("class","col col-33");
+
+	var colMiddle_SubjectSelect = document.createElement("div");
+	colMiddle_SubjectSelect.setAttribute("class","col col-33");
+
+	var colRight_SubjectSelect = document.createElement("div");
+	colRight_SubjectSelect.setAttribute("class","col col-33");
+
+	row_SubjectSelect.appendChild(colLeft_SubjectSelect);
+	row_SubjectSelect.appendChild(colMiddle_SubjectSelect);
+	row_SubjectSelect.appendChild(colRight_SubjectSelect);
+
+	/* create select tags */
+	var listSubjects = document.createElement('select');
+	listSubjects.setAttribute("id","select-subject");
+	listSubjects.setAttribute("onchange","loadCategories(this);");
+	listSubjects.style = "color: grey";
+
+	var listCategories = document.createElement('select');
+	listCategories.setAttribute("id","select-category");
+	listCategories.setAttribute("onchange","loadTopics(this);");
+	listCategories.style = "color: grey";
+
+	var listTopics = document.createElement('select');
+	listTopics.setAttribute("id","select-topic");
+	listTopics.setAttribute("onchange","greyFirstSelect(this);");
+	listTopics.style = "color: grey";
+
+	/* get subjects for select topic list */
+	var subjectsPromise = getSubjects();
+
+	subjectsPromise.then(function(success) {
+		var subjectsData = JSON.parse(success);
+		globalScope.subjects = subjectsData;
+
+		/* first box - subject names */
+		var subjectsNames = Object.keys(subjectsData);
+		var subjectsCount = subjectsNames.length;
+
+		var optionSubject = document.createElement('option');
+		optionSubject.innerHTML = "choose subject";
+		optionSubject.setAttribute("value","");
+		listSubjects.appendChild(optionSubject);
+
+		for(var i = 0; i < subjectsCount; i++) {
+			optionSubject = document.createElement('option');
+			optionSubject.setAttribute('value',subjectsNames[i]);
+			optionSubject.innerHTML = subjectsNames[i];
+			listSubjects.appendChild(optionSubject);
+		}
+
+		/* second box - category names */
+		var optionCategory = document.createElement('option');
+		optionCategory.innerHTML = "choose category";
+		listCategories.appendChild(optionCategory);
+
+		/* third box - topic names */
+		var optionTopic = document.createElement('option');
+		optionTopic.innerHTML = "choose topic";
+		listTopics.appendChild(optionTopic);
+
+	},function(error) {
+		/// handle promise error
+		console.log("getSubjects promise error: " + error);
+	});
+
+	/* append lists to columns */
+	colLeft_SubjectSelect.appendChild(listSubjects);
+	colMiddle_SubjectSelect.appendChild(listCategories);
+	colRight_SubjectSelect.appendChild(listTopics);
+
+	/* row 3 */
+	var row_PageCreate = document.createElement("div");
+	row_PageCreate.setAttribute("class","row");
+
+	var colLeft_PageCreate = document.createElement("div");
+	colLeft_PageCreate.setAttribute("class","col col-85");
+
+	var colRight_PageCreate = document.createElement("div");
+	colRight_PageCreate.setAttribute("class","col col-15");
+
+	row_PageCreate.appendChild(colLeft_PageCreate);
+	row_PageCreate.appendChild(colRight_PageCreate);
 
 	/* input element is for page name */
 	var title = document.createElement('input');
 	title.setAttribute('type','text');
+	title.setAttribute('class','text-input');
 	title.setAttribute('name','pagename-create');
 	title.setAttribute('maxlength','50');
 	title.setAttribute('placeholder','Page Name');
 
 	/* submit button that calls createpage() */
-	var submit = document.createElement('button');
-	submit.setAttribute('type','button');
-	submit.setAttribute('value','submit-createpage');
-	submit.setAttribute('onclick','createpage();');
-	submit.innerHTML = "Create Page";
+	var submit = btnSubmit("Create Page","createpage");
 
-	/* append the log out button and form elements to form div */
-	header.appendChild(logout);
-	header.appendChild(title);
-	header.appendChild(submit);
+	/* append elements to row */
+	colLeft_PageCreate.appendChild(title);
+	// colTwoMiddle.appendChild(topics); // create topics list
+	colRight_PageCreate.appendChild(submit);
 
 	/* append the form to the main div */
 	var main = document.getElementById('content');
-	main.appendChild(logout);
-	main.appendChild(header);
+	main.appendChild(row_HomeLinks);
+	main.appendChild(row_SubjectSelect);
+	main.appendChild(row_PageCreate);
 
 	/* fetch user pages */
 	var promise = getPages();
@@ -1052,9 +1296,40 @@ function pageHome() {
 		/* get the page data from comma-separated string */
 		var pagearray = pages.split(',');
 
+		/* row 3 */
+		var rowThree = document.createElement("div");
+		rowThree.setAttribute("class","row");
+
+		var colThreeMiddle = document.createElement("div");
+		colThreeMiddle.setAttribute("class","col col-100");
+
 		/* create a div to hold the page links */
 		var pagesdiv = document.createElement('div');
 		pagesdiv.setAttribute('class','pagelist');
+
+		/* append elements to row 3 */
+		rowThree.appendChild(pagesdiv);
+
+		/* create select multiple box for page names */
+		var selectBox = document.createElement('select');
+		selectBox.setAttribute('multiple','true');
+		selectBox.setAttribute('id','page-select');
+
+		/* append elements to pagesdiv */
+		pagesdiv.appendChild(selectBox);
+
+		/* row 4 */
+		var rowFour = document.createElement("div");
+		rowFour.setAttribute("class","row");
+
+		var colFourMiddle = document.createElement("div");
+		colFourMiddle.setAttribute("class","col col-100");
+
+		/* create submit button for go to page */
+		var goToPageBtn = btnSubmit("Go To Page","goToPage");
+
+		/* append elements to row 4 */
+		pagesdiv.appendChild(goToPageBtn);
 
 		/* get number of pages, each page has two data (link,name), so 1 is empty */
 		var count;
@@ -1067,12 +1342,10 @@ function pageHome() {
 		/* create page links and append to pages div */
 		var i = 0;
 		while(count > 0) {
-			var link = document.createElement('a');
-			link.setAttribute('class','pagelink');
-			link.setAttribute('href','editpage?page=' + pagearray[i]);
-			link.setAttribute('target','_blank');
-			link.innerHTML = pagearray[i + 1];
-			pagesdiv.appendChild(link);
+			var option = document.createElement('option');
+			option.setAttribute('value',pagearray[i]);
+			option.innerHTML = pagearray[i + 1];
+			selectBox.appendChild(option);
 
 			i += 2;
 			count--;
@@ -2515,11 +2788,43 @@ function createpage() {
 		success - promise, pagedata
 */
 function getPages() {
-
 	var promise = new Promise(function(resolve,reject) {
 
 		/* create the url destination for the ajax request */
 		var url = createURL("/getpages");
+
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+
+		xmlhttp.open("POST",url,true);
+
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					if(xmlhttp.responseText === "err") {
+						reject("err");
+					} else {
+						resolve(xmlhttp.responseText);
+					}
+				} else {
+					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				}
+			}
+		};
+
+		xmlhttp.send();
+	});
+
+	return promise;
+}
+
+function getSubjects() {
+	var promise = new Promise(function(resolve,reject) {
+
+		/* create the url destination for the ajax request */
+		var url = createURL("/getsubjects");
 
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();

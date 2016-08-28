@@ -149,18 +149,23 @@ function journal(isError,idNumber,message,userID,lineNumber,functionName,scriptN
 */
 function loadPage(request,response,script) {
 
+    var minified = ".min";
+    if(request.root.indexOf("localhost") > 0) {
+        minified = "";
+    }
+
 	/* define the library & style links here */
 	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
 	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
 	var alertifycorestyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.core.css'>";
 	var alertifydefaultstyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.default.css'>";
 	var codehighlightstyle = "<link rel='stylesheet' href='" + request.root + "css/vs.css'>";
-	var blockstyle = "<link rel='stylesheet' href='" + request.root + "css/block.css'>";
+	var blockstyle = "<link rel='stylesheet' href='" + request.root + "css/block" + minified + ".css'>";
 	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
 	var pdfjs = "<script src='http://abaganon.com/js/pdf.min.js'></script>";
 	var codehighlightjs = "<script src='//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.3.0/highlight.min.js'></script>";
 	var mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
-	var xamplejs = "<script src='" + request.root + "js/navigation.js'></script>";
+	var xamplejs = "<script src='" + request.root + "js/navigation" + minified + ".js'></script>";
 	var mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, messageStyle: 'none' });</script>";
 	var headend = "<title>Abaganon Xample</title></head>";
 	var body = "<body class='xample'><div id='content'></div>";
@@ -1192,6 +1197,25 @@ getpages: function(request,response) {
 			}
 		});
         connection.release();
+    });
+},
+
+getsubjects: function(request,response) {
+	var __function = "getsubjects";
+
+    var fs = require("fs");
+
+	/* get the user's id */
+	var uid = request.session.uid;
+
+    /* get the topics from the local json file */
+    fs.readFile('data/topics.json',function(err,data) {
+        if (err) {
+            response.end("err");
+            journal(1,120,err,uid,__line,__function,__filename);
+        } else {
+            response.end(data.toString());
+        }
     });
 },
 
