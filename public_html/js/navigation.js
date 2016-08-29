@@ -123,9 +123,31 @@ function greyFirstSelect(selectTag) {
 
 function goToPage() {
 	var selectBox = document.getElementById("page-select");
-	var link = createURL("/editpage?page=" + selectBox.value);
+	var page = selectBox.value;
 
-	window.open(link,"_blank");
+	if(page === "") {
+		alertify.alert("Please Select A Page");
+	} else {
+		var link = createURL("/editpage?page=" + page);
+		window.open(link,"_blank");
+	}
+}
+
+function deletePageConfirm() {
+	var selectBox = document.getElementById("page-select");
+	var page = selectBox.value;
+
+	if(page === "") {
+		alertify.alert("Please Select A Page");
+	} else {
+		alertify.confirm("Are You Sure You Want To Delete This Page? This Is Permanent.",function(accepted) {
+			if (accepted) {
+				deletePage(page);
+			} else {
+				// user clicked "cancel"
+			}
+		});
+	}
 }
 
 function loadCategories(listSubjects) {
@@ -219,6 +241,12 @@ function loadTopics(listCategories) {
 	greyFirstSelect(listTopics);
 }
 
+function urlEscape(str) {
+	/* space -> dash , ampersand -> 'and' , single quote -> double quote */
+	str.replace(/\s+/g,'-').replace(/&/g,'and').replace(/'/g,'"');
+	return str;
+}
+
 // <<<fold>>>
 
 /*
@@ -244,7 +272,7 @@ function loadTopics(listCategories) {
 function btnLogOut() {
 	var logout = document.createElement('button');
 	logout.setAttribute('type','');
-	logout.setAttribute('class','menubtn logout-btn');
+	logout.setAttribute('class','menubtn red-btn');
 	logout.setAttribute('value','submit-logout');
 	logout.setAttribute('onclick','logout();');
 	logout.innerHTML = "Log Out";
@@ -279,10 +307,10 @@ function btnProfile() {
 	return profile;
 }
 
-function btnSubmit(text,funcName) {
+function btnSubmit(text,funcName,color) {
 	var submit = document.createElement('button');
 	submit.setAttribute('type','');
-	submit.setAttribute('class','menubtn generic-btn');
+	submit.setAttribute('class','menubtn ' + color + '-btn');
 	submit.setAttribute('value','submit');
 	submit.setAttribute('onclick',funcName + '();');
 	submit.innerHTML = text;
@@ -696,7 +724,7 @@ function rowProfileCheck(check,field,placeholders,description) {
 	var saveBtn = document.createElement('button');
 	saveBtn.setAttribute('type','button');
 	saveBtn.setAttribute('name','save-' + field);
-	saveBtn.setAttribute('class','menubtn save-btn');
+	saveBtn.setAttribute('class','menubtn green-btn');
 	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + check + '","' + field + '"])');
 	saveBtn.innerHTML = "Save";
 
@@ -754,7 +782,7 @@ function rowProfileSingle(field,description,data) {
 	var saveBtn = document.createElement('button');
 	saveBtn.setAttribute('type','button');
 	saveBtn.setAttribute('name','save-' + field);
-	saveBtn.setAttribute('class','menubtn save-btn');
+	saveBtn.setAttribute('class','menubtn green-btn');
 	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
 	saveBtn.innerHTML = "Save";
 
@@ -824,7 +852,7 @@ function pageChoose(pid) {
 
 	var tempBtn = document.createElement('button');
 	tempBtn.setAttribute('type','button');
-	tempBtn.setAttribute('class','menubtn temp-btn');
+	tempBtn.setAttribute('class','menubtn green-btn');
 	tempBtn.setAttribute('value','submit-temp');
 	tempBtn.setAttribute('onclick','loadTempPage(' + pid + ');');
 	tempBtn.innerHTML = "Temporary Page";
@@ -834,7 +862,7 @@ function pageChoose(pid) {
 
 	var permBtn = document.createElement('button');
 	permBtn.setAttribute('type','button');
-	permBtn.setAttribute('class','menubtn perm-btn');
+	permBtn.setAttribute('class','menubtn green-btn');
 	permBtn.setAttribute('value','submit-perm');
 	permBtn.setAttribute('onclick','loadPermPage(' + pid + ');');
 	permBtn.innerHTML = "Permanent Page";
@@ -964,7 +992,7 @@ function pageEdit(pagedata) {
 	var revertbtn = document.createElement('button');
 	revertbtn.setAttribute('type','button');
 	revertbtn.setAttribute('name','revert-blocks');
-	revertbtn.setAttribute('class','menubtn revert-btn');
+	revertbtn.setAttribute('class','menubtn green-btn');
 	revertbtn.setAttribute('onclick','revertBlocks()');
 	revertbtn.innerHTML = "Revert";
 
@@ -980,7 +1008,7 @@ function pageEdit(pagedata) {
 	var savebtn = document.createElement('button');
 	savebtn.setAttribute('type','button');
 	savebtn.setAttribute('name','save-blocks');
-	savebtn.setAttribute('class','menubtn save-btn');
+	savebtn.setAttribute('class','menubtn green-btn');
 	savebtn.setAttribute('onclick','saveBlocks(true)');
 	savebtn.innerHTML = "Save";
 
@@ -1276,7 +1304,7 @@ function pageHome() {
 	title.setAttribute('placeholder','Page Name');
 
 	/* submit button that calls createpage() */
-	var submit = btnSubmit("Create Page","createpage");
+	var submit = btnSubmit("Create Page","createpage","green");
 
 	/* append elements to row */
 	colLeft_PageCreate.appendChild(title);
@@ -1297,18 +1325,18 @@ function pageHome() {
 		var pagearray = pages.split(',');
 
 		/* row 3 */
-		var rowThree = document.createElement("div");
-		rowThree.setAttribute("class","row");
+		var row_pagesBox = document.createElement("div");
+		row_pagesBox.setAttribute("class","row");
 
-		var colThreeMiddle = document.createElement("div");
-		colThreeMiddle.setAttribute("class","col col-100");
+		var colMiddle_pagesBox = document.createElement("div");
+		colMiddle_pagesBox.setAttribute("class","col col-100");
 
 		/* create a div to hold the page links */
 		var pagesdiv = document.createElement('div');
 		pagesdiv.setAttribute('class','pagelist');
 
 		/* append elements to row 3 */
-		rowThree.appendChild(pagesdiv);
+		row_pagesBox.appendChild(pagesdiv);
 
 		/* create select multiple box for page names */
 		var selectBox = document.createElement('select');
@@ -1317,19 +1345,6 @@ function pageHome() {
 
 		/* append elements to pagesdiv */
 		pagesdiv.appendChild(selectBox);
-
-		/* row 4 */
-		var rowFour = document.createElement("div");
-		rowFour.setAttribute("class","row");
-
-		var colFourMiddle = document.createElement("div");
-		colFourMiddle.setAttribute("class","col col-100");
-
-		/* create submit button for go to page */
-		var goToPageBtn = btnSubmit("Go To Page","goToPage");
-
-		/* append elements to row 4 */
-		pagesdiv.appendChild(goToPageBtn);
 
 		/* get number of pages, each page has two data (link,name), so 1 is empty */
 		var count;
@@ -1351,9 +1366,33 @@ function pageHome() {
 			count--;
 		}
 
+		/* row 4 */
+		var row_pageSubmitButtons = document.createElement("div");
+		row_pageSubmitButtons.setAttribute("class","row");
+
+		var colLeft_pageSubmitButtons = document.createElement("div");
+		colLeft_pageSubmitButtons.setAttribute("class","col col-80");
+
+		var colRight_pageSubmitButtons = document.createElement("div");
+		colRight_pageSubmitButtons.setAttribute("class","col col-20");
+
+		row_pageSubmitButtons.appendChild(colLeft_pageSubmitButtons);
+		row_pageSubmitButtons.appendChild(colRight_pageSubmitButtons);
+
+		/* create submit button for go to page */
+		var goToPageBtn = btnSubmit("Go To Page","goToPage","green");
+
+		/* create delete page button */
+		var deletePageBtn = btnSubmit("Delete Page","deletePageConfirm","red");
+
+		/* append elements to row 4 */
+		colLeft_pageSubmitButtons.appendChild(goToPageBtn);
+		colRight_pageSubmitButtons.appendChild(deletePageBtn);
+
 		/* append the page links to the main div */
 		main.appendChild(document.createElement('hr')); /// remove this later, when you style
-		main.appendChild(pagesdiv);
+		main.appendChild(row_pagesBox);
+		main.appendChild(row_pageSubmitButtons);
 
 	},function(error) {
 		console.log("getPages promise error");
@@ -2743,33 +2782,84 @@ function createpage() {
 
 	/* get the page name */
 	var pagename = document.getElementsByName('pagename-create')[0].value;
+	var subject = document.getElementById('select-subject').value;
+	var category = document.getElementById('select-category').value;
+	var topic = document.getElementById('select-topic').value;
+
+	if(pagename === "" || subject === "" || category === "" || topic === "") {
+		alertify.alert("Please Choose A Topic & Enter A Page Name.");
+	} else {
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+
+		subject = urlEscape(subject);
+		category = urlEscape(category);
+		topic = urlEscape(topic);
+
+		var params = "pagename=" + pagename + "&subject=" + subject + "&category=" + category + "&topic=" + topic;
+
+		xmlhttp.open("POST",url,true);
+
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					if(xmlhttp.responseText === "pageexists") {
+						alertify.alert("You Already Have A Page With That Name.");
+					} else if (xmlhttp.responseText === "nocreateloggedout") {
+						alertify.alert("Unable To Create Page. You Are Logged Out.");
+					} else if (xmlhttp.responseText === "err") {
+						alertify.alert("An Error Occured. Please Try Again Later.");
+					} else {
+						window.location = createURL("/editpage?page=" + xmlhttp.responseText);
+					}
+				} else {
+					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
+	}
+}
+
+function deletePage(pid) {
+	/* create the url destination for the ajax request */
+	var url = createURL("/deletepage");
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "pagename=" + pagename;
+	var params = "pid=" + pid;
 
 	xmlhttp.open("POST",url,true);
 
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 
 	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "pageexists") {
-					alertify.alert("You Already Have A Page With That Name.");
-				} else if (xmlhttp.responseText === "nocreateloggedout") {
-					alertify.alert("Unable To Create Page. You Are Logged Out.");
-				} else if (xmlhttp.responseText === "err") {
-					alertify.alert("An Error Occured. Please Try Again Later.");
+				if(xmlhttp.responseText === "success") {
+					var selectBox = document.getElementById('page-select');
+					var count = selectBox.length;
+					var optionToRemove;
+					for(var i = 0; i < count; i++) {
+						if(selectBox.options[i].value === pid) {
+							optionToRemove = selectBox.options[i];
+						}
+					}
+					selectBox.removeChild(optionToRemove);
+				} else if(xmlhttp.responseText === "nodeleteloggedout") {
+					alertify.alert("Could Not Delete Page. You Are Logged Out.");
 				} else {
-					window.location = createURL("/editpage?page=" + xmlhttp.responseText);
+					alertify.alert("There Was A Problem Deleting The Page.");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
-        }
-    };
+		}
+	};
 
 	xmlhttp.send(params);
 }

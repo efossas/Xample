@@ -199,6 +199,7 @@ app.post('/signup',page.signup);
 app.post('/login',page.login);
 app.post('/logout',page.logout);
 app.post('/createpage',page.createpage);
+app.post('/deletepage',page.deletepage);
 app.post('/getpages',page.getpages); /// breaks REST ??
 app.post('/getsubjects',page.getsubjects);
 app.get('/editpage*',page.editpage);

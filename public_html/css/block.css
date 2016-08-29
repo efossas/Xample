@@ -195,21 +195,21 @@ footer {
 	font-weight: 400;
 }
 
-.generic-btn {
+.green-btn {
 	width: 100%;
 	background-color: #00ffe1;
 }
 
-.generic-btn:hover {
+.green-btn:hover {
 	background-color: #00a895;
 }
 
-.logout-btn {
+.red-btn {
 	width: 100%;
 	background-color: #ff1111;
 }
 
-.logout-btn:hover {
+.red-btn:hover {
 	background-color: #d31e1e;
 }
 
@@ -237,42 +237,6 @@ a.profile-btn {
 }
 
 a.profile-btn:hover {
-	background-color: #00a895;
-}
-
-.revert-btn {
-	width: 100%;
-	background-color: #00ffe1;
-}
-
-.revert-btn:hover {
-	background-color: #00a895;
-}
-
-.save-btn {
-	width: 100%;
-	background-color: #00ffe1;
-}
-
-.save-btn:hover {
-	background-color: #00a895;
-}
-
-.temp-btn {
-	width: 100%;
-	background-color: #00ffe1;
-}
-
-.temp-btn:hover {
-	background-color: #00a895;
-}
-
-.perm-btn {
-	width: 100%;
-	background-color: #00ffe1;
-}
-
-.perm-btn:hover {
 	background-color: #00a895;
 }
 
