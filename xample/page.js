@@ -855,7 +855,7 @@ signup: function(request,response) {
                     if(success !== -1) {
                         response.end('exists');
                     } else {
-                            var qryUser = "INSERT INTO Users (username, password, email, phone, autosave) VALUES (" + username + ", '" + hash + "', " + email + ", '" + phone + "', 0)";
+                            var qryUser = "INSERT INTO Users (username,password,email,phone,autosave,defaulttext) VALUES (" + username + ",'" + hash + "'," + email + ",'" + phone + "',0,1)";
 
 					/* create the user in the Users table */
 					connection.query(qryUser,function(err,rows,fields) {
@@ -1084,7 +1084,7 @@ createpage: function(request,response) {
                         response.end('pageexists');
                     } else {
                         /* insert page into user's page table */
-                        var qryUser = "INSERT INTO u_" + uid + " (pagename, status) VALUES (" + pagename + ", 1)";
+                        var qryUser = "INSERT INTO u_" + uid + " (pagename,status,subject,category,topic) VALUES (" + pagename + ",1," + subject + "," + category + "," + topic + ")";
 
                         connection.query(qryUser,function(err,rows,fields) {
                             if (err) {
@@ -1102,7 +1102,7 @@ createpage: function(request,response) {
                                         var pid = success;
 
                                         /* create the page's permanent table */
-                                        var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
+                                        var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) )";
 
                                         connection.query(qryPage,function(err,rows,fields) {
 											if (err) {
@@ -1112,7 +1112,7 @@ createpage: function(request,response) {
 										});
 
 										/* create the page's temporary table */
-										var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) )";
+										var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) )";
 
 										connection.query(qryTemp,function(err,rows,fields) {
 											if (err) {
@@ -1341,7 +1341,7 @@ getsubjects: function(request,response) {
 /*
 	Function: editpage
 
-	Page Edit Mode, used to get a list of page & block data for a user's page. The data given to the http response is a comma-separate string in this format. pid,pagename,mediaType,mediaContent, If the user does not have a page with that pid, they will receive "err" in the response. If the user has no media on that page, the user will on receive the pid and pagename.
+	Page Edit Mode, used to get a list of page & block data for a user's page. The data given to the http response is a comma-separate string in this format. pid,pagename,mediaType,mediaContent, If the user does not have a page with that pid, they will receive "err" in the response. If the user has no media on that page, the user will only receive the pid and pagename.
 
 	Parameters:
 
@@ -1785,7 +1785,7 @@ profile: function(request,response) {
         loadPage(request,response,"<script>pageProfile('noprofileloggedout');</script>");
     } else {
 
-		var qry = "SELECT username,email,phone,autosave FROM Users WHERE uid=" + uid;
+		var qry = "SELECT username,email,phone,autosave,defaulttext FROM Users WHERE uid=" + uid;
 
 		pool.getConnection(function(err,connection) {
             if(err) {
@@ -1803,6 +1803,7 @@ profile: function(request,response) {
 					data["email"] = rows[0].email;
 					data["phone"] = rows[0].phone;
 					data["autosave"] = rows[0].autosave;
+                    data["defaulttext"] = rows[0].defaulttext;
 
 					var profiledata = JSON.stringify(data);
 

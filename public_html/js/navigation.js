@@ -241,6 +241,14 @@ function loadTopics(listCategories) {
 	greyFirstSelect(listTopics);
 }
 
+function deparseBlock(blockText) {
+	return blockText.replace(/@@SQ/g,"'").replace(/@@CO/g,",").replace(/@@AM/g,"&").replace(/@@NL/g,"\n").replace(/@@BRO/g,"<br>").replace(/@@BRC/g,"</br>").replace(/@@SPANO/g,"<span>").replace(/@@SPANC/g,"</span>");
+}
+
+function parseBlock(blockText) {
+	return blockText.replace(/'/g,"@@SQ").replace(/,/g,"@@CO").replace(/&/g,"@@AM").replace(/\n/g,"@@NL").replace(/<br>/g,"@@BRO").replace(/<\/br>/g,"@@BRC").replace(/<span>/g,"@@SPANO").replace(/<\/span>/g,"@@SPANC");
+}
+
 function urlEscape(str) {
 	/* space -> dash , ampersand -> 'and' , single quote -> double quote */
 	str.replace(/\s+/g,'-').replace(/&/g,'and').replace(/'/g,'"');
@@ -1128,6 +1136,20 @@ function pageEdit(pagedata) {
 	/* start auto save timer */
 	autosaveTimer(autosave);
 
+	/* set defaulttext in globals */
+	var promiseDefaultText = getUserFields(['defaulttext']);
+
+	promiseDefaultText.then(function(data) {
+		if(data.defaulttext) {
+			globalScope.defaulttext = true;
+		} else {
+			globalScope.defaulttext = false;
+		}
+	},function(error) {
+		globalScope.defaulttext = false;
+		alertify.alert("Error. Default Text Could Not Be Initiated.");
+	});
+
 	/* prevent user from exiting page if Revert or Save has not been clicked */
 	window.onbeforeunload = function() {
 		var status = document.getElementsByName("statusid")[0].value;
@@ -1491,22 +1513,24 @@ function pageProfile(profiledata) {
 	profilediv.setAttribute('class','profilelist');
 
 	/* make mandatory profile rows */
-	var rowOne = rowProfileSingle("username","Username:",profileinfo.username);
-	var rowTwo = rowProfileCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
-	var rowThree = rowProfileSingle("autosave","Auto Save:",profileinfo.autosave);
+	var row_Username = rowProfileSingle("username","Username:",profileinfo.username);
+	var row_Password = rowProfileCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
+	var row_Autosave = rowProfileSingle("autosave","Auto Save:",profileinfo.autosave);
+	var row_DefaultText = rowProfileSingle("defaulttext","Default Text:",profileinfo.defaulttext);
 
 	/* make recovery profile rows */
-	var rowFour = rowProfileSingle("email","Email:",profileinfo.email);
-	var rowFive = rowProfileSingle("phone","Phone:",profileinfo.phone);
+	var row_Email = rowProfileSingle("email","Email:",profileinfo.email);
+	var row_Phone = rowProfileSingle("phone","Phone:",profileinfo.phone);
 
 	/* make optional profile rows */
 
 	/* append rows to profilediv */
-	profilediv.appendChild(rowOne);
-	profilediv.appendChild(rowTwo);
-	profilediv.appendChild(rowThree);
-	profilediv.appendChild(rowFour);
-	profilediv.appendChild(rowFive);
+	profilediv.appendChild(row_Username);
+	profilediv.appendChild(row_Password);
+	profilediv.appendChild(row_Autosave);
+	profilediv.appendChild(row_DefaultText);
+	profilediv.appendChild(row_Email);
+	profilediv.appendChild(row_Phone);
 
 	/* MAIN */
 
@@ -1614,7 +1638,13 @@ function insertContent(bid,btype,content) {
 			var iframe = block.childNodes[0].contentDocument;
 			iframe.open();
 			/// iframe.head.appendChild(cssLink); this can be used in show mode,not in edit mode
-			iframe.write(content);
+
+			/* defaul text */
+			if(globalScope.defaulttext && content === "") {
+				iframe.write("You can turn this default text off on your Profile Page.<br><br>Press&nbsp;<kbd>shift</kbd>&nbsp;and&nbsp;<kbd>ctrl</kbd>&nbsp;with the following keys to style text:<br><br><kbd>p</kbd>&nbsp;plain<br><kbd>b</kbd>&nbsp;<b>bold</b><br><kbd>i</kbd>&nbsp;<i>italics</i><br><kbd>h</kbd>&nbsp;<span style='background-color: yellow;'>highlight</span><br><kbd>+</kbd>&nbsp;<sup>superscript</sup><br><kbd>-</kbd>&nbsp;<sub>subscript</sub><br><kbd>a</kbd>&nbsp;<a href='http://abaganon.com/'>anchor link</a><ul><li><kbd>l</kbd>&nbsp;list</li></ul><br><kbd>j</kbd>&nbsp;justify left<i>For the things we have to learn before we can do them, we learn by doing them</i>. -Aristotle &nbsp;<i>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i>. &nbsp;-? &nbsp;<i>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i>-? &nbsp;<i>If you can't explain it simply, you don't understand it well enough.&nbsp;</i>-Einstein &nbsp;<i>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i>&nbsp;-Twain<br><br><kbd>f</kbd>&nbsp;justify full<div style='text-align: justify;'><i style='text-align: start;'>For the things we have to learn before we can do them, we learn by doing them</i><span style='text-align: start;'>. -Aristotle &nbsp;</span><i style='text-align: start;'>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i><span style='text-align: start;'>. &nbsp;-? &nbsp;</span><i style='text-align: start;'>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i><span style='text-align: start;'>-? &nbsp;</span><i style='text-align: start;'>If you can't explain it simply, you don't understand it well enough.&nbsp;</i><span style='text-align: start;'>-Einstein &nbsp;</span><i style='text-align: start;'>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i><span style='text-align: start;'>&nbsp;-Twain</span>");
+			} else {
+				iframe.write(deparseBlock(content));
+			}
 			iframe.close();
 
 			block = block.childNodes[0];
@@ -1635,7 +1665,18 @@ function insertContent(bid,btype,content) {
 		xcode.setAttribute("class","xCde");
 		xcode.setAttribute("onblur","renderCode(this)");
 		xcode.contentEditable = "true";
-		xcode.innerHTML = content;
+
+		/* defaul text */
+		if(globalScope.defaulttext && content === "") {
+			xcode.innerHTML = `var description = "Programming languages are auto-detected.";<br>
+function default(parameter) {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;var instructions = "When you click outside the block, the syntax is highlighted.";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;alert(parameter + instructions);<br>
+}<br>
+default(description);`;
+		} else {
+			xcode.innerHTML = deparseBlock(content);
+		}
 
 		block.appendChild(xcode);
 
@@ -1649,12 +1690,27 @@ function insertContent(bid,btype,content) {
 		}
 	} else if(btype === "xmath") {
 		var mathpreview = '<div class="mathImage"></div>';
-		var mathstr = '<div class="xMat" onblur="renderMath(this);" contenteditable>' + content + '</code>';
+
+		var mathstr;
+		/* defaul text */
+		if(globalScope.defaulttext && content === "") {
+			mathstr = '<div class="xMat" onblur="renderMath(this);" contenteditable>AsciiMath \\ Mark \\ Up: \\ \\ \\ sum_(i=1)^n i^3=((n(n+1))/2)^2</div>';
+		} else {
+			mathstr = '<div class="xMat" onblur="renderMath(this);" contenteditable>' + deparseBlock(content) + '</div>';
+		}
+
 		block.innerHTML = mathpreview + mathstr;
 	} else if(btype === "latex") {
 
 		var latexpreview = '<div class="latexImage"></div>';
-		var latexstr = '<div class="xLtx" onblur="renderLatex(this);" contenteditable>' + content + '</code>';
+
+		var latexstr;
+		/* defaul text */
+		if(globalScope.defaulttext && content === "") {
+			latexstr = '<div class="xLtx" onblur="renderLatex(this);" contenteditable>LaTeX \\ Mark \\ Up: \\quad \\frac{d}{dx}\\left( \\int_{0}^{x} f(u)\\,du\\right)=f(x)</div>';
+		} else {
+			latexstr = '<div class="xLtx" onblur="renderLatex(this);" contenteditable>' + deparseBlock(content) + '</div>';
+		}
 		block.innerHTML = latexpreview + latexstr;
 	} else if(btype === "image") {
 		var ximg = document.createElement("img");
@@ -1751,7 +1807,7 @@ function insertContent(bid,btype,content) {
 		};
 	} else if(btype === "title") {
 
-		var str = '<input type="text" class="xTit" maxlength="64" value="' + content + '">';
+		var str = '<input type="text" class="xTit" maxlength="64" value="' + deparseBlock(content) + '">';
 		block.innerHTML = str;
 	}
 
@@ -1812,6 +1868,10 @@ function codeKeys(block,event) {
 */
 function detectKey(iframe,event) {
 
+	/* p : plain */
+    if(event.shiftKey && event.ctrlKey && event.keyCode === 80) {
+		iframe.contentDocument.execCommand('removeFormat',false,null);
+	}
     /* b : bold */
     if(event.shiftKey && event.ctrlKey && event.keyCode === 66) {
 		iframe.contentDocument.execCommand('bold',false,null);
@@ -1819,6 +1879,10 @@ function detectKey(iframe,event) {
 	/* i : italics */
 	if(event.shiftKey && event.ctrlKey && event.keyCode === 73) {
 		iframe.contentDocument.execCommand('italic',false,null);
+	}
+	/* h : highlight */
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 72) {
+		iframe.contentDocument.execCommand('backColor',false,"yellow");
 	}
 	/* l : list */
 	if(event.shiftKey && event.ctrlKey && event.keyCode === 76) {
@@ -1844,13 +1908,13 @@ function detectKey(iframe,event) {
 	if(event.keyCode === 9) {
 		iframe.contentDocument.execCommand('insertHTML',false,'&nbsp;&nbsp;&nbsp;&nbsp;');
 	}
-	/* h - hyperlink */
-	if(event.shiftKey && event.ctrlKey && event.keyCode === 72) {
+	/* a - anchor */
+	if(event.shiftKey && event.ctrlKey && event.keyCode === 65) {
 		var callback = function(event,str) {
 			if(event) {
 				if (str.indexOf("http://") < 0 && str.indexOf("https://") < 0) {
 					iframe.contentDocument.execCommand('createLink',false,"http://" + str);
-				} else if (str.indexOf("http://") > 0 || str.indexOf("https://") > 0) {
+				} else if (str.indexOf("http://") === 0 || str.indexOf("https://") === 0) {
 					iframe.contentDocument.execCommand('createLink',false,str);
 				} else {
 					alertify.log("Not A Valid Link!","error");
@@ -1858,6 +1922,28 @@ function detectKey(iframe,event) {
 			} else { /* cancel */ }
 		};
 		alertify.prompt('Enter the link: ',callback,'http://');
+	}
+
+	/* Command + letter, works for these, but include for consistency */
+	/* x : cut */
+    if(event.shiftKey && event.ctrlKey && event.keyCode === 88) {
+		iframe.contentDocument.execCommand('cut',false,null);
+	}
+	/* c : copy */
+    if(event.shiftKey && event.ctrlKey && event.keyCode === 67) {
+		iframe.contentDocument.execCommand('copy',false,null);
+	}
+	/* v : paste */
+    if(event.shiftKey && event.ctrlKey && event.keyCode === 86) {
+		iframe.contentDocument.execCommand('paste',false,null);
+	}
+	/* z : undo */
+    if(event.shiftKey && event.ctrlKey && event.keyCode === 90) {
+		iframe.contentDocument.execCommand('undo',false,null);
+	}
+	/* y : redo */
+    if(event.shiftKey && event.ctrlKey && event.keyCode === 89) {
+		iframe.contentDocument.execCommand('redo',false,null);
 	}
 
 	/// is this necessary ??
@@ -2120,8 +2206,8 @@ function blockButtons(bid) {
 	buttonDiv.appendChild(imgBtn);
 	buttonDiv.appendChild(audBtn);
 	buttonDiv.appendChild(vidBtn);
-	/// buttonDiv.appendChild(sliBtn);
-	buttonDiv.appendChild(svgBtn);
+	buttonDiv.appendChild(sliBtn);
+	/// buttonDiv.appendChild(svgBtn);
 	buttonDiv.appendChild(titBtn);
 	buttonDiv.appendChild(delBtn);
 
@@ -2981,6 +3067,9 @@ function saveBlocks(which) {
 	/// need solution for escaping: ' , & in the xtext,xcode,latex,xmath blocks
 	/// ' breaks strings , breaks arrays & breaks ajax params
 	///
+	/// different delimiters should be chosen for commas
+	/// regex should replace & with "and"
+	/// regex should replace single quotes with double quotes??
 
 	/* get the block types & contents */
 	if(blockCount > 0) {
@@ -2997,7 +3086,7 @@ function saveBlocks(which) {
 				blockContent[i] = document.getElementById('a' + bid).children[0].contentDocument.getElementsByTagName('body')[0].innerHTML;
 
 				/// NEED SOLUTION
-				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
+				blockContent[i] = parseBlock(blockContent[i]);
 			} else if (btype === "xcode") {
 				blockContent[i] = document.getElementById('a' + bid).children[0].textContent;
 
@@ -3005,13 +3094,13 @@ function saveBlocks(which) {
 				/// needs to ignore all span classes: "<span" to next ">" and "</span>"
 
 				/// NEED SOLUTION
-				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
+				blockContent[i] = parseBlock(blockContent[i]);
 			} else if (btype === "latex" || btype === "xmath") {
 				/* replace() is for escaping backslashes */
 				blockContent[i] = document.getElementById('a' + bid).children[1].innerHTML.replace(/\\/g,"\\\\");
 
 				/// NEED SOLUTION
-				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
+				blockContent[i] = parseBlock(blockContent[i]);
 			} else if (btype === "image") {
 				var imagestr = document.getElementById('a' + bid).children[0].src;
 				blockContent[i] = imagestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
@@ -3028,7 +3117,7 @@ function saveBlocks(which) {
 				blockContent[i] = document.getElementById('a' + bid).children[0].value;
 
 				/// NEED SOLUTION
-				blockContent[i] = blockContent[i].replace(/'/g," ").replace(/,/g," ").replace(/&/g," ");
+				blockContent[i] = parseBlock(blockContent[i]);
 			}
 
 			i++;
@@ -3079,7 +3168,7 @@ function saveBlocks(which) {
 					} else if (xmlhttp.responseText === "nosaveloggedout") {
 						alertify.alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
 					} else {
-						alertify.alert("An Unknown Error Occurred");
+						alertify.alert("An Unknown Save Error Occurred");
 					}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
