@@ -241,12 +241,38 @@ function loadTopics(listCategories) {
 	greyFirstSelect(listTopics);
 }
 
-function deparseBlock(blockText) {
-	return blockText.replace(/@@SQ/g,"'").replace(/@@CO/g,",").replace(/@@AM/g,"&").replace(/@@NL/g,"\n").replace(/@@BRO/g,"<br>").replace(/@@BRC/g,"</br>").replace(/@@SPANO/g,"<span>").replace(/@@SPANC/g,"</span>");
+function deparseBlock(blockType,blockText) {
+	var deparsed = blockText.replace(/@SP@/g," ").replace(/@HS@/g,"&nbsp;").replace(/@AM@/g,"&").replace(/@DQ@/g,"\"").replace(/@SQ@/g,"'").replace(/@CO@/g,",").replace(/@PL@/g,"+").replace(/@BR@/g,"<br>").replace(/@BC@/g,"</br>");
+	if(blockType === "xtext") {
+		//deparsed = "";
+	} else if (blockType === "xcode") {
+		//deparsed = "";
+	} else {
+		//deparsed = "";
+	}
+	return deparsed;
 }
 
-function parseBlock(blockText) {
-	return blockText.replace(/'/g,"@@SQ").replace(/,/g,"@@CO").replace(/&/g,"@@AM").replace(/\n/g,"@@NL").replace(/<br>/g,"@@BRO").replace(/<\/br>/g,"@@BRC").replace(/<span>/g,"@@SPANO").replace(/<\/span>/g,"@@SPANC");
+/*
+	spaces -  ajax urls
+	&nbsp; - ajax delimiters
+	& - ajax delimiters
+	" - ajax strings
+	' - ajax strings
+	, - array delimiters
+	+ - interpreted as spaces in urls
+	<br> - maintaini new lines
+*/
+function parseBlock(blockType,blockText) {
+	var parsed = blockText.replace(/ /g,"@SP@").replace(/&nbsp;/g,"@HS@").replace(/&/g,"@AM@").replace(/"/g,"@DQ@").replace(/'/g,"@SQ@").replace(/,/g,"@CO@").replace(/\+/g,"@PL@").replace(/<br>/g,"@BR@").replace(/<\/br>/g,"@BC@");
+	if(blockType === "xtext") {
+		//parsed = "";
+	} else if (blockType === "xcode") {
+		parsed = parsed.replace(/<span[^>]*>/g,"").replace(/<\/span>/g,"");
+	} else {
+		//parsed = "";
+	}
+	return parsed;
 }
 
 function urlEscape(str) {
@@ -1641,9 +1667,9 @@ function insertContent(bid,btype,content) {
 
 			/* defaul text */
 			if(globalScope.defaulttext && content === "") {
-				iframe.write("You can turn this default text off on your Profile Page.<br><br>Press&nbsp;<kbd>shift</kbd>&nbsp;and&nbsp;<kbd>ctrl</kbd>&nbsp;with the following keys to style text:<br><br><kbd>p</kbd>&nbsp;plain<br><kbd>b</kbd>&nbsp;<b>bold</b><br><kbd>i</kbd>&nbsp;<i>italics</i><br><kbd>h</kbd>&nbsp;<span style='background-color: yellow;'>highlight</span><br><kbd>+</kbd>&nbsp;<sup>superscript</sup><br><kbd>-</kbd>&nbsp;<sub>subscript</sub><br><kbd>a</kbd>&nbsp;<a href='http://abaganon.com/'>anchor link</a><ul><li><kbd>l</kbd>&nbsp;list</li></ul><br><kbd>j</kbd>&nbsp;justify left<i>For the things we have to learn before we can do them, we learn by doing them</i>. -Aristotle &nbsp;<i>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i>. &nbsp;-? &nbsp;<i>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i>-? &nbsp;<i>If you can't explain it simply, you don't understand it well enough.&nbsp;</i>-Einstein &nbsp;<i>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i>&nbsp;-Twain<br><br><kbd>f</kbd>&nbsp;justify full<div style='text-align: justify;'><i style='text-align: start;'>For the things we have to learn before we can do them, we learn by doing them</i><span style='text-align: start;'>. -Aristotle &nbsp;</span><i style='text-align: start;'>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i><span style='text-align: start;'>. &nbsp;-? &nbsp;</span><i style='text-align: start;'>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i><span style='text-align: start;'>-? &nbsp;</span><i style='text-align: start;'>If you can't explain it simply, you don't understand it well enough.&nbsp;</i><span style='text-align: start;'>-Einstein &nbsp;</span><i style='text-align: start;'>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i><span style='text-align: start;'>&nbsp;-Twain</span>");
+				iframe.write("You can turn this default text off on your Profile Page.<br><br>Press&nbsp;<kbd>shift</kbd>&nbsp;and&nbsp;<kbd>ctrl</kbd>&nbsp;with the following keys to style text:<br><br><kbd>p</kbd>&nbsp;plain<br><kbd>b</kbd>&nbsp;<b>bold</b><br><kbd>i</kbd>&nbsp;<i>italics</i><br><kbd>h</kbd>&nbsp;<span style='background-color: yellow;'>highlight</span><br><kbd>+</kbd>&nbsp;<sup>superscript</sup><br><kbd>-</kbd>&nbsp;<sub>subscript</sub><br><kbd>a</kbd>&nbsp;<a href='http://abaganon.com/'>anchor link</a><ul><li><kbd>l</kbd>&nbsp;list</li></ul><kbd>j</kbd>&nbsp;justify left<br><i>For the things we have to learn before we can do them, we learn by doing them</i>. -Aristotle &nbsp;<i>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i>. &nbsp;-? &nbsp;<i>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i>-? &nbsp;<i>If you can't explain it simply, you don't understand it well enough.&nbsp;</i>-Einstein &nbsp;<i>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i>&nbsp;-Twain<br><br><kbd>f</kbd>&nbsp;justify full<div style='text-align: justify;'><i style='text-align: start;'>For the things we have to learn before we can do them, we learn by doing them</i><span style='text-align: start;'>. -Aristotle &nbsp;</span><i style='text-align: start;'>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i><span style='text-align: start;'>. &nbsp;-? &nbsp;</span><i style='text-align: start;'>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i><span style='text-align: start;'>-? &nbsp;</span><i style='text-align: start;'>If you can't explain it simply, you don't understand it well enough.&nbsp;</i><span style='text-align: start;'>-Einstein &nbsp;</span><i style='text-align: start;'>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i><span style='text-align: start;'>&nbsp;-Twain</span>");
 			} else {
-				iframe.write(deparseBlock(content));
+				iframe.write(deparseBlock(btype,content));
 			}
 			iframe.close();
 
@@ -1668,14 +1694,9 @@ function insertContent(bid,btype,content) {
 
 		/* defaul text */
 		if(globalScope.defaulttext && content === "") {
-			xcode.innerHTML = `var description = "Programming languages are auto-detected.";<br>
-function default(parameter) {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;var instructions = "When you click outside the block, the syntax is highlighted.";<br>
-&nbsp;&nbsp;&nbsp;&nbsp;alert(parameter + instructions);<br>
-}<br>
-default(description);`;
+			xcode.innerHTML = "var description = 'Programming languages are auto-detected.';<br>function default(parameter) {<br>&nbsp;&nbsp;&nbsp;&nbsp;var instructions = 'When you click outside the block syntax is highlighted.';<br>&nbsp;&nbsp;&nbsp;&nbsp;alert(parameter + instructions);<br>}<br>default(description);";
 		} else {
-			xcode.innerHTML = deparseBlock(content);
+			xcode.innerHTML = deparseBlock(btype,content);
 		}
 
 		block.appendChild(xcode);
@@ -1696,7 +1717,7 @@ default(description);`;
 		if(globalScope.defaulttext && content === "") {
 			mathstr = '<div class="xMat" onblur="renderMath(this);" contenteditable>AsciiMath \\ Mark \\ Up: \\ \\ \\ sum_(i=1)^n i^3=((n(n+1))/2)^2</div>';
 		} else {
-			mathstr = '<div class="xMat" onblur="renderMath(this);" contenteditable>' + deparseBlock(content) + '</div>';
+			mathstr = '<div class="xMat" onblur="renderMath(this);" contenteditable>' + deparseBlock(btype,content) + '</div>';
 		}
 
 		block.innerHTML = mathpreview + mathstr;
@@ -1709,7 +1730,7 @@ default(description);`;
 		if(globalScope.defaulttext && content === "") {
 			latexstr = '<div class="xLtx" onblur="renderLatex(this);" contenteditable>LaTeX \\ Mark \\ Up: \\quad \\frac{d}{dx}\\left( \\int_{0}^{x} f(u)\\,du\\right)=f(x)</div>';
 		} else {
-			latexstr = '<div class="xLtx" onblur="renderLatex(this);" contenteditable>' + deparseBlock(content) + '</div>';
+			latexstr = '<div class="xLtx" onblur="renderLatex(this);" contenteditable>' + deparseBlock(btype,content) + '</div>';
 		}
 		block.innerHTML = latexpreview + latexstr;
 	} else if(btype === "image") {
@@ -1807,7 +1828,7 @@ default(description);`;
 		};
 	} else if(btype === "title") {
 
-		var str = '<input type="text" class="xTit" maxlength="64" value="' + deparseBlock(content) + '">';
+		var str = '<input type="text" class="xTit" maxlength="64" value="' + deparseBlock(btype,content) + '">';
 		block.innerHTML = str;
 	}
 
@@ -3063,14 +3084,6 @@ function saveBlocks(which) {
 	var blockCount = countBlocks();
 	var bid = 1;
 
-	///
-	/// need solution for escaping: ' , & in the xtext,xcode,latex,xmath blocks
-	/// ' breaks strings , breaks arrays & breaks ajax params
-	///
-	/// different delimiters should be chosen for commas
-	/// regex should replace & with "and"
-	/// regex should replace single quotes with double quotes??
-
 	/* get the block types & contents */
 	if(blockCount > 0) {
 		var i = 0;
@@ -3084,23 +3097,14 @@ function saveBlocks(which) {
 
 				/* execCommand() applies style tags to <body> tag inside <iframe>, hence .getElementsByTagName('body')[0] */
 				blockContent[i] = document.getElementById('a' + bid).children[0].contentDocument.getElementsByTagName('body')[0].innerHTML;
-
-				/// NEED SOLUTION
-				blockContent[i] = parseBlock(blockContent[i]);
+				blockContent[i] = parseBlock(btype,blockContent[i]);
 			} else if (btype === "xcode") {
-				blockContent[i] = document.getElementById('a' + bid).children[0].textContent;
-
-				/// this needs to grab innerHTML instead and will need to be passed through a parse
-				/// needs to ignore all span classes: "<span" to next ">" and "</span>"
-
-				/// NEED SOLUTION
-				blockContent[i] = parseBlock(blockContent[i]);
+				blockContent[i] = document.getElementById('a' + bid).children[0].innerHTML;
+				blockContent[i] = parseBlock(btype,blockContent[i]);
 			} else if (btype === "latex" || btype === "xmath") {
 				/* replace() is for escaping backslashes */
 				blockContent[i] = document.getElementById('a' + bid).children[1].innerHTML.replace(/\\/g,"\\\\");
-
-				/// NEED SOLUTION
-				blockContent[i] = parseBlock(blockContent[i]);
+				blockContent[i] = parseBlock(btype,blockContent[i]);
 			} else if (btype === "image") {
 				var imagestr = document.getElementById('a' + bid).children[0].src;
 				blockContent[i] = imagestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
@@ -3115,9 +3119,7 @@ function saveBlocks(which) {
 				blockContent[i] = slidestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 			} else if (btype === "title") {
 				blockContent[i] = document.getElementById('a' + bid).children[0].value;
-
-				/// NEED SOLUTION
-				blockContent[i] = parseBlock(blockContent[i]);
+				blockContent[i] = parseBlock(btype,blockContent[i]);
 			}
 
 			i++;

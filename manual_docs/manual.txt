@@ -133,6 +133,7 @@ These plug-ins for Atom help stream-line work flow.
 > apm install git-time-machine
 > apm install data-atom
 > apm install remote-ftp
+> apm install package-manager
 
 > apm install custom-folds
 - set open & close tags for custom-folds: <<<code>>> & <<<fold>>>

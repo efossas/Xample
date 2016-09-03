@@ -358,6 +358,8 @@ iframe.xTex {
 }
 
 .xCde {
+	white-space: pre-line;
+
 	display: inline-block;
 	width: 720px;
 	height: 300px;
