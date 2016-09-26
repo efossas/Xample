@@ -3,3 +3,4 @@ sync.sh
 xample/node_modules/
 xample/*.js
 public_html/js/*.js
+test

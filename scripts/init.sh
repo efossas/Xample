@@ -1,11 +1,23 @@
 #!/bin/bash
 
+
+if [ $(which nvm &> /dev/null) ]; then
+  curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.3/install.sh | bash
+  nvm install node
+  nvm use node
+fi
+
 if [ "$(uname)" == "Darwin" ]; then
+  if [ $(which brew &> /dev/null) ]; then
+    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    nvm install node
+    nvm use node
+  fi
   brew update
   brew install imagemagick
   brew install mysql
   brew install unoconv
-  brew install node
+  brew install ffmpeg
   brew cask install atom
 
   if [ ! -e /var/mysql ]; then
@@ -26,7 +38,6 @@ if [ "$response" == "y" ]; then
   apm install file-icons
   apm install atom-minify
   apm install terminal-plus
-  apm install atom-minify
   apm install script
   apm install git-plus
   apm install merge-conflicts
