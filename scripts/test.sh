@@ -1,14 +1,21 @@
-TEMP_DIR="temp"
+TEMP_DIR="test"
+PORT=2020
+
+rm -rf $TEMP_DIR
 mkdir $TEMP_DIR
 
-cp ./public_html $TEMP_DIR/public_html
-cp ./xample $TEMP_DIR/xample
+cp -R public_html $TEMP_DIR
+cp -R xample $TEMP_DIR
 
-sudo brew services start mysql
-mysql -uroot
+if [ -z $(pgrep "mysqld") ]; then
+   echo "No mysql server instance, starting one"
+   mysqld &
+fi
 
-npm install
-source ./db/initialize.sql
+echo "source ./db/initialize.sql;" | mysql -uroot
 
 cd $TEMP_DIR/xample
-node xample.js local 2020
+echo "Starting Xample on $PORT ... ctrl + c to stop process"
+node xample.js local $PORT
+
+echo "source ./db/destroy.sql;" > mysql -uroot

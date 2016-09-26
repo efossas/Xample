@@ -34,7 +34,10 @@ Object.defineProperty(global, "__stack", {
 declare const __line;
 Object.defineProperty(global, "__line", {
     get: function() {
-        return __stack[1].getLineNumber();
+        if (__stack[1].getLineNumber)
+            return __stack[1].getLineNumber();
+        else
+            return "THE LINE NUMBERS OF ERRORS ISNT WORKING"; // TODO whats going on here??
     }
 });
 
@@ -659,7 +662,7 @@ function deleteMedia(connection, uid, pid) {
                     let exists = false;
                     let difference = existing.filter(function(existingfile) {
                         exists = false;
-                        (<Array<any>> success).forEach(function(tablefile) {
+                        (<Array<any>>success).forEach(function(tablefile) {
                             if (tablefile === existingfile) {
                                 exists = true;
                             }

@@ -26,10 +26,8 @@
 */
 
 declare var hljs; // Loaded externally from library.
-declare var pdfObjects; // Loaded externally from a library.
-
-// TODO global variables should be wrapped
-declare var globalScope: OurGlobal;
+const pdfObjects = {}; // Loaded externally from a library.
+const globalScope: OurGlobal = {}; // TODO global variables should be wrapped
 
 
 /*
@@ -2866,9 +2864,9 @@ function createpage() {
 
     /* get the page name */
     const pagename = (<HTMLTextAreaElement>document.getElementsByName("pagename-create")[0]).value;
-    let subject = (<HTMLTextAreaElement>document.getElementsByName("select-subject")[0]).value;
-    let category = (<HTMLTextAreaElement>document.getElementsByName("select-category")[0]).value;
-    let topic = (<HTMLTextAreaElement>document.getElementsByName("select-topic")[0]).value;
+    let subject = (<HTMLTextAreaElement>document.getElementById("select-subject")).value;
+    let category = (<HTMLTextAreaElement>document.getElementById("select-category")).value;
+    let topic = (<HTMLTextAreaElement>document.getElementById("select-topic")).value;
 
     if (pagename === "" || subject === "" || category === "" || topic === "") {
         alertify.alert("Please Choose A Topic & Enter A Page Name.");
@@ -3409,9 +3407,9 @@ function getUserFields(fields) {
     return promise;
 }
 
-interface OurGlobal extends Window {
-    subjects: {};
-    defaulttext: boolean;
+interface OurGlobal {
+    subjects?: {};
+    defaulttext?: boolean;
 }
 
 interface BlockWithContentDocument extends HTMLElement {
