@@ -1,5 +1,3 @@
-/* eslint-env node, es6 */
-
 /*
 	Section: Xample
 
@@ -94,7 +92,7 @@ function slack(message) {
         icon_emoji: ":rage:",
         // postData.channel = "#error";
         text: message
-    }
+    };
 
     const option = {
         url: "https:///hooks.slack.com/services/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",

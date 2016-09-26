@@ -24,13 +24,32 @@
 	pdfObjects - pdf.js generates pdf objects that can be used to render individual pages to <canvas>
 	globalScope - attach needed global variables as properties to this object
 */
-/* global hljs:true */
 
-//TODO
-declare var hljs;
+// TODO
+declare var hljs; // Loaded externally from library.
+declare var pdfObjects; // Loaded externally from a library.
 
-const pdfObjects = {};
-const globalScope = {};
+// some temporary stuff... all this at the top is utter crap right now.
+interface OurGlobal extends Window {
+    subjects: {};
+    defaulttext: boolean;
+}
+
+interface BlockWithContentDocument extends HTMLElement {
+    contentDocument: ContentDocument;
+}
+
+interface ContentDocument extends HTMLElement {
+    designMode: string;
+    open: () => any;
+    write: (a) => any;
+    close: () => any;
+    attachEvent: (a, b) => any;
+}
+
+declare var globalScope: OurGlobal; // TODO
+
+
 /*
 	Section: Helper Functions
 	These are helper functions.
@@ -113,7 +132,7 @@ function greyFirstSelect(selectTag) {
 }
 
 function goToPage() {
-    const selectBox = document.getElementById("page-select");
+    const selectBox = <HTMLSelectElement>document.getElementById("page-select");
     const page = selectBox.value;
 
     if (page === "") {
@@ -125,7 +144,7 @@ function goToPage() {
 }
 
 function deletePageConfirm() {
-    const selectBox = document.getElementById("page-select");
+    const selectBox = <HTMLSelectElement>document.getElementById("page-select");
     const page = selectBox.value;
 
     if (page === "") {
@@ -147,11 +166,11 @@ function loadCategories(listSubjects) {
     const subject = listSubjects.options[listSubjects.selectedIndex].value;
 
     /* get & empty the category selection element */
-    const listCategories = document.getElementById("select-category");
+    const listCategories = <HTMLSelectElement>document.getElementById("select-category");
     emptyDiv(listCategories);
 
     /* create the default first selection */
-    const optionCategory = document.createElement("option");
+    let optionCategory = document.createElement("option");
     optionCategory.setAttribute("value", "");
     optionCategory.innerHTML = "choose category";
     listCategories.appendChild(optionCategory);
@@ -195,11 +214,11 @@ function loadTopics(listCategories) {
     const category = listCategories.options[listCategories.selectedIndex].value;
 
     /* get the selected subject using id */
-    const selectSubject = document.getElementById("select-subject");
+    const selectSubject = <HTMLSelectElement>document.getElementById("select-subject");
     const subject = selectSubject.options[selectSubject.selectedIndex].value;
 
     /* get & empty the topic selection element */
-    const listTopics = document.getElementById("select-topic");
+    const listTopics = <HTMLSelectElement>document.getElementById("select-topic");
     emptyDiv(listTopics);
 
     /* create the default first option */
@@ -232,7 +251,7 @@ function loadTopics(listCategories) {
     greyFirstSelect(listTopics);
 }
 
-function deparseBlock(blockType, blockText) {
+function deparseBlock(blockType: string, blockText: string) {
     const deparsed = blockText.replace(/@SP@/g, " ").replace(/@HS@/g, "&nbsp;").replace(/@AM@/g, "&").replace(/@DQ@/g, "\"").replace(/@SQ@/g, "'").replace(/@CO@/g, ",").replace(/@PL@/g, "+").replace(/@BR@/g, "<br>").replace(/@BC@/g, "</br>");
     if (blockType === "xtext") {
         // deparsed = "";
@@ -272,14 +291,10 @@ function urlEscape(str) {
     return str;
 }
 
-// <<<fold>>>
-
 /*
 	Section: Display Functions
 	These are functions to create, remove, or show page elements (except for blocks).
 */
-
-// <<<code>>>
 
 /*
 	Function: btnLogOut
@@ -423,8 +438,8 @@ function dashSaveProgress() {
 
     const progressbar = document.createElement("progress");
     progressbar.setAttribute("id", "progressbar");
-    progressbar.setAttribute("value", 100);
-    progressbar.setAttribute("max", 100);
+    progressbar.setAttribute("value", "100");
+    progressbar.setAttribute("max", "100");
     progressbar.style.visibility = "hidden";
     progressbar.style.display = "none";
 
@@ -612,7 +627,7 @@ function loadTempPage(pid) {
 
     const url = createURL("/editpage?page=" + pid + "&temp=true");
 
-    window.location = url;
+    window.location.href = url;
 }
 
 /*
@@ -632,7 +647,7 @@ function loadPermPage(pid) {
 
     const url = createURL("/editpage?page=" + pid + "&temp=false");
 
-    window.location = url;
+    window.location.href = url;
 }
 
 /*
@@ -674,7 +689,7 @@ function progressInitialize(msg, max) {
     document.getElementById("autosave").style.visibility = "hidden";
     document.getElementById("autosave").style.display = "none";
 
-    document.getElementById("progressbar").setAttribute("value", 0);
+    document.getElementById("progressbar").setAttribute("value", "0");
     document.getElementById("progressbar").setAttribute("max", max);
     document.getElementById("progressbar").style.visibility = "visible";
     document.getElementById("progressbar").style.display = "block";
@@ -1069,7 +1084,7 @@ function pageEdit(pagedata) {
         /* create block + button div */
         const group = document.createElement("div");
         group.setAttribute("class", "block");
-        group.setAttribute("id", i);
+        group.setAttribute("id", "" + i);
 
         group.appendChild(block);
         group.appendChild(buttons);
@@ -1126,7 +1141,7 @@ function pageEdit(pagedata) {
     const textblocks = document.getElementsByClassName("xTex");
     const cntT = textblocks.length;
     for (i = 0; i < cntT; i++) {
-        textblocks[i].contentDocument.designMode = "on";
+        (<BlockWithContentDocument>textblocks[i]).contentDocument.designMode = "on";
     }
 
     /* render any code blocks */
@@ -1156,7 +1171,7 @@ function pageEdit(pagedata) {
     /* set defaulttext in globals */
     const promiseDefaultText = getUserFields(["defaulttext"]);
 
-    promiseDefaultText.then(function(data) {
+    promiseDefaultText.then(function(data: any) {
         if (data.defaulttext) {
             globalScope.defaulttext = true;
         } else {
@@ -1169,8 +1184,8 @@ function pageEdit(pagedata) {
 
     /* prevent user from exiting page if Revert or Save has not been clicked */
     window.onbeforeunload = function() {
-        const status = document.getElementsByName("statusid")[0].value;
-        if (status == 0) {
+        const status = (<HTMLTextAreaElement>document.getElementsByName("statusid")[0]).value;
+        if (+status === 0) {
             /// this text isn't being displayed... some default is instead
             return "Please click Revert or Save before exiting.";
         }
@@ -1266,22 +1281,22 @@ function pageHome() {
     const listSubjects = document.createElement("select");
     listSubjects.setAttribute("id", "select-subject");
     listSubjects.setAttribute("onchange", "loadCategories(this);");
-    listSubjects.style = "color: grey";
+    listSubjects.style.setProperty("color", "grey");
 
     const listCategories = document.createElement("select");
     listCategories.setAttribute("id", "select-category");
     listCategories.setAttribute("onchange", "loadTopics(this);");
-    listCategories.style = "color: grey";
+    listCategories.style.setProperty("color", "grey");
 
     const listTopics = document.createElement("select");
     listTopics.setAttribute("id", "select-topic");
     listTopics.setAttribute("onchange", "greyFirstSelect(this);");
-    listTopics.style = "color: grey";
+    listTopics.style.setProperty("color", "grey");
 
     /* get subjects for select topic list */
     const subjectsPromise = getSubjects();
 
-    subjectsPromise.then(function(success) {
+    subjectsPromise.then(function(success: string) {
         const subjectsData = JSON.parse(success);
         globalScope.subjects = subjectsData;
 
@@ -1359,7 +1374,7 @@ function pageHome() {
     /* fetch user pages */
     const promise = getPages();
 
-    promise.then(function(pages) {
+    promise.then(function(pages: string) {
         /* get the page data from comma-separated string */
         const pagearray = pages.split(",");
 
@@ -1588,7 +1603,7 @@ function countBlocks() {
         num++;
 
         /* undefined is double banged to false, and node is double banged to true */
-        miss = Boolean(document.getElementById(num));
+        miss = Boolean(document.getElementById("" + num));
     }
 
     /* decrement num, since the check for id happens after increment */
@@ -1633,7 +1648,7 @@ function generateBlock(bid, btype) {
 		success - html node, block
 */
 function insertContent(bid, btype, content) {
-    const block = generateBlock(bid, btype);
+    let block = generateBlock(bid, btype);
 
     if (btype === "xtext") {
         /* WYSIWIG uses iframe */
@@ -1652,7 +1667,7 @@ function insertContent(bid, btype, content) {
             cssLink.rel = "stylesheet";
             cssLink.type = "text/css";
 
-            const iframe = block.childNodes[0].contentDocument;
+            const iframe = (<BlockWithContentDocument>block.childNodes[0]).contentDocument;
             iframe.open();
             /// iframe.head.appendChild(cssLink); this can be used in show mode,not in edit mode
 
@@ -1664,7 +1679,7 @@ function insertContent(bid, btype, content) {
             }
             iframe.close();
 
-            block = block.childNodes[0];
+            block = <HTMLDivElement>block.childNodes[0];
 
             /* attach keyboard shortcuts to iframe */
             if (iframe.addEventListener) {
@@ -1695,15 +1710,15 @@ function insertContent(bid, btype, content) {
         /* attach keyboard shortcuts to iframe */
         if (xcode.addEventListener) {
             xcode.addEventListener("keydown", codeKeys.bind(null, block), false);
-        } else if (xcode.attachEvent) {
-            xcode.attachEvent("onkeydown", codeKeys.bind(null, block));
+        } else if ((<any>xcode).attachEvent) {
+            (<any>xcode).attachEvent("onkeydown", codeKeys.bind(null, block));
         } else {
             xcode.onkeydown = codeKeys.bind(null, block);
         }
     } else if (btype === "xmath") {
         const mathpreview = "<div class='mathImage'></div>";
 
-        const mathstr;
+        let mathstr;
         /* defaul text */
         if (globalScope.defaulttext && content === "") {
             mathstr = "<div class='xMat' onblur='renderMath(this);' contenteditable>AsciiMath \\ Mark \\ Up: \\ \\ \\ sum_(i=1)^n i^3=((n(n+1))/2)^2</div>";
@@ -1716,7 +1731,7 @@ function insertContent(bid, btype, content) {
 
         const latexpreview = "<div class='latexImage'></div>";
 
-        const latexstr;
+        let latexstr;
         /* defaul text */
         if (globalScope.defaulttext && content === "") {
             latexstr = "<div class='xLtx' onblur='renderLatex(this);' contenteditable>LaTeX \\ Mark \\ Up: \\quad \\frac{d}{dx}\\left( \\int_{0}^{x} f(u)\\,du\\right)=f(x)</div>";
@@ -1760,7 +1775,7 @@ function insertContent(bid, btype, content) {
         xsvgs.setAttribute("data-link", content);
 
         if (content !== "") {
-            getLocalLinkContent(content).then(function(svgdata) {
+            getLocalLinkContent(content).then(function(svgdata: string) {
                 /* remove the first line, which is just a DOCTYPE tag */
                 const svgArray = svgdata.split("\n");
                 xsvgs.innerHTML = svgArray[1];
@@ -1797,8 +1812,8 @@ function insertContent(bid, btype, content) {
             /// const Y = event.pageY - this.offsetTop;
 
             /* get the <canvas> tag, current page, pdf url/id, and the pdf total page count */
-            const canvas = this.childNodes[0];
-            const pageNum = canvas.getAttribute("data-page");
+            const canvas = <HTMLCanvasElement>this.childNodes[0];
+            let pageNum = +canvas.getAttribute("data-page");
             const pdfID = canvas.getAttribute("id");
             const pageCount = pdfObjects[pdfID].numPages;
 
@@ -1806,19 +1821,18 @@ function insertContent(bid, btype, content) {
             if (X > this.offsetWidth / 1.7) {
                 if (pageNum < pageCount) {
                     pageNum++;
-                    canvas.setAttribute("data-page", pageNum);
+                    canvas.setAttribute("data-page", "" + pageNum);
                     renderPDF(pdfObjects[pdfID], pageNum, canvas);
                 }
             } else {
                 if (pageNum > 1) {
                     pageNum--;
-                    canvas.setAttribute("data-page", pageNum);
+                    canvas.setAttribute("data-page", "" + pageNum);
                     renderPDF(pdfObjects[pdfID], pageNum, canvas);
                 }
             }
         };
     } else if (btype === "title") {
-
         const str = "<input type='text' class='xTit' maxlength='64' value=\"' + deparseBlock(btype, content) + '\">";
         block.innerHTML = str;
     }
@@ -2362,7 +2376,7 @@ function addBlock(bid, btype) {
         createBlock(bid, btype);
 
         /* grab the block iframe that was just made */
-        const block = document.getElementById("a" + (bid + 1)).childNodes[0];
+        const block = <BlockWithContentDocument>document.getElementById("a" + (bid + 1)).childNodes[0];
         const blockDoc = block.contentDocument;
 
         /* make iframe editable */
@@ -2496,7 +2510,7 @@ function deleteBlock(cbid) {
 function uploadMedia(bid, btype) {
 
     /* get the hidden file-select object that will store the user's file selection */
-    const fileSelect = document.getElementById("file-select");
+    const fileSelect = <HTMLInputElement>document.getElementById("file-select");
 
     /* change file-select to only accept files based on btype */
     switch (btype) {
@@ -2528,9 +2542,9 @@ function uploadMedia(bid, btype) {
         /* grab the selected file */
         const file = fileSelect.files[0];
 
-        const notvalid = false;
-        const nofile = false;
-        const errorMsg;
+        let notvalid = false;
+        let nofile = false;
+        let errorMsg;
         if (fileSelect.files.length > 0) {
             if (file.size > 4294967295) {
                 notvalid = true;
@@ -2557,7 +2571,7 @@ function uploadMedia(bid, btype) {
                 formData.append("media", file, file.name);
 
                 /* get the page id */
-                const pid = document.getElementsByName("pageid")[0].value;
+                const pid = (<HTMLTextAreaElement>document.getElementsByName("pageid")[0]).value;
 
                 /* grab the domain and create the url destination for the ajax request */
                 const url = createURL("/uploadmedia?pid=" + pid + "&btype=" + btype);
@@ -2566,7 +2580,7 @@ function uploadMedia(bid, btype) {
                 xmlhttp.open("POST", url, true);
 
                 /* upload progress */
-                xmlhttp.upload.onloadstart = function(e) {
+                xmlhttp.upload.onloadstart = function(e: any) {
                     progressInitialize("Uploading...", e.total);
                 };
                 xmlhttp.upload.onprogress = function(e) {
@@ -2578,28 +2592,29 @@ function uploadMedia(bid, btype) {
                     progressFinalize("Uploaded", e.total);
                 };
 
+                let counterNumber;
                 function counter(reset) {
-                    if (typeof counter.track === "undefined" || counter.track === 0) {
-                        counter.track = 1;
-                        return 1;
+                    if (typeof counterNumber === "undefined" || counterNumber === 0) {
+                        counterNumber = 1;
                     } else if (reset) {
-                        counter.track = 0;
-                        return 0;
+                        counterNumber = 0;
                     } else {
-                        counter.track++;
+                        counterNumber++;
                     }
-                    return counter.track;
+                    return counterNumber;
                 }
 
+                let positionPrev;
+                let positionCurr;
                 function position(spot) {
-                    if (typeof position.prev === "undefined") {
-                        position.prev = 0;
-                        position.curr = spot;
-                    } else if (position.curr !== spot) {
-                        position.prev = position.curr;
-                        position.curr = spot;
+                    if (typeof positionPrev === "undefined") {
+                        positionPrev = 0;
+                        positionCurr = spot;
+                    } else if (positionCurr !== spot) {
+                        positionPrev = positionCurr;
+                        positionCurr = spot;
                     }
-                    return [position.prev, position.curr];
+                    return [positionPrev, positionCurr];
                 }
 
                 /* conversion progress */
@@ -2648,22 +2663,22 @@ function uploadMedia(bid, btype) {
                 xmlhttp.send(formData);
             });
 
-            promise.then(function(success) {
+            promise.then(function(success: string) {
 
                 /* set the image source */
                 if (btype === "image") {
-                    const imagetag = document.getElementById("a" + bid).childNodes[0];
+                    const imagetag = <HTMLImageElement>document.getElementById("a" + bid).childNodes[0];
                     imagetag.src = success;
                 } else if (btype === "audio" || btype === "video") {
                     /* audio & video divs have their src set in an extra child node */
-                    const mediatag = document.getElementById("a" + bid).childNodes[0].childNodes[0];
+                    const mediatag = <HTMLAudioElement | HTMLVideoElement>document.getElementById("a" + bid).childNodes[0].childNodes[0];
                     mediatag.src = success;
-                    mediatag.parentNode.load();
+                    (<HTMLAudioElement | HTMLVideoElement>mediatag.parentNode).load();
                 } else if (btype === "xsvgs") {
                     /* load the svg file's contents into the block */
-                    const svgtag = document.getElementById("a" + bid).childNodes[0];
+                    const svgtag = <HTMLElement>document.getElementById("a" + bid).childNodes[0];
                     svgtag.setAttribute("data-link", success);
-                    getLocalLinkContent(success).then(function(svgdata) {
+                    getLocalLinkContent(success).then(function(svgdata: string) {
                         /* remove the first line, which is just a DOCTYPE tag */
                         const svgArray = svgdata.split("\n");
                         svgtag.innerHTML = svgArray[1];
@@ -2676,7 +2691,7 @@ function uploadMedia(bid, btype) {
 
                         pdfObjects[success] = pdfObj;
 
-                        const slidetag = document.getElementById("a" + bid).childNodes[0];
+                        const slidetag = <HTMLElement>document.getElementById("a" + bid).childNodes[0];
                         slidetag.setAttribute("id", success);
 
                         renderPDF(pdfObj, 1, slidetag);
@@ -2718,13 +2733,12 @@ function login() {
     const url = createURL("/login");
 
     /* get the entered username and password */
-    const username = document.getElementsByName("username-login")[0].value;
-    const password = document.getElementsByName("password-login")[0].value;
+    const username = (<HTMLTextAreaElement>document.getElementsByName("username-login")[0]).value;
+    const password = (<HTMLTextAreaElement>document.getElementsByName("password-login")[0]).value;
 
     /// instant validation needed
 
-    const xmlhttp;
-    xmlhttp = new XMLHttpRequest();
+    const xmlhttp = new XMLHttpRequest();
 
     const params = "username=" + username + "&password=" + password;
 
@@ -2773,19 +2787,18 @@ function signup() {
     const url = createURL("/signup");
 
     /* get the user information */
-    const username = document.getElementsByName("username-signup")[0].value;
-    const email = document.getElementsByName("email-signup")[0].value;
-    const phone = document.getElementsByName("phone-signup")[0].value;
-    const password = document.getElementsByName("password-signup")[0].value;
-    const passwordcheck = document.getElementsByName("password-signup-check")[0].value;
+    const username = (<HTMLTextAreaElement>document.getElementsByName("username-signup")[0]).value;
+    const email = (<HTMLTextAreaElement>document.getElementsByName("email-signup")[0]).value;
+    const phone = (<HTMLTextAreaElement>document.getElementsByName("phone-signup")[0]).value;
+    const password = (<HTMLTextAreaElement>document.getElementsByName("password-signup")[0]).value;
+    const passwordcheck = (<HTMLTextAreaElement>document.getElementsByName("password-signup-check")[0]).value;
 
     /// todo: instant validation needed
     if (password !== passwordcheck) {
         /// oh fuck
     }
 
-    const xmlhttp;
-    xmlhttp = new XMLHttpRequest();
+    const xmlhttp = new XMLHttpRequest();
 
     const params = "username=" + username + "&email=" + email + "&phone=" + phone + "&password=" + password;
 
@@ -2831,8 +2844,7 @@ function logout() {
     /* create the url destination for the ajax request */
     const url = createURL("/logout");
 
-    const xmlhttp;
-    xmlhttp = new XMLHttpRequest();
+    const xmlhttp = new XMLHttpRequest();
 
     xmlhttp.open("POST", url, true);
 
@@ -2875,10 +2887,10 @@ function createpage() {
     const url = createURL("/createpage");
 
     /* get the page name */
-    const pagename = document.getElementsByName("pagename-create")[0].value; //why not urlescaped! TODO
-    let subject = document.getElementById("select-subject").value;
-    let category = document.getElementById("select-category").value;
-    let topic = document.getElementById("select-topic").value;
+    const pagename = (<HTMLTextAreaElement>document.getElementsByName("pagename-create")[0]).value;
+    let subject = (<HTMLTextAreaElement>document.getElementsByName("select-subject")[0]).value;
+    let category = (<HTMLTextAreaElement>document.getElementsByName("select-category")[0]).value;
+    let topic = (<HTMLTextAreaElement>document.getElementsByName("select-topic")[0]).value;
 
     if (pagename === "" || subject === "" || category === "" || topic === "") {
         alertify.alert("Please Choose A Topic & Enter A Page Name.");
@@ -2905,7 +2917,7 @@ function createpage() {
                     } else if (xmlhttp.responseText === "err") {
                         alertify.alert("An Error Occured. Please Try Again Later.");
                     } else {
-                        window.location = createURL("/editpage?page=" + xmlhttp.responseText);
+                        window.location.href = createURL("/editpage?page=" + xmlhttp.responseText);
                     }
                 } else {
                     alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -2933,7 +2945,7 @@ function deletePage(pid) {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
             if (xmlhttp.status === 200) {
                 if (xmlhttp.responseText === "success") {
-                    const selectBox = document.getElementById("page-select");
+                    const selectBox = <HTMLSelectElement>document.getElementById("page-select");
                     const count = selectBox.length;
                     let optionToRemove;
                     for (let i = 0; i < count; i++) {
@@ -3066,6 +3078,8 @@ function saveBlocks(which) {
 
     const blockCount = countBlocks();
     let bid = 1;
+    let types;
+    let contents;
 
     /* get the block types & contents */
     if (blockCount > 0) {
@@ -3079,7 +3093,7 @@ function saveBlocks(which) {
             if (btype === "xtext") {
 
                 /* execCommand() applies style tags to <body> tag inside <iframe>, hence .getElementsByTagName("body")[0] */
-                blockContent[i] = document.getElementById("a" + bid).children[0].contentDocument.getElementsByTagName("body")[0].innerHTML;
+                blockContent[i] = (<BlockWithContentDocument>document.getElementById("a" + bid).children[0]).contentDocument.getElementsByTagName("body")[0].innerHTML;
                 blockContent[i] = parseBlock(btype, blockContent[i]);
             } else if (btype === "xcode") {
                 blockContent[i] = document.getElementById("a" + bid).children[0].innerHTML;
@@ -3089,19 +3103,19 @@ function saveBlocks(which) {
                 blockContent[i] = document.getElementById("a" + bid).children[1].innerHTML.replace(/\\/g, "\\\\");
                 blockContent[i] = parseBlock(btype, blockContent[i]);
             } else if (btype === "image") {
-                const imagestr = document.getElementById("a" + bid).children[0].src;
+                const imagestr = (<HTMLImageElement>document.getElementById("a" + bid).children[0]).src;
                 blockContent[i] = imagestr.replace(location.href.substring(0, location.href.lastIndexOf("/") + 1), "");
             } else if (btype === "audio" || btype === "video") {
-                const mediastr = document.getElementById("a" + bid).children[0].children[0].src;
+                const mediastr = (<HTMLAudioElement | HTMLVideoElement>(<HTMLElement>document.getElementById("a" + bid).children[0]).children[0]).src;
                 blockContent[i] = mediastr.replace(location.href.substring(0, location.href.lastIndexOf("/") + 1), "");
             } else if (btype === "xsvgs") {
-                const svgstr = document.getElementById("a" + bid).childNodes[0].getAttribute("data-link");
+                const svgstr = (<HTMLElement>document.getElementById("a" + bid).childNodes[0]).getAttribute("data-link");
                 blockContent[i] = svgstr.replace(location.href.substring(0, location.href.lastIndexOf("/") + 1), "");
             } else if (btype === "slide") {
                 const slidestr = document.getElementById("a" + bid).children[0].id;
                 blockContent[i] = slidestr.replace(location.href.substring(0, location.href.lastIndexOf("/") + 1), "");
             } else if (btype === "title") {
-                blockContent[i] = document.getElementById("a" + bid).children[0].value;
+                blockContent[i] = (<HTMLTextAreaElement>document.getElementById("a" + bid).children[0]).value;
                 blockContent[i] = parseBlock(btype, blockContent[i]);
             }
 
@@ -3118,8 +3132,8 @@ function saveBlocks(which) {
     const url = createURL("/saveblocks");
 
     /* get pagename & pageid */
-    const pid = document.getElementsByName("pageid")[0].value;
-    const pagename = document.getElementsByName("pagename")[0].value;
+    const pid = (<HTMLTextAreaElement>document.getElementsByName("pageid")[0]).value;
+    const pagename = (<HTMLTextAreaElement>document.getElementsByName("pagename")[0]).value;
 
     const xmlhttp = new XMLHttpRequest();
 
@@ -3130,7 +3144,7 @@ function saveBlocks(which) {
                 progressUpdate(e.loaded);
             }
         };
-        xmlhttp.upload.onloadstart = function(e) {
+        xmlhttp.upload.onloadstart = function(e: any) {
             progressInitialize("Saving...", e.total);
         };
         xmlhttp.upload.onloadend = function(e) {
@@ -3181,8 +3195,8 @@ function revertBlocks() {
     const url = createURL("/revert");
 
     /* get the pid & page name */
-    const pid = document.getElementsByName("pageid")[0].value;
-    const pagename = document.getElementsByName("pagename")[0].value;
+    const pid = (<HTMLTextAreaElement>document.getElementsByName("pageid")[0]).value;
+    const pagename = (<HTMLTextAreaElement>document.getElementsByName("pagename")[0]).value;
 
     const xmlhttp = new XMLHttpRequest();
 
@@ -3235,11 +3249,11 @@ function saveProfileInfo(btn, fields) {
     const count = fields.length;
 
     if (count > 0) {
-        params = fields[i] + "=" + document.getElementsByName(fields[i])[0].value;
+        params = fields[i] + "=" + (<HTMLTextAreaElement>document.getElementsByName(fields[i])[0]).value;
         i++;
     }
     while (i < count) {
-        params += "&" + fields[i] + "=" + document.getElementsByName(fields[i])[0].value;
+        params += "&" + fields[i] + "=" + (<HTMLTextAreaElement>document.getElementsByName(fields[i])[0]).value;
         i++;
     }
 
@@ -3291,16 +3305,16 @@ function autosaveTimer(asdiv) {
 
     const promise = getUserFields(["autosave"]);
 
-    promise.then(function(data) {
+    promise.then(function(data: { autosave: number }) {
         const time = data.autosave;
 
-        if (time != 0) {
+        if (+time !== 0) {
             let timer = time;
             let minutes;
             let seconds;
             setInterval(function() {
-                minutes = parseInt(timer / 60, 10);
-                seconds = parseInt(timer % 60, 10);
+                minutes = Math.floor(timer / 60); // TODO
+                seconds = Math.floor(timer % 60);
 
                 minutes = minutes < 10 ? "0" + minutes : minutes;
                 seconds = seconds < 10 ? "0" + seconds : seconds;
@@ -3417,5 +3431,3 @@ function getUserFields(fields) {
 
     return promise;
 }
-
-// <<<fold>>>
