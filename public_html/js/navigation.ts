@@ -25,29 +25,11 @@
 	globalScope - attach needed global variables as properties to this object
 */
 
-// TODO
 declare var hljs; // Loaded externally from library.
 declare var pdfObjects; // Loaded externally from a library.
 
-// some temporary stuff... all this at the top is utter crap right now.
-interface OurGlobal extends Window {
-    subjects: {};
-    defaulttext: boolean;
-}
-
-interface BlockWithContentDocument extends HTMLElement {
-    contentDocument: ContentDocument;
-}
-
-interface ContentDocument extends HTMLElement {
-    designMode: string;
-    open: () => any;
-    write: (a) => any;
-    close: () => any;
-    attachEvent: (a, b) => any;
-}
-
-declare var globalScope: OurGlobal; // TODO
+// TODO global variables should be wrapped
+declare var globalScope: OurGlobal;
 
 
 /*
@@ -1572,14 +1554,10 @@ function pageProfile(profiledata) {
     main.appendChild(profilediv);
 }
 
-// <<<fold>>>
-
 /*
 	Section: Block Functions
 	These are functions that handle the block generator
 */
-
-// <<<code>>>
 
 /*
 	Function: countBlocks
@@ -3403,8 +3381,7 @@ function getUserFields(fields) {
         /* create the url destination for the ajax request */
         const url = createURL("/getprofiledata");
 
-        let xmlhttp;
-        xmlhttp = new XMLHttpRequest();
+        const xmlhttp = new XMLHttpRequest();
 
         xmlhttp.open("POST", url, true);
 
@@ -3430,4 +3407,21 @@ function getUserFields(fields) {
     });
 
     return promise;
+}
+
+interface OurGlobal extends Window {
+    subjects: {};
+    defaulttext: boolean;
+}
+
+interface BlockWithContentDocument extends HTMLElement {
+    contentDocument: ContentDocument;
+}
+
+interface ContentDocument extends HTMLElement {
+    designMode: string;
+    open: () => any;
+    write: (a) => any;
+    close: () => any;
+    attachEvent: (a, b) => any;
 }
