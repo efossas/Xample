@@ -1,2 +1,5 @@
 sync.sh
 .DS_Store
+xample/node_modules/
+xample/*.js
+public_html/js/*.js
