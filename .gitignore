@@ -1,1 +1,9 @@
 sync.sh
+.DS_Store
+xample/node_modules/
+xample/**/*.js
+xample/typings/globals/
+public_html/js/**/*.js
+public_html/bower_components/
+public_html/js/typings/
+test/

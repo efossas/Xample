@@ -35,7 +35,7 @@ Section: Environment Set Up
 This section walks through setting up your computer for local testing.
 
 If you are on Ubuntu, don't install Homebrew & replace "brew" with "apt-get".
-If you are on Windows, go buy a different computer.
+If you are on Windows, go buy a different computer. (There is no technical reason this won't work, but your on your own when setting up)
 
 !! Important, only share these files between Git & Test folder:
 
@@ -81,18 +81,6 @@ NPM is Node Package Manager for installing Node dependencies.
 
 > brew install npm
 
-Topic: Install ESLint
-
-ESLint is a linter that checks javascript syntax for errors and code consistency.
-
-> npm install eslint -g
-
-Topic: Install Gyp
-
-Gyp is a depency requirement for the Atom terminal-plus plug-in.
-
-> npm install node-gyp -g
-
 Topic: Download Git Repo
 
 Get the Xample code.
@@ -109,15 +97,12 @@ Create a folder for testing. It will include dependencies no found in the repo.
 
 Topic: Install Atom From
 
-Atom is the preferred IDE for this project.
-
-https://atom.io/
+brew cask install atom
 
 Topic: Install Atom Plugins
 
-These plug-ins for Atom help stream-line work flow.
+These plug-ins to stream-line and improve work flow in Atom.
 
-> apm install linter-eslint
 > apm install minimap
 > apm install jumpy
 > apm install file-icons
@@ -134,9 +119,7 @@ These plug-ins for Atom help stream-line work flow.
 > apm install data-atom
 > apm install remote-ftp
 > apm install package-manager
-
-> apm install custom-folds
-- set open & close tags for custom-folds: <<<code>>> & <<<fold>>>
+> apm install atom-typescript
 
 Topic: Install Xample Dependencies In Test Folder
 

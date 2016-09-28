@@ -1,0 +1,17 @@
+{
+  "name": "xample-client",
+  "homepage": "https://github.com/nbellowe/JS-Xample",
+  "authors": [
+    ""
+  ],
+  "description": "Client for Xample",
+  "main": "./js/navigation.js",
+  "license": "",
+  "dependencies": {
+    "alertify": "^0.3.10",
+    "pdfjs-dist": "^1.5.496",
+    "highlightjs": "^9.6.0",
+    "es6-promise": "^4.0.3",
+    "MathJax": "^2.6.1"
+  }
+}
