@@ -97,7 +97,7 @@ Create a folder for testing. It will include dependencies no found in the repo.
 
 Topic: Install Atom From
 
-brew install atom
+brew cask install atom
 
 Topic: Install Atom Plugins
 
