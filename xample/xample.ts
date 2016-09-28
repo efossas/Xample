@@ -162,7 +162,7 @@ global["stats"] = mysql.createPool({
 });
 
 /* routes */
-setupRoutes(app, pool, stats);
+setupRoutes(app);
 
 /* activate the server */
 app.listen(port);

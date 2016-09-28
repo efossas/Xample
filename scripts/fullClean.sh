@@ -1,11 +1,8 @@
 #!/bin/bash
 
-cd $(pwd)/xample
-rm -rf *.js
-rm -rf typings/globals
-
-cd ../public_html
-rm -rf bower_components
-
-cd js/
-rm -rf *.js
+rm -rf xample/*.js
+rm -rf xample/typings/globals
+rm -rf xample/node_modules
+rm -rf public_html/bower_components
+rm -rf public_html/js/*.js
+rm -rf public_html/js/typings

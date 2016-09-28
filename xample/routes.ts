@@ -17,10 +17,9 @@ import startRoute from "./routes/start";
 import uploadmediaRoute from "./routes/uploadmedia";
 
 import { Express } from "express";
-import * as mysql from "mysql";
-
+ 
 // module is by default a function that takes in an app and configures its routes to various handlers
-export default function setupRoutes(app: Express, mainPool: mysql.IPool, statsPool: mysql.IPool) {
+export default function setupRoutes(app: Express) {
     /* routes */
     app.get("/", startRoute);
     app.post("/signup", signupRoute);

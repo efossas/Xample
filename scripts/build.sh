@@ -16,7 +16,7 @@ if [ ! -f ./js/alertify.min.js ]; then
 fi
 
 if [ ! -f ./js/pdf.combined.js ]; then
-  cp bower_components/pdfjs-dist/build/pdf.combined.js ./js
+  cp bower_components/pdfjs-dist/build/pdf.combined.js ./js/pdf.min.js # TODO not minimized  
 fi
 
 if [ ! -f ./js/highlight.pack.min.js ]; then

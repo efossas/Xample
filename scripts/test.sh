@@ -18,4 +18,4 @@ cd $TEMP_DIR/xample
 echo "Starting Xample on $PORT ... ctrl + c to stop process"
 node xample.js local $PORT
 
-echo "source ./db/destroy.sql;" > mysql -uroot
+echo "source ./db/destroy.sql;" | mysql -uroot
