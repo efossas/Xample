@@ -1,5 +1,4 @@
-import { journal } from "../utilities";
-import { convertMedia } from "../utilities";
+import { journal, convertMedia } from "../utilities";
 
 /*
     Function: uploadMedia

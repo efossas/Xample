@@ -1,5 +1,4 @@
-import { journal } from "../utilities";
-import { deleteMedia, changePagename } from "../utilities";
+import { journal, deleteMedia, changePagename } from "../utilities";
 
 /*
     Function: saveblocks

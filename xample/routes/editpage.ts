@@ -1,5 +1,4 @@
-import { journal } from "../utilities";
-import { loadPage, searchPageStatus, absentRequest } from "../utilities";
+import { journal, loadPage, searchPageStatus, absentRequest } from "../utilities";
 
 /*
     Function: editpage

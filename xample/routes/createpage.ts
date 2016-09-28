@@ -1,5 +1,4 @@
-import { journal } from "../utilities";
-import { searchPid, searchPagename } from "../utilities";
+import { journal, searchPid, searchPagename } from "../utilities";
 
 /*
     Function: createpage

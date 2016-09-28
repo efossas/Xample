@@ -1,5 +1,4 @@
-import { journal } from "../utilities";
-import { loadPage } from "../utilities";
+import { journal, loadPage } from "../utilities";
 
 /*
     Function: start
