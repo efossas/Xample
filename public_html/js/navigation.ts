@@ -25,9 +25,8 @@
 	globalScope - attach needed global variables as properties to this object
 */
 
-declare var hljs; // Loaded externally from library.
 const pdfObjects = {}; // Loaded externally from a library.
-const globalScope: OurGlobal = {}; // TODO global variables should be wrapped
+const globalScope: OurGlobal = {};
 
 
 /*
@@ -2144,7 +2143,7 @@ function blockButtons(bid) {
     /* the following are all of the buttons */
 
     const txtBtn = document.createElement("button");
-    txtBtn.setAttribute("onclick", "addBlock(" + bid + ",'xtext')");
+    txtBtn.setAttribute("onclick", "addBlock(" + bid + ",'xtext')"); // TODO none of the event handlers gp through the compiler
     txtBtn.setAttribute("class", "blockbtn addbtn");
     txtBtn.innerHTML = "text";
 

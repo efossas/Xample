@@ -5,9 +5,8 @@
   "main": "xample.ts",
   "dependencies": {
     "connect-busboy": "0.0.2",
-    "es6-promise": "^3.3.1",
     "express": "^4.13.4",
-    "express-mysql-session": "^1.1.1",
+    "express-mysql-session": "^1.2.0",
     "express-session": "^1.7.6",
     "mysql": "^2.10.2",
     "password-hash": "^1.2.2",

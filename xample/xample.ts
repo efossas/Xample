@@ -1,3 +1,11 @@
+import * as express from "express";
+import * as session from "express-session";
+import * as mysql from "mysql";
+import { slack, SlackMessage } from "./utilities";
+import setupRoutes from "./routes";
+const busboy = require("connect-busboy"); // TODO
+const sqlsession = require("express-mysql-session");
+
 /*
 	Section: Xample
 
@@ -40,7 +48,7 @@ switch (host) {
         root = "http://localhost:" + port + "/";
         break;
     case "remote":
-        root = "http://abaganon.com/xample/";
+        root = "http://abaganon.com/xample/"; // TODO
         break;
     default:
         console.log("Incorrect value for arg 1. Usage: node xample.js [local|remote] [port]");
@@ -56,14 +64,14 @@ switch (host) {
 	express - used to start a server and page routing
 	busboy - used to parse media data (file uploads)
 	session - used with express to add sessions for users
-	MySQLStore - used for persistent sessions
 */
 
-const page = require("./page.js");
-const express = require("express");
-const busboy = require("connect-busboy");
-const session = require("express-session");
-const MySQLStore = require("express-mysql-session")(session);
+
+/*
+	MySQLStore - used for persistent sessions
+*/
+const MySQLStore = sqlsession(session);
+
 
 /*
 	Section: Prototypes
@@ -71,43 +79,15 @@ const MySQLStore = require("express-mysql-session")(session);
 */
 
 /* express requests will have root which is the http path to this server */
-express.request.root = root;
+(<any>express).request.root = root;
 
 /*
 	Section: Server Exit
 	These functions handle uncaught errors and program exit procedure
 */
 
-interface SlackMessage {
-    username: string;
-    icon_emoji: string;
-    text: string;
-}
-
-function slack(message) {
-    const request = require("request");
-
-    const postData: SlackMessage = {
-        username: "xample-error",
-        icon_emoji: ":rage:",
-        // postData.channel = "#error";
-        text: message
-    };
-
-    const option = {
-        url: "https:///hooks.slack.com/services/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",
-        body: JSON.stringify(postData)
-    };
-
-    request.post(option, function(err, res, body) {
-        if (body === "ok" && !err) {
-            console.log("Error Sent To Slack");
-        }
-    });
-}
-
 /* prevents node from exiting on error */
-process.on("uncaughtException", function(err) {
+process.on("uncaughtException", err => {
     console.log("666 " + err);
 
     slack(err);
@@ -116,25 +96,11 @@ process.on("uncaughtException", function(err) {
 /* ensures stdin continues after uncaught exception */
 process.stdin.resume();
 
-/*
-	Function: exitHandler
-	Used to run code when the program exits. Called on SIGINT (ctrl^c)
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		nothing - *
-*/
-function exitHandler() {
+/* calls exitHandler() on SIGINT, ctrl^c */
+process.on("SIGINT", () => {
     console.log("\nClean up routine complete. Xample app terminated.");
     process.exit();
-}
-
-/* calls exitHandler() on SIGINT, ctrl^c */
-process.on("SIGINT", exitHandler);
+});
 
 /*
 	Section: Create Server
@@ -154,14 +120,14 @@ app.use(express.static("../public_html"));
 /// todo: this is a hack, sessionStore needs to work on remote & local.
 if (host === "local") {
     app.use(session({
-        key: "xsessionkey",
+        // TODO key: "xsessionkey",
         secret: "KZtX0C0qlhvi)d",
         resave: false,
         saveUninitialized: false
     }));
 } else {
     app.use(session({
-        key: "xsessionkey",
+        // TODO key: "xsessionkey",
         secret: "KZtX0C0qlhvi)d",
         resave: false,
         saveUninitialized: false,
@@ -177,24 +143,26 @@ if (host === "local") {
 /* set up busboy */
 app.use(busboy());
 
-/* routes */
-app.get("/", page.start);
-app.post("/signup", page.signup);
-app.post("/login", page.login);
-app.post("/logout", page.logout);
-app.post("/createpage", page.createpage);
-app.post("/deletepage", page.deletepage);
-app.post("/getpages", page.getpages); /// breaks REST ??
-app.post("/getsubjects", page.getsubjects);
-app.get("/editpage*", page.editpage);
-app.post("/saveblocks", page.saveblocks);
-app.post("/uploadmedia*", page.uploadmedia); /// breaks REST ?? uses get query with post method
-app.get("/profile", page.profile);
-app.post("/saveprofile", page.saveprofile);
-app.post("/getprofiledata", page.getprofiledata);
-app.post("/revert", page.revert);
+global["GLOBALreroute"] = "../public_html/"; // TODO global variables
 
-app.all("*", page.notfound);
+global["pool"] = mysql.createPool({
+    connectionLimit: 100,
+    host: "localhost",
+    user: "nodesql",
+    password: "Vup}Ur34",
+    database: "xample"
+});
+
+global["stats"] = mysql.createPool({
+    connectionLimit: 100,
+    host: "localhost",
+    user: "nodesql",
+    password: "Vup}Ur34",
+    database: "xanalytics"
+});
+
+/* routes */
+setupRoutes(app, pool, stats);
 
 /* activate the server */
 app.listen(port);
