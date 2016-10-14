@@ -75,12 +75,23 @@ function emptyDiv(node) {
 
 // <<<code>>>
 
-function pageHome() {
-	console.log("logged in");
-}
+/*
+	Function: pageLanding
 
-function pageLanding() {
-	console.log("logged out");
+	Dispaly the landing page. The logstatus is used purely for displaying a login/signup form vs a link to the home page. Do not use it to display any sensitive data.
+
+	Parameters:
+
+		logstatus - boolean, true if logged in or false otherwise.
+
+	Returns:
+
+		nothing - *
+*/
+function pageLanding(logstatus) {
+	var main = document.getElementById("content");
+
+	main.innerHTML = "hi there";
 }
 
 // <<<fold>>>
