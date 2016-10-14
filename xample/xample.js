@@ -1,4 +1,5 @@
 /* eslint-env node, es6 */
+/* eslint no-console: "off" */
 
 /*
 	Section: Xample
@@ -44,7 +45,7 @@ switch(host) {
 		root = "http://localhost:" + port + "/";
 		break;
 	case "remote":
-		root = "http://abaganon.com/xample/";
+		root = "http://wisepool.io/";
 		break;
 	default:
 		console.log("Incorrect value for arg 1. Usage: node xample.js [local|remote] [port]");
@@ -119,10 +120,21 @@ function slack(message) {
 }
 
 /* prevents node from exiting on error */
-process.on('uncaughtException',function(err) {
-	console.log('666 ' + err);
+process.on('uncaughtException',function(error) {
+	var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + error;
 
-	slack(err);
+	slack(datedError);
+
+	var fs = require('fs');
+	fs.appendFile("error/666.txt",datedError,function(err) {
+		if(err) {
+			console.log('666: ' + datedError);
+			console.log('fs: ' + err);
+			console.log(' ');
+			return -1;
+		}
+		return 0;
+	});
 });
 
 /* ensures stdin continues after uncaught exception */
@@ -164,7 +176,7 @@ var app = express();
 app.disable('x-powered-by');
 
 /* set up static file routes */
-app.use(express.static('../public_html'));
+app.use(express.static('public'));
 
 /* set up sessions */
 /// todo: this is a hack, sessionStore needs to work on remote & local.
@@ -192,6 +204,33 @@ if(host === "local") {
 
 /* set up busboy */
 app.use(busboy());
+
+/* set up mysql */
+var mysql = require('mysql');
+
+var pool = mysql.createPool({
+  connectionLimit : 100,
+  host     : 'localhost',
+  user     : 'nodesql',
+  password : 'Vup}Ur34',
+  database : 'xample'
+});
+
+/* immediately test a connection, if this fails, it's considered fatal */
+pool.getConnection(function(error,connection) {
+	if(error) {
+		console.log('xample db connection error: ' + error);
+		console.log(' ');
+		connection.release();
+		process.exit(1);
+	}
+});
+
+/* pass pool into request object, request.app.get("pool") */
+app.set("pool",pool);
+
+/* set up any global variables for routes */
+app.set("fileRoute",__dirname + "/public/");
 
 /* routes */
 app.get('/',page.start);

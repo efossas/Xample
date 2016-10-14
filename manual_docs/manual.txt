@@ -333,6 +333,7 @@ They can range from 0 - 255.
 
 - 110 : convert media error
 - 111 : remove media error
+- 112 : delete media error
 - 120-130 : file system error
 - 150 : front-end error
 - 199 : overload attack

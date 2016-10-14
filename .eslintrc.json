@@ -92,7 +92,6 @@
         "no-unsafe-finally": ["warn"],
         "no-unused-expressions": ["error"],
         "no-unused-labels": ["error"],
-        "no-unused-vars": ["error",{"args":"none","vars":"local"}],
         "no-use-before-define":["error",{"functions":false,"classes":false}],
         "no-useless-computed-key": ["error"],
         "no-useless-call": ["error"],
