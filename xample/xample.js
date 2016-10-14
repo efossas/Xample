@@ -234,6 +234,7 @@ app.set("fileRoute",__dirname + "/public/");
 
 /* routes */
 app.get('/',page.start);
+app.get('/begin',page.begin); /// THIS IS TEMPORARY FOR TESTING REACTJS!!!
 app.post('/signup',page.signup);
 app.post('/login',page.login);
 app.post('/logout',page.logout);

@@ -24,12 +24,13 @@ exports.absentRequest = function(request,response) {
 };
 
 /*
-	Function: loadPage
+	Function: loadBlockPage
 
-	This is used to load a page. It writes the <head> to the response which includes all library links. Then it writes the parameter "script" which is a javascript function on the front-end that should create the page. It finally writes some ending tags using response.end() to send the response.
+	This is used to load a block page. It writes the <head> to the response which includes all library links. Then it writes the parameter "script" which is a javascript function on the front-end that should create the page. It finally writes some ending tags using response.end() to send the response.
 
 	Parameters:
 
+		request - the http request
 		response - the http response
 		script - the front-end javascript function, it needs to have <script> tags
 
@@ -37,7 +38,7 @@ exports.absentRequest = function(request,response) {
 
 		nothing - *
 */
-exports.loadPage = function(request,response,script) {
+exports.loadBlockPage = function(request,response,script) {
 
     /* use minified code unless running from localhost */
     var minified = ".min";
@@ -58,7 +59,7 @@ exports.loadPage = function(request,response,script) {
 	var mathjaxjs = "<script type='text/javascript' src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'></script>";
 	var xamplejs = "<script src='" + request.root + "js/navigation" + minified + ".js'></script>";
 	var mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, messageStyle: 'none' });</script>";
-	var headend = "<title>Abaganon Xample</title></head>";
+	var headend = "<title>Wisepool</title></head>";
 	var body = "<body class='xample'><div id='content'></div>";
 
 	/* write the <head> */
@@ -69,4 +70,100 @@ exports.loadPage = function(request,response,script) {
 
 	/* close tags & send the http response */
 	response.end("<footer></footer></body></html>");
+};
+
+/*
+	Function: loadPage
+
+	This is used to load a general page. It writes the <head> to the response which includes all library links. Then it writes the parameter "script" which is a javascript function on the front-end that should create the page. It finally writes some ending tags using response.end() to send the response.
+
+	Parameters:
+
+		request - the http request
+		response - the http response
+		script - the front-end javascript function, it needs to have <script> tags
+
+	Returns:
+
+		nothing - *
+*/
+exports.loadPage = function(request,response,script) {
+
+    /* use minified code unless running from localhost */
+    var minified = ".min";
+    if(request.root.indexOf("localhost") > 0) {
+        minified = "";
+    }
+
+	/* define the library & style links here */
+	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
+	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+	var alertifycorestyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.core.css'>";
+	var alertifydefaultstyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.default.css'>";
+	var blockstyle = "<link rel='stylesheet' href='" + request.root + "css/block" + minified + ".css'>";
+	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
+	var xamplejs = "<script src='" + request.root + "js/navigation" + minified + ".js'></script>";
+	var headend = "<title>Wisepool</title></head>";
+	var body = "<body class='xample'><div id='content'></div>";
+
+	/* write the <head> */
+	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + blockstyle + alertifyjs + xamplejs + headend + body);
+
+	/* write the <script> */
+	response.write(script);
+
+	/* close tags & send the http response */
+	response.end("<footer></footer></body></html>");
+};
+
+/*
+	Function: loadReact
+
+	This is used to load a ReactJS page. It writes the <head> to the response which includes all library links. Then it writes the parameter "script" which is a javascript function on the front-end that should create the page. It finally writes some ending tags using response.end() to send the response.
+
+	Parameters:
+
+		request - the http request
+		response - the http response
+		script - the front-end javascript function, it needs to have <script> tags
+
+	Returns:
+
+		nothing - *
+*/
+exports.loadReact = function(request,response,script) {
+
+	/* use minified code unless running from localhost */
+    var minified = ".min";
+    if(request.root.indexOf("localhost") > 0) {
+        minified = "";
+    }
+
+	/* define the library & style links here */
+	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
+	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+
+	var reactjs;
+	var reactdom;
+	if(request.root.indexOf("localhost") > 0) {
+		reactjs = '<script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>';
+		reactdom = '<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>';
+	} else {
+		reactjs = '<script src="https://unpkg.com/react@15.3.2/dist/react.min.js"></script>';
+		reactdom = '<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.min.js"></script>';
+	}
+
+	var wisepooljs = "<script src='" + request.root + "js/wisepool" + minified + ".js'></script>";
+	var headend = "<title>Wisepool</title></head>";
+	var body = "<body class='xample'><div id='content'></div>";
+
+	/* write the <head> */
+	response.write(headstart + viewport + reactjs + reactdom + wisepooljs + headend + body);
+
+	/* write the <script> */
+	response.write(script);
+
+	/* close tags & send the http response */
+	response.end("<footer></footer></body></html>");
+
 };

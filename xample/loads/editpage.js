@@ -35,7 +35,7 @@ exports.editpage = function(request,response) {
 
 	/* redirect users if logged out or no page id provided */
 	if(typeof uid === 'undefined' || typeof pid === 'undefined') {
-        loader.loadPage(request,response,"<script>pageError('noeditloggedout');</script>");
+        loader.loadBlockPage(request,response,"<script>pageError('noeditloggedout');</script>");
     } else {
 
 		/* get table identifier */
@@ -66,7 +66,7 @@ exports.editpage = function(request,response) {
             promise.then(function(success) {
                 if(searchstatus && success === 0) {
                     /* load the edit page with the page data */
-                    loader.loadPage(request,response,"<script>pageChoose('" + pid + "');</script>");
+                    loader.loadBlockPage(request,response,"<script>pageChoose('" + pid + "');</script>");
                 } else {
 
 					var qry = "SELECT pagename FROM u_" + uid + " WHERE pid=" + pid;
@@ -110,7 +110,7 @@ exports.editpage = function(request,response) {
 										}
 
 										/* load the edit page with the page data */
-										loader.loadPage(request,response,"<script>pageEdit('" + pagedata + "');</script>");
+										loader.loadBlockPage(request,response,"<script>pageEdit('" + pagedata + "');</script>");
 										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 									}
 								});

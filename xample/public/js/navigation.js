@@ -1,7 +1,7 @@
 /* eslint-env browser, es6 */
 /*
 	Title: Navigation
-	This is the front-end for Xample
+	This is the front-end for Xample Block Pages
 
 	Topic: Important Terms
 

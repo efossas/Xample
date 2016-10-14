@@ -12,6 +12,7 @@
 // <<<code>>>
 
 /* load functions, for loading pages */
+var l_begin = require('./loads/begin.js');
 var l_editpage = require('./loads/editpage.js');
 var l_notfound = require('./loads/notfound.js');
 var l_profile = require('./loads/profile.js');
@@ -41,6 +42,7 @@ var r_uploadmedia = require('./routes/uploadmedia.js');
 // <<<code>>>
 
 module.exports = {
+    begin: l_begin.begin,
     createpage: r_createpage.createpage,
     deletepage: r_deletepage.deletepage,
     editpage: l_editpage.editpage,
