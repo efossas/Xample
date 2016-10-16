@@ -70,10 +70,10 @@ exports.saveblocks = function(request,response) {
                 /* 1 -> perm, 0 -> temp */
                 if (Number(POST.tabid) === 1) {
                     tid = "p_";
-                    qryStatus = "UPDATE u_" + uid + " SET status=1 WHERE pid=" + pid;
+                    qryStatus = "UPDATE p_" + uid + " SET status=1 WHERE pid=" + pid;
                 } else {
                     tid = "t_";
-                    qryStatus = "UPDATE u_" + uid + " SET status=0 WHERE pid=" + pid;
+                    qryStatus = "UPDATE p_" + uid + " SET status=0 WHERE pid=" + pid;
                 }
 
                 connection.query(qryStatus,function(err,rows,fields) {

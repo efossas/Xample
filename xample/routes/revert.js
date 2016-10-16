@@ -63,7 +63,7 @@ exports.revert = function(request,response) {
                     }
 
 					/* update the page status */
-					var qryStatus = "UPDATE u_" + uid + " SET status=1 WHERE pid=" + pid;
+					var qryStatus = "UPDATE p_" + uid + " SET status=1 WHERE pid=" + pid;
 
 					connection.query(qryStatus,function(err,rows,fields) {
 						if(err) {

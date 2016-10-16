@@ -348,8 +348,11 @@ These errors are not logged & indicate a serious problem.
 
 The uncaught exception is not sent to the database.
 It indicates a serious failure and the app may have crashed.
-The app attempts to send a slack message when this occurs.
-Other than that, it will display in the terminal running the server.
+The app attempts to send a slack message when this occurs & tries to log the error in errors/666.txt. If logging the error fails, it will display it in the terminal running the server.
+
+- 667 : journal db error
+
+These are errors that occur when the analytics.journal function cannot log to the analytics database. The error is written to errors/667.txt. If that fails, the error is displayed to the terminal running the server.
 
 Section: Flow Charts
 
@@ -499,23 +502,46 @@ This table holds general info for every user.
 
 > CREATE TABLE Users (uid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(50), phone VARCHAR(15), autosave SMALLINT UNSIGNED NOT NULL );
 
-Topic: u_uid
-Each user has a table for storing info about their pages. The table is named "u_" + uid.
-
-uid - user ID
+Topic: p_uid
+Each user has a table for storing info about their block pages. The table is named "p_" + uid.
 
 1. pid (primary key)
 2. pagename
 3. status
+4. subject
+5. category
+6. topic
 
-> CREATE TABLE u_ (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50) NOT NULL, status BOOLEAN NOT NULL);
+> CREATE TABLE p_ (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32));
 
-Topic: p_uid_pid
-Each page has a table for storing info about their blocks. The table is named "p_" + uid + "_" + pid.
+Topic: p_uid_pid & t_uid_pid
+Each block page has a table for storing its block data. The table is named "p_" + uid + "_" + pid. Temporary page tables are used to store back ups in case a connection is lost. They use the prefix "t_".
 
-pid - page ID
+1. bid (primary key)
+2. mediatype
+3. mediacontent
 
-> CREATE TABLE p_ (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) );
+> CREATE TABLE p_ (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) );
+
+Topic: g_uid
+Each user has a table for storing info about their learning guides. The table is named "g_" + uid.
+
+1. gid (primary key)
+2. guidename
+3. status
+4. subject
+5. category
+6. topic
+
+> CREATE TABLE g_ (gid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, guidename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32));
+
+Topic: g_uid_gid & c_uid_gid
+Each guide has a table for storing list data. The table is named "g_" + uid + "_" + gid. Temporary guide tables are used to store back ups in case a connection is lost. They use the prefix "c_" (conditional).
+
+1. lid (primary key)
+2. links
+
+> CREATE TABLE g_ (lid TINYINT UNSIGNED, links VARCHAR(1024) );
 
 Topic: sessions
 This table stores persistent sessions.

@@ -1,15 +1,15 @@
 /* eslint-env node, es6 */
 /*
-	Title: Get Pages
-	Route for retrieving a user's page names.
+	Title: Get Learning Guides
+	Route for retrieving a user's learning guide names.
 */
 
 var analytics = require('./../analytics.js');
 
 /*
-	Function: getpages
+	Function: getlgs
 
-	Ajax, used to get a list of the user's xample pages. The data given to the http response is a comma-separate string in the following format. pid,pagename, If the user has no pages, an empty string is returned.
+	Ajax, used to get a list of the user's learning guides. The data given to the http response is a comma-separate string in the following format. lid,lgname, If the user has no pages, an empty string is returned.
 
 	Parameters:
 
@@ -20,15 +20,15 @@ var analytics = require('./../analytics.js');
 
 		nothing - *
 */
-exports.getpages = function(request,response) {
-	var __function = "getpages";
+exports.getlgs = function(request,response) {
+	var __function = "getlgs";
 
     var pool = request.app.get("pool");
 
 	/* get the user's id */
 	var uid = request.session.uid;
 
-    var qry = "SELECT pid,pagename FROM p_" + uid;
+    var qry = "SELECT gid,guidename FROM g_" + uid;
 
     pool.getConnection(function(err,connection) {
         if(err) {
@@ -40,7 +40,7 @@ exports.getpages = function(request,response) {
 				response.end('err');
 				analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
 			} else {
-				var pages = "";
+				var guides = "";
 
 				/* i is for accessing row array, j is for keeping track of rows left to parse */
 				var i = 0;
@@ -48,15 +48,15 @@ exports.getpages = function(request,response) {
 
 				/* append commas to each row except for the last one */
 				while(j > 1) {
-					pages += rows[i].pid + "," + rows[i].pagename + ",";
+					guides += rows[i].gid + "," + rows[i].guidename + ",";
 					i++;
 					j--;
 				}
 				if(j === 1) {
-					pages += rows[i].pid + "," + rows[i].pagename;
+					guides += rows[i].gid + "," + rows[i].guidename;
 				}
 
-				response.end(pages);
+				response.end(guides);
 				analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 			}
 		});

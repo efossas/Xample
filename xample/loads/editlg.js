@@ -1,7 +1,7 @@
 /* eslint-env node, es6 */
 /*
-	Title: Edit Page
-	Loads block page in edit mode.
+	Title: Edit Learning Guide
+	Loads learning guide page in edit mode.
 */
 
 var loader = require('./loader.js');
@@ -9,9 +9,9 @@ var analytics = require('./../analytics.js');
 var querydb = require('./../querydb.js');
 
 /*
-	Function: editpage
+	Function: editlg
 
-	Page Edit Mode, used to get a list of page & block data for a user's page. The data given to the http response is a comma-separate string in this format. pid,pagename,mediaType,mediaContent, If the user does not have a page with that pid, they will receive "err" in the response. If the user has no media on that page, the user will only receive the pid and pagename.
+	Learning guide Edit Mode, used to get a list of learning guide data for a user's page. The data given to the http response is a comma-separate string in this format (links to block pages are ampersand delimited): listnumber,link&link&etc,listnumber,link&link&etc
 
 	Parameters:
 
@@ -22,22 +22,21 @@ var querydb = require('./../querydb.js');
 
 		nothing - *
 */
-exports.editpage = function(request,response) {
-	var __function = "editpage";
+exports.editlg = function(request,response) {
+	var __function = "editlg";
 
     var pool = request.app.get("pool");
 
-	/* get the user's id, getting it from the session ensures user's can edit other users pages */
+	/* get the user's id, getting it from the session ensures user's can edit other users guides */
 	var uid = request.session.uid;
 
-	/* get the pid from the get request */
-	var pid = request.query.page;
+	/* get the gid from the get request */
+	var gid = request.query.lg;
 
 	/* redirect users if logged out or no page id provided */
-	if(typeof uid === 'undefined' || typeof pid === 'undefined') {
-        loader.loadBlockPage(request,response,"<script>pageError('noeditloggedout');</script>");
+	if(typeof uid === 'undefined' || typeof gid === 'undefined') {
+        loader.loadPage(request,response,"<script>pageError('noeditloggedout');</script>");
     } else {
-
 		/* get table identifier */
 		var temp = request.query.temp;
 
@@ -46,13 +45,13 @@ exports.editpage = function(request,response) {
 		var searchstatus;
 
 		if(temp === "true") {
-			tid = "t_";
+			tid = "c_";
 			searchstatus = false;
 		} else if (temp === "false") {
-			tid = "p_";
+			tid = "g_";
 			searchstatus = false;
 		} else {
-			tid = "p_";
+			tid = "g_";
 			searchstatus = true;
 		}
 
@@ -61,35 +60,35 @@ exports.editpage = function(request,response) {
                 analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
             }
 
-            var promise = querydb.searchPageStatus(connection,uid,pid);
+            var promise = querydb.searchPageStatus(connection,uid,gid);
 
             promise.then(function(success) {
                 if(searchstatus && success === 0) {
                     /* load the edit page with the page data */
-                    loader.loadBlockPage(request,response,"<script>pageChoose('" + pid + "');</script>");
+                    loader.loadBlockPage(request,response,"<script>pageChoose('" + gid + "');</script>");
                 } else {
-					var qry = "SELECT pagename FROM p_" + uid + " WHERE pid=" + pid;
+
+					var qry = "SELECT guidename FROM g_" + uid + " WHERE gid=" + gid;
 
 					connection.query(qry,function(err,rows,fields) {
 						if(err) {
 							response.end('err');
 							analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
 						} else {
-							/* sql query is undefined if a user tries to edit page with invalid pid */
+							/* sql query is undefined if a user tries to edit page with invalid gid */
 							if(typeof rows[0] === 'undefined') {
 								loader.absentRequest(request,response);
 							} else {
-								var pagename = rows[0].pagename;
+								var guidename = rows[0].guidename;
 
-								var qry = "SELECT mediaType,mediaContent FROM " + tid + uid + "_" + pid;
+								var qry = "SELECT links FROM " + tid + uid + "_" + gid;
 
 								connection.query(qry,function(err,rows,fields) {
 									if(err) {
 										response.end('err');
 										analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
 									} else {
-										var pagedata = pid + ",";
-										pagedata += pagename;
+										var guidedata = gid + "," + guidename;
 
 										/* i is for accessing row array, j is for keeping track of rows left to parse */
 										var i = 0;
@@ -97,19 +96,19 @@ exports.editpage = function(request,response) {
 
 										/* append commas to each row except for the last one */
 										if(j > 0) {
-											pagedata += ",";
+											guidedata += ",";
 										}
 										while(j > 1) {
-											pagedata += rows[i].mediaType + "," + rows[i].mediaContent + ",";
+											guidedata += rows[i].links + ",";
 											i++;
 											j--;
 										}
 										if(j === 1) {
-											pagedata += rows[i].mediaType + "," + rows[i].mediaContent;
+											guidedata += rows[i].links;
 										}
 
 										/* load the edit page with the page data */
-										loader.loadBlockPage(request,response,"<script>pageEdit('" + pagedata + "');</script>");
+										loader.loadLearningGuidePage(request,response,"<script>pageEditLG('" + guidedata + "');</script>");
 										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 									}
 								});

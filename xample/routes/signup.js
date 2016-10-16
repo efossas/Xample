@@ -89,24 +89,35 @@ exports.signup = function(request,response) {
 									analytics.journal(true,202,err,0,analytics.__line,__function,__filename);
 								} else {
 									var uid = rows[0].uid;
-									var qryTable = "CREATE TABLE u_" + uid + " (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32))";
+
+									var qryBlockPageTable = "CREATE TABLE p_" + uid + " (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32))";
 
 									/* create the user's page table */
-									connection.query(qryTable,function(err,rows,fields) {
+									connection.query(qryBlockPageTable,function(err,rows,fields) {
 										if (err) {
 											response.end('err');
 											analytics.journal(true,203,err,0,analytics.__line,__function,__filename);
 										} else {
-											/* make the user's directory to store pages in later */
-											request.session.uid = uid;
-											fs.mkdir(request.app.get('fileRoute') + "xm/" + uid,function(err) {
-												/* don't consider existing folders as a mkdir error */
-												if(err && err.code !== "EEXIST") {
-													analytics.journal(true,120,err,0,analytics.__line,__function,__filename);
+											var qryLearningGuideTable = "CREATE TABLE g_" + uid + " (gid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, guidename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32))";
+
+											/* create the user's page table */
+											connection.query(qryLearningGuideTable,function(err,rows,fields) {
+												if (err) {
+													response.end('err');
+													analytics.journal(true,204,err,0,analytics.__line,__function,__filename);
+												} else {
+													/* make the user's directory to store pages in later */
+													request.session.uid = uid;
+													fs.mkdir(request.app.get('fileRoute') + "xm/" + uid,function(err) {
+														/* don't consider existing folders as a mkdir error */
+														if(err && err.code !== "EEXIST") {
+															analytics.journal(true,120,err,0,analytics.__line,__function,__filename);
+														}
+													});
+													response.end('success');
+													analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 												}
 											});
-											response.end('success');
-											analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 										}
 									});
 								}

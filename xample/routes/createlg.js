@@ -8,9 +8,9 @@ var analytics = require('./../analytics.js');
 var querydb = require('./../querydb.js');
 
 /*
-	Function: createpage
+	Function: createlg
 
-	Ajax, handles the page creation routine.
+	Ajax, handles the learning guide creation routine.
 
 	Parameters:
 
@@ -21,8 +21,8 @@ var querydb = require('./../querydb.js');
 
 		nothing - *
 */
-exports.createpage = function(request,response) {
-	var __function = "createpage";
+exports.createlg = function(request,response) {
+	var __function = "createlgs";
 
 	var qs = require('querystring');
 	var fs = require('fs');
@@ -36,7 +36,6 @@ exports.createpage = function(request,response) {
     if(typeof uid === 'undefined') {
         response.end('nocreateloggedout');
     } else {
-
 		var body = '';
 
         /* when the request gets data, append it to the body string */
@@ -60,48 +59,48 @@ exports.createpage = function(request,response) {
                 var POST = qs.parse(body);
 
                 /* escape the page name to prevent Sql injection */
-                var pagename = connection.escape(POST.pagename);
+                var guidename = connection.escape(POST.guidename);
                 var subject = "'none'";
                 var category = "'none'";
                 var topic = "'none'";
 
                 /* check if page name exists */
-                var promise = querydb.searchPagename(connection,uid,pagename);
+                var promise = querydb.searchGuidename(connection,uid,guidename);
 
                 promise.then(function(success) {
                     if(success !== -1) {
-                        response.end('pageexists');
+                        response.end('guideexists');
                     } else {
                         /* insert page into user's page table */
 
-                        var qryUser = "INSERT INTO p_" + uid + " (pagename,status,subject,category,topic) VALUES (" + pagename + ",1," + subject + "," + category + "," + topic + ")";
+                        var qryUser = "INSERT INTO g_" + uid + " (guidename,status,subject,category,topic) VALUES (" + guidename + ",1," + subject + "," + category + "," + topic + ")";
                         connection.query(qryUser,function(err,rows,fields) {
                             if (err) {
                                 response.end('err');
                                 analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
                             } else {
-                                /* grab the pid of the new page name from the user's page table */
-                                var promisePid = querydb.searchPid(connection,uid,pagename);
+                                /* grab the gid of the new guide name from the user's guide table */
+                                var promiseGid = querydb.searchGid(connection,uid,guidename);
 
-                                promisePid.then(function(success) {
+                                promiseGid.then(function(success) {
                                     if(success === -1) {
                                         response.end('err');
-                                        analytics.journal(true,203,"pid not found after page insert",uid,analytics.__line,__function,__filename);
+                                        analytics.journal(true,203,"gid not found after page insert",uid,analytics.__line,__function,__filename);
                                     } else {
-                                        var pid = success;
+                                        var gid = success;
 
                                         /* create the page's permanent table */
-                                        var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) )";
+                                        var qryGuide = "CREATE TABLE g_" + uid + "_" + gid + " (gid TINYINT UNSIGNED, links VARCHAR(1024) )";
 
-                                        connection.query(qryPage,function(err,rows,fields) {
+                                        connection.query(qryGuide,function(err,rows,fields) {
 											if (err) {
 												response.end('err');
 												analytics.journal(true,204,err,uid,analytics.__line,__function,__filename);
 											}
 										});
 
-										/* create the page's temporary table */
-										var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) )";
+										/* create the guide's temporary table */
+										var qryTemp = "CREATE TABLE c_" + uid + "_" + gid + " (gid TINYINT UNSIGNED, links VARCHAR(1024) )";
 
 										connection.query(qryTemp,function(err,rows,fields) {
 											if (err) {
@@ -110,14 +109,7 @@ exports.createpage = function(request,response) {
 											}
 										});
 
-										/* make a folder in user's media folder to store future media uploads */
-										fs.mkdir(request.app.get('fileRoute') + "xm/" + uid + "/" + pid,function(err) {
-											/* don't consider existing folders as a mkdir error */
-											if(err && err.code !== "EEXIST") {
-												analytics.journal(true,120,err,uid,analytics.__line,__function,__filename);
-											}
-										});
-										response.end(pid.toString());
+										response.end(gid.toString());
 										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 									}
 								},function(error) {

@@ -18,3 +18,4 @@ CREATE TABLE xdata (scriptName VARCHAR(32), functionName VARCHAR(32), lineNumber
 CREATE USER 'nodesql'@'localhost' IDENTIFIED BY 'Vup}Ur34';
 GRANT ALL PRIVILEGES ON xample.* TO 'nodesql'@'localhost';
 GRANT ALL PRIVILEGES ON xanalytics.* TO 'nodesql'@'localhost';
+GRANT ALL PRIVILEGES ON xsessionstore.* TO 'nodesql'@'localhost';

@@ -213,7 +213,7 @@ footer {
 	background-color: #d31e1e;
 }
 
-a.profile-btn {
+a.btn {
 	color: black;
 	border: 1px solid transparent;
 	border-color: black;
@@ -231,13 +231,8 @@ a.profile-btn {
 
 	display:inline-block;
 	width: 99%;
-	background-color: #00ffe1;
 
     text-decoration: none;
-}
-
-a.profile-btn:hover {
-	background-color: #00a895;
 }
 
 .page-title {
@@ -573,7 +568,7 @@ svg {
 
 	.logout-btn { width: 100%; }
 	.save-btn { width: 100%; }
-	a.profile-btn { width: 99.5%; }
+	a.btn { width: 99.5%; }
 	.revert-btn { width: 100%; }
 	.page-title { width: 100%; }
 

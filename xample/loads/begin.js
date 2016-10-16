@@ -26,12 +26,15 @@ exports.begin = function(request,response) {
 
 	/* detect is the user is logged in by checking for a session */
 	var logstatus;
+	var uid;
 	if(request.session.uid) {
 		logstatus = "true";
+		uid = request.session.uid;
 	} else {
 		logstatus = "false";
+		uid = 0;
 	}
 
 	loader.loadReact(request,response,"<script>pageLanding(" + logstatus + ");</script>");
-	analytics.journal(false,0,"",request.session.uid,analytics.__line,__function,__filename);
+	analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 };

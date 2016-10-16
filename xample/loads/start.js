@@ -25,13 +25,16 @@ exports.start = function(request,response) {
 	var __function = "start";
 
 	/* detect is the user is logged in by checking for a session */
+	var logstatus;
+	var uid;
 	if(request.session.uid) {
-		/* user is logged in, display home page */
-		loader.loadPage(request,response,"<script>pageHome();</script>");
-		analytics.journal(false,0,"",request.session.uid,analytics.__line,__function,__filename);
+		logstatus = "true";
+		uid = request.session.uid;
 	} else {
-		/* user is not logged in, display landing page */
-		loader.loadPage(request,response,"<script>pageLanding();</script>");
-		analytics.journal(false,0,"",0,analytics.__line,__function,__filename);
+		logstatus = "false";
+		uid = 0;
 	}
+
+	loader.loadPage(request,response,"<script>pageLanding(" + logstatus + ");</script>");
+	analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 };

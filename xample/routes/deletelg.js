@@ -7,9 +7,9 @@
 var analytics = require('./../analytics.js');
 
 /*
-	Function: deletepage
+	Function: deletelg
 
-	Ajax, handles the page deletion routine.
+	Ajax, handles the learning guide deletion routine.
 
 	Parameters:
 
@@ -20,8 +20,8 @@ var analytics = require('./../analytics.js');
 
 		nothing - *
 */
-exports.deletepage = function(request,response) {
-	var __function = "deletepage";
+exports.deletelg = function(request,response) {
+	var __function = "deletelg";
 
 	var qs = require('querystring');
 
@@ -57,17 +57,17 @@ exports.deletepage = function(request,response) {
                     var POST = qs.parse(body);
 
                     /* change info as needed */
-                    var pid = connection.escape(POST.pid).replace(/'/g,'');
+                    var gid = connection.escape(POST.gid).replace(/'/g,'');
 
-                    var qryDeleteRow = "DELETE FROM p_" + uid + " WHERE pid=" + pid;
-                    var qryDeletePermPage = "DROP TABLE p_" + uid + "_" + pid;
-                    var qryDeleteTempPage = "DROP TABLE t_" + uid + "_" + pid;
+                    var qryDeleteRow = "DELETE FROM g_" + uid + " WHERE gid=" + gid;
+                    var qryDeletePermGuide = "DROP TABLE g_" + uid + "_" + gid;
+                    var qryDeleteTempGuide = "DROP TABLE c_" + uid + "_" + gid;
 
                     /* three async queries, use this flag for knowning when to send response */
                     var firstQryComplete = false;
                     var secondQryComplete = false;
 
-                    /* delete page row from user's page list */
+                    /* delete guide row from user's page list */
                     connection.query(qryDeleteRow,function(err,rows,fields) {
                         if(err) {
                             response.end('err');
@@ -85,7 +85,7 @@ exports.deletepage = function(request,response) {
                     });
 
                     /* delete the permanent page table */
-                    connection.query(qryDeletePermPage,function(err,rows,fields) {
+                    connection.query(qryDeletePermGuide,function(err,rows,fields) {
                         if(err) {
                             response.end('err');
                             analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
@@ -102,7 +102,7 @@ exports.deletepage = function(request,response) {
                     });
 
                     /* delete the temporary page */
-                    connection.query(qryDeleteTempPage,function(err,rows,fields) {
+                    connection.query(qryDeleteTempGuide,function(err,rows,fields) {
                         if(err) {
                             response.end('err');
                             analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);

@@ -55,9 +55,37 @@ switch(host) {
 // <<<fold>>>
 
 /*
-	Section: Modules
+	Section: Clusters
+	This section generates multiple processes to handle traffic.
+*/
 
-	These are the modules xample uses
+// <<<code>>>
+
+/// can't add clusters until sessions can be stored persistently & accessed across clusters
+// const cluster = require('cluster');
+// const numCPUs = require('os').cpus().length;
+
+// if (cluster.isMaster) {
+// 	/* Fork workers */
+// 	for (var i = 0; i < numCPUs; i++) {
+// 		cluster.fork();
+// 	}
+//
+// 	cluster.on('exit', (worker, code, signal) => {
+// 		console.log(`worker ${worker.process.pid} died`);
+// 	});
+// } else {
+
+// <<<fold>>>
+
+/*
+	Section: Globals & Modules
+
+	These are the globals & modules xample uses
+
+	require - part of node environment
+	process - part of node environment
+	sessionStore - allows closing session db connection on exit
 
 	page - imports the functions that handle xample url requests
 	express - used to start a server and page routing
@@ -178,30 +206,6 @@ app.disable('x-powered-by');
 /* set up static file routes */
 app.use(express.static('public'));
 
-/* set up sessions */
-/// todo: this is a hack, sessionStore needs to work on remote & local.
-if(host === "local") {
-	app.use(session({
-		key : 'xsessionkey',
-		secret: 'KZtX0C0qlhvi)d',
-		resave: false,
-		saveUninitialized: false
-	}));
-} else {
-	app.use(session({
-		key : 'xsessionkey',
-		secret: 'KZtX0C0qlhvi)d',
-		resave: false,
-		saveUninitialized: false,
-		store: new MySQLStore({host: 'localhost',
-			user: 'nodesql',
-			password: 'Vup}Ur34',
-			database: "xsessionstore"
-		})
-	}));
-}
-
-
 /* set up busboy */
 app.use(busboy());
 
@@ -209,25 +213,65 @@ app.use(busboy());
 var mysql = require('mysql');
 
 var pool = mysql.createPool({
-  connectionLimit : 100,
-  host     : 'localhost',
-  user     : 'nodesql',
-  password : 'Vup}Ur34',
-  database : 'xample'
+	connectionLimit : 100,
+	host     : 'localhost',
+	user     : 'nodesql',
+	password : 'Vup}Ur34',
+	database : 'xample'
 });
 
 /* immediately test a connection, if this fails, it's considered fatal */
 pool.getConnection(function(error,connection) {
 	if(error) {
-		console.log('xample db connection error: ' + error);
+		console.log('xample main db connection error: ' + error);
 		console.log(' ');
 		connection.release();
 		process.exit(1);
+	} else {
+		connection.release();
 	}
 });
 
 /* pass pool into request object, request.app.get("pool") */
 app.set("pool",pool);
+
+/* first test session db connection, if this fails, it's considered fatal */
+var testSessConnect = mysql.createConnection({
+	host     : 'localhost',
+	user     : 'nodesql',
+	password : 'Vup}Ur34',
+	database : 'xsessionstore'
+});
+var testError;
+testSessConnect.connect(function(error) {
+	if(error) {
+		testError = error;
+	}
+});
+if(testError) {
+	console.log('xample session db connection error: ' + testError);
+	console.log(' ');
+	testSessConnect.destroy();
+	process.exit(1);
+} else {
+	testSessConnect.end();
+}
+
+/* set up session store */
+var sessionStore = new MySQLStore({
+	connectionLimit : 100,
+	host     : 'localhost',
+	user     : 'nodesql',
+	password : 'Vup}Ur34',
+	database : 'xsessionstore'
+});
+app.use(session({
+	key : 'xsessionkey',
+	secret: 'KZtX0C0qlhvi)d',
+	resave: false,
+	saveUninitialized: false,
+	store: sessionStore
+}));
 
 /* set up any global variables for routes */
 app.set("fileRoute",__dirname + "/public/");
@@ -235,24 +279,34 @@ app.set("fileRoute",__dirname + "/public/");
 /* routes */
 app.get('/',page.start);
 app.get('/begin',page.begin); /// THIS IS TEMPORARY FOR TESTING REACTJS!!!
-app.post('/signup',page.signup);
+app.post('/createlg',page.createlg);
+app.post('/createpage',page.createpage);
+app.post('/deletelg',page.deletelg);
+app.post('/deletepage',page.deletepage);
+app.get('/editpage*',page.editpage);
+app.get('/editlg*',page.editlg);
+app.post('/getlgs',page.getlgs);
+app.post('/getpages',page.getpages); /// breaks REST ??
+app.post('/getprofiledata',page.getprofiledata);
+app.post('/getsubjects',page.getsubjects);
+app.get('/home',page.home);
+app.post('/journalerror',page.journalerror);
 app.post('/login',page.login);
 app.post('/logout',page.logout);
-app.post('/createpage',page.createpage);
-app.post('/deletepage',page.deletepage);
-app.post('/getpages',page.getpages); /// breaks REST ??
-app.post('/getsubjects',page.getsubjects);
-app.get('/editpage*',page.editpage);
-app.post('/saveblocks',page.saveblocks);
-app.post('/uploadmedia*',page.uploadmedia); /// breaks REST ?? uses get query with post method
 app.get('/profile',page.profile);
-app.post('/saveprofile',page.saveprofile);
-app.post('/getprofiledata',page.getprofiledata);
 app.post('/revert',page.revert);
+app.post('/saveblocks',page.saveblocks);
+app.post('/saveprofile',page.saveprofile);
+app.post('/signup',page.signup);
+app.post('/uploadmedia*',page.uploadmedia); /// breaks REST ?? uses get query with post method
 
 app.all('*',page.notfound);
 
 /* activate the server */
-app.listen(port);
+app.listen(port,function() {
+	console.log("listening...");
+});
 
 // <<<fold>>>
+
+//} // end parentheses for else{} of cluster

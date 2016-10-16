@@ -5,6 +5,84 @@
 */
 
 /*
+	Function: searchGid
+
+	This finds the gid for a user's learning guide.
+
+	Parameters:
+
+		connection - a MySQL connection
+		uid - the user's id
+		pagename - the pagename to search for
+
+	Returns:
+
+		success - promise, gid
+		error - promise, -1
+*/
+exports.searchGid = function(connection,uid,guidename) {
+	var promise = new Promise(function(resolve,reject) {
+
+		/* username must have connection.escape() already applied, which adds '' */
+		var qry = "SELECT gid FROM g_" + uid + " WHERE guidename=" + guidename;
+
+		/* query the database */
+		connection.query(qry,function(err,rows,fields) {
+			if(err) {
+				reject(err);
+			} else {
+				if(typeof rows[0] !== 'undefined') {
+					resolve(rows[0].gid);
+				} else {
+					resolve(-1);
+				}
+			}
+		});
+	});
+
+	return promise;
+};
+
+/*
+	Function: searchGuidename
+
+	This searches a user's table to see if a guidename exists. This is used to ensure that user's don't create two or more guides with the same name.
+
+	Parameters:
+
+		connection - a MySQL connection
+		uid - the user's id
+		guidename - the guide name to search for
+
+	Returns:
+
+		success - promise, the guide name
+		error - promise, -1
+*/
+exports.searchGuidename = function(connection,uid,guidename) {
+	var promise = new Promise(function(resolve,reject) {
+
+		/* username must have connection.escape() already applied, which adds '' */
+		var qry = "SELECT guidename FROM g_" + uid + " WHERE guidename=" + guidename;
+
+		/* query the database */
+		connection.query(qry,function(err,rows,fields) {
+			if(err) {
+				reject(err);
+			} else {
+				if(typeof rows[0] !== 'undefined') {
+					resolve(rows[0].guidename);
+				} else {
+					resolve(-1);
+				}
+			}
+		});
+	});
+
+	return promise;
+};
+
+/*
 	Function: searchUid
 
 	This finds a the uid for a username.
@@ -62,7 +140,7 @@ exports.searchPagename = function(connection,uid,pagename) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT pagename FROM u_" + uid + " WHERE pagename=" + pagename;
+		var qry = "SELECT pagename FROM p_" + uid + " WHERE pagename=" + pagename;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
@@ -101,7 +179,7 @@ exports.searchPid = function(connection,uid,pagename) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT pid FROM u_" + uid + " WHERE pagename=" + pagename;
+		var qry = "SELECT pid FROM p_" + uid + " WHERE pagename=" + pagename;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
@@ -143,7 +221,7 @@ exports.searchPageStatus = function(connection,uid,pid) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT status FROM u_" + uid + " WHERE pid=" + pid;
+		var qry = "SELECT status FROM p_" + uid + " WHERE pid=" + pid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
@@ -183,7 +261,7 @@ exports.changePagename = function(connection,uid,pid,pagename) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "UPDATE u_" + uid + " SET pagename=" + pagename + " WHERE pid=" + pid;
+		var qry = "UPDATE p_" + uid + " SET pagename=" + pagename + " WHERE pid=" + pid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
