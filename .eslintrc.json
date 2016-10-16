@@ -17,6 +17,7 @@
         "default-case": ["error"],
         "dot-location": ["warn"],
         "eqeqeq": ["warn"],
+		"func-style": ["error","declaration",{"allowArrowFunctions":false}],
         "generator-star-spacing": ["error", "after"],
         "guard-for-in": ["warn"],
         "handle-callback-err": ["error"],

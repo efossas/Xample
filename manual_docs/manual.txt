@@ -320,6 +320,13 @@ Triple slashes can be easily searched for & won't be confused with double slashe
 Topic: Double Slash Comments
 Do not use them.
 
+Section: Linter
+
+ESLint is used as the javascript linter for this project. Linting rules are stored in .eslintrc.json. If there are important reasons for keeping rules in that file, they should be listed here.
+
+Topic: func-style
+"Declarations" should be preferred since hoisting is used a lot. Arrow notation should not be allowed since uglifyjs cannot handle them.
+
 Section: Error Codes
 
 Xample uses these custom error codes.
