@@ -3,6 +3,14 @@
 REPO=
 TEST=
 
+# create folder if needed
+mkdir -p $TEST/xample/data
+mkdir -p $TEST/xample/error
+mkdir -p $TEST/xample/loads
+mkdir -p $TEST/xample/routes
+mkdir -p $TEST/xample/public/css
+mkdir -p $TEST/xample/public/js
+
 # copy backend files
 rsync -a -v $REPO/xample/*.js $TEST/xample/
 rsync -a -v $REPO/xample/data/* $TEST/xample/data/
