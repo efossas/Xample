@@ -91,7 +91,6 @@
         "no-unneeded-ternary": ["error"],
         "no-unreachable": ["error"],
         "no-unsafe-finally": ["warn"],
-        "no-unused-expressions": ["error"],
         "no-unused-labels": ["error"],
         "no-use-before-define":["error",{"functions":false,"classes":false}],
         "no-useless-computed-key": ["error"],

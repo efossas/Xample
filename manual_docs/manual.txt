@@ -327,6 +327,9 @@ ESLint is used as the javascript linter for this project. Linting rules are stor
 Topic: func-style
 "Declarations" should be preferred since hoisting is used a lot. Arrow notation should not be allowed since uglifyjs cannot handle them.
 
+Topic: no-unused-expressions
+When using closures to pass functions with parameters as arguments, this error will be thrown. Hence, it should be left disabled.
+
 Section: Error Codes
 
 Xample uses these custom error codes.

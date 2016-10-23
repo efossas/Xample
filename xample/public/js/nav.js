@@ -642,7 +642,7 @@ function pageProfile(profiledata) {
 
 	/* create top div to wrap all header elements */
 	var menu = document.createElement("div");
-	menu.setAttribute("class","block-menu");
+	menu.setAttribute("class","menu-bar");
 
 	/* menu row 1 */
 	var menuRowOne = document.createElement("div");
