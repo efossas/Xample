@@ -116,12 +116,17 @@ function blockButtons(bid) {
 	buttonDiv.setAttribute('class','blockbtns');
 	buttonDiv.setAttribute('id','b' + bid);
 
+	/// there should prob be better styling than this
+	/// if greater than 10, buttons won't fit...
+	var percentageWidth = 100 / (Object.keys(x).length + 1);
+
 	/* the following are all of the buttons */
 	for(var prop in x) {
 		if(x.hasOwnProperty(prop)) {
 			var btn = document.createElement('button');
 			btn.setAttribute("onclick","addBlock(" + bid + ",x." + x[prop].type + ")");
 			btn.setAttribute("class","blockbtn addbtn");
+			btn.setAttribute("style","width:" + percentageWidth + "%;");
 			btn.innerHTML = x[prop].name;
 
 			buttonDiv.appendChild(btn);
