@@ -135,8 +135,22 @@ function pageEditLG(guidedata) {
 
 	blockEngineStart('content',x,["lg",gid],blockarray.splice(2,blockarray.length));
 
-	/// NEED A SECTION HERE FOR PARSING guidedata INTO blocksdiv
+	/*** AFTER STUFF ***/
 
+	/* start auto save timer */
+	autosaveTimer(document.getElementById("autosave"),function() {
+		return saveBlocks(true);
+	});
+
+	/* prevent user from exiting page if Revert or Save has not been clicked */
+	window.onbeforeunload = function() {
+		var status = document.getElementById("statusid").value;
+		if(status === '0') {
+			/// this text isn't being displayed... some default is instead
+			return "Please click Revert or Save before exiting.";
+		}
+		return null;
+	};
 }
 
 // <<<fold>>>

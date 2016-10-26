@@ -237,7 +237,7 @@ function formGenerateUserContent(type,data) {
 			alertify.alert("Please Select A " + capital);
 		} else {
 			var link = createURL("/edit" + lower + "?" + lower + "=" + dataop);
-			window.open(link,"_blank");
+			window.open(link,"_self");
 		}
 	}
 
