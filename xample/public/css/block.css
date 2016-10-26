@@ -209,7 +209,9 @@ footer {
 	border: 0px solid transparent;
 	border-radius: 0px;
 
-	padding: 7px 12px 7px 12px;
+	padding: 8px 12px 7px 12px;
+	margin: 0;
+	line-height: 20px;
 	text-align: center;
 
 	cursor: pointer;
@@ -221,7 +223,7 @@ footer {
 }
 
 .savebar {
-	padding: 21px 0px 21px 0px;
+	padding: 20px 0px 20px 0px;
 }
 
 .none-btn {
@@ -255,7 +257,9 @@ a.btn {
 	color: black;
 	border: 0px solid transparent;
 
+	margin: 0;
 	padding: 8px 0px 7px 0px;
+	line-height: 20px;
 	text-align: center;
 
 	cursor: pointer;
@@ -271,8 +275,14 @@ a.btn {
     text-decoration: none;
 }
 
+/* terribe fucking hack to get rid of firefox random extra padding */
+button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
 a.savebar {
-	padding: 22px 0px 22px 0px;
+	padding: 19px 0px 19px 0px;
 }
 
 .page-title {
