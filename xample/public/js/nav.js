@@ -164,7 +164,7 @@ function formGenerateUserContent(type,data) {
 	title.setAttribute('placeholder',capital + ' Name');
 
 	/* submit button that calls createpage() */
-	var submit = btnSubmit("Create " + capital,"create" + lower,"green");
+	var submit = btnSubmit("Create " + capital,"create" + lower + "()","green");
 
 	/* append elements to row */
 	colLeft_Content.appendChild(title);

@@ -91,7 +91,7 @@ exports.createpage = function(request,response) {
                                         var pid = success;
 
                                         /* create the page's permanent table */
-                                        var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) )";
+                                        var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
 
                                         connection.query(qryPage,function(err,rows,fields) {
 											if (err) {
@@ -101,7 +101,7 @@ exports.createpage = function(request,response) {
 										});
 
 										/* create the page's temporary table */
-										var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) )";
+										var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
 
 										connection.query(qryTemp,function(err,rows,fields) {
 											if (err) {

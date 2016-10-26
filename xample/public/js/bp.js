@@ -32,9 +32,12 @@ var globalScope = {};
 	global x:true
 	global globalBlockEngine:true
 	global blockButtons:true
+	global blockEngineStart:true
 	global generateBlock: true
 	global countBlocks: true
 	global saveBlocks: true
+	global parseBlock: true
+	global deparseBlock: true
 */
 /* list any objects js dependencies */
 /*
@@ -47,7 +50,7 @@ var globalScope = {};
 // <<<fold>>>
 
 /***
-	Section: Block objects
+	Section: Block Objects
 	Any block you wish to define for the page go here.
 ***/
 
@@ -71,7 +74,6 @@ x.xtext = new function xtext() {
 
 		/* iframe has to be put with document first or some bullshit, so wait one millisecond for that to happen and then insert content */
 		setTimeout(function() {
-
 			var iframe = block.childNodes[0].contentDocument;
 			iframe.open();
 
@@ -712,35 +714,6 @@ x.title = new function title() {
 // <<<code>>>
 
 /*
-	Function: deparseBlock
-
-	Block data must be passed through this to replace any encodings back to their original values.
-
-	Parameters:
-
-		blockType - string, the block's type
-		blockText - string, the block's data
-
-	Returns:
-
-		success - string, the deparsed block's data.
-*/
-function deparseBlock(blockType,blockText) {
-	var deparsed = blockText.replace(/@SP@/g," ").replace(/@HS@/g,"&nbsp;").replace(/@AM@/g,"&").replace(/@DQ@/g,"\"").replace(/@SQ@/g,"'").replace(/@CO@/g,",").replace(/@PL@/g,"+").replace(/@BR@/g,"<br>").replace(/@BC@/g,"</br>");
-	if(blockType === "xtext") {
-		//deparsed = "";
-	} else if (blockType === "xcode") {
-		//deparsed = "";
-	} else if (blockType === "xmath" || blockType === "latex") {
-		deparsed = deparsed.replace(/\\\\/g,'\\');
-	} else {
-		//deparsed = "";
-	}
-
-	return deparsed;
-}
-
-/*
 	Function: loadWhichPage
 
 	This function loads the either the user's temporary or permanent block page.
@@ -767,43 +740,6 @@ function loadWhichPage(pid,which) {
 	/* redirect to correct page */
 	var url = createURL("/editpage?page=" + pid + "&temp=" + status);
 	window.location = url;
-}
-
-/*
-	Function: deparseBlock
-
-	Block data must be passed through this to replace any chars that can break functionality with encodings.
-
-	spaces -  ajax urls
-	&nbsp; - ajax delimiters
-	& - ajax delimiters
-	" - ajax strings
-	' - ajax strings
-	, - array delimiters
-	+ - interpreted as spaces in urls
-	<br> - maintaini new lines
-
-	Parameters:
-
-		blockType - string, the block's type
-		blockText - string, the block's data
-
-	Returns:
-
-		success - string, the parsed block's data.
-*/
-function parseBlock(blockType,blockText) {
-	var parsed = blockText.replace(/ /g,"@SP@").replace(/&nbsp;/g,"@HS@").replace(/&/g,"@AM@").replace(/"/g,"@DQ@").replace(/'/g,"@SQ@").replace(/,/g,"@CO@").replace(/\+/g,"@PL@").replace(/<br>/g,"@BR@").replace(/<\/br>/g,"@BC@");
-	if(blockType === "xtext") {
-		//parsed = "";
-	} else if (blockType === "xcode") {
-		parsed = parsed.replace(/<span[^>]*>/g,"").replace(/<\/span>/g,"");
-	} else if (blockType === "xmath" || blockType === "latex") {
-		parsed = parsed.replace(/\\/g,"\\\\");
-	} else {
-		//parsed = "";
-	}
-	return parsed;
 }
 
 // <<<fold>>>
@@ -1124,6 +1060,8 @@ function pageEdit(pagedata) {
 	main.appendChild(menu);
 	main.appendChild(status);
 
+	/// PAGE OPTIONS NEED TO BE ADDED HERE
+
 	/* page title input */
 	var title = document.createElement('input');
 	title.setAttribute('type','text');
@@ -1136,73 +1074,7 @@ function pageEdit(pagedata) {
 
 	/*** BLOCKS ***/
 
-	/* blocks */
-	var blocksdiv = document.createElement('div');
-	blocksdiv.setAttribute('class','blocks');
-	blocksdiv.setAttribute('id','blocks');
-
-	/* initial first block buttons */
-	var buttons = blockButtons(0);
-	blocksdiv.appendChild(buttons);
-
-	/* append blocksdiv to main */
-	main.appendChild(blocksdiv);
-
-	var count = 2;
-	var i = 1;
-
-	while(count < blockarray.length) {
-		/* create the block */
-		var block = generateBlock(i,blockarray[count]);
-		var retblock = x[blockarray[count]].insertContent(block,blockarray[count + 1]);
-
-		/* create the block buttons */
-		buttons = blockButtons(i);
-
-		/* create block + button div */
-		var group = document.createElement('div');
-		group.setAttribute('class','block');
-		group.setAttribute('id',i);
-
-		group.appendChild(retblock);
-		group.appendChild(buttons);
-
-		/* append group to blocks div */
-		blocksdiv.appendChild(group);
-
-		/* do any rendering the block needs */
-		x[blockarray[count]].afterDOMinsert(i,null);
-
-		count += 2;
-		i++;
-	}
-
-	/*** HIDDEN FILE FORM ***/
-
-	/* hidden form for media uploads */
-	var fileinput = document.createElement('input');
-	fileinput.setAttribute('type','file');
-	fileinput.setAttribute('id','file-select');
-
-	var filebtn = document.createElement('button');
-	filebtn.setAttribute('type','submit');
-	filebtn.setAttribute('id','upload-button');
-
-	var url = createURL("/uploadmedia");
-
-	var fileform = document.createElement('form');
-	fileform.setAttribute('id','file-form');
-	fileform.setAttribute('action',url);
-	fileform.setAttribute('method','POST');
-	fileform.style.visibility = 'hidden';
-
-	fileform.appendChild(fileinput);
-	fileform.appendChild(filebtn);
-
-	/*** MAIN ***/
-
-	/* append hidden file form to main */
-	main.appendChild(fileform);
+	blockEngineStart('content',x,["bp",pid],blockarray.splice(2,blockarray.length));
 
 	/*** AFTER STUFF ***/
 
@@ -1210,15 +1082,6 @@ function pageEdit(pagedata) {
 	autosaveTimer(document.getElementById("autosave"),function() {
 		return saveBlocks(true);
 	});
-
-	/* make delete buttons visible & last button invisible */
-	i = 0;
-	var blockCount = countBlocks();
-	while(i < blockCount) {
-		document.getElementById('d' + i).style.visibility = 'visible';
-		i++;
-	}
-	document.getElementById('d' + i).style.visibility = 'hidden';
 
 	/* set defaulttext in globals */
 	var promiseDefaultText = getUserFields(['defaulttext']);
@@ -1236,7 +1099,7 @@ function pageEdit(pagedata) {
 
 	/* prevent user from exiting page if Revert or Save has not been clicked */
 	window.onbeforeunload = function() {
-		var status = document.getElementsByName("statusid")[0].value;
+		var status = document.getElementById("statusid").value;
 		if(status === '0') {
 			/// this text isn't being displayed... some default is instead
 			return "Please click Revert or Save before exiting.";
@@ -1298,58 +1161,6 @@ function getSubjects() {
 	});
 
 	return promise;
-}
-
-/*
-	Function: revertBlocks
-
-	This function loads the page with last permanent save data.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		nothing - *
-*/
-function revertBlocks() {
-	/* create the url destination for the ajax request */
-	var url = createURL("/revert");
-
-	/* get the pid & page name */
-	var pid = document.getElementsByName('pageid')[0].value;
-	var pagename = document.getElementsByName('pagename')[0].value;
-
-	var xmlhttp;
-	xmlhttp = new XMLHttpRequest();
-
-	var params = "pid=" + pid;
-
-	xmlhttp.open("POST",url,true);
-
-	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-	xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "nopid") {
-					alertify.alert("This Page Is Not Meant To Be Visited Directly.");
-				} else if (xmlhttp.responseText === "norevertloggedout") {
-					alertify.alert("Revert Error. You Are Not Logged In.");
-				} else if (xmlhttp.responseText === "err") {
-					alertify.alert("An Error Occured. Please Try Again Later");
-				} else {
-					emptyDiv("content");
-					pageEdit(pid + "," + pagename + xmlhttp.responseText);
-				}
-			} else {
-				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-			}
-        }
-    };
-
-	xmlhttp.send(params);
 }
 
 // <<<fold>>>

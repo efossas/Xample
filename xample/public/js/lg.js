@@ -30,9 +30,12 @@
 	global x:true
 	global globalBlockEngine:true
 	global blockButtons:true
+	global blockEngineStart:true
 	global generateBlock: true
 	global countBlocks: true
 	global saveBlocks: true
+	global parseBlock: true
+	global deparseBlock: true
 */
 /* list any objects js dependencies */
 /*
@@ -45,20 +48,33 @@
 // <<<fold>>>
 
 /***
-	Section: Helper Functions
-	These are helper functions.
+	Section: Block Objects
+	Any block you wish to define for the page go here.
 ***/
 
-// <<<code>>>
+// <<<code>>
 
-// <<<fold>>>
+x.xlist = new function xlist() {
+	this.type = "xlist";
+	this.name = "list";
+	this.upload = false;
 
-/***
-	Section: Display Functions
-	These are functions to create, remove, or show page elements.
-***/
+	this.insertContent = function(block,content) {
+		var str = '<input type="text" class="xLrg" maxlength="64" value="' + deparseBlock(this.type,content) + '">';
+		block.innerHTML = str;
 
-// <<<code>>>
+		return block;
+	};
+
+	this.afterDOMinsert = function(bid,data) {
+		/* nothing to do */
+	};
+
+	this.saveContent = function(bid) {
+		var blockContent = document.getElementById('a' + bid).children[0].value;
+		return parseBlock(this.type,blockContent);
+	};
+};
 
 // <<<fold>>>
 
@@ -84,80 +100,43 @@
 */
 function pageEditLG(guidedata) {
 
+	/* grab the main div */
+	var main = document.getElementById('content');
+
+	/* block array -> pid,pagename,mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
+	var blockarray = guidedata.split(',');
+
+	/* hidden pid & title */
+	var gid = blockarray[0];
+	var guidename = blockarray[1];
+
 	/* MENU & STATUS BAR */
 
 	var menu = barMenu();
-	var status = barStatus();
+	var status = barStatus(gid);
+
+	/* append menu & status to main */
+	main.appendChild(menu);
+	main.appendChild(status);
+
+	/* page title input */
+	var title = document.createElement('input');
+	title.setAttribute('type','text');
+	title.setAttribute('name','pagename');
+	title.setAttribute('class','page-title');
+	title.setAttribute('maxlength','50');
+	title.setAttribute('value',guidename);
+	title.setAttribute('style','display: none;');
+	menu.appendChild(title);
+
+	/// PAGE OPTIONS NEED TO BE ADDED HERE
 
 	/*** BLOCKS ***/
 
-	/* blocks */
-	var blocksdiv = document.createElement('div');
-	blocksdiv.setAttribute('class','blocks');
-	blocksdiv.setAttribute('id','blocks');
-
-	/* initial first block buttons */
-	var buttons = blockButtons(0);
-	blocksdiv.appendChild(buttons);
+	blockEngineStart('content',x,["lg",gid],blockarray.splice(2,blockarray.length));
 
 	/// NEED A SECTION HERE FOR PARSING guidedata INTO blocksdiv
 
-	/* MAIN */
-
-	var main = document.getElementById("content");
-	main.appendChild(menu);
-	main.appendChild(status);
-	main.appendChild(blocksdiv);
-}
-
-// <<<fold>>>
-
-/***
-	Section: Block Functions
-	These are functions that handle the block generator
-***/
-
-// <<<code>>>
-
-/*
-	Function: blockButtons
-
-	This creates a div that holds all of the buttons for creating and deleting blocks. This function returns that div.
-
-	Parameters:
-
-		bid - the block id, which is used to determine where a block should inserted or removed
-
-	Returns:
-
-		success - html node, button div
-*/
-function blockButtons(bid) {
-
-	/* this div will hold the buttons inside of it */
-	var buttonDiv = document.createElement('div');
-	buttonDiv.setAttribute('class','blockbtns');
-	buttonDiv.setAttribute('id','b' + bid);
-
-	/* the following are all of the buttons */
-
-	var lisBtn = document.createElement('button');
-	lisBtn.setAttribute("onclick","addBlock(" + bid + ",'xlist')");
-	lisBtn.setAttribute("class","blockbtn addbtn");
-	lisBtn.innerHTML = "list";
-
-	var delBtn = document.createElement('button');
-	delBtn.setAttribute('id','d' + bid);
-	delBtn.setAttribute('onclick','deleteBlock(' + bid + ')');
-	delBtn.setAttribute("class","blockbtn delbtn");
-	delBtn.style.visibility = 'hidden';
-	delBtn.innerHTML = "&darr;";
-
-	/* append the buttons to the div that holds them */
-	buttonDiv.appendChild(lisBtn);
-	buttonDiv.appendChild(delBtn);
-
-	return buttonDiv;
 }
 
 // <<<fold>>>

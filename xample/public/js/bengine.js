@@ -39,6 +39,161 @@ var globalBlockEngine = {};
 */
 
 /***
+	Section: StartUp Functions
+	These are functions that need to be called on a page to start the block engine.
+***/
+
+// <<<code>>>
+
+/*
+	Function: blockEngineStart
+
+	This function create the blocks div & returns it.
+
+	Parameters:
+
+		main - string, id of an html div that is already attached to the DOM, if 'x-noappend', then it's assumed the block engine alreadyexists.
+		x - object, containing all of the block objects, like x.myblock
+		id - array, [name of id,id number]
+		data - array, array of the block data [type,content,type,content,etc.]
+
+	Returns:
+
+		success - number, block count
+*/
+function blockEngineStart(main,x,id,data) {
+	/* main div */
+	var mainDiv = document.getElementById(main);
+
+	if(mainDiv === 'undefined') {
+		var badMain = document.createElement("div").innerHTML = "Could Not Find Div With Main Id";
+		return badMain;
+	}
+
+	/* engine div */
+	var enginediv;
+	enginediv = document.createElement('div');
+	enginediv.setAttribute('class','x-bengine');
+	enginediv.setAttribute('id','x-bengine');
+	mainDiv.appendChild(enginediv);
+
+	/* blocks */
+	var blocksdiv = document.createElement('div');
+	blocksdiv.setAttribute('class','x-blocks');
+	blocksdiv.setAttribute('id','x-blocks');
+
+	/* append blocks div to engine div */
+	enginediv.appendChild(blocksdiv);
+
+	/* initial first block buttons, get count for style requirement below */
+	var buttons = blockButtons(0);
+	var buttonCount = buttons.childNodes.length;
+	blocksdiv.appendChild(buttons);
+
+	var count = 0;
+	var i = 1;
+	var doubleBlockCount = data.length;
+
+	/* hide the first delete button if no blocks, else show it */
+	if(doubleBlockCount < 2) {
+		buttons.childNodes[buttonCount - 1].style.visibility = 'hidden';
+	} else {
+		buttons.childNodes[buttonCount - 1].style.visibility = 'visible';
+	}
+
+	while(count < doubleBlockCount) {
+		/* create the block */
+		var block = generateBlock(i,data[count]);
+		var retblock = x[data[count]].insertContent(block,data[count + 1]);
+
+		/* create the block buttons */
+		buttons = blockButtons(i);
+
+		/* hide the last delete button */
+		if(count === doubleBlockCount - 2) {
+			/* last button is delete, so hide last delete button */
+			buttons.childNodes[buttonCount - 1].style.visibility = 'hidden';
+		} else {
+			buttons.childNodes[buttonCount - 1].style.visibility = 'visible';
+		}
+
+		/* create block + button div */
+		var group = document.createElement('div');
+		group.setAttribute('class','block');
+		group.setAttribute('id',i);
+
+		group.appendChild(retblock);
+		group.appendChild(buttons);
+
+		/* append group to blocks div */
+		blocksdiv.appendChild(group);
+
+		/* do any rendering the block needs */
+		x[data[count]].afterDOMinsert(i,null);
+
+		count += 2;
+		i++;
+	}
+
+	/*** HIDDEN FILE FORM ***/
+
+	/* hidden form for media uploads */
+	var fileinput = document.createElement('input');
+	fileinput.setAttribute('type','file');
+	fileinput.setAttribute('id','file-select');
+
+	var filebtn = document.createElement('button');
+	filebtn.setAttribute('type','submit');
+	filebtn.setAttribute('id','upload-button');
+
+	var url = createURL("/uploadmedia");
+
+	var fileform = document.createElement('form');
+	fileform.setAttribute('id','file-form');
+	fileform.setAttribute('action',url);
+	fileform.setAttribute('method','POST');
+	fileform.style.visibility = 'hidden';
+
+	fileform.appendChild(fileinput);
+	fileform.appendChild(filebtn);
+
+	/* append the hidden file form to the blocksdiv */
+	enginediv.appendChild(fileform);
+
+	/*** HIDDEN ID & NAME INFO ***/
+
+	/* add page id & name to hidden div */
+	var idDiv = document.createElement("input");
+	idDiv.setAttribute("id","x-id");
+	idDiv.setAttribute("name",id[0]);
+	idDiv.setAttribute("data-xid",id[1]);
+	idDiv.style.visibility = 'hidden';
+	idDiv.style.display = 'none';
+	enginediv.appendChild(idDiv);
+
+	/*** HIDDEN STATUS ID DIV ***/
+
+	/* this is set to 0 after block adds and deletes & 1 after saves */
+	/* it is checked when exiting a window to notify the user that the page hasn't been saved */
+	var statusid = document.createElement('input');
+	statusid.setAttribute('type','hidden');
+	statusid.setAttribute('id','statusid');
+	statusid.setAttribute('value','1');
+	enginediv.appendChild(statusid);
+
+	/*** HIDDEN MAIN ID DIV ***/
+	var mainid = document.createElement('input');
+	mainid.setAttribute('type','hidden');
+	mainid.setAttribute('id','x-mainid');
+	mainid.setAttribute('value',main);
+	enginediv.appendChild(mainid);
+
+	return enginediv;
+}
+
+// <<<fold>>>
+
+/***
 	Section: Block Functions
 	These are functions that handle the block generator
 ***/
@@ -72,6 +227,35 @@ function countBlocks() {
 
 	/* decrement num, since the check for id happens after increment */
 	return --num;
+}
+
+/*
+	Function: deparseBlock
+
+	Block data must be passed through this to replace any encodings back to their original values.
+
+	Parameters:
+
+		blockType - string, the block's type
+		blockText - string, the block's data
+
+	Returns:
+
+		success - string, the deparsed block's data.
+*/
+function deparseBlock(blockType,blockText) {
+	var deparsed = blockText.replace(/@SP@/g," ").replace(/@HS@/g,"&nbsp;").replace(/@AM@/g,"&").replace(/@DQ@/g,"\"").replace(/@SQ@/g,"'").replace(/@CO@/g,",").replace(/@PL@/g,"+").replace(/@BR@/g,"<br>").replace(/@BC@/g,"</br>");
+	if(blockType === "xtext") {
+		//deparsed = "";
+	} else if (blockType === "xcode") {
+		//deparsed = "";
+	} else if (blockType === "xmath" || blockType === "latex") {
+		deparsed = deparsed.replace(/\\\\/g,'\\');
+	} else {
+		//deparsed = "";
+	}
+
+	return deparsed;
 }
 
 /*
@@ -200,7 +384,7 @@ function makeSpace(bid,count) {
 function insertBlock(block,buttons,bid,count) {
 
 	/* grab the blocks container */
-	var blocksdiv = document.getElementById('blocks');
+	var blocksdiv = document.getElementById('x-blocks');
 
 	/* create the block div */
 	var group = document.createElement('div');
@@ -213,8 +397,8 @@ function insertBlock(block,buttons,bid,count) {
 
 	/* find the location to insert the block and insert it */
 	if(bid <= count) {
-		var position = document.getElementById('blocks').children[bid];
-		document.getElementById('blocks').insertBefore(group,position);
+		var position = blocksdiv.children[bid];
+		blocksdiv.insertBefore(group,position);
 	} else {
 		/* you do this if the block goes at the end, it's the last block */
 		blocksdiv.appendChild(group);
@@ -383,6 +567,43 @@ function deleteBlock(cbid) {
 	saveBlocks(false);
 }
 
+/*
+	Function: parseBlock
+
+	Block data must be passed through this to replace any chars that can break functionality with encodings.
+
+	spaces -  ajax urls
+	&nbsp; - ajax delimiters
+	& - ajax delimiters
+	" - ajax strings
+	' - ajax strings
+	, - array delimiters
+	+ - interpreted as spaces in urls
+	<br> - maintaini new lines
+
+	Parameters:
+
+		blockType - string, the block's type
+		blockText - string, the block's data
+
+	Returns:
+
+		success - string, the parsed block's data.
+*/
+function parseBlock(blockType,blockText) {
+	var parsed = blockText.replace(/ /g,"@SP@").replace(/&nbsp;/g,"@HS@").replace(/&/g,"@AM@").replace(/"/g,"@DQ@").replace(/'/g,"@SQ@").replace(/,/g,"@CO@").replace(/\+/g,"@PL@").replace(/<br>/g,"@BR@").replace(/<\/br>/g,"@BC@");
+	if(blockType === "xtext") {
+		//parsed = "";
+	} else if (blockType === "xcode") {
+		parsed = parsed.replace(/<span[^>]*>/g,"").replace(/<\/span>/g,"");
+	} else if (blockType === "xmath" || blockType === "latex") {
+		parsed = parsed.replace(/\\/g,"\\\\");
+	} else {
+		//parsed = "";
+	}
+	return parsed;
+}
+
 // <<<fold>>>
 
 /***
@@ -391,6 +612,61 @@ function deleteBlock(cbid) {
 ***/
 
 // <<<code>>>
+
+/*
+	Function: revertBlocks
+
+	This function loads the page with last permanent save data.
+
+	Parameters:
+
+		pageDisplayFunc - function, the page function that loads the page.
+
+	Returns:
+
+		nothing - *
+*/
+function revertBlocks() {
+	/* create the url destination for the ajax request */
+	var url = createURL("/revertblocks");
+
+	/* get the pid & page name */
+	var xid = document.getElementById('x-id').getAttribute('data-xid');
+	var xidName = document.getElementById('x-id').getAttribute('name');
+
+	var xmlhttp;
+	xmlhttp = new XMLHttpRequest();
+
+	var params = "xid=" + xid + "&xname=" + xidName;
+
+	xmlhttp.open("POST",url,true);
+
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+	xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "noxid") {
+					alertify.alert("This Page Is Not Meant To Be Visited Directly.");
+				} else if (xmlhttp.responseText === "norevertloggedout") {
+					alertify.alert("Revert Error. You Are Not Logged In.");
+				} else if (xmlhttp.responseText === "err") {
+					alertify.alert("An Error Occured. Please Try Again Later");
+				} else {
+					var oldBengine = document.getElementById('x-bengine');
+					var main = oldBengine.parentNode;
+					main.removeChild(oldBengine);
+					blockEngineStart(main.getAttribute('id'),x,[xidName,xid],xmlhttp.responseText.split(","));
+					document.getElementById("savestatus").innerHTML = "Saved";
+				}
+			} else {
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+			}
+        }
+    };
+
+	xmlhttp.send(params);
+}
 
 /*
 	Function: saveBlocks
@@ -414,10 +690,9 @@ function saveBlocks(which) {
 		document.getElementById("savestatus").innerHTML = "Not Saved";
 	} else {
 		table = 1;
-		document.getElementById("savestatus").innerHTML = "Saved";
 	}
 
-	document.getElementsByName('statusid')[0].setAttribute('value',table);
+	document.getElementById('statusid').setAttribute('value',table);
 
 	/* variables for storing block data */
 	var blockType = [];
@@ -449,9 +724,9 @@ function saveBlocks(which) {
 	/* create the url destination for the ajax request */
 	var url = createURL("/saveblocks");
 
-	/* get pagename & pageid */
-	var pid = document.getElementsByName('pageid')[0].value;
-	var pagename = document.getElementsByName('pagename')[0].value;
+	/* get the pid & page name */
+	var xid = document.getElementById('x-id').getAttribute('data-xid');
+	var xidName = document.getElementById('x-id').getAttribute('name');
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
@@ -471,7 +746,7 @@ function saveBlocks(which) {
 		};
 	}
 
-	var params = "mediaType=" + types + "&mediaContent=" + contents + "&pid=" + pid + "&pagename=" + pagename + "&tabid=" + table;
+	var params = "mediaType=" + types + "&mediaContent=" + contents + "&xid=" + xid + "&xname=" + xidName + "&tabid=" + table;
 
 	xmlhttp.open("POST",url,true);
 
@@ -481,7 +756,9 @@ function saveBlocks(which) {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
 				if(xmlhttp.responseText === "blockssaved") {
-						/// successful save
+						if(table === 1) {
+							document.getElementById("savestatus").innerHTML = "Saved";
+						}
 					} else if (xmlhttp.responseText === "nosaveloggedout") {
 						alertify.alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
 					} else {
@@ -675,7 +952,7 @@ function uploadMedia(bid,blockObj) {
 				if(error === "convertmediaerr") {
 					alertify.log("There was an error with that media format. Please try a different file type.");
 				} else {
-					console.log("uploadMedia() promise error");
+					alertify.log("There was an unknown error during media upload.");
 				}
 			});
 		}

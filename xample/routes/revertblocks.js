@@ -20,7 +20,7 @@ var analytics = require('./../analytics.js');
 
 		nothing - *
 */
-exports.revert = function(request,response) {
+exports.revertblocks = function(request,response) {
 	var __function = "revert";
 
 	var qs = require('querystring');
@@ -48,22 +48,31 @@ exports.revert = function(request,response) {
         });
 
 		request.on('end',function() {
-
 			/* save the POST data */
 			var POST = qs.parse(body);
 
-			if(typeof POST.pid === 'undefined') {
-                response.end('nopid');
+			if(typeof POST.xid === 'undefined') {
+                response.end('noxid');
             } else {
-				var pid = POST.pid;
+				var xid = POST.xid;
+				var xname = POST.xname;
+
+				var tid;
+				var qryStatus;
+				if(xname === "bp") {
+					tid = "p_";
+					qryStatus = "UPDATE " + tid + uid + " SET status=1 WHERE pid=" + xid;
+				} else if(xname === "lg") {
+					tid = "g_";
+					qryStatus = "UPDATE " + tid + uid + " SET status=1 WHERE gid=" + xid;
+				} else {
+					/// else throw invalid parameter error!!
+				}
 
                 pool.getConnection(function(err,connection) {
                     if(err) {
                         analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
                     }
-
-					/* update the page status */
-					var qryStatus = "UPDATE p_" + uid + " SET status=1 WHERE pid=" + pid;
 
 					connection.query(qryStatus,function(err,rows,fields) {
 						if(err) {
@@ -71,7 +80,7 @@ exports.revert = function(request,response) {
 							analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
 						} else {
 
-							var qryPageData = "SELECT mediaType,mediaContent FROM p_" + uid + "_" + pid;
+							var qryPageData = "SELECT type,content FROM " + tid + uid + "_" + xid;
 
 							connection.query(qryPageData,function(err,rows,fields) {
 								if(err) {
@@ -85,17 +94,15 @@ exports.revert = function(request,response) {
 									var j = rows.length;
 
 									/* append commas to each row except for the last one */
-									if(j > 0) {
-										pagedata += ",";
-									}
 									while(j > 1) {
-										pagedata += rows[i].mediaType + "," + rows[i].mediaContent + ",";
+										pagedata += rows[i].type + "," + rows[i].content + ",";
 										i++;
 										j--;
 									}
 									if(j === 1) {
-										pagedata += rows[i].mediaType + "," + rows[i].mediaContent;
+										pagedata += rows[i].type + "," + rows[i].content;
 									}
+
 									response.end(pagedata);
 									analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 								}

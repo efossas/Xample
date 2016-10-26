@@ -81,15 +81,14 @@ exports.editpage = function(request,response) {
 							} else {
 								var pagename = rows[0].pagename;
 
-								var qry = "SELECT mediaType,mediaContent FROM " + tid + uid + "_" + pid;
+								var qry = "SELECT type,content FROM " + tid + uid + "_" + pid;
 
 								connection.query(qry,function(err,rows,fields) {
 									if(err) {
 										response.end('err');
 										analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
 									} else {
-										var pagedata = pid + ",";
-										pagedata += pagename;
+										var pagedata = pid + "," + pagename;
 
 										/* i is for accessing row array, j is for keeping track of rows left to parse */
 										var i = 0;
@@ -100,12 +99,12 @@ exports.editpage = function(request,response) {
 											pagedata += ",";
 										}
 										while(j > 1) {
-											pagedata += rows[i].mediaType + "," + rows[i].mediaContent + ",";
+											pagedata += rows[i].type + "," + rows[i].content + ",";
 											i++;
 											j--;
 										}
 										if(j === 1) {
-											pagedata += rows[i].mediaType + "," + rows[i].mediaContent;
+											pagedata += rows[i].type + "," + rows[i].content;
 										}
 
 										/* load the edit page with the page data */

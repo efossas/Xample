@@ -198,7 +198,7 @@ function btnLink(text,url,color) {
 	var linkbtn = document.createElement('a');
 	linkbtn.setAttribute('class','btn ' + color + '-btn');
 	linkbtn.setAttribute('href',url);
-	linkbtn.setAttribute('target','_blank');
+	linkbtn.setAttribute('target','_self');
 	linkbtn.setAttribute('value',text);
 	linkbtn.innerHTML = text;
 
@@ -440,16 +440,8 @@ function barStatus(pid) {
 	pageid.setAttribute('name','pageid');
 	pageid.setAttribute('value',pid);
 
-	/* this is set to 0 after block adds and deletes & 1 after saves */
-	/* it is checked when exiting a window to notify the user that the page hasn't been saved */
-	var statusid = document.createElement('input');
-	statusid.setAttribute('type','hidden');
-	statusid.setAttribute('name','statusid');
-	statusid.setAttribute('value','1');
-
 	/* append hidden values to bar */
 	statusBar.appendChild(pageid);
-	statusBar.appendChild(statusid);
 
 	/* append row to status bar */
 	statusBar.appendChild(rowOne);

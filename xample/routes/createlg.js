@@ -90,7 +90,7 @@ exports.createlg = function(request,response) {
                                         var gid = success;
 
                                         /* create the page's permanent table */
-                                        var qryGuide = "CREATE TABLE g_" + uid + "_" + gid + " (gid TINYINT UNSIGNED, links VARCHAR(1024) )";
+                                        var qryGuide = "CREATE TABLE g_" + uid + "_" + gid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
 
                                         connection.query(qryGuide,function(err,rows,fields) {
 											if (err) {
@@ -100,7 +100,7 @@ exports.createlg = function(request,response) {
 										});
 
 										/* create the guide's temporary table */
-										var qryTemp = "CREATE TABLE c_" + uid + "_" + gid + " (gid TINYINT UNSIGNED, links VARCHAR(1024) )";
+										var qryTemp = "CREATE TABLE c_" + uid + "_" + gid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
 
 										connection.query(qryTemp,function(err,rows,fields) {
 											if (err) {

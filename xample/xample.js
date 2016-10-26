@@ -295,7 +295,7 @@ app.post('/journalerror',page.journalerror);
 app.post('/login',page.login);
 app.post('/logout',page.logout);
 app.get('/profile',page.profile);
-app.post('/revert',page.revert);
+app.post('/revertblocks',page.revertblocks);
 app.post('/saveblocks',page.saveblocks);
 app.post('/saveprofile',page.saveprofile);
 app.post('/signup',page.signup);

@@ -81,7 +81,7 @@ exports.editlg = function(request,response) {
 							} else {
 								var guidename = rows[0].guidename;
 
-								var qry = "SELECT links FROM " + tid + uid + "_" + gid;
+								var qry = "SELECT type,content FROM " + tid + uid + "_" + gid;
 
 								connection.query(qry,function(err,rows,fields) {
 									if(err) {
@@ -99,12 +99,12 @@ exports.editlg = function(request,response) {
 											guidedata += ",";
 										}
 										while(j > 1) {
-											guidedata += rows[i].links + ",";
+											guidedata += rows[i].type + "," + rows[i].content + ",";
 											i++;
 											j--;
 										}
 										if(j === 1) {
-											guidedata += rows[i].links;
+											guidedata += rows[i].type + "," + rows[i].content;
 										}
 
 										/* load the edit page with the page data */

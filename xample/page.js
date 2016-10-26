@@ -32,7 +32,7 @@ var r_getsubjects = require('./routes/getsubjects.js');
 var r_journalerror = require('./routes/journalerror.js');
 var r_login = require('./routes/login.js');
 var r_logout = require('./routes/logout.js');
-var r_revert = require('./routes/revert.js');
+var r_revertblocks = require('./routes/revertblocks.js');
 var r_saveblocks = require('./routes/saveblocks.js');
 var r_saveprofile = require('./routes/saveprofile.js');
 var r_signup = require('./routes/signup.js');
@@ -65,7 +65,7 @@ module.exports = {
     logout: r_logout.logout,
     notfound: l_notfound.notfound,
     profile: l_profile.profile,
-    revert: r_revert.revert,
+    revertblocks: r_revertblocks.revertblocks,
     saveblocks: r_saveblocks.saveblocks,
     saveprofile: r_saveprofile.saveprofile,
     signup: r_signup.signup,

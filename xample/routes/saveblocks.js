@@ -60,22 +60,39 @@ exports.saveblocks = function(request,response) {
                 var POST = qs.parse(body);
 
                 /* change info as needed */
-                var pid = POST.pid;
-                var pagename = connection.escape(POST.pagename);
+                var xid = POST.xid;
+				var xname = POST.xname;
                 var mediaType = POST.mediaType;
                 var mediaContent = POST.mediaContent;
 
-                var tid;
-                var qryStatus;
-                /* 1 -> perm, 0 -> temp */
-                if (Number(POST.tabid) === 1) {
-                    tid = "p_";
-                    qryStatus = "UPDATE p_" + uid + " SET status=1 WHERE pid=" + pid;
-                } else {
-                    tid = "t_";
-                    qryStatus = "UPDATE p_" + uid + " SET status=0 WHERE pid=" + pid;
-                }
+				var tid;
+				var qryStatus;
+				/* 1 -> perm, 0 -> temp */
+				if(xname === "bp") {
+					switch(POST.tabid) {
+						case '0':
+							tid = "t_";
+							break;
+						default:
+							tid = "p_";
+							break;
+					}
+					qryStatus = "UPDATE p_" + uid + " SET status=1 WHERE pid=" + xid;
+				} else if(xname === "lg") {
+					switch(POST.tabid) {
+						case '0':
+							tid = "c_";
+							break;
+						default:
+							tid = "g_";
+							break;
+					}
+					qryStatus = "UPDATE g_" + uid + " SET status=1 WHERE gid=" + xid;
+				} else {
+					/// else throw invalid parameter error!!
+				}
 
+				/* this is changing the temp || perm save status */
                 connection.query(qryStatus,function(err,rows,fields) {
                     if(err) {
                         response.end('err');
@@ -87,63 +104,54 @@ exports.saveblocks = function(request,response) {
                 var types = mediaType.split(',');
                 var contents = mediaContent.split(',');
 
-                /// update page name regardless of whether it was changed, this could be removed with checks later
-                var promisePage = querydb.changePagename(connection,uid,pid,pagename);
+                /* truncate (remove all rows) from the table */
+				var qryTruncate = "TRUNCATE TABLE " + tid + uid + "_" + xid;
 
-                promisePage.then(function(success) {
+				connection.query(qryTruncate,function(err,rows,fields) {
+					if(err) {
+						response.end('err');
+						analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
+					} else {
 
-                    /* truncate (remove all rows) from the table */
-					var qryTruncate = "TRUNCATE TABLE " + tid + uid + "_" + pid;
+						/* check that blocks exist to be saved */
+						if(types[0] !== 'undefined') {
 
-					connection.query(qryTruncate,function(err,rows,fields) {
-						if(err) {
-							response.end('err');
-							analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
-						} else {
+							/* create the query and remove unused media from user's page folder as well */
+							var qryInsert = "INSERT INTO " + tid + uid + "_" + xid + " (bid,type,content) VALUES ";
 
-							/* check that blocks exist to be saved */
-							if(types[0] !== 'undefined') {
+                            var i = 0;
+                            var stop = types.length - 1;
 
-								/* create the query and remove unused media from user's page folder as well */
-								var qryInsert = "INSERT INTO " + tid + uid + "_" + pid + " (bid,mediatype,mediacontent) VALUES ";
+                            while(i < stop) {
+                                qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
+                                i++;
+                            }
+                            qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ")";
 
-                                var i = 0;
-                                var stop = types.length - 1;
-
-                                while(i < stop) {
-                                    qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
-                                    i++;
-                                }
-                                qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ")";
-
-                                /* save the blocks */
-                                connection.query(qryInsert,function(err,rows,fields) {
-									if(err) {
-										response.end('err');
-										analytics.journal(true,203,err,uid,analytics.__line,__function,__filename);
-									} else {
-										/* only delete unused files on permanent table saves */
-										if(Number(POST.tabid) === 1) {
-											filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,pid);
-										}
-										response.end('blockssaved');
-										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+                            /* save the blocks */
+                            connection.query(qryInsert,function(err,rows,fields) {
+								if(err) {
+									response.end('err');
+									analytics.journal(true,203,err,uid,analytics.__line,__function,__filename);
+								} else {
+									/* only delete unused files on permanent table saves */
+									if(tid === "p_") {
+										filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
 									}
-								});
-							} else {
-								/* in this case, only page save, since no blocks */
-								response.end('blockssaved');
-                                /* there could have been blocks deleted though, so delete if perm save */
-                                if(Number(POST.tabid) === 1) {
-                                    filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,pid);
-                                }
-								analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
-							}
+									response.end('blockssaved');
+									analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+								}
+							});
+						} else {
+							/* in this case, only page save, since no blocks */
+							response.end('blockssaved');
+                            /* there could have been blocks deleted though, so delete if perm save */
+                            if(tid === "p_") {
+                                filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
+                            }
+							analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 						}
-					});
-
-                },function(error) {
-					analytics.journal(true,201,error,uid,analytics.__line,__function,__filename);
+					}
 				});
                 connection.release();
             });
