@@ -60,18 +60,133 @@ x.xlist = new function xlist() {
 	this.upload = false;
 
 	this.insertContent = function(block,content) {
-		var str = '<input type="text" class="xLrg" maxlength="64" value="' + deparseBlock(this.type,content) + '">';
-		block.innerHTML = str;
+		var rows = content.split('@@');
+		var count = rows.length;
+
+		var linkDiv = document.createElement('div');
+		linkDiv.setAttribute('class','xLrg');
+
+		for(var i = 0; i < count; i++) {
+			var newLinkBtn = document.createElement('a');
+			newLinkBtn.setAttribute('class','inbtn delbtn');
+			newLinkBtn.setAttribute('onclick','delLink(this)');
+			newLinkBtn.innerHTML = '-';
+
+			var newLinkBtnDiv = document.createElement('div');
+			newLinkBtnDiv.setAttribute('class','col col-10');
+			newLinkBtnDiv.appendChild(newLinkBtn);
+
+			var newLinkInput = document.createElement('input');
+			newLinkInput.setAttribute('class','xLrg');
+			newLinkInput.setAttribute('type','text');
+			newLinkInput.maxlength = 64;
+
+			var data = rows[i].split('$');
+			if(data.length === 1) {
+				newLinkInput.value = '';
+			} else {
+				newLinkInput.value = 'pg=' + data[0] + '&ui=' + data[1];
+			}
+
+			var newLinkInputDiv = document.createElement('div');
+			newLinkInputDiv.setAttribute('class','col col-90');
+			newLinkInputDiv.appendChild(newLinkInput);
+
+			var newLinkDiv = document.createElement('div');
+			newLinkDiv.setAttribute('class','row');
+			newLinkDiv.appendChild(newLinkBtnDiv);
+			newLinkDiv.appendChild(newLinkInputDiv);
+
+			linkDiv.appendChild(newLinkDiv);
+		}
+
+		/* the add link btn */
+		var addLinkBtn = document.createElement('a');
+		addLinkBtn.setAttribute('class','inbtn addbtn');
+		addLinkBtn.setAttribute('onclick','addLink(this)');
+		addLinkBtn.innerHTML = '+';
+
+		var addLinkBtnDiv = document.createElement('div');
+		addLinkBtnDiv.setAttribute('class','col col-10');
+		addLinkBtnDiv.appendChild(addLinkBtn);
+
+		var addLinkFillDiv = document.createElement('div');
+		addLinkFillDiv.setAttribute('class','col col-90');
+
+		linkDiv.appendChild(addLinkBtnDiv);
+		linkDiv.appendChild(addLinkFillDiv);
+
+		block.appendChild(linkDiv);
 
 		return block;
 	};
 
 	this.afterDOMinsert = function(bid,data) {
-		/* nothing to do */
+		/* append necessary functions to body */
+		function delLink(btn) {
+			btn.parentNode.parentNode.parentNode.removeChild(btn.parentNode.parentNode);
+		}
+
+		function addLink(btn) {
+			var newLinkBtn = document.createElement('a');
+			newLinkBtn.setAttribute('class','inbtn delbtn');
+			newLinkBtn.setAttribute('onclick','delLink(this)');
+			newLinkBtn.innerHTML = '-';
+
+			var newLinkBtnDiv = document.createElement('div');
+			newLinkBtnDiv.setAttribute('class','col col-10');
+			newLinkBtnDiv.appendChild(newLinkBtn);
+
+			var newLinkInput = document.createElement('input');
+			newLinkInput.setAttribute('class','xLrg');
+			newLinkInput.setAttribute('type','text');
+			newLinkInput.maxlength = 64;
+
+			var newLinkInputDiv = document.createElement('div');
+			newLinkInputDiv.setAttribute('class','col col-90');
+			newLinkInputDiv.appendChild(newLinkInput);
+
+			var newLinkDiv = document.createElement('div');
+			newLinkDiv.setAttribute('class','row');
+			newLinkDiv.appendChild(newLinkBtnDiv);
+			newLinkDiv.appendChild(newLinkInputDiv);
+
+			btn.parentNode.parentNode.insertBefore(newLinkDiv,btn.parentNode);
+		}
+
+		var script = document.createElement('script');
+		script.type = 'text/javascript';
+		script.text = String(delLink) + String(addLink);
+		document.body.appendChild(script);
 	};
 
 	this.saveContent = function(bid) {
-		var blockContent = document.getElementById('a' + bid).children[0].value;
+		var linkContent = [];
+
+		var rows = document.getElementById('a' + bid).children[0].children;
+		var count = rows.length;
+		for(var i = 0; i < count; i++) {
+			if(rows[i].getAttribute('class') === 'row') {
+				var current = rows[i].children[1].children[0].value;
+
+				/* if empty, ignore saving this input */
+				if(current !== "") {
+					var pgRegEx = /pg=([0-9]+)/;
+					var pg = pgRegEx.exec(current);
+
+					var uiRegEx = /ui=([0-9]+)/;
+					var ui = uiRegEx.exec(current);
+
+					if(pg === null || ui === null) {
+						/// HANDLE INVALID LINKS
+					} else {
+						linkContent.push(pg[1] + '$' + ui[1]);
+					}
+				}
+			}
+		}
+		var blockContent = linkContent.join("@@");
+
 		return parseBlock(this.type,blockContent);
 	};
 };

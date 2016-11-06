@@ -322,6 +322,7 @@ function blockButtons(bid) {
 	delBtn.setAttribute('id','d' + bid);
 	delBtn.setAttribute('onclick','deleteBlock(' + bid + ')');
 	delBtn.setAttribute("class","blockbtn delbtn");
+	delBtn.setAttribute("style","width:" + percentageWidth + "%;");
 	delBtn.style.visibility = 'hidden';
 	delBtn.innerHTML = "&darr;";
 
