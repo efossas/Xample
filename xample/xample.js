@@ -100,7 +100,7 @@ if (cluster.isMaster) {
 /* global require:true */
 /* global process:true */
 
-var page = require('./page.js');
+var rts = require('./rts.js');
 var express = require('express');
 var busboy = require('connect-busboy');
 var session = require('express-session');
@@ -278,30 +278,31 @@ app.use(session({
 app.set("fileRoute",__dirname + "/public/");
 
 /* routes */
-app.get('/',page.start);
-app.get('/begin',page.begin); /// THIS IS TEMPORARY FOR TESTING REACTJS!!!
-app.post('/createlg',page.createlg);
-app.post('/createpage',page.createpage);
-app.post('/deletelg',page.deletelg);
-app.post('/deletepage',page.deletepage);
-app.get('/editpage*',page.editpage);
-app.get('/editlg*',page.editlg);
-app.post('/getlgs',page.getlgs);
-app.post('/getpages',page.getpages); /// breaks REST ??
-app.post('/getprofiledata',page.getprofiledata);
-app.post('/getsubjects',page.getsubjects);
-app.get('/home',page.home);
-app.post('/journalerror',page.journalerror);
-app.post('/login',page.login);
-app.post('/logout',page.logout);
-app.get('/profile',page.profile);
-app.post('/revertblocks',page.revertblocks);
-app.post('/saveblocks',page.saveblocks);
-app.post('/saveprofile',page.saveprofile);
-app.post('/signup',page.signup);
-app.post('/uploadmedia*',page.uploadmedia); /// breaks REST ?? uses get query with post method
+app.get('/',rts.start);
+app.get('/begin',rts.begin); /// THIS IS TEMPORARY FOR TESTING REACTJS!!!
+app.post('/createlg',rts.createlg);
+app.post('/createpage',rts.createpage);
+app.post('/deletelg',rts.deletelg);
+app.post('/deletepage',rts.deletepage);
+app.get('/editpage*',rts.editpage);
+app.get('/editlg*',rts.editlg);
+app.post('/getlgs',rts.getlgs);
+app.post('/getpages',rts.getpages); /// breaks REST ??
+app.post('/getprofiledata',rts.getprofiledata);
+app.post('/getsubjects',rts.getsubjects);
+app.get('/home',rts.home);
+app.post('/journalerror',rts.journalerror);
+app.post('/login',rts.login);
+app.post('/logout',rts.logout);
+app.get('/page*',rts.page);
+app.get('/profile',rts.profile);
+app.post('/revertblocks',rts.revertblocks);
+app.post('/saveblocks',rts.saveblocks);
+app.post('/saveprofile',rts.saveprofile);
+app.post('/signup',rts.signup);
+app.post('/uploadmedia*',rts.uploadmedia); /// breaks REST ?? uses get query with post method
 
-app.all('*',page.notfound);
+app.all('*',rts.notfound);
 
 /* activate the server */
 app.listen(port,function() {

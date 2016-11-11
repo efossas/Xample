@@ -63,7 +63,7 @@ exports.loadBlockPage = function(request,response,script) {
 
 	var mathjaxconfig = "<script type='text/x-mathjax-config'>MathJax.Hub.Config({ tex2jax: { processClass: 'latexImage', ignoreClass: 'xample' }, mml2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, asciimath2jax: { processClass: 'mathImage', ignoreClass: 'xample' }, messageStyle: 'none' });</script>";
 	var headend = "<title>Wisepool</title></head>";
-	var body = "<body class='xample'><div id='content'></div>";
+	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
 	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + codehighlightstyle + blockstyle + alertifyjs + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
@@ -72,7 +72,7 @@ exports.loadBlockPage = function(request,response,script) {
 	response.write(script);
 
 	/* close tags & send the http response */
-	response.end("<footer></footer></body></html>");
+	response.end("</body></html>");
 };
 
 /*
@@ -110,7 +110,7 @@ exports.loadLearningGuidePage = function(request,response,script) {
 	var xamplejs = "<script src='" + request.root + "js/lg" + minified + ".js'></script>";
 
 	var headend = "<title>Wisepool</title></head>";
-	var body = "<body class='xample'><div id='content'></div>";
+	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
 	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + blockstyle + alertifyjs + xamplejs + headend + body);
@@ -119,7 +119,7 @@ exports.loadLearningGuidePage = function(request,response,script) {
 	response.write(script);
 
 	/* close tags & send the http response */
-	response.end("<footer></footer></body></html>");
+	response.end("</body></html>");
 };
 
 /*
@@ -157,7 +157,7 @@ exports.loadPage = function(request,response,script) {
 	var xamplejs = "<script src='" + request.root + "js/nav" + minified + ".js'></script>";
 
 	var headend = "<title>Wisepool</title></head>";
-	var body = "<body class='xample'><div id='content'></div>";
+	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
 	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + blockstyle + alertifyjs + xamplejs + headend + body);
@@ -166,7 +166,7 @@ exports.loadPage = function(request,response,script) {
 	response.write(script);
 
 	/* close tags & send the http response */
-	response.end("<footer></footer></body></html>");
+	response.end("</body></html>");
 };
 
 /*
@@ -209,7 +209,7 @@ exports.loadReact = function(request,response,script) {
 	var wisepooljs = "<script src='" + request.root + "js/wisepool" + minified + ".js'></script>";
 
 	var headend = "<title>Wisepool</title></head>";
-	var body = "<body class='xample'><div id='content'></div>";
+	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
 	response.write(headstart + viewport + reactjs + reactdom + wisepooljs + headend + body);
@@ -218,6 +218,6 @@ exports.loadReact = function(request,response,script) {
 	response.write(script);
 
 	/* close tags & send the http response */
-	response.end("<footer></footer></body></html>");
+	response.end("</body></html>");
 
 };

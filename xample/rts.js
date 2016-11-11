@@ -17,6 +17,7 @@ var l_editpage = require('./loads/editpage.js');
 var l_editlg = require('./loads/editlg.js');
 var l_home = require('./loads/home.js');
 var l_notfound = require('./loads/notfound.js');
+var l_page = require('./loads/page.js');
 var l_profile = require('./loads/profile.js');
 var l_start = require('./loads/start.js');
 
@@ -64,6 +65,7 @@ module.exports = {
     login: r_login.login,
     logout: r_logout.logout,
     notfound: l_notfound.notfound,
+    page: l_page.page,
     profile: l_profile.profile,
     revertblocks: r_revertblocks.revertblocks,
     saveblocks: r_saveblocks.saveblocks,

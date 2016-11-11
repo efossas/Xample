@@ -22,6 +22,7 @@
 	global btnLink:true
 	global btnSubmit:true
 	global barMenu:true
+	global barSubMenu:true
 	global barStatus:true
 	global getUserFields:true
 */
@@ -230,9 +231,27 @@ function pageEditLG(guidedata) {
 	var menu = barMenu();
 	var status = barStatus(gid);
 
+	/* create settings div for submenu */
+	var rowSettings = document.createElement("div");
+	rowSettings.setAttribute("class","row");
+
+	var colSettings = document.createElement("div");
+	colSettings.setAttribute("class","col col-100");
+
+	var pageSettings = document.createElement('div');
+	pageSettings.innerHTML = "Hi There";
+
+	/* append page settings to column,row,main */
+	colSettings.appendChild(pageSettings);
+	rowSettings.appendChild(colSettings);
+
+	/* create submenu */
+	var submenu = barSubMenu('Learning Guide Settings',rowSettings);
+
 	/* append menu & status to main */
 	main.appendChild(menu);
 	main.appendChild(status);
+	main.appendChild(submenu);
 
 	/* page title input */
 	var title = document.createElement('input');

@@ -25,6 +25,7 @@ var globalScope = {};
 	global btnSubmit:true
 	global barMenu:true
 	global barStatus:true
+	global barSubMenu:true
 	global getUserFields:true
 */
 /* from bengine.js */
@@ -32,6 +33,7 @@ var globalScope = {};
 	global x:true
 	global globalBlockEngine:true
 	global blockButtons:true
+	global blockContentShow:true
 	global blockEngineStart:true
 	global generateBlock: true
 	global countBlocks: true
@@ -122,6 +124,16 @@ x.xtext = new function xtext() {
 		/* execCommand() applies style tags to <body> tag inside <iframe>, hence .getElementsByTagName('body')[0] */
 		var blockContent = document.getElementById('a' + bid).children[0].contentDocument.getElementsByTagName('body')[0].innerHTML;
 		return parseBlock(this.type,blockContent);
+	};
+
+	this.showContent = function(block,content) {
+		var textBlock = document.createElement("div");
+		textBlock.setAttribute("class","xTex-show");
+		textBlock.innerHTML = deparseBlock(this.type,content);
+
+		block.appendChild(textBlock);
+
+		return block;
 	};
 
 	this.f = {
@@ -267,6 +279,17 @@ x.xcode = new function xcode() {
 		return parseBlock(this.type,blockContent);
 	};
 
+	this.showContent = function(block,content) {
+		var codeBlock = document.createElement("div");
+		codeBlock.setAttribute("class","xCde-show");
+		codeBlock.innerHTML = deparseBlock(this.type,content);
+
+		block.appendChild(codeBlock);
+		this.f.renderCode(codeBlock);
+
+		return block;
+	};
+
 	this.f = {
 		/*
 			Function: codeKeys
@@ -366,6 +389,23 @@ x.xmath = new function xmath() {
 		return parseBlock(this.type,blockContent);
 	};
 
+	this.showContent = function(block,content) {
+		var mathpreview = document.createElement('div');
+		mathpreview.setAttribute('class','mathImage-show');
+
+		var mathBlock = document.createElement('div');
+		mathBlock.setAttribute('class','xMat');
+		mathBlock.setAttribute('style','display:none;visibility:hidden;');
+		mathBlock.innerHTML = deparseBlock(this.type,content);
+
+		block.appendChild(mathpreview);
+		block.appendChild(mathBlock);
+
+		this.f.renderMath(mathBlock);
+
+		return block;
+	};
+
 	this.f = {
 		renderMath: function(block) {
 			/* get the math notation and prepend/append backticks, which is how MathJax identifies ASCIIMath markup language */
@@ -417,6 +457,23 @@ x.latex = new function latex() {
 		return parseBlock(this.type,blockContent);
 	};
 
+	this.showContent = function(block,content) {
+		var latexpreview = document.createElement('div');
+		latexpreview.setAttribute('class','latexImage-show');
+
+		var latexBlock = document.createElement('div');
+		latexBlock.setAttribute('class','xLtx');
+		latexBlock.setAttribute('style','display:none;visibility:hidden;');
+		latexBlock.innerHTML = deparseBlock(this.type,content);
+
+		block.appendChild(latexpreview);
+		block.appendChild(latexBlock);
+
+		this.f.renderLatex(latexBlock);
+
+		return block;
+	};
+
 	this.f = {
 		renderLatex: function(block) {
 			/* get the math notation and prepend/append double dollars, which is how MathJax identifies LaTeX markup language */
@@ -459,6 +516,16 @@ x.image = new function image() {
 		var imagestr = document.getElementById('a' + bid).children[0].src;
 		return imagestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
+
+	this.showContent = function(block,content) {
+		var ximg = document.createElement("img");
+		ximg.setAttribute("class","xImg-show");
+		ximg.src = content;
+
+		block.appendChild(ximg);
+
+		return block;
+	};
 };
 
 x.audio = new function audio() {
@@ -495,6 +562,22 @@ x.audio = new function audio() {
 		var mediastr = document.getElementById('a' + bid).children[0].children[0].src;
 		return mediastr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
+
+	this.showContent = function(block,content) {
+		var audio = document.createElement("audio");
+		audio.setAttribute("class","xAud-show");
+		audio.volume = 0.8;
+		audio.setAttribute("controls","controls");
+
+		var audiosource = document.createElement("source");
+		audiosource.setAttribute("src",content);
+		audiosource.setAttribute("type","audio/mpeg");
+
+		audio.appendChild(audiosource);
+		block.appendChild(audio);
+
+		return block;
+	};
 };
 
 x.video = new function video() {
@@ -530,6 +613,22 @@ x.video = new function video() {
 	this.saveContent = function(bid) {
 		var mediastr = document.getElementById('a' + bid).children[0].children[0].src;
 		return mediastr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
+	};
+
+	this.showContent = function(block,content) {
+		var video = document.createElement("video");
+		video.setAttribute("class","xVid-show");
+		video.volume = 0.8;
+		video.setAttribute("controls","controls");
+
+		var videosource = document.createElement("source");
+		videosource.setAttribute("src",content);
+		videosource.setAttribute("type","video/mp4");
+
+		video.appendChild(videosource);
+		block.appendChild(video);
+
+		return block;
 	};
 };
 
@@ -613,6 +712,56 @@ x.slide = new function slide() {
 		return slidestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
 
+	this.showContent = function(block,content) {
+		/* data-page attribute keeps track of which page is being displayed */
+		var canvas = document.createElement("canvas");
+		canvas.setAttribute("class","xSli-show");
+		canvas.setAttribute("id",content);
+		canvas.setAttribute("data-page","1");
+
+		block.appendChild(canvas);
+
+		/* if block was just made, don't try to load pdf */
+		if (content !== "") {
+			PDFJS.getDocument(content).then(function(pdfObj) {
+				globalBlockEngine.pdfObjects[content] = pdfObj;
+
+				var tag = block.childNodes[0];
+
+				x.slide.f.renderPDF(pdfObj,1,tag);
+			});
+		}
+
+		/* event listener for changing slides left & right */
+		block.onmouseup = function(event) {
+			var X = event.pageX - this.offsetLeft;
+			/// var Y = event.pageY - this.offsetTop;
+
+			/* get the <canvas> tag, current page, pdf url/id, and the pdf total page count */
+			var canvas = this.childNodes[0];
+			var pageNum = canvas.getAttribute("data-page");
+			var pdfID = canvas.getAttribute("id");
+			var pageCount = globalBlockEngine.pdfObjects[pdfID].numPages;
+
+			/* determine whether left or right side was clicked, then render prev or next page */
+			if(X > this.offsetWidth / 1.7) {
+				if(pageNum < pageCount) {
+					pageNum++;
+					canvas.setAttribute("data-page",pageNum);
+					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+				}
+			} else {
+				if(pageNum > 1) {
+					pageNum--;
+					canvas.setAttribute("data-page",pageNum);
+					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+				}
+			}
+		};
+
+		return block;
+	};
+
 	this.f = {
 		renderPDF: function(pdfDoc,pageNum,canvas) {
 			/*
@@ -679,6 +828,12 @@ x.xsvgs = new function xsvgs() {
 		var svgstr = document.getElementById('a' + bid).childNodes[0].getAttribute("data-link");
 		return svgstr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
+
+	this.showContent = function(block,content) {
+		///block.innerHTML = deparseBlock(this.type,content);
+
+		return block;
+	};
 };
 */
 
@@ -701,6 +856,13 @@ x.title = new function title() {
 	this.saveContent = function(bid) {
 		var blockContent = document.getElementById('a' + bid).children[0].value;
 		return parseBlock(this.type,blockContent);
+	};
+
+	this.showContent = function(block,content) {
+		var str = '<div class="xTit-show">' + deparseBlock(this.type,content) + '</div>';
+		block.innerHTML = str;
+
+		return block;
 	};
 };
 
@@ -1056,9 +1218,27 @@ function pageEdit(pagedata) {
 	var menu = barMenu();
 	var status = barStatus(pid);
 
+	/* create settings div for submenu */
+	var rowSettings = document.createElement("div");
+	rowSettings.setAttribute("class","row");
+
+	var colSettings = document.createElement("div");
+	colSettings.setAttribute("class","col col-100");
+
+	var pageSettings = document.createElement('div');
+	pageSettings.innerHTML = "Hi There";
+
+	/* append page settings to column,row,main */
+	colSettings.appendChild(pageSettings);
+	rowSettings.appendChild(colSettings);
+
+	/* create submenu */
+	var submenu = barSubMenu('Page Settings',rowSettings);
+
 	/* append menu & status to main */
 	main.appendChild(menu);
 	main.appendChild(status);
+	main.appendChild(submenu);
 
 	/// PAGE OPTIONS NEED TO BE ADDED HERE
 
@@ -1106,6 +1286,58 @@ function pageEdit(pagedata) {
 		}
 		return null;
 	};
+}
+
+/*
+	Function: pageShow
+
+	This function loads page data in show mode.
+
+	Parameters:
+
+		pagedata - string, page data is received in the format "pid,pagename,(mediaType,mediaContent,)"
+
+	Returns:
+
+		nothing - *
+*/
+function pageShow(pagedata) {
+	/* grab the main div */
+	var main = document.getElementById('content');
+
+	/* block array -> pid,pagename,mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
+	var blockarray = pagedata.split(',');
+
+	/* hidden pid & title */
+	var pid = blockarray[0];
+	var pagename = blockarray[1];
+
+	/*** MENU BAR ***/
+
+	/* create menu & status bar */
+	var menu = barMenu();
+
+	/* append menu & status to main */
+	main.appendChild(menu);
+
+	/// UH... WHERE DOES THIS PAGE TITLE GO??
+	var spaceDiv = document.createElement('div');
+	spaceDiv.setAttribute('style','padding-bottom:20px;');
+	main.appendChild(spaceDiv);
+
+	/* page title input */
+	var title = document.createElement('input');
+	title.setAttribute('type','text');
+	title.setAttribute('name','pagename');
+	title.setAttribute('class','page-title');
+	title.setAttribute('maxlength','50');
+	title.setAttribute('value',pagename);
+	title.setAttribute('style','display: none;');
+	menu.appendChild(title);
+
+	/*** BLOCKS ***/
+
+	blockContentShow('content',x,["bp",pid],blockarray.splice(2,blockarray.length));
 }
 
 // <<<fold>>>

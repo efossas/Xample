@@ -17,8 +17,8 @@ body {
 	color: black;
 }
 
-footer {
-	margin: 40px auto;
+footer, .footer {
+	padding: 40px 0px;
 }
 
 #content {
@@ -27,7 +27,7 @@ footer {
 	position: relative;
 }
 
-.menu-bar {
+.menu-bar, .submenu-bar {
 	width: 100%;
 	max-width: 720px;
 	margin: 0 auto 0 auto;
@@ -35,7 +35,7 @@ footer {
 	position: relative;
 }
 
-.menu-bar::after {
+.menu-bar::after, .submenu-bar::after {
   content: "";
   position: absolute;
   height: 100%;
@@ -192,7 +192,7 @@ footer {
 	padding-left: 10px;
 }
 
-#blocks {
+#x-blocks {
 	margin: 0;
 	padding: 0;
 }
@@ -224,6 +224,11 @@ footer {
 
 .savebar {
 	padding: 20px 0px 20px 0px;
+}
+
+/* removes blue border after buttons are clicked */
+button:focus, a:focus {
+	outline: none;
 }
 
 .none-btn {
@@ -379,7 +384,7 @@ progress {
 	border-color: black;
 	border-radius: 2px;
 
-	width: 10%;
+	width: 100%;
 
 	padding: 6px 12px;
 	text-align: center;
@@ -414,8 +419,10 @@ progress {
 	margin: 0px auto 0 auto;
 }
 
-iframe.xTex {
+.xTex, .xTex-show {
 	display: inline-block;
+	overflow-y: auto;
+
 	width: 720px;
 	height: 200px;
 	border: 1px solid black;
@@ -432,12 +439,17 @@ iframe.xTex {
 	color: black;
 }
 
+.xTex-show {
+	padding: 8px;
+	margin-bottom: 12px;
+}
+
 .xcode {
 	max-width: 720px;
 	margin: 0px auto 0 auto;
 }
 
-.xCde {
+.xCde, .xCde-show {
 	white-space: pre-line;
 
 	display: inline-block;
@@ -462,6 +474,10 @@ iframe.xTex {
 	box-sizing: border-box;
 }
 
+.xCde-show {
+	margin-bottom: 12px;
+}
+
 .latex {
 	max-width: 720px;
 	margin: 0px auto 0 auto;
@@ -480,7 +496,7 @@ iframe.xTex {
 	box-sizing: border-box;
 }
 
-.latexImage {
+.latexImage, .latexImage-show {
 	display: inline-block;
 	width: 720px;
 	height: 200px;
@@ -492,6 +508,11 @@ iframe.xTex {
 	margin: 0px;
 	box-sizing: border-box;
 }
+
+.latexImage-show {
+	margin-bottom: 12px;
+}
+
 
 .xmath {
 	max-width: 720px;
@@ -513,7 +534,7 @@ iframe.xTex {
 	font-family: Arial, Helvetica, sans-serif;
 }
 
-.mathImage {
+.mathImage, .mathImage-show {
 	display: inline-block;
 	width: 720px;
 	height: 200px;
@@ -526,12 +547,16 @@ iframe.xTex {
 	box-sizing: border-box;
 }
 
+.mathImage-show {
+	margin-bottom: 12px;
+}
+
 .image {
 	max-width: 720px;
 	margin: 0px auto 0 auto;
 }
 
-.xImg {
+.xImg, .xImg-show {
 	display: inline-block;
 	width: 720px;
 	height: 405px;
@@ -541,6 +566,10 @@ iframe.xTex {
 	padding: 0px;
 	margin: 0px;
 	box-sizing: border-box;
+}
+
+.xImg-show {
+	margin-bottom: 12px;
 }
 
 .audio {
@@ -548,13 +577,17 @@ iframe.xTex {
 	margin: 0px auto 0 auto;
 }
 
-.xAud {
+.xAud, .xAud-show {
 	display: inline-block;
 	width: 720px;
 
 	padding: 0px;
 	margin: 0px;
 	box-sizing: border-box;
+}
+
+.xAud-show {
+	margin-bottom: 12px;
 }
 
 .video {
@@ -562,7 +595,7 @@ iframe.xTex {
 	margin: 0px auto 0 auto;
 }
 
-.xVid {
+.xVid, .xVid-show {
 	display: inline-block;
 	width: 720px;
 	height: 405px;
@@ -572,6 +605,10 @@ iframe.xTex {
 	padding: 0px;
 	margin: 0px;
 	box-sizing: border-box;
+}
+
+.xVid-show {
+	margin-bottom: 12px;
 }
 
 .slide {
@@ -579,7 +616,7 @@ iframe.xTex {
 	margin: 0px auto 0 auto;
 }
 
-.xSli {
+.xSli, .xSli-show {
 	display: inline-block;
 	width: 720px;
 	height: 405px;
@@ -589,6 +626,10 @@ iframe.xTex {
 	padding: 0px;
 	margin: 0px;
 	box-sizing: border-box;
+}
+
+.xSli-show {
+	margin-bottom: 12px;
 }
 
 svg {
@@ -634,6 +675,27 @@ svg {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 1em;
 	font-weight: 300;
+	color: black;
+}
+
+.xTit-show {
+	display: inline-block;
+	width: 720px;
+	height: 46px;
+	background-color: #9fc4c6;
+	border: 1px solid black;
+	border-bottom-color: #9fc4c6;
+	border-radius: 2px;
+
+	padding: 6px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 2em;
+	font-weight: 900;
 	color: black;
 }
 
@@ -699,39 +761,39 @@ input.xLrg {
 	.blockbtn { width: 100%; }
 
 	.xtext { max-width: 100%; margin: 0px auto 0 auto; }
-	iframe.xTex { width: 100%; }
+	.xTex, .xTex-show { width: 100%; }
 
 	.xcode { max-width: 100%; margin: 0px auto 0 auto; }
-	.xCde { width: 100%; }
+	.xCde, .xCde-show { width: 100%; }
 
 	.latex { max-width: 100%; margin: 0px auto 0 auto; }
 	.xLtx { width: 100%; }
-	.latexImage { width: 100%; }
+	.latexImage, .latexImage-show { width: 100%; }
 
 	.xmath { max-width: 100%; margin: 0px auto 0 auto; }
 	.xMat { width: 100%; }
-	.mathImage { width: 100%; }
+	.mathImage, .mathImage-show { width: 100%; }
 
 	.image { max-width: 100%; margin: 0px auto 0 auto; }
-	.xImg { width: 100%; height: 80%; }
+	.xImg, .xImg-show { width: 100%; height: 80%; }
 
 	.audio { max-width: 100%; margin: 0px auto 0 auto; }
-	.xAud { width: 100%; }
+	.xAud, .xAud-show { width: 100%; }
 
 	.video { max-width: 100%; margin: 0px auto 0 auto; }
-	.xVid { width: 100%; height: 80%; }
+	.xVid, .xVid-show { width: 100%; height: 80%; }
 
 	.xsvgs { max-width: 100%; margin: 0px auto 0 auto; }
-	.xSvg { width: 100%; height: 80%; }
+	.xSvg, .xSvg-show { width: 100%; height: 80%; }
 
 	.slide { max-width: 100%; margin: 0px auto 0 auto; }
-	.xSli { width: 100%; height: 80%; }
+	.xSli, .xSli-show { width: 100%; height: 80%; }
 
 	.title { max-width: 100%; margin: 0px auto 0 auto; }
-	.xTit { width: 100%; }
+	.xTit, .xTit-show { width: 100%; }
 
 	.xlist { max-width: 100%; margin: 0px auto 0 auto; }
-	.xLrg { width: 100%; }
+	.xLrg, .xLrg-show { width: 100%; }
 }
 
 /* Form Element Styles */

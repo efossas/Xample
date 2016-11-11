@@ -46,15 +46,79 @@ var globalBlockEngine = {};
 // <<<code>>>
 
 /*
+	Function: blockContentShow
+
+	This function create the show blocks div & returns it.
+
+	Parameters:
+
+	main - string, id of an html div that is already attached to the DOM.
+	x - object, containing all of the block objects, like x.myblock
+	id - array, [name of id,id number], like [bp,1] where 1 is pid
+	data - array, array of the block data [type,content,type,content,etc.]
+
+	Returns:
+
+		success - number, block count
+*/
+function blockContentShow(main,x,id,data) {
+	/* main div */
+	var mainDiv = document.getElementById(main);
+
+	if(mainDiv === 'undefined') {
+		return -1;
+	}
+
+	/* engine div */
+	var enginediv;
+	enginediv = document.createElement('div');
+	enginediv.setAttribute('class','x-bengine');
+	enginediv.setAttribute('id','x-bengine');
+	mainDiv.appendChild(enginediv);
+
+	/* blocks */
+	var blocksdiv = document.createElement('div');
+	blocksdiv.setAttribute('class','x-blocks');
+	blocksdiv.setAttribute('id','x-blocks');
+
+	/* append blocks div to engine div */
+	enginediv.appendChild(blocksdiv);
+
+	var count = 0;
+	var i = 1;
+	var doubleBlockCount = data.length;
+
+	while(count < doubleBlockCount) {
+		/* create the block */
+		var block = generateBlock(i,data[count]);
+		var retblock = x[data[count]].showContent(block,data[count + 1]);
+
+		/* create the block div */
+		var group = document.createElement('div');
+		group.setAttribute('class','block');
+		group.setAttribute('id',i);
+
+		/* append group to blocks div */
+		group.appendChild(retblock);
+		blocksdiv.appendChild(group);
+
+		count += 2;
+		i++;
+	}
+
+	return i;
+}
+
+/*
 	Function: blockEngineStart
 
 	This function create the blocks div & returns it.
 
 	Parameters:
 
-		main - string, id of an html div that is already attached to the DOM, if 'x-noappend', then it's assumed the block engine alreadyexists.
+		main - string, id of an html div that is already attached to the DOM.
 		x - object, containing all of the block objects, like x.myblock
-		id - array, [name of id,id number]
+		id - array, [name of id,id number], like [bp,1] where 1 is pid
 		data - array, array of the block data [type,content,type,content,etc.]
 
 	Returns:
@@ -66,8 +130,7 @@ function blockEngineStart(main,x,id,data) {
 	var mainDiv = document.getElementById(main);
 
 	if(mainDiv === 'undefined') {
-		var badMain = document.createElement("div").innerHTML = "Could Not Find Div With Main Id";
-		return badMain;
+		return -1;
 	}
 
 	/* engine div */
@@ -96,9 +159,9 @@ function blockEngineStart(main,x,id,data) {
 
 	/* hide the first delete button if no blocks, else show it */
 	if(doubleBlockCount < 2) {
-		buttons.childNodes[buttonCount - 1].style.visibility = 'hidden';
+		buttons.childNodes[buttonCount - 1].children[0].style.visibility = 'hidden';
 	} else {
-		buttons.childNodes[buttonCount - 1].style.visibility = 'visible';
+		buttons.childNodes[buttonCount - 1].children[0].style.visibility = 'visible';
 	}
 
 	while(count < doubleBlockCount) {
@@ -112,9 +175,9 @@ function blockEngineStart(main,x,id,data) {
 		/* hide the last delete button */
 		if(count === doubleBlockCount - 2) {
 			/* last button is delete, so hide last delete button */
-			buttons.childNodes[buttonCount - 1].style.visibility = 'hidden';
+			buttons.childNodes[buttonCount - 1].children[0].style.visibility = 'hidden';
 		} else {
-			buttons.childNodes[buttonCount - 1].style.visibility = 'visible';
+			buttons.childNodes[buttonCount - 1].children[0].style.visibility = 'visible';
 		}
 
 		/* create block + button div */
@@ -188,7 +251,7 @@ function blockEngineStart(main,x,id,data) {
 	mainid.setAttribute('value',main);
 	enginediv.appendChild(mainid);
 
-	return enginediv;
+	return i;
 }
 
 // <<<fold>>>
@@ -297,7 +360,7 @@ function blockButtons(bid) {
 
 	/* this div will hold the buttons inside of it */
 	var buttonDiv = document.createElement('div');
-	buttonDiv.setAttribute('class','blockbtns');
+	buttonDiv.setAttribute('class','blockbtns row');
 	buttonDiv.setAttribute('id','b' + bid);
 
 	/// there should prob be better styling than this
@@ -307,26 +370,32 @@ function blockButtons(bid) {
 	/* the following are all of the buttons */
 	for(var prop in x) {
 		if(x.hasOwnProperty(prop)) {
+			var colDiv = document.createElement('div');
+			colDiv.setAttribute('class','col col-' + percentageWidth);
+
 			var btn = document.createElement('button');
 			btn.setAttribute("onclick","addBlock(" + bid + ",x." + x[prop].type + ")");
 			btn.setAttribute("class","blockbtn addbtn");
-			btn.setAttribute("style","width:" + percentageWidth + "%;");
 			btn.innerHTML = x[prop].name;
 
-			buttonDiv.appendChild(btn);
+			colDiv.appendChild(btn);
+			buttonDiv.appendChild(colDiv);
 		}
 	}
 
 	/* add the delete button */
+	var delDiv = document.createElement('div');
+	delDiv.setAttribute('class','col col-' + percentageWidth);
+
 	var delBtn = document.createElement('button');
 	delBtn.setAttribute('id','d' + bid);
 	delBtn.setAttribute('onclick','deleteBlock(' + bid + ')');
 	delBtn.setAttribute("class","blockbtn delbtn");
-	delBtn.setAttribute("style","width:" + percentageWidth + "%;");
 	delBtn.style.visibility = 'hidden';
 	delBtn.innerHTML = "&darr;";
 
-	buttonDiv.appendChild(delBtn);
+	delDiv.appendChild(delBtn);
+	buttonDiv.appendChild(delDiv);
 
 	return buttonDiv;
 }

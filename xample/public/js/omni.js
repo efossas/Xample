@@ -371,6 +371,61 @@ function barMenu() {
 }
 
 /*
+	Function: barSubMenu
+
+	Creates a sub menu with a single button that when clicked, will expand a provided div.
+
+	Parameters:
+
+		button name - string, name of button that expands div.
+		settings div - html div, contains div that will be revealed
+
+	Returns:
+
+		success - html node, menu div
+*/
+function barSubMenu(btnName,settingsDiv) {
+	/* set necessary attributes for settingsDiv */
+	settingsDiv.setAttribute('id','page-settings');
+	settingsDiv.setAttribute('data-expanded','0');
+	settingsDiv.setAttribute('style','display:none;visibility:hidden;');
+
+	/* create top div for menu buttons */
+	var menu = document.createElement("div");
+	menu.setAttribute("class","submenu-bar");
+
+	/* row 1 */
+	var rowOne = document.createElement("div");
+	rowOne.setAttribute("class","row");
+
+	/* expand page settings div function */
+	function expandSettings() {
+		if(settingsDiv.getAttribute('data-expanded') === '0') {
+			settingsDiv.setAttribute('style','display:inline-block;visibility:visible;');
+			settingsDiv.setAttribute('data-expanded','1');
+		} else {
+			settingsDiv.setAttribute('style','display:none;visibility:hidden;');
+			settingsDiv.setAttribute('data-expanded','0');
+		}
+	}
+
+	/* page settings button */
+	var settings = btnSubmit(btnName,expandSettings,'none');
+	var colSettings = document.createElement("div");
+	colSettings.setAttribute("class","col col-100");
+	colSettings.appendChild(settings);
+
+	/* append buttons to row 1 */
+	rowOne.appendChild(colSettings);
+
+	/* append row 1 to the menu */
+	menu.appendChild(rowOne);
+	menu.appendChild(settingsDiv);
+
+	return menu;
+}
+
+/*
 	Function: barStatus
 
 	Creates the status bar, which includes save information.

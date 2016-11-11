@@ -41,6 +41,7 @@ var globalScope = {};
 	global btnLink:true
 	global btnSubmit:true
 	global getUserFields:true
+	global barMenu:true
 */
 
 /* list any objects from other js files here */
@@ -640,35 +641,8 @@ function pageProfile(profiledata) {
 
 	/* MENU */
 
-	/* create top div to wrap all header elements */
-	var menu = document.createElement("div");
-	menu.setAttribute("class","menu-bar");
-
-	/* menu row 1 */
-	var menuRowOne = document.createElement("div");
-	menuRowOne.setAttribute("class","row");
-
-	var menuColOneLeft = document.createElement("div");
-	menuColOneLeft.setAttribute("class","col col-15");
-
-	var menuColOneMiddle = document.createElement("div");
-	menuColOneMiddle.setAttribute("class","col col-70 pad-10");
-
-	var menuColOneRight = document.createElement("div");
-	menuColOneRight.setAttribute("class","col col-15");
-
-	menuRowOne.appendChild(menuColOneLeft);
-	menuRowOne.appendChild(menuColOneMiddle);
-	menuRowOne.appendChild(menuColOneRight);
-
-	/* log out button */
-	var logout = btnSubmit('Log Out','logout','red');
-
-	/* append elements to row 1 */
-	menuColOneLeft.appendChild(logout);
-
-	/* append row 1 to the menu */
-	menu.appendChild(menuRowOne);
+	/* create menu */
+	var menu = barMenu();
 
 	/* PROFILE */
 
