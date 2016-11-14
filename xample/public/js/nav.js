@@ -272,7 +272,8 @@ function formGenerateUserContent(type,data) {
 
 	/* append the page links to a form div */
 	var generateUserContentDiv = document.createElement('div');
-	generateUserContentDiv.id = '';
+	generateUserContentDiv.setAttribute('class','page-gen');
+	generateUserContentDiv.setAttribute('id',type + '-gen');
 	generateUserContentDiv.appendChild(row_Content);
 	generateUserContentDiv.appendChild(row_dataBox);
 	generateUserContentDiv.appendChild(row_dataSubmitButtons);
@@ -516,36 +517,11 @@ function rowProfileSingle(field,description,data) {
 */
 function pageHome() {
 
-	/* row 1 */
-	var row_HomeLinks = document.createElement("div");
-	row_HomeLinks.setAttribute("class","row");
-
-	var colLeft_HomeLinks = document.createElement("div");
-	colLeft_HomeLinks.setAttribute("class","col col-15");
-
-	var colMiddle_HomeLinks = document.createElement("div");
-	colMiddle_HomeLinks.setAttribute("class","col col-70 pad-10");
-
-	var colRight_HomeLinks = document.createElement("div");
-	colRight_HomeLinks.setAttribute("class","col col-15");
-
-	row_HomeLinks.appendChild(colLeft_HomeLinks);
-	row_HomeLinks.appendChild(colMiddle_HomeLinks);
-	row_HomeLinks.appendChild(colRight_HomeLinks);
-
-	/* get a log out button */
-	var logoutBtn = btnSubmit('Log Out','logout','red');
-
-	/* get a profile button */
-	var profileBtn = btnLink('Profile',createURL('/profile'),'green');
-
-	/* append elements to row one */
-	colLeft_HomeLinks.appendChild(profileBtn);
-	colRight_HomeLinks.appendChild(logoutBtn);
+	var menu = barMenu();
 
 	/* append the form to the main div */
 	var main = document.getElementById('content');
-	main.appendChild(row_HomeLinks);
+	main.appendChild(menu);
 
 	main.appendChild(document.createElement('hr')); /// remove this later, when you style
 
@@ -559,6 +535,8 @@ function pageHome() {
 		/* block page create form */
 		var row_PageCreate = formGenerateUserContent('blockpage',values[0]);
 		main.appendChild(row_PageCreate);
+
+		main.appendChild(document.createElement('hr')); /// remove this later, when you style
 
 		/* learning guide create form */
 		var row_LgCreate = formGenerateUserContent('lg',values[1]);
@@ -583,14 +561,11 @@ function pageHome() {
 */
 function pageLanding(logstatus) {
 
-	var logdisplay = document.createElement('div');
-	logdisplay.setAttribute('id','logdisplay');
+	var main = document.getElementById('content');
 
-	if(logstatus === "true") {
-		var homelink = document.createElement('a');
-		homelink.setAttribute('href',createURL('home'));
-
-		logdisplay.appendChild(homelink);
+	/* create and append menu based on log status */
+	if(logstatus === true) {
+		var menu = barMenu();
 	} else {
 		var login = formLogin();
 
@@ -606,12 +581,20 @@ function pageLanding(logstatus) {
 		signupbtn.onclick = displaySignUp;
 		signupbtn.innerHTML = "Sign Up";
 
-		logdisplay.appendChild(login);
-		logdisplay.appendChild(document.createElement('hr')); /// remove this later, when you style
-		logdisplay.appendChild(signupbtn);
+		var menu = document.createElement('div');
+		menu.appendChild(login);
+		menu.appendChild(document.createElement('hr')); /// remove this later, when you style
+		menu.appendChild(signupbtn);
 	}
-	var main = document.getElementById('content');
-	main.appendChild(logdisplay);
+	main.appendChild(menu);
+
+	var next = document.createElement('div');
+	next.setAttribute('class','explore');
+	next.innerHTML = "add stuff here";
+
+	/* append div to main */
+	main.appendChild(document.createElement('hr'));
+	main.appendChild(next);
 }
 
 /*
@@ -675,6 +658,7 @@ function pageProfile(profiledata) {
 	/* grab the main div and append all of these elements */
 	var main = document.getElementById('content');
 	main.appendChild(menu);
+	main.appendChild(document.createElement('hr')); /// REMOVE THIS AFTER STYLING
 	main.appendChild(profilediv);
 }
 

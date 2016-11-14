@@ -27,7 +27,7 @@ footer, .footer {
 	position: relative;
 }
 
-.menu-bar, .submenu-bar {
+.menu-bar, .submenu-bar, .page-gen, .explore {
 	width: 100%;
 	max-width: 720px;
 	margin: 0 auto 0 auto;
