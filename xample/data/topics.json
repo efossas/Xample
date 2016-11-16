@@ -14,11 +14,11 @@
         ,"web":
             ["html","css","php","sql","javascript"]
         },
-    "music lexicon":
+    "mathematics":
         {
-        "rhythm":
-            ["tempo","rhythm","time signature","dots & ties","tuplets","meter","syncopation","polyrhythm","metric modulation"]
-        ,"pitch":
-            ["pitch","staff","tab"]
+        "algebra":
+            ["one","two"]
+        ,"calculus":
+            ["one","two"]
         }
 }

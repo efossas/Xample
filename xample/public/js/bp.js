@@ -26,6 +26,7 @@ var globalScope = {};
 	global barMenu:true
 	global barStatus:true
 	global barSubMenu:true
+	global getSubjects:true
 	global getUserFields:true
 */
 /* from bengine.js */
@@ -1338,61 +1339,6 @@ function pageShow(pagedata) {
 	/*** BLOCKS ***/
 
 	blockContentShow('content',x,["bp",pid],blockarray.splice(2,blockarray.length));
-}
-
-// <<<fold>>>
-
-/***
-	Section: Ajax Functions
-	These are functions to retrieve data from the back-end.
-***/
-
-// <<<code>>>
-
-/*
-	Function: getSubjects
-
-	This function retrieves json with subjects,categories,topics.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - promise
-*/
-function getSubjects() {
-	var promise = new Promise(function(resolve,reject) {
-
-		/* create the url destination for the ajax request */
-		var url = createURL("/getsubjects");
-
-		var xmlhttp;
-		xmlhttp = new XMLHttpRequest();
-
-		xmlhttp.open("POST",url,true);
-
-		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "err") {
-						reject("err");
-					} else {
-						resolve(xmlhttp.responseText);
-					}
-				} else {
-					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-				}
-			}
-		};
-
-		xmlhttp.send();
-	});
-
-	return promise;
 }
 
 // <<<fold>>>

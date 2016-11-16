@@ -83,9 +83,9 @@ function createURL(path) {
 
 	/* detect local or remote routes */
 	if(splitUrl[2].match(/localhost.*/)) {
-		url = splitUrl[0] + "//" + splitUrl[2] + path;
+		url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
 	} else {
-		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + path;
+		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + encodeURI(path);
 	}
 
 	return url;
@@ -608,6 +608,52 @@ function pageError(error) {
 ***/
 
 // <<<code>>>
+
+/*
+	Function: getSubjects
+
+	This function retrieves json with subjects,categories,topics.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - promise
+*/
+function getSubjects() {
+	var promise = new Promise(function(resolve,reject) {
+
+		/* create the url destination for the ajax request */
+		var url = createURL("/getsubjects");
+
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+
+		xmlhttp.open("POST",url,true);
+
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					if(xmlhttp.responseText === "err") {
+						reject("err");
+					} else {
+						resolve(xmlhttp.responseText);
+					}
+				} else {
+					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				}
+			}
+		};
+
+		xmlhttp.send();
+	});
+
+	return promise;
+}
 
 /*
    Function: getUserFields

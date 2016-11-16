@@ -27,12 +27,23 @@ footer, .footer {
 	position: relative;
 }
 
-.menu-bar, .submenu-bar, .page-gen, .explore {
+.menu-bar, .submenu-bar, .page-gen, .search-bar, .explore {
 	width: 100%;
 	max-width: 720px;
 	margin: 0 auto 0 auto;
 	padding: 0px;
 	position: relative;
+}
+
+.search-bar {
+	margin-top: 12px;
+}
+
+.explore {
+	margin-top: 12px;
+	border-radius: 2px;
+	background-color: white;
+	box-shadow: 1px 1px 1px #888888;
 }
 
 .menu-bar::after, .submenu-bar::after {
@@ -66,6 +77,48 @@ footer, .footer {
   width: 100vw;
   background: rgba(118, 118, 118, 0.7);
   z-index: -1;
+}
+
+h2 {
+	display: inline-block;
+	width: 100%;
+	height: 46px;
+	background-color: rgb(244, 244, 244);
+	border: 0px solid black;
+	border-bottom-width: 1px;
+	border-radius: 2px;
+
+	padding: 7px 7px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 2em;
+	font-weight: 900;
+	color: black;
+}
+
+h3 {
+	display: inline-block;
+	width: 100%;
+	height: 32px;
+	background-color: transparent;
+	border: 0px solid black;
+	border-bottom-width: 1px;
+	border-radius: 2px;
+
+	padding: 6px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1.2em;
+	font-weight: 600;
+	color: black;
 }
 
 /* Grid System */
@@ -754,6 +807,8 @@ input.xLrg {
 	a.btn { width: 100%; }
 	.revert-btn { width: 100%; }
 	.page-title { width: 100%; }
+	h2 { width: 100%; }
+	h3 { width: 100%; }
 
 	/* Block Styles */
 

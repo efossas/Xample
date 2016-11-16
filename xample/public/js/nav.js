@@ -41,7 +41,9 @@ var globalScope = {};
 	global btnLink:true
 	global btnSubmit:true
 	global getUserFields:true
+	global barLog:true
 	global barMenu:true
+	global getSubjects:true
 */
 
 /* list any objects from other js files here */
@@ -62,6 +64,339 @@ var globalScope = {};
 ***/
 
 // <<<code>>>
+
+/*
+	Function: barLog
+
+	Creates the log in & sign up form.
+
+	Parameters:
+
+		* - none
+
+	Returns:
+
+		success - html node, log in sign up div
+*/
+function barLog() {
+	var login = formLogin();
+
+	/* this function will reveal the sign up form onclick */
+	function displaySignUp() {
+		document.getElementById('logdisplay').removeChild(document.getElementById('signupbtn'));
+		document.getElementById('logdisplay').appendChild(formSignUp());
+	}
+
+	var signupbtn = document.createElement('button');
+	signupbtn.setAttribute('type','button');
+	signupbtn.setAttribute('id','signupbtn');
+	signupbtn.onclick = displaySignUp;
+	signupbtn.innerHTML = "Sign Up";
+
+	var formLog = document.createElement('div');
+	formLog.appendChild(login);
+	formLog.appendChild(document.createElement('hr')); /// remove this later, when you style
+	formLog.appendChild(signupbtn);
+
+	return formLog;
+}
+
+/*
+	Function: barSearch
+
+	Creates the search bar.
+
+	Parameters:
+
+		* - none
+
+	Returns:
+
+		success - html node, search div
+*/
+function barSearch() {
+	/* create the search input */
+	var searchDiv = document.createElement('div');
+	searchDiv.setAttribute('class','search-bar');
+
+	var searchRow = document.createElement('div');
+	searchRow.setAttribute('class','row');
+
+	var searchCol = document.createElement('div');
+	searchCol.setAttribute('class','col col-100');
+
+	var searchBar = document.createElement('input');
+	searchBar.setAttribute('class','text-input');
+	searchBar.setAttribute('type','search');
+	searchBar.setAttribute('placeholder','Search');
+
+	searchCol.appendChild(searchBar);
+	searchRow.appendChild(searchCol);
+	searchDiv.appendChild(searchRow);
+
+	/* create div to display search results */
+	var resultsRow = document.createElement('div');
+	resultsRow.setAttribute('class','row');
+
+	var resultsCol = document.createElement('div');
+	resultsCol.setAttribute('class','col col-100');
+
+	var resultsDisplay = document.createElement('div');
+	resultsDisplay.setAttribute('id','search-results');
+
+	resultsCol.appendChild(resultsDisplay);
+	resultsRow.appendChild(resultsCol);
+	searchDiv.appendChild(resultsRow);
+
+	return searchDiv;
+}
+
+/*
+	Function: dashExplore
+
+	Create dash for exploring content by subject.
+
+	Parameters:
+
+		exploreHeader - string, the <h2> header title
+		linkeRoute - string, the url route name links will go to (no domain or /)
+
+	Returns:
+
+		success - html node, explore dash
+*/
+function dashExplore(exploreHeader,linkRoute) {
+
+	/* create main div for entire dash */
+	var exploreDash = document.createElement('div');
+	exploreDash.setAttribute('class','explore');
+
+	/* create header for dash */
+	var h2row = document.createElement('div');
+	h2row.setAttribute('class','row');
+
+	var h2col = document.createElement('div');
+	h2col.setAttribute('class','col col-100');
+
+	var h2 = document.createElement('h2');
+	h2.innerHTML = exploreHeader;
+
+	h2col.appendChild(h2);
+	h2row.appendChild(h2col);
+	exploreDash.appendChild(h2row);
+
+	/* create div to hold links */
+	var explore = document.createElement('div');
+	explore.setAttribute('class','explore-links');
+	exploreDash.appendChild(explore);
+
+	/* get subjects for select topic list */
+	var subjectsPromise = getSubjects();
+
+	subjectsPromise.then(function(success) {
+		var subjectsData = JSON.parse(success);
+		globalScope.subjects = subjectsData;
+
+		function showTop() {
+			/* first box - subject names */
+			var subjectsNames = Object.keys(subjectsData);
+			var subjectsCount = subjectsNames.length;
+
+			emptyDiv(explore);
+
+			/* create header for link section */
+			var h3row = document.createElement('div');
+			h3row.setAttribute('class','row');
+
+			var h3col = document.createElement('div');
+			h3col.setAttribute('class','col col-100');
+
+			var h3 = document.createElement('h3');
+			h3.innerHTML = 'Subjects';
+
+			explore.appendChild(h3);
+
+			for(var i = 0; i < subjectsCount; i++) {
+				var currentSubject = subjectsNames[i];
+
+				var subjectRow = document.createElement('div');
+				subjectRow.setAttribute('class','row');
+
+				var subjectCol = document.createElement('div');
+				subjectCol.setAttribute('class','col col-100');
+
+				var subjectBtn = btnSubmit(currentSubject,showSubject,'none');
+				subjectBtn.setAttribute('data-subject',currentSubject);
+
+				subjectCol.appendChild(subjectBtn);
+				subjectRow.appendChild(subjectCol);
+
+				explore.appendChild(subjectRow);
+			}
+		}
+
+		showTop();
+
+		function showCategory() {
+			var topicRow = document.createElement('div');
+			topicRow.setAttribute('class','row');
+
+			/* make back btn & col */
+			var backCol = document.createElement('div');
+			backCol.setAttribute('class','col col-10');
+			backCol.setAttribute('style','position:absolute;z-index:2;');
+
+			var backBtn = btnSubmit('Back',showSubject,'red');
+			backBtn.setAttribute('data-subject',this.getAttribute('data-subject'));
+			backCol.appendChild(backBtn);
+
+			/* create header for link section */
+			var h3row = document.createElement('div');
+			h3row.setAttribute('class','row');
+
+			var h3col = document.createElement('div');
+			h3col.setAttribute('class','col col-100');
+
+			var h3 = document.createElement('h3');
+			h3.innerHTML = 'Topics';
+
+			h3row.appendChild(backCol);
+			h3col.appendChild(h3);
+			h3row.appendChild(h3col);
+			topicRow.appendChild(h3row);
+
+			/* make category col */
+			var topicCol = document.createElement('div');
+			topicCol.setAttribute('class','col col-100');
+
+			/* append back & category columns */
+			topicRow.appendChild(topicCol);
+
+			/* add subject row to category col */
+			var categoryRow = document.createElement('div');
+			categoryRow.setAttribute('class','row');
+
+			var categoryCol = document.createElement('div');
+			categoryCol.setAttribute('class','col col-100');
+
+			var categoryUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category'));
+			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>',categoryUrl,'none');
+
+			categoryCol.appendChild(categoryBtn);
+
+			categoryRow.appendChild(categoryCol);
+			topicCol.appendChild(categoryRow);
+
+			/* append categories to category column */
+			var topicsNames = globalScope.subjects[this.getAttribute('data-subject')][this.getAttribute('data-category')];
+			var topicsCount = topicsNames.length;
+
+			for(var i = 0; i < topicsCount; i++) {
+				var currentTopic = topicsNames[i];
+
+				var currentTopicRow = document.createElement('div');
+				currentTopicRow.setAttribute('class','row');
+
+				var currentTopicCol = document.createElement('div');
+				currentTopicCol.setAttribute('class','col col-100');
+
+				var topicUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
+
+				var currentTopicBtn = btnLink(currentTopic,topicUrl,'none');
+
+				currentTopicCol.appendChild(currentTopicBtn);
+				currentTopicRow.appendChild(currentTopicCol);
+
+				topicCol.appendChild(currentTopicRow);
+			}
+
+			emptyDiv(explore);
+			explore.appendChild(topicRow);
+		}
+
+		/* function for showing subject's categoris in explore div */
+		function showSubject() {
+			var categoryRow = document.createElement('div');
+			categoryRow.setAttribute('class','row');
+
+			/* make back btn & col */
+			var backCol = document.createElement('div');
+			backCol.setAttribute('class','col col-10');
+			backCol.setAttribute('style','position:absolute;z-index:2;');
+
+			var backBtn = btnSubmit('Back',showTop,'red');
+			backCol.appendChild(backBtn);
+
+			/* create header for link section */
+			var h3row = document.createElement('div');
+			h3row.setAttribute('class','row');
+
+			var h3col = document.createElement('div');
+			h3col.setAttribute('class','col col-100');
+
+			var h3 = document.createElement('h3');
+			h3.innerHTML = 'Categories';
+
+			h3row.appendChild(backCol);
+			h3col.appendChild(h3);
+			h3row.appendChild(h3col);
+			categoryRow.appendChild(h3row);
+
+			/* make category col */
+			var categoryCol = document.createElement('div');
+			categoryCol.setAttribute('class','col col-100');
+
+			/* append back & category columns */
+			categoryRow.appendChild(categoryCol);
+
+			/* add subject row to category col */
+			var subjectRow = document.createElement('div');
+			subjectRow.setAttribute('class','row');
+
+			var subjectCol = document.createElement('div');
+			subjectCol.setAttribute('class','col col-100');
+			subjectCol.setAttribute('style','border-bottom-color:black;border-bottom-width:1px;');
+
+			var subjectUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject'));
+			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>',subjectUrl,'none');
+			subjectCol.appendChild(subjectBtn);
+
+			subjectRow.appendChild(subjectCol);
+			categoryCol.appendChild(subjectRow);
+
+			/* append categories to category column */
+			var categoryNames = Object.keys(globalScope.subjects[this.getAttribute('data-subject')]);
+			var categoryCount = categoryNames.length;
+
+			for(var i = 0; i < categoryCount; i++) {
+				var currentCategory = categoryNames[i];
+
+				var currentCategoryRow = document.createElement('div');
+				currentCategoryRow.setAttribute('class','row');
+
+				var currentCategoryCol = document.createElement('div');
+				currentCategoryCol.setAttribute('class','col col-100');
+
+				var currentCategoryBtn = btnSubmit(currentCategory,showCategory,'none');
+				currentCategoryBtn.setAttribute('data-category',currentCategory);
+				currentCategoryBtn.setAttribute('data-subject',this.getAttribute('data-subject'));
+
+				currentCategoryCol.appendChild(currentCategoryBtn);
+				currentCategoryRow.appendChild(currentCategoryCol);
+
+				categoryCol.appendChild(currentCategoryRow);
+			}
+
+			/* empty the explore div and replace with categories */
+			emptyDiv(explore);
+			explore.appendChild(categoryRow);
+		}
+	},function(error) {
+		/// handle error
+	});
+
+	return exploreDash;
+}
 
 /*
 	Function: formLogin
@@ -564,37 +899,25 @@ function pageLanding(logstatus) {
 	var main = document.getElementById('content');
 
 	/* create and append menu based on log status */
+	var menu;
 	if(logstatus === true) {
-		var menu = barMenu();
+		menu = barMenu();
 	} else {
-		var login = formLogin();
-
-		/* this function will reveal the sign up form onclick */
-		function displaySignUp() {
-			document.getElementById('logdisplay').removeChild(document.getElementById('signupbtn'));
-			document.getElementById('logdisplay').appendChild(formSignUp());
-		}
-
-		var signupbtn = document.createElement('button');
-		signupbtn.setAttribute('type','button');
-		signupbtn.setAttribute('id','signupbtn');
-		signupbtn.onclick = displaySignUp;
-		signupbtn.innerHTML = "Sign Up";
-
-		var menu = document.createElement('div');
-		menu.appendChild(login);
-		menu.appendChild(document.createElement('hr')); /// remove this later, when you style
-		menu.appendChild(signupbtn);
+		menu = barLog();
 	}
 	main.appendChild(menu);
 
-	var next = document.createElement('div');
-	next.setAttribute('class','explore');
-	next.innerHTML = "add stuff here";
+	/* search bar */
+	var search = barSearch();
+	main.appendChild(search);
 
-	/* append div to main */
-	main.appendChild(document.createElement('hr'));
-	main.appendChild(next);
+	/* pages div */
+	var explorePages = dashExplore('Pages','explorePages');
+	main.appendChild(explorePages);
+
+	/* learning guide div */
+	var exploreLGs = dashExplore('Learning Guides','exploreLGs');
+	main.appendChild(exploreLGs);
 }
 
 /*
