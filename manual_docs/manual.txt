@@ -56,6 +56,13 @@ Follow these steps for editing & testing code.
 3 - Run the software inside the Test folder for testing.
 4 - When ready, push files to remote Git repo from local Git folder.
 
+Topic: Install sass
+
+Sass is a preprocessor that converts .scss files to .css.
+
+linux> sudo su -c "gem install sass"
+mac> gem install sass
+
 Topic: Install NVM
 
 NVM is Node Version Manager. Keeps track of node installations.
