@@ -18,8 +18,11 @@ rsync -a -v $REPO/xample/error/* $TEST/xample/error/
 rsync -a -v $REPO/xample/loads/* $TEST/xample/loads/
 rsync -a -v $REPO/xample/routes/* $TEST/xample/routes/
 
+# convert sass to css
+sass $REPO/xample/public/css/*.scss $TEST/xample/public/css/
+
 # copy frontend files
-rsync -a -v $REPO/xample/public/css/* $TEST/xample/public/css/
+rsync -a -v $REPO/xample/public/css/*.css $TEST/xample/public/css/
 rsync -a -v $REPO/xample/public/js/* $TEST/xample/public/js/
 
 # add frontend omni functions to js files
