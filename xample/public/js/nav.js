@@ -79,26 +79,100 @@ var globalScope = {};
 		success - html node, log in sign up div
 */
 function barLog() {
-	var login = formLogin();
 
-	/* this function will reveal the sign up form onclick */
-	function displaySignUp() {
-		document.getElementById('logdisplay').removeChild(document.getElementById('signupbtn'));
-		document.getElementById('logdisplay').appendChild(formSignUp());
+	/* create parent <div> */
+	var logBar = document.createElement('div');
+	logBar.setAttribute('class','log-bar');
+	logBar.setAttribute('id','form-login');
+
+	/* create top row */
+	var rowTop = document.createElement('div');
+	rowTop.setAttribute('class','row');
+	rowTop.setAttribute('id','top-bar');
+
+	function expandLog() {
+		/* create empty col */
+		var colEmptyLog = document.createElement('div');
+		colEmptyLog.setAttribute('class','col col-50');
+
+		/* create username column */
+		var colUsername = document.createElement('div');
+		colUsername.setAttribute('class','col col-20');
+
+		/* create username text <input> */
+		var username = document.createElement('input');
+		username.setAttribute('class','log-input');
+		username.setAttribute('type','text');
+		username.setAttribute('name','username-login');
+		username.setAttribute('maxlength','50');
+		username.setAttribute('placeholder','User Name');
+		username.setAttribute('style','border-left-width:2px;');
+
+		colUsername.appendChild(username);
+
+		/* create password column */
+		var colPassword = document.createElement('div');
+		colPassword.setAttribute('class','col col-20');
+
+		/* create password <input> */
+		var password = document.createElement('input');
+		password.setAttribute('class','log-input');
+		password.setAttribute('type','password');
+		password.setAttribute('name','password-login');
+		password.setAttribute('maxlength','32');
+		password.setAttribute('placeholder','Password');
+
+		colPassword.appendChild(password);
+
+		/* create submit button column */
+		var colSubmit = document.createElement('div');
+		colSubmit.setAttribute('class','col col-10');
+
+		/* create form submit <button> */
+		var submit = btnSubmit('Log In','login()','green');
+		submit.setAttribute('style','border-color:black;border-left-width:1px;');
+
+		colSubmit.appendChild(submit);
+
+		emptyDiv(rowTop);
+		rowTop.appendChild(colEmptyLog);
+		rowTop.appendChild(colUsername);
+		rowTop.appendChild(colPassword);
+		rowTop.appendChild(colSubmit);
 	}
 
-	var signupbtn = document.createElement('button');
-	signupbtn.setAttribute('type','button');
-	signupbtn.setAttribute('id','signupbtn');
-	signupbtn.onclick = displaySignUp;
-	signupbtn.innerHTML = "Sign Up";
+	function expandSign() {
+		var sign = formSignUp();
 
-	var formLog = document.createElement('div');
-	formLog.appendChild(login);
-	formLog.appendChild(document.createElement('hr')); /// remove this later, when you style
-	formLog.appendChild(signupbtn);
+		emptyDiv(rowTop);
+		rowTop.appendChild(sign);
+	}
 
-	return formLog;
+	/* create expand buttons */
+	var logBtn = btnSubmit('Log In',expandLog,'none');
+	var signBtn = btnSubmit('Sign Up',expandSign,'none');
+
+	/* create columns */
+	var colEmpty = document.createElement('div');
+	colEmpty.setAttribute('class','col col-70');
+
+	var colLogBtn = document.createElement('div');
+	colLogBtn.setAttribute('class','col col-15');
+	colLogBtn.appendChild(logBtn);
+
+	var colSignBtn = document.createElement('div');
+	colSignBtn.setAttribute('class','col col-15');
+	colSignBtn.appendChild(signBtn);
+
+	/* add columns to top row */
+	rowTop.appendChild(colEmpty);
+	rowTop.appendChild(colLogBtn);
+	rowTop.appendChild(colSignBtn);
+
+	/* append the elements to the parent <div> */
+	logBar.appendChild(rowTop);
+
+	return logBar;
 }
 
 /*
@@ -399,60 +473,6 @@ function dashExplore(exploreHeader,linkRoute) {
 }
 
 /*
-	Function: formLogin
-
-	Create a log in form. This returns an html node containing the form. On submit, the form calls login()
-
-	Parameters:
-
-		none
-
-	Form:
-
-		username-login - the user name
-		password-login - the password
-
-	Returns:
-
-		success - html node, log in form
-*/
-function formLogin() {
-
-	/* create parent <div> */
-	var login = document.createElement('div');
-	login.setAttribute('class','form');
-	login.setAttribute('id','form-login');
-
-	/* create username text <input> */
-	var username = document.createElement('input');
-	username.setAttribute('type','text');
-	username.setAttribute('name','username-login');
-	username.setAttribute('maxlength','50');
-	username.setAttribute('placeholder','User Name');
-
-	/* create password <input> */
-	var password = document.createElement('input');
-	password.setAttribute('type','password');
-	password.setAttribute('name','password-login');
-	password.setAttribute('maxlength','32');
-	password.setAttribute('placeholder','Password');
-
-	/* create form submit <button> */
-	var submit = document.createElement('button');
-	submit.setAttribute('type','button');
-	submit.setAttribute('name','submit-login');
-	submit.setAttribute('onclick','login();');
-	submit.innerHTML = "Log In";
-
-	/* append the elements to the parent <div> */
-	login.appendChild(username);
-	login.appendChild(password);
-	login.appendChild(submit);
-
-	return login;
-}
-
-/*
 	Function: formGenerateUserContent
 
 	Make a user content form.
@@ -644,61 +664,89 @@ function formSignUp() {
 	signup.setAttribute('class','form');
 	signup.setAttribute('id','form-signup');
 
+	/* username column */
+	var colUsername = document.createElement('div');
+	colUsername.setAttribute('class','col col-17');
+
 	/* create username text <input> */
 	var username = document.createElement('input');
+	username.setAttribute('class','log-input');
 	username.setAttribute('type','text');
 	username.setAttribute('name','username-signup');
 	username.setAttribute('maxlength','50');
 	username.setAttribute('placeholder','User Name');
+	username.setAttribute('style','border-left-width:0px;');
+	colUsername.appendChild(username);
+
+	/* email column */
+	var colEmail = document.createElement('div');
+	colEmail.setAttribute('class','col col-17');
 
 	/* create email text <input> */
 	var email = document.createElement('input');
+	email.setAttribute('class','log-input');
 	email.setAttribute('type','text');
 	email.setAttribute('name','email-signup');
 	email.setAttribute('maxlength','50');
 	email.setAttribute('placeholder','Email - optional');
+	colEmail.appendChild(email);
+
+	/* phone column */
+	var colPhone = document.createElement('div');
+	colPhone.setAttribute('class','col col-17');
 
 	/* create phone text <input> */
 	var phone = document.createElement('input');
+	phone.setAttribute('class','log-input');
 	phone.setAttribute('type','text');
 	phone.setAttribute('name','phone-signup');
-	phone.setAttribute('maxlength','15');
+	phone.setAttribute('maxlength','17');
 	phone.setAttribute('placeholder','Phone - optional');
+	colPhone.appendChild(phone);
+
+	/* password column */
+	var colPassword = document.createElement('div');
+	colPassword.setAttribute('class','col col-17');
 
 	/* create password <input> */
 	var password = document.createElement('input');
+	password.setAttribute('class','log-input');
 	password.setAttribute('type','password');
 	password.setAttribute('name','password-signup');
 	password.setAttribute('maxlength','32');
 	password.setAttribute('placeholder','Password');
+	colPassword.appendChild(password);
+
+	/* password check column */
+	var colPasswordc = document.createElement('div');
+	colPasswordc.setAttribute('class','col col-17');
 
 	/* create another password <input> */
 	var passwordc = document.createElement('input');
+	passwordc.setAttribute('class','log-input');
 	passwordc.setAttribute('type','password');
 	passwordc.setAttribute('name','password-signup-check');
 	passwordc.setAttribute('maxlength','32');
 	passwordc.setAttribute('placeholder','Repeat Password');
+	colPasswordc.appendChild(passwordc);
+
+	/* submit button column */
+	var colSubmit = document.createElement('div');
+	colSubmit.setAttribute('class','col col-15');
 
 	/* create form submit <button> */
-	var submit = document.createElement('button');
-	submit.setAttribute('type','button');
+	var submit = btnSubmit('Sign Up','signup()','green');
 	submit.setAttribute('value','submit-signup');
-	submit.setAttribute('onclick','signup();');
-	submit.innerHTML = "Sign Up";
-
-	/* create error <div> for displaying errors */
-	var error = document.createElement('div');
-	error.setAttribute('class','error');
-	error.setAttribute('id','error-signup');
+	submit.setAttribute('style','border-color:black;border-left-width:1px;');
+	colSubmit.appendChild(submit);
 
 	/* append the elements to the parent <div> */
-	signup.appendChild(username);
-	signup.appendChild(email);
-	signup.appendChild(phone);
-	signup.appendChild(password);
-	signup.appendChild(passwordc);
-	signup.appendChild(submit);
-	signup.appendChild(error);
+	signup.appendChild(colUsername);
+	signup.appendChild(colEmail);
+	signup.appendChild(colPhone);
+	signup.appendChild(colPassword);
+	signup.appendChild(colPasswordc);
+	signup.appendChild(colSubmit);
 
 	return signup;
 }

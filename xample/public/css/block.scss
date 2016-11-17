@@ -1,6 +1,6 @@
 /* Base Styles */
 
-/* this is a test */
+$site-width: 720px;
 
 html {
 	height: 100%;
@@ -29,26 +29,15 @@ footer, .footer {
 	position: relative;
 }
 
-.menu-bar, .submenu-bar, .page-gen, .search-bar, .explore {
+.wrapper {
 	width: 100%;
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0 auto 0 auto;
 	padding: 0px;
 	position: relative;
 }
 
-.search-bar {
-	margin-top: 12px;
-}
-
-.explore {
-	margin-top: 12px;
-	border-radius: 2px;
-	background-color: white;
-	box-shadow: 1px 1px 1px #888888;
-}
-
-.menu-bar::after, .submenu-bar::after {
+.bar::after {
   content: "";
   position: absolute;
   height: 100%;
@@ -56,29 +45,65 @@ footer, .footer {
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;
-  background: rgba(118, 118, 118, 0.4);
   z-index: -1;
+}
+
+.log-bar {
+	@extend .wrapper;
+}
+
+.log-bar::after {
+	@extend .bar::after;
+	background: rgba(118, 118, 118, 0.4);
+}
+
+.menu-bar {
+	@extend .wrapper;
+}
+
+.menu-bar::after {
+	@extend .bar::after;
+	background: rgba(118, 118, 118, 0.4);
+}
+
+.submenu-bar {
+	@extend .wrapper;
+}
+
+.submenu-bar::after {
+	@extend .bar::after;
+	background: rgba(118, 118, 118, 0.4);
 }
 
 .status-bar {
 	width: 100%;
 	height: 60px;
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0 auto 0 auto;
 	padding: 0px;
 	position: relative;
 }
 
 .status-bar::after {
-  content: "";
-  position: absolute;
-  height: 100%;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100vw;
+  @extend .bar::after;
   background: rgba(118, 118, 118, 0.7);
-  z-index: -1;
+}
+
+.page-gen {
+	@extend .wrapper;
+}
+
+.search-bar {
+	@extend .wrapper;
+	margin-top: 12px;
+}
+
+.explore {
+	@extend .wrapper;
+	margin-top: 12px;
+	border-radius: 2px;
+	background-color: white;
+	box-shadow: 1px 1px 1px #888888;
 }
 
 h2 {
@@ -157,6 +182,10 @@ h3 {
 
 .col-15 {
     width: 15%;
+}
+
+.col-17 {
+    width: 17%;
 }
 
 .col-20 {
@@ -428,7 +457,7 @@ progress {
 
 /* Block Button Styles */
 .blockbtns {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 10px auto 0px auto;
 	position: relative;
 }
@@ -470,7 +499,7 @@ progress {
 
 /* Block Styles */
 .xtext {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
@@ -478,7 +507,7 @@ progress {
 	display: inline-block;
 	overflow-y: auto;
 
-	width: 720px;
+	width: $site-width;
 	height: 200px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -500,7 +529,7 @@ progress {
 }
 
 .xcode {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
@@ -508,7 +537,7 @@ progress {
 	white-space: pre-line;
 
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 300px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -534,13 +563,13 @@ progress {
 }
 
 .latex {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xLtx {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 100px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -553,7 +582,7 @@ progress {
 
 .latexImage, .latexImage-show {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 200px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -570,13 +599,13 @@ progress {
 
 
 .xmath {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xMat {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 100px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -591,7 +620,7 @@ progress {
 
 .mathImage, .mathImage-show {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 200px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -607,13 +636,13 @@ progress {
 }
 
 .image {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xImg, .xImg-show {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 405px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -628,13 +657,13 @@ progress {
 }
 
 .audio {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xAud, .xAud-show {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 
 	padding: 0px;
 	margin: 0px;
@@ -646,13 +675,13 @@ progress {
 }
 
 .video {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xVid, .xVid-show {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 405px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -667,13 +696,13 @@ progress {
 }
 
 .slide {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xSli, .xSli-show {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 405px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -693,13 +722,13 @@ svg {
 }
 
 .xsvgs {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xSvg {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 405px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -710,13 +739,13 @@ svg {
 }
 
 .title {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xTit {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 32px;
 	border: 1px solid black;
 	border-radius: 2px;
@@ -735,7 +764,7 @@ svg {
 
 .xTit-show {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 46px;
 	background-color: #9fc4c6;
 	border: 1px solid black;
@@ -755,13 +784,13 @@ svg {
 }
 
 .xlist {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 0px auto 0 auto;
 }
 
 .xLrg {
 	display: inline-block;
-	width: 720px;
+	width: $site-width;
 	height: 100%;
 	border: 0px solid black;
 	border-radius: 2px;
@@ -792,10 +821,10 @@ input.xLrg {
 
 /* Mobile Size */
 
-@media screen and (max-width: 720px) {
+@media screen and (max-width: $site-width) {
 	#content { width: 100%; }
 
-	.col-5, .col-10, .col-15, .col-20, .col-25, .col-30, .col-33, .col-35, .col-40, .col-45, .col-50, .col-55, .col-60, .col-65, .col-66, .col-70, .col-75, .col-80, .col-85, .col-90, .col-95, .col-100 {
+	.col-5, .col-10, .col-15, .col-17, .col-20, .col-25, .col-30, .col-33, .col-35, .col-40, .col-45, .col-50, .col-55, .col-60, .col-65, .col-66, .col-70, .col-75, .col-80, .col-85, .col-90, .col-95, .col-100 {
 		float: none;
 	    min-height: 1px;
 	    width: auto;
@@ -901,10 +930,19 @@ select[multiple] {
 	color: black;
 }
 
+.log-input {
+	@extend .text-input;
+	font-size: 0.9em;
+	border-radius: 0px;
+	border-top-width: 0px;
+	border-bottom-width: 0px;
+	outline: none;
+}
+
 /* Other Content */
 
 .profilelist {
-	max-width: 720px;
+	max-width: $site-width;
 	margin: 10px auto 0px auto;
 	position: relative;
 }
