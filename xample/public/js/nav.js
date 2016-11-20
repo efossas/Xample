@@ -353,7 +353,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			var categoryCol = document.createElement('div');
 			categoryCol.setAttribute('class','col col-100');
 
-			var categoryUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category'));
+			var categoryUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category'));
 			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>',categoryUrl,'none');
 
 			categoryCol.appendChild(categoryBtn);
@@ -374,7 +374,7 @@ function dashExplore(exploreHeader,linkRoute) {
 				var currentTopicCol = document.createElement('div');
 				currentTopicCol.setAttribute('class','col col-100');
 
-				var topicUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
+				var topicUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
 
 				var currentTopicBtn = btnLink(currentTopic,topicUrl,'none');
 
@@ -431,7 +431,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			subjectCol.setAttribute('class','col col-100');
 			subjectCol.setAttribute('style','border-bottom-color:black;border-bottom-width:1px;');
 
-			var subjectUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject'));
+			var subjectUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject'));
 			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>',subjectUrl,'none');
 			subjectCol.appendChild(subjectBtn);
 
@@ -886,6 +886,165 @@ function rowProfileSingle(field,description,data) {
 // <<<code>>>
 
 /*
+	Function: pageExplore
+
+	Displays the page for exploring content.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		nothing - *
+*/
+function pageExplore(logstatus,data) {
+	var main = document.getElementById('content');
+
+	/* create and append menu based on log status */
+	var menu;
+	if(logstatus === true) {
+		menu = barMenu();
+	} else {
+		menu = barLog();
+	}
+	main.appendChild(menu);
+
+	/* holds the entire link */
+	var box = document.createElement('div');
+	box.setAttribute('class','content-box');
+
+	/* holds title, author, rating, & bookmark */
+	var topRow = document.createElement('div');
+	topRow.setAttribute('class','row');
+
+	/* create title */
+	var colTitle = document.createElement('div');
+	colTitle.setAttribute('class','col col-75');
+
+	var title = document.createElement('div');
+	title.setAttribute('class','box-title');
+	title.innerHTML = "";
+	colTitle.appendChild(title);
+
+	/* create author */
+	var colAuthor = document.createElement('div');
+	colAuthor.setAttribute('class','col col-10');
+
+	var author = document.createElement('div');
+	author.setAttribute('class','box-author');
+	colAuthor.appendChild(author);
+
+	/* create rating */
+	var colRating = document.createElement('div');
+	colRating.setAttribute('class','col col-10');
+
+	var rating = document.createElement('div');
+	rating.setAttribute('class','box-rating');
+	colRating.appendChild(rating);
+
+	/* create bookmark */
+	var colBookmark = document.createElement('div');
+	colBookmark.setAttribute('class','col col-5');
+
+	var bookmark = document.createElement('div');
+	bookmark.setAttribute('class','box-bookmark');
+	colBookmark.appendChild(bookmark);
+
+	/* append to top row */
+	topRow.appendChild(colTitle);
+	topRow.appendChild(colAuthor);
+	topRow.appendChild(colRating);
+	topRow.appendChild(colBookmark);
+
+	/* holds image and blurb */
+	var middleRow = document.createElement('div');
+	middleRow.setAttribute('class','row');
+
+	/* create image */
+	var colImage = document.createElement('div');
+	colImage.setAttribute('class','col col-50');
+
+	var image = document.createElement('div');
+	image.setAttribute('class','box-image');
+	colImage.appendChild(image);
+
+	/* create blurb */
+	var colBlurb = document.createElement('div');
+	colBlurb.setAttribute('class','col col-50');
+
+	var blurb = document.createElement('div');
+	blurb.setAttribute('class','box-blurb');
+	colBlurb.appendChild(blurb);
+
+	/* append to middle row */
+	middleRow.appendChild(colImage);
+	middleRow.appendChild(colBlurb);
+
+	/* holds created, edited, ranks, views */
+	var bottomRow = document.createElement('div');
+	bottomRow.setAttribute('class','row');
+
+	/* create date created */
+	var colCreated = document.createElement('div');
+	colCreated.setAttribute('class','col col-25');
+
+	var created = document.createElement('div');
+	created.setAttribute('class','box-created');
+	colCreated.appendChild(created);
+
+	/* create edited */
+	var colEdited = document.createElement('div');
+	colEdited.setAttribute('class','col col-25');
+
+	var edited = document.createElement('div');
+	edited.setAttribute('class','box-edited');
+	colEdited.appendChild(edited);
+
+	/* create ranks */
+	var colRanks = document.createElement('div');
+	colRanks.setAttribute('class','col col-25');
+
+	var ranks = document.createElement('div');
+	ranks.setAttribute('class','box-ranks');
+	colRanks.appendChild(ranks);
+
+	/* views */
+	var colViews = document.createElement('div');
+	colViews.setAttribute('class','col col-25');
+
+	var views = document.createElement('div');
+	views.setAttribute('class','box-views');
+	colViews.appendChild(views);
+
+	/* append to bottom row */
+	bottomRow.appendChild(colCreated);
+	bottomRow.appendChild(colEdited);
+	bottomRow.appendChild(colRanks);
+	bottomRow.appendChild(colViews);
+
+	/* append rows to div & set visibility */
+	box.appendChild(topRow);
+	box.appendChild(middleRow);
+	box.appendChild(bottomRow);
+
+	/* loop through links & insert data into boxes */
+	var newBox = box.cloneNode(true);
+	newBox.querySelector(".box-title").innerHTML = "Title";
+	newBox.querySelector(".box-author").innerHTML = "author";
+	newBox.querySelector(".box-rating").innerHTML = "rating";
+	newBox.querySelector(".box-bookmark").innerHTML = "bm";
+	newBox.querySelector(".box-image").innerHTML = "Image";
+	newBox.querySelector(".box-blurb").innerHTML = "Blurb";
+	newBox.querySelector(".box-created").innerHTML = "created: 00/00/00";
+	newBox.querySelector(".box-edited").innerHTML = "edited: 00/00/00";
+	newBox.querySelector(".box-ranks").innerHTML = "ranks: #########";
+	newBox.querySelector(".box-views").innerHTML = "views: #########";
+	console.log(newBox);
+	main.appendChild(newBox);
+}
+
+/*
 	Function: pageHome
 
 	Displays the Home Page (index page for logged in users). Currently displays log out button, makes and shows page creation form, and fetches and links to existing user pages.
@@ -960,11 +1119,11 @@ function pageLanding(logstatus) {
 	main.appendChild(search);
 
 	/* pages div */
-	var explorePages = dashExplore('Pages','explorePages');
+	var explorePages = dashExplore('Pages','explore?content=bp');
 	main.appendChild(explorePages);
 
 	/* learning guide div */
-	var exploreLGs = dashExplore('Learning Guides','exploreLGs');
+	var exploreLGs = dashExplore('Learning Guides','explore?content=lg');
 	main.appendChild(exploreLGs);
 }
 

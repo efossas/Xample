@@ -12,9 +12,9 @@
 // <<<code>>>
 
 /* load functions, for loading pages */
-var l_begin = require('./loads/begin.js');
 var l_editpage = require('./loads/editpage.js');
 var l_editlg = require('./loads/editlg.js');
+var l_explore = require('./loads/explore.js');
 var l_home = require('./loads/home.js');
 var l_notfound = require('./loads/notfound.js');
 var l_page = require('./loads/page.js');
@@ -49,13 +49,13 @@ var r_uploadmedia = require('./routes/uploadmedia.js');
 // <<<code>>>
 
 module.exports = {
-    begin: l_begin.begin,
     createlg: r_createlg.createlg,
     createpage: r_createpage.createpage,
     deletelg: r_deletelg.deletelg,
     deletepage: r_deletepage.deletepage,
     editpage: l_editpage.editpage,
     editlg: l_editlg.editlg,
+    explore: l_explore.explore,
     getlgs: r_getlgs.getlgs,
     getpages: r_getpages.getpages,
     getprofiledata: r_getprofiledata.getprofiledata,

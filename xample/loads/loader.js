@@ -53,7 +53,7 @@ exports.loadBlockPage = function(request,response,script) {
 	var alertifycorestyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.core.css'>";
 	var alertifydefaultstyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.default.css'>";
 	var codehighlightstyle = "<link rel='stylesheet' href='" + request.root + "css/vs.css'>";
-	var blockstyle = "<link rel='stylesheet' href='" + request.root + "css/block" + minified + ".css'>";
+	var wisestyle = "<link rel='stylesheet' href='" + request.root + "css/wisepool" + minified + ".css'>";
 
 	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
 	var pdfjs = "<script src='" + request.root + "js/pdf.min.js'></script>";
@@ -66,7 +66,7 @@ exports.loadBlockPage = function(request,response,script) {
 	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
-	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + codehighlightstyle + blockstyle + alertifyjs + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
+	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + codehighlightstyle + wisestyle + alertifyjs + pdfjs + codehighlightjs + mathjaxconfig + mathjaxjs + xamplejs + headend + body);
 
 	/* write the <script> */
 	response.write(script);
@@ -104,7 +104,7 @@ exports.loadLearningGuidePage = function(request,response,script) {
 
 	var alertifycorestyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.core.css'>";
 	var alertifydefaultstyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.default.css'>";
-	var blockstyle = "<link rel='stylesheet' href='" + request.root + "css/block" + minified + ".css'>";
+	var wisestyle = "<link rel='stylesheet' href='" + request.root + "css/wisepool" + minified + ".css'>";
 
 	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
 	var xamplejs = "<script src='" + request.root + "js/lg" + minified + ".js'></script>";
@@ -113,7 +113,7 @@ exports.loadLearningGuidePage = function(request,response,script) {
 	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
-	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + blockstyle + alertifyjs + xamplejs + headend + body);
+	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + wisestyle + alertifyjs + xamplejs + headend + body);
 
 	/* write the <script> */
 	response.write(script);
@@ -151,7 +151,7 @@ exports.loadPage = function(request,response,script) {
 
 	var alertifycorestyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.core.css'>";
 	var alertifydefaultstyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.default.css'>";
-	var blockstyle = "<link rel='stylesheet' href='" + request.root + "css/block" + minified + ".css'>";
+	var wisestyle = "<link rel='stylesheet' href='" + request.root + "css/wisepool" + minified + ".css'>";
 
 	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
 	var xamplejs = "<script src='" + request.root + "js/nav" + minified + ".js'></script>";
@@ -160,64 +160,11 @@ exports.loadPage = function(request,response,script) {
 	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
-	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + blockstyle + alertifyjs + xamplejs + headend + body);
+	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + wisestyle + alertifyjs + xamplejs + headend + body);
 
 	/* write the <script> */
 	response.write(script);
 
 	/* close tags & send the http response */
 	response.end("</body></html>");
-};
-
-/*
-	Function: loadReact
-
-	This is used to load a ReactJS page. It writes the <head> to the response which includes all library links. Then it writes the parameter "script" which is a javascript function on the front-end that should create the page. It finally writes some ending tags using response.end() to send the response.
-
-	Parameters:
-
-		request - the http request
-		response - the http response
-		script - the front-end javascript function, it needs to have <script> tags
-
-	Returns:
-
-		nothing - *
-*/
-exports.loadReact = function(request,response,script) {
-
-	/* use minified code unless running from localhost */
-    var minified = ".min";
-    if(request.root.indexOf("localhost") > 0) {
-        minified = "";
-    }
-
-	/* define the library & style links here */
-	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
-	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
-
-	var reactjs;
-	var reactdom;
-	if(request.root.indexOf("localhost") > 0) {
-		reactjs = '<script src="https://unpkg.com/react@15.3.2/dist/react.js"></script>';
-		reactdom = '<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.js"></script>';
-	} else {
-		reactjs = '<script src="https://unpkg.com/react@15.3.2/dist/react.min.js"></script>';
-		reactdom = '<script src="https://unpkg.com/react-dom@15.3.2/dist/react-dom.min.js"></script>';
-	}
-
-	var wisepooljs = "<script src='" + request.root + "js/wisepool" + minified + ".js'></script>";
-
-	var headend = "<title>Wisepool</title></head>";
-	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
-
-	/* write the <head> */
-	response.write(headstart + viewport + reactjs + reactdom + wisepooljs + headend + body);
-
-	/* write the <script> */
-	response.write(script);
-
-	/* close tags & send the http response */
-	response.end("</body></html>");
-
 };

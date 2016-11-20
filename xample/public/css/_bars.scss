@@ -1,0 +1,51 @@
+/*** Top Bars ***/
+
+/* Positioning */
+.bar::after {
+  content: "";
+  position: absolute;
+  height: 100%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  z-index: -1;
+}
+
+/* Bars */
+.log-bar {
+	@extend .wrapper;
+}
+
+.log-bar::after {
+	@extend .bar::after;
+	background: $bar-color;
+}
+
+.menu-bar {
+	@extend .wrapper;
+}
+
+.menu-bar::after {
+	@extend .bar::after;
+	background: $bar-color;
+}
+
+.submenu-bar {
+	@extend .wrapper;
+}
+
+.submenu-bar::after {
+	@extend .bar::after;
+	background: $bar-color;
+}
+
+.status-bar {
+	@extend .wrapper;
+	height: 60px;
+}
+
+.status-bar::after {
+  @extend .bar::after;
+  background: rgba(118, 118, 118, 0.7);
+}

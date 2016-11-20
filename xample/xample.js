@@ -279,13 +279,13 @@ app.set("fileRoute",__dirname + "/public/");
 
 /* routes */
 app.get('/',rts.start);
-app.get('/begin',rts.begin); /// THIS IS TEMPORARY FOR TESTING REACTJS!!!
 app.post('/createlg',rts.createlg);
 app.post('/createpage',rts.createpage);
 app.post('/deletelg',rts.deletelg);
 app.post('/deletepage',rts.deletepage);
 app.get('/editpage*',rts.editpage);
 app.get('/editlg*',rts.editlg);
+app.get('/explore*',rts.explore);
 app.post('/getlgs',rts.getlgs);
 app.post('/getpages',rts.getpages); /// breaks REST ??
 app.post('/getprofiledata',rts.getprofiledata);

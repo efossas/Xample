@@ -1,0 +1,35 @@
+/*** General Box Type Divs ***/
+
+/* Page Generator - Home Page */
+.page-gen {
+	@extend .wrapper;
+}
+
+/* Content Search Box - Landing Page */
+.explore {
+	@extend .wrapper;
+	margin-top: 12px;
+	border-radius: 2px;
+	background-color: white;
+	box-shadow: 1px 1px 1px #888888;
+}
+
+/* Link Box - Explore Page */
+.content-box {
+    @extend .wrapper;
+}
+
+.box-title {
+
+}
+
+.box-author {
+
+}
+
+/* Profile Box - Profile Page */
+.profilelist {
+	max-width: $site-width;
+	margin: 10px auto 0px auto;
+	position: relative;
+}
