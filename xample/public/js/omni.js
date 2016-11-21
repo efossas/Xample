@@ -119,6 +119,28 @@ function emptyDiv(node) {
 	}
 }
 
+/*
+	Function: emptyDiv
+
+	This is only used on the explore page now, after much frustration, a dynamic function could not be attached to the boxes. This could be altered for functionality elsewhere though so it's not such a waste of space.
+
+	Parameters:
+
+		btn - object, the button being clicked
+
+	Returns:
+
+		nothing - *
+*/
+function expandRow(btn) {
+	var extraInfo = btn.parentNode.parentNode.parentNode.parentNode.children[1];
+	if(extraInfo.style.visibility === 'visible') {
+		extraInfo.style = "display:none;visibility:hidden;";
+	} else {
+		extraInfo.style = "display:block;visibility:visible;";
+	}
+}
+
 // <<<fold>>>
 
 /***

@@ -920,7 +920,7 @@ function pageExplore(logstatus,data) {
 
 	/* create title */
 	var colTitle = document.createElement('div');
-	colTitle.setAttribute('class','col col-75');
+	colTitle.setAttribute('class','col col-60');
 
 	var title = document.createElement('div');
 	title.setAttribute('class','box-title');
@@ -929,7 +929,7 @@ function pageExplore(logstatus,data) {
 
 	/* create author */
 	var colAuthor = document.createElement('div');
-	colAuthor.setAttribute('class','col col-10');
+	colAuthor.setAttribute('class','col col-15');
 
 	var author = document.createElement('div');
 	author.setAttribute('class','box-author');
@@ -937,11 +937,16 @@ function pageExplore(logstatus,data) {
 
 	/* create rating */
 	var colRating = document.createElement('div');
-	colRating.setAttribute('class','col col-10');
+	colRating.setAttribute('class','col col-15');
 
 	var rating = document.createElement('div');
 	rating.setAttribute('class','box-rating');
 	colRating.appendChild(rating);
+
+	var ratingBar = document.createElement('div');
+	ratingBar.setAttribute('class','rating-bar');
+	ratingBar.setAttribute('role','progressbar');
+	rating.appendChild(ratingBar);
 
 	/* create bookmark */
 	var colBookmark = document.createElement('div');
@@ -951,39 +956,61 @@ function pageExplore(logstatus,data) {
 	bookmark.setAttribute('class','box-bookmark');
 	colBookmark.appendChild(bookmark);
 
+	var star = document.createElement('input');
+	star.setAttribute('type','checkbox');
+	star.setAttribute('class','star');
+	bookmark.appendChild(star);
+
+	/* create expand */
+	var colExpand = document.createElement('div');
+	colExpand.setAttribute('class','col col-5');
+
+	var expand = document.createElement('div');
+	expand.setAttribute('class','box-expand');
+	colExpand.appendChild(expand);
+
+	/* add expand btn */
+	var btnExpand = btnSubmit('+','expandRow(this)','none');
+	expand.appendChild(btnExpand);
+
 	/* append to top row */
 	topRow.appendChild(colTitle);
 	topRow.appendChild(colAuthor);
 	topRow.appendChild(colRating);
 	topRow.appendChild(colBookmark);
+	topRow.appendChild(colExpand);
 
-	/* holds image and blurb */
-	var middleRow = document.createElement('div');
-	middleRow.setAttribute('class','row');
+	/* holds image and a row */
+	var bottomRow = document.createElement('div');
+	bottomRow.setAttribute('class','row');
+	bottomRow.setAttribute('style','display:none;visibility:hidden;');
 
 	/* create image */
 	var colImage = document.createElement('div');
-	colImage.setAttribute('class','col col-50');
+	colImage.setAttribute('class','col col-35');
 
 	var image = document.createElement('div');
 	image.setAttribute('class','box-image');
 	colImage.appendChild(image);
 
+	/* upper row for right section, holds blurb */
+	var upperRow = document.createElement('div');
+	upperRow.setAttribute('class','row');
+
 	/* create blurb */
 	var colBlurb = document.createElement('div');
-	colBlurb.setAttribute('class','col col-50');
+	colBlurb.setAttribute('class','col col-100');
 
 	var blurb = document.createElement('div');
 	blurb.setAttribute('class','box-blurb');
 	colBlurb.appendChild(blurb);
 
-	/* append to middle row */
-	middleRow.appendChild(colImage);
-	middleRow.appendChild(colBlurb);
+	/* append to upper row */
+	upperRow.appendChild(colBlurb);
 
-	/* holds created, edited, ranks, views */
-	var bottomRow = document.createElement('div');
-	bottomRow.setAttribute('class','row');
+	/* lower row for right section, holds created, edited, ranks, views */
+	var lowerRow = document.createElement('div');
+	lowerRow.setAttribute('class','row');
 
 	/* create date created */
 	var colCreated = document.createElement('div');
@@ -1018,30 +1045,48 @@ function pageExplore(logstatus,data) {
 	colViews.appendChild(views);
 
 	/* append to bottom row */
-	bottomRow.appendChild(colCreated);
-	bottomRow.appendChild(colEdited);
-	bottomRow.appendChild(colRanks);
-	bottomRow.appendChild(colViews);
+	lowerRow.appendChild(colCreated);
+	lowerRow.appendChild(colEdited);
+	lowerRow.appendChild(colRanks);
+	lowerRow.appendChild(colViews);
+
+	/* column for upper and lower rows */
+	var colRightSection = document.createElement('div');
+	colRightSection.setAttribute('class','col col-65');
+
+	/* append upper and lower rows to right section */
+	colRightSection.appendChild(upperRow);
+	colRightSection.appendChild(lowerRow);
+
+	/* append left and right sections to bottom row */
+	bottomRow.appendChild(colImage);
+	bottomRow.appendChild(colRightSection);
 
 	/* append rows to div & set visibility */
 	box.appendChild(topRow);
-	box.appendChild(middleRow);
 	box.appendChild(bottomRow);
 
 	/* loop through links & insert data into boxes */
-	var newBox = box.cloneNode(true);
-	newBox.querySelector(".box-title").innerHTML = "Title";
-	newBox.querySelector(".box-author").innerHTML = "author";
-	newBox.querySelector(".box-rating").innerHTML = "rating";
-	newBox.querySelector(".box-bookmark").innerHTML = "bm";
-	newBox.querySelector(".box-image").innerHTML = "Image";
-	newBox.querySelector(".box-blurb").innerHTML = "Blurb";
-	newBox.querySelector(".box-created").innerHTML = "created: 00/00/00";
-	newBox.querySelector(".box-edited").innerHTML = "edited: 00/00/00";
-	newBox.querySelector(".box-ranks").innerHTML = "ranks: #########";
-	newBox.querySelector(".box-views").innerHTML = "views: #########";
-	console.log(newBox);
-	main.appendChild(newBox);
+	var index = 0;
+	while(index < 10) {
+		var newBox = box.cloneNode(true);
+		newBox.setAttribute('id',index);
+
+		newBox.querySelector(".box-title").innerHTML = "<a href=''>Metric Modulation In Early 90's Heavy Metal</a>";
+		newBox.querySelector(".box-author").innerHTML = "<a href=''>author</a>";
+		var percentage = 65;
+		newBox.querySelector(".rating-bar").className += " w" + (percentage - (percentage % 10));
+		newBox.querySelector(".rating-bar").style = "width:" + percentage + "%";
+		newBox.querySelector(".star").checked = false;
+		newBox.querySelector(".box-image").innerHTML = "Image";
+		newBox.querySelector(".box-blurb").innerHTML = "Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest!";
+		newBox.querySelector(".box-created").innerHTML = "created: 00/00/00";
+		newBox.querySelector(".box-edited").innerHTML = "edited: 00/00/00";
+		newBox.querySelector(".box-ranks").innerHTML = "ranks: #########";
+		newBox.querySelector(".box-views").innerHTML = "views: #########";
+		main.appendChild(newBox);
+		index++;
+	}
 }
 
 /*
