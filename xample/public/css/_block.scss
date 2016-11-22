@@ -39,6 +39,23 @@
 }
 
 /* Page Info */
+.page-link {
+	display: inline-block;
+	width: 100%;
+	padding: 6px;
+	text-align: center;
+	font-weight: 500;
+
+	a {
+		font-weight: 500;
+	}
+
+	a:hover {
+		color: black;
+	}
+
+}
+
 .page-title {
 	display: inline-block;
 	width: 100%;
@@ -380,9 +397,9 @@ svg {
 	display: inline-block;
 	width: $site-width;
 	height: 46px;
-	background-color: #9fc4c6;
+	background-color: rgba(118, 118, 118, 0.2);
 	border: 1px solid black;
-	border-bottom-color: #9fc4c6;
+	border-bottom-color: rgba(118, 118, 118, 0.2);
 	border-radius: 2px;
 
 	padding: 6px 6px;

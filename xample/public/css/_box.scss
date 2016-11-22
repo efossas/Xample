@@ -1,8 +1,32 @@
 /*** General Box Type Divs ***/
 
+/* Bookmarks Box - Home Page */
+.bookmarks-box {
+	@extend .wrapper;
+
+	margin-top: 16px;
+	margin-bottom: 16px;
+	box-shadow: 1px 1px 1px $shadow;
+}
+
 /* Page Generator - Home Page */
 .page-gen {
 	@extend .wrapper;
+
+	margin-top: 16px;
+	margin-bottom: 16px;
+	box-shadow: 1px 1px 1px $shadow;
+
+	select {
+		border-left-width: 0px;
+		border-right-width: 0px;
+	}
+
+	select[multiple] {
+		width: 100%;
+		font-size: 1em;
+		height: 240px;
+	}
 }
 
 /* Content Search Box - Landing Page */
@@ -192,8 +216,39 @@
 }
 
 /* Profile Box - Profile Page */
-.profilelist {
+.profile-list {
 	max-width: $site-width;
 	margin: 10px auto 0px auto;
 	position: relative;
+}
+
+.profile-row {
+	margin-top: 8px;
+
+	.text-input {
+		border-radius: 0px;
+	}
+}
+
+.profile-title {
+	background-color: $bar-color;
+
+	padding-left: 4px;
+	padding-top: 8px;
+	padding-bottom: 8px;
+
+	font-size: 1em;
+	font-weight: 500;
+}
+
+@media screen and (max-width: $site-width) {
+	.profile-row {
+		border-top: 1px solid black;
+		border-bottom: 1px solid black;
+
+		.text-input {
+			border-left-width: 0px;
+			border-right-width: 0px;
+		}
+	}
 }

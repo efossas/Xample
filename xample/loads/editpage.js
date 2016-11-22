@@ -108,7 +108,7 @@ exports.editpage = function(request,response) {
 										}
 
 										/* load the edit page with the page data */
-										loader.loadBlockPage(request,response,"<script>pageEdit('" + pagedata + "');</script>");
+										loader.loadBlockPage(request,response,"<script>pageEdit('" + uid + "','" + pagedata + "');</script>");
 										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
 									}
 								});

@@ -35,6 +35,7 @@ var r_login = require('./routes/login.js');
 var r_logout = require('./routes/logout.js');
 var r_revertblocks = require('./routes/revertblocks.js');
 var r_saveblocks = require('./routes/saveblocks.js');
+var r_savepagesettings = require('./routes/savepagesettings.js');
 var r_saveprofile = require('./routes/saveprofile.js');
 var r_signup = require('./routes/signup.js');
 var r_uploadmedia = require('./routes/uploadmedia.js');
@@ -69,6 +70,7 @@ module.exports = {
     profile: l_profile.profile,
     revertblocks: r_revertblocks.revertblocks,
     saveblocks: r_saveblocks.saveblocks,
+    savepagesettings: r_savepagesettings.savepagesettings,
     saveprofile: r_saveprofile.saveprofile,
     signup: r_signup.signup,
     start: l_start.start,

@@ -226,6 +226,214 @@ function barSearch() {
 }
 
 /*
+	Function: boxCreate
+
+	Creates a content box for displaying info about pages.
+
+	Parameters:
+
+		* - none
+
+	Returns:
+
+		success - html node, box
+*/
+function boxCreate() {
+	/* holds the entire link */
+	var box = document.createElement('div');
+	box.setAttribute('class','content-box');
+
+	/* holds title, author, rating, & bookmark */
+	var topRow = document.createElement('div');
+	topRow.setAttribute('class','row');
+
+	/* create title */
+	var colTitle = document.createElement('div');
+	colTitle.setAttribute('class','col col-60');
+
+	var title = document.createElement('div');
+	title.setAttribute('class','box-title');
+	title.innerHTML = "";
+	colTitle.appendChild(title);
+
+	/* create author */
+	var colAuthor = document.createElement('div');
+	colAuthor.setAttribute('class','col col-15');
+
+	var author = document.createElement('div');
+	author.setAttribute('class','box-author');
+	colAuthor.appendChild(author);
+
+	/* create rating */
+	var colRating = document.createElement('div');
+	colRating.setAttribute('class','col col-15');
+
+	var rating = document.createElement('div');
+	rating.setAttribute('class','box-rating');
+	colRating.appendChild(rating);
+
+	var ratingBar = document.createElement('div');
+	ratingBar.setAttribute('class','rating-bar');
+	ratingBar.setAttribute('role','progressbar');
+	rating.appendChild(ratingBar);
+
+	/* create bookmark */
+	var colBookmark = document.createElement('div');
+	colBookmark.setAttribute('class','col col-5');
+
+	var bookmark = document.createElement('div');
+	bookmark.setAttribute('class','box-bookmark');
+	colBookmark.appendChild(bookmark);
+
+	var star = document.createElement('input');
+	star.setAttribute('type','checkbox');
+	star.setAttribute('class','star');
+	bookmark.appendChild(star);
+
+	/* create expand */
+	var colExpand = document.createElement('div');
+	colExpand.setAttribute('class','col col-5');
+
+	var expand = document.createElement('div');
+	expand.setAttribute('class','box-expand');
+	colExpand.appendChild(expand);
+
+	/* add expand btn */
+	var btnExpand = btnSubmit('+','expandRow(this)','none');
+	expand.appendChild(btnExpand);
+
+	/* append to top row */
+	topRow.appendChild(colTitle);
+	topRow.appendChild(colAuthor);
+	topRow.appendChild(colRating);
+	topRow.appendChild(colBookmark);
+	topRow.appendChild(colExpand);
+
+	/* holds image and a row */
+	var bottomRow = document.createElement('div');
+	bottomRow.setAttribute('class','row');
+	bottomRow.setAttribute('style','display:none;visibility:hidden;');
+
+	/* create image */
+	var colImage = document.createElement('div');
+	colImage.setAttribute('class','col col-35');
+
+	var image = document.createElement('div');
+	image.setAttribute('class','box-image');
+	colImage.appendChild(image);
+
+	/* upper row for right section, holds blurb */
+	var upperRow = document.createElement('div');
+	upperRow.setAttribute('class','row');
+
+	/* create blurb */
+	var colBlurb = document.createElement('div');
+	colBlurb.setAttribute('class','col col-100');
+
+	var blurb = document.createElement('div');
+	blurb.setAttribute('class','box-blurb');
+	colBlurb.appendChild(blurb);
+
+	/* append to upper row */
+	upperRow.appendChild(colBlurb);
+
+	/* lower row for right section, holds created, edited, ranks, views */
+	var lowerRow = document.createElement('div');
+	lowerRow.setAttribute('class','row');
+
+	/* create date created */
+	var colCreated = document.createElement('div');
+	colCreated.setAttribute('class','col col-25');
+
+	var created = document.createElement('div');
+	created.setAttribute('class','box-created');
+	colCreated.appendChild(created);
+
+	/* create edited */
+	var colEdited = document.createElement('div');
+	colEdited.setAttribute('class','col col-25');
+
+	var edited = document.createElement('div');
+	edited.setAttribute('class','box-edited');
+	colEdited.appendChild(edited);
+
+	/* create ranks */
+	var colRanks = document.createElement('div');
+	colRanks.setAttribute('class','col col-25');
+
+	var ranks = document.createElement('div');
+	ranks.setAttribute('class','box-ranks');
+	colRanks.appendChild(ranks);
+
+	/* views */
+	var colViews = document.createElement('div');
+	colViews.setAttribute('class','col col-25');
+
+	var views = document.createElement('div');
+	views.setAttribute('class','box-views');
+	colViews.appendChild(views);
+
+	/* append to bottom row */
+	lowerRow.appendChild(colCreated);
+	lowerRow.appendChild(colEdited);
+	lowerRow.appendChild(colRanks);
+	lowerRow.appendChild(colViews);
+
+	/* column for upper and lower rows */
+	var colRightSection = document.createElement('div');
+	colRightSection.setAttribute('class','col col-65');
+
+	/* append upper and lower rows to right section */
+	colRightSection.appendChild(upperRow);
+	colRightSection.appendChild(lowerRow);
+
+	/* append left and right sections to bottom row */
+	bottomRow.appendChild(colImage);
+	bottomRow.appendChild(colRightSection);
+
+	/* append rows to div & set visibility */
+	box.appendChild(topRow);
+	box.appendChild(bottomRow);
+
+	return box;
+}
+
+/*
+	Function: dashBookmarks
+
+	Create dash for viewing users bookmarks.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, bookmarks dash
+*/
+function dashBookmarks() {
+	/* create header */
+	var rowHeader = document.createElement('div');
+	rowHeader.setAttribute('class','row');
+
+	var colHeader = document.createElement('div');
+	colHeader.setAttribute('class','col col-100');
+
+	var dashHeader = document.createElement('h2');
+	dashHeader.innerHTML = "Bookmarks";
+
+	colHeader.appendChild(dashHeader);
+	rowHeader.appendChild(colHeader);
+
+	/* append the page links to a form div */
+	var dashBookmarks = document.createElement('div');
+	dashBookmarks.setAttribute('class','bookmarks-box');
+	dashBookmarks.appendChild(rowHeader);
+
+	return dashBookmarks;
+}
+
+/*
 	Function: dashExplore
 
 	Create dash for exploring content by subject.
@@ -473,6 +681,123 @@ function dashExplore(exploreHeader,linkRoute) {
 }
 
 /*
+	Function: barFilter
+
+	Make the form for filtering content searches.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, filter form
+*/
+function barFilter() {
+	var row = document.createElement('div');
+	row.setAttribute('class','row');
+
+	var colRating = document.createElement('div');
+	colRating.setAttribute('class','col col-15');
+
+	var minRating = document.createElement('input');
+	minRating.setAttribute('id','min-rating');
+	minRating.setAttribute('placeholder','min rating');
+
+	var maxRating = document.createElement('input');
+	maxRating.setAttribute('id','max-rating');
+	maxRating.setAttribute('placeholder','max rating');
+
+	colRating.appendChild(minRating);
+	colRating.appendChild(maxRating);
+
+	var colRanks = document.createElement('div');
+	colRanks.setAttribute('class','col col-20');
+
+	var minRanks = document.createElement('input');
+	minRanks.setAttribute('id','min-ranks');
+	minRanks.setAttribute('placeholder','min ranks');
+
+	var maxRanks = document.createElement('input');
+	maxRanks.setAttribute('id','max-ranks');
+	maxRanks.setAttribute('placeholder','max ranks');
+
+	colRanks.appendChild(minRanks);
+	colRanks.appendChild(maxRanks);
+
+	var colViews = document.createElement('div');
+	colViews.setAttribute('class','col col-20');
+
+	var minViews = document.createElement('input');
+	minViews.setAttribute('id','min-views');
+	minViews.setAttribute('placeholder','min views');
+
+	var maxViews = document.createElement('input');
+	maxViews.setAttribute('id','max-views');
+	maxViews.setAttribute('placeholder','max views');
+
+	colViews.appendChild(minViews);
+	colViews.appendChild(maxViews);
+
+	var colDate = document.createElement('div');
+	colDate.setAttribute('class','col col-15');
+
+	var minDate = document.createElement('input');
+	minDate.setAttribute('id','min-date');
+	minDate.setAttribute('placeholder','min date');
+
+	var maxDate = document.createElement('input');
+	maxDate.setAttribute('id','max-date');
+	maxDate.setAttribute('placeholder','max date');
+
+	colDate.appendChild(minDate);
+	colDate.appendChild(maxDate);
+
+	var colFilterBtn = document.createElement('div');
+	colFilterBtn.setAttribute('class','col col-15');
+
+	var btnFilterApply = btnSubmit('Apply Filter','','none');
+	btnFilterApply.className += " savebar";
+	colFilterBtn.appendChild(btnFilterApply);
+
+	var colExpand = document.createElement('div');
+	colExpand.setAttribute('class','col col-15');
+
+	function expandAll() {
+		var boxes = document.getElementsByClassName('content-box');
+		var count = boxes.length;
+		if(this.innerHTML === "Expand All") {
+			for(var i = 0; i < count; i++) {
+				boxes[i].children[1].setAttribute('style','display:block;visibility:visible;');
+			}
+			this.innerHTML = "Collapse All";
+		} else {
+			for(var j = 0; j < count; j++) {
+				boxes[j].children[1].setAttribute('style','display:none;visibility:hidden;');
+			}
+			this.innerHTML = "Expand All";
+		}
+	}
+
+	var btnExpandAll = btnSubmit('Expand All',expandAll,'none');
+	btnExpandAll.className += " savebar";
+	colExpand.appendChild(btnExpandAll);
+
+	row.appendChild(colRating);
+	row.appendChild(colRanks);
+	row.appendChild(colViews);
+	row.appendChild(colDate);
+	row.appendChild(colFilterBtn);
+	row.appendChild(colExpand);
+
+	var filter = document.createElement('div');
+	filter.setAttribute('class','filter-bar');
+	filter.appendChild(row);
+
+	return filter;
+}
+
+/*
 	Function: formGenerateUserContent
 
 	Make a user content form.
@@ -480,25 +805,43 @@ function dashExplore(exploreHeader,linkRoute) {
 	Parameters:
 
 		type - string, the name of the type of content page to create.
+		data - string, comma-separated like so: id,name,id,name etc.
 
 	Returns:
 
 		success - html node, user content creation form
 */
 function formGenerateUserContent(type,data) {
+	var fullCapital;
 	var capital;
 	var lower;
 	var deleteFunc;
 	if(type === 'blockpage') {
+		fullCapital = 'Pages';
 		capital = 'Page';
 		lower = 'page';
 		deleteFunc = deletePage;
 	} else if(type === 'lg') {
+		fullCapital = 'Learning Guides';
 		capital = 'LG';
 		lower = 'lg';
 		deleteFunc = deleteLG;
 	}
 
+	/* create header */
+	var rowHeader = document.createElement('div');
+	rowHeader.setAttribute('class','row');
+
+	var colHeader = document.createElement('div');
+	colHeader.setAttribute('class','col col-100');
+
+	var formHeader = document.createElement('h2');
+	formHeader.innerHTML = fullCapital;
+
+	colHeader.appendChild(formHeader);
+	rowHeader.appendChild(colHeader);
+
+	/* create new page form */
 	var row_Content = document.createElement("div");
 	row_Content.setAttribute("class","row");
 
@@ -514,10 +857,11 @@ function formGenerateUserContent(type,data) {
 	/* input element is for page name */
 	var title = document.createElement('input');
 	title.setAttribute('type','text');
-	title.setAttribute('class','text-input');
+	title.setAttribute('class','log-input');
 	title.setAttribute('name',lower + 'name-create');
 	title.setAttribute('maxlength','50');
-	title.setAttribute('placeholder',capital + ' Name');
+	title.setAttribute('placeholder','New ' + capital + ' Name');
+	title.setAttribute('style','border-left-width:0px;');
 
 	/* submit button that calls createpage() */
 	var submit = btnSubmit("Create " + capital,"create" + lower + "()","green");
@@ -525,9 +869,6 @@ function formGenerateUserContent(type,data) {
 	/* append elements to row */
 	colLeft_Content.appendChild(title);
 	colRight_Content.appendChild(submit);
-
-	/* get the page data from comma-separated string */
-	var dataarray = data.split(',');
 
 	/* row 3 */
 	var row_dataBox = document.createElement("div");
@@ -551,6 +892,9 @@ function formGenerateUserContent(type,data) {
 	/* append elements to datadiv */
 	datadiv.appendChild(selectBox);
 
+	/* get the page data from comma-separated string */
+	var dataarray = data.split(',');
+
 	/* get number of pages, each page has two data (link,name), so 1 is empty */
 	var count;
 	if(dataarray.length === 1) {
@@ -558,16 +902,40 @@ function formGenerateUserContent(type,data) {
 	} else {
 		count = dataarray.length / 2;
 	}
+	var origCount = count;
+
+	/* sort the data by name */
+	var i = 0;
+	var idNameArray = [];
+	while(count > 0) {
+		var currentPage = {};
+		currentPage['id'] = dataarray[i];
+		currentPage['name'] = dataarray[i + 1];
+		idNameArray.push(currentPage);
+		i += 2;
+		count--;
+	}
+
+	idNameArray.sort(function(a,b) {
+		if(a['name'] < b['name']) {
+			return -1;
+		} else if(a['name'] > b['name']) {
+			return 1;
+		} else {
+			return 0;
+		}
+	});
 
 	/* create page links and append to data div */
-	var i = 0;
+	i = 0;
+	count = origCount;
 	while(count > 0) {
 		var option = document.createElement('option');
-		option.setAttribute('value',dataarray[i]);
-		option.innerHTML = dataarray[i + 1];
+		option.setAttribute('value',idNameArray[i]['id']);
+		option.innerHTML = idNameArray[i]['name'];
 		selectBox.appendChild(option);
 
-		i += 2;
+		i++;
 		count--;
 	}
 
@@ -629,6 +997,7 @@ function formGenerateUserContent(type,data) {
 	var generateUserContentDiv = document.createElement('div');
 	generateUserContentDiv.setAttribute('class','page-gen');
 	generateUserContentDiv.setAttribute('id',type + '-gen');
+	generateUserContentDiv.appendChild(rowHeader);
 	generateUserContentDiv.appendChild(row_Content);
 	generateUserContentDiv.appendChild(row_dataBox);
 	generateUserContentDiv.appendChild(row_dataSubmitButtons);
@@ -769,7 +1138,7 @@ function formSignUp() {
 */
 function rowProfileCheck(check,field,placeholders,description) {
 	var row = document.createElement("div");
-	row.setAttribute("class","row");
+	row.setAttribute("class","row profile-row");
 
 	var colLeft = document.createElement("div");
 	colLeft.setAttribute("class","col col-15");
@@ -782,6 +1151,11 @@ function rowProfileCheck(check,field,placeholders,description) {
 
 	var colRight = document.createElement("div");
 	colRight.setAttribute("class","col col-15");
+
+	/* title */
+	var profileTitle = document.createElement('div');
+	profileTitle.setAttribute('class','profile-title');
+	profileTitle.innerHTML = description;
 
 	/* first input */
 	var first = document.createElement('input');
@@ -807,7 +1181,7 @@ function rowProfileCheck(check,field,placeholders,description) {
 	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + check + '","' + field + '"])');
 	saveBtn.innerHTML = "Save";
 
-	colLeft.innerHTML = description;
+	colLeft.appendChild(profileTitle);
 	colMiddleLeft.appendChild(first);
 	colMiddleRight.appendChild(second);
 	colRight.appendChild(saveBtn);
@@ -838,7 +1212,7 @@ function rowProfileCheck(check,field,placeholders,description) {
 function rowProfileSingle(field,description,data) {
 
 	var row = document.createElement("div");
-	row.setAttribute("class","row");
+	row.setAttribute("class","row profile-row");
 
 	var colLeft = document.createElement("div");
 	colLeft.setAttribute("class","col col-15");
@@ -848,6 +1222,11 @@ function rowProfileSingle(field,description,data) {
 
 	var colRight = document.createElement("div");
 	colRight.setAttribute("class","col col-15");
+
+	/* title */
+	var profileTitle = document.createElement('div');
+	profileTitle.setAttribute('class','profile-title');
+	profileTitle.innerHTML = description;
 
 	/* username input */
 	var fieldInput = document.createElement('input');
@@ -865,7 +1244,7 @@ function rowProfileSingle(field,description,data) {
 	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
 	saveBtn.innerHTML = "Save";
 
-	colLeft.innerHTML = description;
+	colLeft.appendChild(profileTitle);
 	colMiddle.appendChild(fieldInput);
 	colRight.appendChild(saveBtn);
 
@@ -910,161 +1289,12 @@ function pageExplore(logstatus,data) {
 	}
 	main.appendChild(menu);
 
-	/* holds the entire link */
-	var box = document.createElement('div');
-	box.setAttribute('class','content-box');
+	/* create filter menu */
+	var filter = barFilter();
+	main.appendChild(filter);
 
-	/* holds title, author, rating, & bookmark */
-	var topRow = document.createElement('div');
-	topRow.setAttribute('class','row');
-
-	/* create title */
-	var colTitle = document.createElement('div');
-	colTitle.setAttribute('class','col col-60');
-
-	var title = document.createElement('div');
-	title.setAttribute('class','box-title');
-	title.innerHTML = "";
-	colTitle.appendChild(title);
-
-	/* create author */
-	var colAuthor = document.createElement('div');
-	colAuthor.setAttribute('class','col col-15');
-
-	var author = document.createElement('div');
-	author.setAttribute('class','box-author');
-	colAuthor.appendChild(author);
-
-	/* create rating */
-	var colRating = document.createElement('div');
-	colRating.setAttribute('class','col col-15');
-
-	var rating = document.createElement('div');
-	rating.setAttribute('class','box-rating');
-	colRating.appendChild(rating);
-
-	var ratingBar = document.createElement('div');
-	ratingBar.setAttribute('class','rating-bar');
-	ratingBar.setAttribute('role','progressbar');
-	rating.appendChild(ratingBar);
-
-	/* create bookmark */
-	var colBookmark = document.createElement('div');
-	colBookmark.setAttribute('class','col col-5');
-
-	var bookmark = document.createElement('div');
-	bookmark.setAttribute('class','box-bookmark');
-	colBookmark.appendChild(bookmark);
-
-	var star = document.createElement('input');
-	star.setAttribute('type','checkbox');
-	star.setAttribute('class','star');
-	bookmark.appendChild(star);
-
-	/* create expand */
-	var colExpand = document.createElement('div');
-	colExpand.setAttribute('class','col col-5');
-
-	var expand = document.createElement('div');
-	expand.setAttribute('class','box-expand');
-	colExpand.appendChild(expand);
-
-	/* add expand btn */
-	var btnExpand = btnSubmit('+','expandRow(this)','none');
-	expand.appendChild(btnExpand);
-
-	/* append to top row */
-	topRow.appendChild(colTitle);
-	topRow.appendChild(colAuthor);
-	topRow.appendChild(colRating);
-	topRow.appendChild(colBookmark);
-	topRow.appendChild(colExpand);
-
-	/* holds image and a row */
-	var bottomRow = document.createElement('div');
-	bottomRow.setAttribute('class','row');
-	bottomRow.setAttribute('style','display:none;visibility:hidden;');
-
-	/* create image */
-	var colImage = document.createElement('div');
-	colImage.setAttribute('class','col col-35');
-
-	var image = document.createElement('div');
-	image.setAttribute('class','box-image');
-	colImage.appendChild(image);
-
-	/* upper row for right section, holds blurb */
-	var upperRow = document.createElement('div');
-	upperRow.setAttribute('class','row');
-
-	/* create blurb */
-	var colBlurb = document.createElement('div');
-	colBlurb.setAttribute('class','col col-100');
-
-	var blurb = document.createElement('div');
-	blurb.setAttribute('class','box-blurb');
-	colBlurb.appendChild(blurb);
-
-	/* append to upper row */
-	upperRow.appendChild(colBlurb);
-
-	/* lower row for right section, holds created, edited, ranks, views */
-	var lowerRow = document.createElement('div');
-	lowerRow.setAttribute('class','row');
-
-	/* create date created */
-	var colCreated = document.createElement('div');
-	colCreated.setAttribute('class','col col-25');
-
-	var created = document.createElement('div');
-	created.setAttribute('class','box-created');
-	colCreated.appendChild(created);
-
-	/* create edited */
-	var colEdited = document.createElement('div');
-	colEdited.setAttribute('class','col col-25');
-
-	var edited = document.createElement('div');
-	edited.setAttribute('class','box-edited');
-	colEdited.appendChild(edited);
-
-	/* create ranks */
-	var colRanks = document.createElement('div');
-	colRanks.setAttribute('class','col col-25');
-
-	var ranks = document.createElement('div');
-	ranks.setAttribute('class','box-ranks');
-	colRanks.appendChild(ranks);
-
-	/* views */
-	var colViews = document.createElement('div');
-	colViews.setAttribute('class','col col-25');
-
-	var views = document.createElement('div');
-	views.setAttribute('class','box-views');
-	colViews.appendChild(views);
-
-	/* append to bottom row */
-	lowerRow.appendChild(colCreated);
-	lowerRow.appendChild(colEdited);
-	lowerRow.appendChild(colRanks);
-	lowerRow.appendChild(colViews);
-
-	/* column for upper and lower rows */
-	var colRightSection = document.createElement('div');
-	colRightSection.setAttribute('class','col col-65');
-
-	/* append upper and lower rows to right section */
-	colRightSection.appendChild(upperRow);
-	colRightSection.appendChild(lowerRow);
-
-	/* append left and right sections to bottom row */
-	bottomRow.appendChild(colImage);
-	bottomRow.appendChild(colRightSection);
-
-	/* append rows to div & set visibility */
-	box.appendChild(topRow);
-	box.appendChild(bottomRow);
+	/* create box template */
+	var box = boxCreate();
 
 	/* loop through links & insert data into boxes */
 	var index = 0;
@@ -1110,7 +1340,9 @@ function pageHome() {
 	var main = document.getElementById('content');
 	main.appendChild(menu);
 
-	main.appendChild(document.createElement('hr')); /// remove this later, when you style
+	/* create bookmarks dash */
+	var bookmarks = dashBookmarks();
+	main.appendChild(bookmarks);
 
 	/* fetch user pages */
 	var promiseBP = getPages();
@@ -1122,8 +1354,6 @@ function pageHome() {
 		/* block page create form */
 		var row_PageCreate = formGenerateUserContent('blockpage',values[0]);
 		main.appendChild(row_PageCreate);
-
-		main.appendChild(document.createElement('hr')); /// remove this later, when you style
 
 		/* learning guide create form */
 		var row_LgCreate = formGenerateUserContent('lg',values[1]);
@@ -1206,7 +1436,7 @@ function pageProfile(profiledata) {
 
 	/* create a div to hold the page links */
 	var profilediv = document.createElement('div');
-	profilediv.setAttribute('class','profilelist');
+	profilediv.setAttribute('class','profile-list');
 
 	/* make mandatory profile rows */
 	var row_Username = rowProfileSingle("username","Username:",profileinfo.username);

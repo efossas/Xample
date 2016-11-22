@@ -984,6 +984,7 @@ function formDropDownsSCT() {
 		/* grey the first selected */
 		greyFirstSelect(this);
 		greyFirstSelect(listCategories);
+		greyFirstSelect(listTopics);
 	}
 
 	/* this function will be called onchange of categories dropdown */
@@ -1059,7 +1060,9 @@ function formDropDownsSCT() {
 
 	var listTopics = document.createElement('select');
 	listTopics.setAttribute("id","select-topic");
-	listTopics.setAttribute("onchange","greyFirstSelect(this);");
+	listTopics.onchange = function() {
+		greyFirstSelect(listTopics);
+	};
 	listTopics.style = "color: grey";
 
 	/* get subjects for select topic list */
@@ -1201,7 +1204,7 @@ function pageChoose(pid) {
 
 		nothing - *
 */
-function pageEdit(pagedata) {
+function pageEdit(aid,pagedata) {
 
 	/* grab the main div */
 	var main = document.getElementById('content');
@@ -1219,39 +1222,41 @@ function pageEdit(pagedata) {
 	var menu = barMenu();
 	var status = barStatus(pid);
 
-	/* create settings div for submenu */
-	var rowSettings = document.createElement("div");
-	rowSettings.setAttribute("class","row");
-
-	var colSettings = document.createElement("div");
-	colSettings.setAttribute("class","col col-100");
-
 	var pageSettings = document.createElement('div');
-	pageSettings.innerHTML = "Hi There";
+	pageSettings.setAttribute('class','settings-bar col-100');
 
-	/* append page settings to column,row,main */
-	colSettings.appendChild(pageSettings);
-	rowSettings.appendChild(colSettings);
-
-	/* create submenu */
-	var submenu = barSubMenu('Page Settings',rowSettings);
-
-	/* append menu & status to main */
-	main.appendChild(menu);
-	main.appendChild(status);
-	main.appendChild(submenu);
-
-	/// PAGE OPTIONS NEED TO BE ADDED HERE
+	/* show mode page link */
+	var showLink = document.createElement('div');
+	showLink.setAttribute('class','page-link');
+	var slink = createURL('/page?a=' + aid + '&p=' + pid);
+	showLink.innerHTML = "<a href='" + slink + "' target='_blank'>" + slink + "</a>";
+	pageSettings.appendChild(showLink);
 
 	/* page title input */
 	var title = document.createElement('input');
 	title.setAttribute('type','text');
 	title.setAttribute('name','pagename');
+	title.setAttribute('id','pagetitle');
 	title.setAttribute('class','page-title');
 	title.setAttribute('maxlength','50');
 	title.setAttribute('value',pagename);
-	title.setAttribute('style','display: none;');
-	menu.appendChild(title);
+	pageSettings.appendChild(title);
+
+	/* drop downs for choosing page subj,cat,top */
+	var ddsct = formDropDownsSCT();
+	pageSettings.appendChild(ddsct);
+
+	/* page settings save */
+	var btnSaveSettings = btnSubmit('Save Page Settings','savePageSettings()','none');
+	pageSettings.appendChild(btnSaveSettings);
+
+	/* create submenu */
+	var submenu = barSubMenu('Page Settings',pageSettings);
+
+	/* append menu & status to main */
+	main.appendChild(menu);
+	main.appendChild(status);
+	main.appendChild(submenu);
 
 	/*** BLOCKS ***/
 
@@ -1339,6 +1344,46 @@ function pageShow(pagedata) {
 	/*** BLOCKS ***/
 
 	blockContentShow('content',x,["bp",pid],blockarray.splice(2,blockarray.length));
+}
+
+function savePageSettings() {
+	/* create the url destination for the ajax request */
+	var url = createURL("/savepagesettings");
+
+	/* get the pid & page name */
+	var pid = document.getElementById('x-id').getAttribute('data-xid');
+	var pagetitle = document.getElementById('pagetitle').value;
+	var subject = document.getElementById('select-subject').value;
+	var category = document.getElementById('select-category').value;
+	var topic = document.getElementById('select-topic').value;
+	var tags = "";
+
+	var xmlhttp;
+	xmlhttp = new XMLHttpRequest();
+
+	var params = "pid=" + pid + "&p=" + pagetitle + "&s=" + subject + "&c=" + category + "&t=" + topic + "&g=" + tags;
+
+	xmlhttp.open("POST",url,true);
+
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "nosaveloggedout") {
+					alertify.alert("Save Settings Error. You Are Not Logged In.");
+				} else if (xmlhttp.responseText === "err") {
+					alertify.alert("An Error Occured. Please Try Again Later");
+				} else {
+					alertify.log("Settings Saved!","success");
+				}
+			} else {
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+			}
+		}
+	};
+
+	xmlhttp.send(params);
 }
 
 // <<<fold>>>
