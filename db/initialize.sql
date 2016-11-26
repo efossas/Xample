@@ -3,6 +3,8 @@ USE xample;
 
 CREATE TABLE Users (uid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(50), phone VARCHAR(15), autosave SMALLINT UNSIGNED NOT NULL, defaulttext TINYINT UNSIGNED NOT NULL );
 
+SOURCE setup.sql;
+
 CREATE DATABASE xsessionstore;
 USE xsessionstore;
 

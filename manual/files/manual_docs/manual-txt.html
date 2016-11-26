@@ -11,32 +11,36 @@ if (browserType) {document.write("<div class=" + browserType + ">");if (browserV
 
 
 
-<div id=Content><div class="CSection"><div class=CTopic id=MainTopic><h1 class=CTitle><a name="Xample_Overview"></a>Xample Overview</h1><div class=CBody><p>This is the manual for the Xample app.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SMain"><td class=SEntry><a href="#Xample_Overview" >Xample Overview</a></td><td class=SDescription>This is the manual for the Xample app.</td></tr><tr class="SSection"><td class=SEntry><a href="#Intro" >Intro</a></td><td class=SDescription>Here is a summary of important stuff Xample uses.</td></tr><tr class="SSection"><td class=SEntry><a href="#Environment_Set_Up" >Environment Set Up</a></td><td class=SDescription>This section walks through setting up your computer for local testing.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Work_Flow" >Work Flow</a></td><td class=SDescription>Follow these steps for editing &amp; testing code.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_NVM" >Install NVM</a></td><td class=SDescription>NVM is Node Version Manager. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_Node" >Install Node</a></td><td class=SDescription>Node is the engine that runs the server javascript.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_Homebrew" >Install Homebrew</a></td><td class=SDescription>Homebrew is a package manager for installing OS dependencies.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_NPM" >Install NPM</a></td><td class=SDescription>NPM is Node Package Manager for installing Node dependencies.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_ESLint" >Install ESLint</a></td><td class=SDescription>ESLint is a linter that checks javascript syntax for errors and code consistency.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_Gyp" >Install Gyp</a></td><td class=SDescription>Gyp is a depency requirement for the Atom terminal-plus plug-in.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Download_Git_Repo" >Download Git Repo</a></td><td class=SDescription>Get the Xample code.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Create_Test_Folder" >Create Test Folder</a></td><td class=SDescription>Create a folder for testing. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_Atom_From" >Install Atom From</a></td><td class=SDescription>Atom is the preferred IDE for this project.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_Atom_Plugins" >Install Atom Plugins</a></td><td class=SDescription>These plug-ins for Atom help stream-line work flow.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_Xample_Dependencies_In_Test_Folder" >Install Xample Dependencies In Test Folder</a></td><td class=SDescription>These OS &amp; Node dependencies are required for Xample to work.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Configure_MySQL" >Configure MySQL</a></td><td class=SDescription>MySQL is the database software. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Testing" >Testing</a></td><td class=SDescription>Follow these steps to test Xample.</td></tr><tr class="SSection"><td class=SEntry><a href="#Files" >Files</a></td><td class=SDescription>Xamples has these main files.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xample.js" >xample.js</a></td><td class=SDescription>the server</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#page.js" >page.js</a></td><td class=SDescription>the back-end</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#navigation.js" >navigation.js</a></td><td class=SDescription>the front-end</td></tr><tr class="SSection"><td class=SEntry><a href="#NPM_Packages" >NPM Packages</a></td><td class=SDescription>Xample uses the following native npm packages.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Query_String" >Query String</a></td><td class=SDescription>require(&lsquo;query-string&rsquo;), <a href="https://github.com/sindresorhus/query-string" class=LURL target=_top>https://github.com/sindresorhus/query-string</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#File_System" >File System</a></td><td class=SDescription>require(&lsquo;fs&rsquo;)</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Password_Hash" >Password Hash</a></td><td class=SDescription>require(&lsquo;password-hash&rsquo;), <a href="https://github.com/davidwood/node-password-hash" class=LURL target=_top>https://github.com/davidwood/node-password-hash</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#MySQL" >MySQL</a></td><td class=SDescription>require(&lsquo;mysql&rsquo;), <a href="https://github.com/felixge/node-mysql" class=LURL target=_top>https://github.com/felixge/node-mysql</a></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Express" >Express</a></td><td class=SDescription>require(&lsquo;express&rsquo;), <a href="https://github.com/expressjs/express" class=LURL target=_top>https://github.com/expressjs/express</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Express_Sessions" >Express Sessions</a></td><td class=SDescription>require(&lsquo;express-session&rsquo;), <a href="https://github.com/expressjs/session" class=LURL target=_top>https://github.com/expressjs/session</a></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Busboy" >Busboy</a></td><td class=SDescription>require(&lsquo;connect-busboy&rsquo;), <a href="https://github.com/mscdex/connect-busboy" class=LURL target=_top>https://github.com/mscdex/connect-busboy</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#MySQLStore" >MySQLStore</a></td><td class=SDescription>require(&lsquo;express-mysql-session&rsquo;)(session), <a href="https://www.npmjs.com/package/express-mysql-session" class=LURL target=_top>https://www.npmjs.com<wbr>/package<wbr>/express-mysql-session</a></td></tr><tr class="SSection"><td class=SEntry><a href="#Libraries" >Libraries</a></td><td class=SDescription>Xample uses the following libraries</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#alertify.min.js" >alertify.<wbr>min.js</a></td><td class=SDescription>for custom html alert notifications</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#highlight.min.js" >highlight.<wbr>min.js</a></td><td class=SDescription>for code block rendering</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#MathJax.js" >MathJax.js</a></td><td class=SDescription>for asciiMath &amp; Latex rendering</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#pdf.js" >pdf.js</a></td><td class=SDescription>for converting pdfs into &lt;canvas&gt; objects</td></tr><tr class="SSection"><td class=SEntry><a href="#Styles" >Styles</a></td><td class=SDescription>Xample uses the following css styles.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#block.css" >block.css</a></td><td class=SDescription>for styling blocks &amp; pages</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#vs.css" >vs.css</a></td><td class=SDescription>for code block rendering</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#alertify.core.css" >alertify.<wbr>core.css</a></td><td class=SDescription>core alertify styles</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#alertify.default.css" >alertify.<wbr>default.css</a></td><td class=SDescription>optional default styles</td></tr><tr class="SSection"><td class=SEntry><a href="#Documentation" >Documentation</a></td><td class=SDescription>Xample documentation is compiled using NaturalDocs. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Compiling_The_Manual" >Compiling The Manual</a></td><td class=SDescription>To compile the doc follow these steps.</td></tr><tr class="SSection"><td class=SEntry><a href="#Comments" >Comments</a></td><td class=SDescription>Xample is commented in the following way.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#NaturalDocs_Comments" >NaturalDocs Comments</a></td><td class=SDescription>These comments are used to generate the documentation. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Asterisk_Comments" >Asterisk Comments</a></td><td class=SDescription>Asterisk comments are used for completed code.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Triple_Slash_Comments" >Triple Slash Comments</a></td><td class=SDescription>Triple slash comments are to marks code where there are design questions or something is incomplete.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Double_Slash_Comments" >Double Slash Comments</a></td><td class=SDescription>Do not use them.</td></tr><tr class="SSection"><td class=SEntry><a href="#Error_Codes" >Error Codes</a></td><td class=SDescription>Xample uses these custom error codes.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Logged_errors" >Logged errors</a></td><td class=SDescription>These errors are logged in the analytics databse.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Serious_Errors" >Serious Errors</a></td><td class=SDescription>These errors are not logged &amp; indicate a serious problem.</td></tr><tr class="SSection"><td class=SEntry><a href="#Flow_Charts" >Flow Charts</a></td><td class=SDescription>Xample follows these flow diagrams for executing use cases.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Xample_Flow_Chart" >Xample Flow Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlM1VlZk9SUWt5TTg" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlM1VlZk9SUWt5TTg</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Add_Blocks_Chart" >Add Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlaFdLSVpWRlVXTE0" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlaFdLSVpWRlVXTE0</a></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Delete_Blocks_Chart" >Delete Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlNjl1N0lkRmR5ejQ" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlNjl1N0lkRmR5ejQ</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Save_Blocks_Chart" >Save Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlNXpDWjhhZTVPbXc" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlNXpDWjhhZTVPbXc</a></td></tr><tr class="SSection"><td class=SEntry><a href="#Pages" >Pages</a></td><td class=SDescription>The following are a list of pages loaded by the back-end.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Error_Page" >Error Page</a></td><td class=SDescription>displayError(), this is the 404 error page for unknown URLs</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Landing_Page" >Landing Page</a></td><td class=SDescription>displayLanding(), this is the index page a user sees when not logged in</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Home_Page" >Home Page</a></td><td class=SDescription>displayHome(), this is the index page a user sees when they are logged in</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Profile_Page" >Profile Page</a></td><td class=SDescription>profilePage(), this is the page that displays a user&rsquo;s profile info for editing.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Edit_Page" >Edit Page</a></td><td class=SDescription>editPage(), this is the page that displays the edit mode for a user&rsquo;s xample page</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Choose_Page" >Choose Page</a></td><td class=SDescription>choosePage(), if user exits edit page without saving, they&rsquo;ll be presented with this page. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Show_Page" >Show Page</a></td><td class=SDescription>showPage(), this is the page that displays the presentation mode for a user&rsquo;s xample page</td></tr><tr class="SSection"><td class=SEntry><a href="#Page_Layout" >Page Layout</a></td><td class=SDescription>Xample&rsquo;s web pages are laid out in the following form.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Page_Contents" >Page Contents.</a></td><td class=SDescription>Xample pages are loaded with this content.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#HTML" >HTML</a></td><td class=SDescription>This is an example of the what the page HTML looks like.</td></tr><tr class="SSection"><td class=SEntry><a href="#Database" >Database</a></td><td class=SDescription>Xample uses a MySQL database. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Querying_The_Database" >Querying The Database</a></td><td class=SDescription>When a page requires a query it uses a connection from a pool of connections set up on the back-end. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Useful_Commands" >Useful Commands</a></td><td class=SDescription>These are commonly used MySQL commands for creating &amp; debugging.</td></tr><tr class="SSection"><td class=SEntry><a href="#Database_Table-xample" >Database Table - xample</a></td><td class=SDescription>This database stores user information, sessions, and user pages.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Users" >Users</a></td><td class=SDescription>This table holds general info for every user.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#u_uid" >u_uid</a></td><td class=SDescription>Each user has a table for storing info about their pages. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#p_uid_pid" >p_uid_pid</a></td><td class=SDescription>Each page has a table for storing info about their blocks. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#sessions" >sessions</a></td><td class=SDescription>This table stores persistent sessions.</td></tr><tr class="SSection"><td class=SEntry><a href="#Database_Table-xanalytics" >Database Table - xanalytics</a></td><td class=SDescription>This database stores errors and event analytics.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xerror" >xerror</a></td><td class=SDescription>This table stores logged errors.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#xdata" >xdata</a></td><td class=SDescription>This table stores event analytics.</td></tr><tr class="SSection"><td class=SEntry><a href="#Uploaded_Media" >Uploaded Media</a></td><td class=SDescription>Xample stores user uploaded media in a folder called &ldquo;xm&rdquo;.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#File_System_Organization" >File System Organization</a></td><td class=SDescription>The media is stored with the following folder &amp; file configuration.</td></tr><tr class="SSection"><td class=SEntry><a href="#Post_Data(Back-End)" >Post Data (Back-End)</a></td><td class=SDescription>Xample parses POST data on the back-end in the following way.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Query_String_Package" >Query String Package</a></td><td class=SDescription>It uses the &ldquo;query-string&rdquo; package for extracting key value data.</td></tr><tr class="SSection"><td class=SEntry><a href="#Ajax_Data(Front-End)" >Ajax Data (Front-End)</a></td><td class=SDescription>Xample parses data on the front-end in the following way.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#CSV_Data" >CSV Data.</a></td><td class=SDescription>Data is always received as comma-separated strings which are parsed for their contents.</td></tr><tr class="SSection"><td class=SEntry><a href="#Blocks" >Blocks</a></td><td class=SDescription>Xample can create the following blocks. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xtext" >xtext</a></td><td class=SDescription>This is the WYSIWIG (what you see is what you get) block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#xcode" >xcode</a></td><td class=SDescription>This is the programming code block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xmath" >xmath</a></td><td class=SDescription>This is the ASCIIMath block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#latex" >latex</a></td><td class=SDescription>This is the LaTeX block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#image" >image</a></td><td class=SDescription>This is the image block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#audio" >audio</a></td><td class=SDescription>This is the audio block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#video" >video</a></td><td class=SDescription>Thus is the video block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#slide" >slide</a></td><td class=SDescription>This is the slide block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#title" >title</a></td><td class=SDescription>This is the title block. </td></tr><tr class="SSection"><td class=SEntry><a href="#Styles" >Styles</a></td><td class=SDescription>Xample uses these CSS styles</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#PageBlocks" >Page &amp; Blocks</a></td><td class=SDescription>...this needs completion.</td></tr><tr class="SSection"><td class=SEntry><a href="#Minify" >Minify</a></td><td class=SDescription></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#JSCSS" >JS &amp; CSS</a></td><td class=SDescription>Javascript &amp; CSS files are minified before being uploaded. </td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
+<div id=Content><div class="CSection"><div class=CTopic id=MainTopic><h1 class=CTitle><a name="Xample_Overview"></a>Xample Overview</h1><div class=CBody><p>This is the manual for the Xample app.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SMain"><td class=SEntry><a href="#Xample_Overview" >Xample Overview</a></td><td class=SDescription>This is the manual for the Xample app.</td></tr><tr class="SSection"><td class=SEntry><a href="#Intro" >Intro</a></td><td class=SDescription>Here is a summary of important stuff Xample uses.</td></tr><tr class="SSection"><td class=SEntry><a href="#Environment_Set_Up" >Environment Set Up</a></td><td class=SDescription>This section walks through setting up your computer for local testing.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Work_Flow" >Work Flow</a></td><td class=SDescription>Follow these steps for editing &amp; testing code.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_SASS" >Install SASS</a></td><td class=SDescription>Sass is a preprocessor that converts .scss files to .css.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_NVM" >Install NVM</a></td><td class=SDescription>NVM is Node Version Manager. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_Node" >Install Node</a></td><td class=SDescription>Node is the engine that runs the server javascript.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_NPM" >Install NPM</a></td><td class=SDescription>NPM is Node Package Manager for installing Node dependencies.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_ESLint" >Install ESLint</a></td><td class=SDescription>ESLint is a linter that checks javascript syntax for errors and code consistency.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Download_Git_Repo" >Download Git Repo</a></td><td class=SDescription>Get the Xample code.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Add_Folders_To_Shell_Script" >Add Folders To Shell Script</a></td><td class=SDescription>Add the absolute paths to your Git folder &amp; Test folder (you need to create your test folder).</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_Atom_From" >Install Atom From</a></td><td class=SDescription>Atom is the preferred IDE for this project.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Install_Atom_Plugins" >Install Atom Plugins</a></td><td class=SDescription>These plug-ins for Atom help stream-line work flow.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Install_Xample_Dependencies_In_Test_Folder" >Install Xample Dependencies In Test Folder</a></td><td class=SDescription>These OS &amp; Node dependencies are required for Xample to work.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Configure_MySQL" >Configure MySQL</a></td><td class=SDescription>MySQL is the database software. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Testing" >Testing</a></td><td class=SDescription>Follow these steps to test Xample.</td></tr><tr class="SSection"><td class=SEntry><a href="#Tools" >Tools</a></td><td class=SDescription>These are work flow tools used for communication.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Zenhub" >Zenhub</a></td><td class=SDescription>Zenhub adds storyboards to the Github.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Slack" >Slack</a></td><td class=SDescription>Slack is used for all communication due to its channels.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Draw.io" >Draw.io</a></td><td class=SDescription>Draw.io is used for creating flow charts.</td></tr><tr class="SSection"><td class=SEntry><a href="#Files" >Files</a></td><td class=SDescription>Xamples has these main files.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xample.js" >xample.js</a></td><td class=SDescription>the server</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#page.js" >page.js</a></td><td class=SDescription>the back-end</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#navigation.js" >navigation.js</a></td><td class=SDescription>the front-end</td></tr><tr class="SSection"><td class=SEntry><a href="#NPM_Packages" >NPM Packages</a></td><td class=SDescription>Xample uses the following native npm packages.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Query_String" >Query String</a></td><td class=SDescription>require(&lsquo;query-string&rsquo;), <a href="https://github.com/sindresorhus/query-string" class=LURL target=_top>https://github.com/sindresorhus/query-string</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#File_System" >File System</a></td><td class=SDescription>require(&lsquo;fs&rsquo;)</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Password_Hash" >Password Hash</a></td><td class=SDescription>require(&lsquo;password-hash&rsquo;), <a href="https://github.com/davidwood/node-password-hash" class=LURL target=_top>https://github.com/davidwood/node-password-hash</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#MySQL" >MySQL</a></td><td class=SDescription>require(&lsquo;mysql&rsquo;), <a href="https://github.com/felixge/node-mysql" class=LURL target=_top>https://github.com/felixge/node-mysql</a></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Express" >Express</a></td><td class=SDescription>require(&lsquo;express&rsquo;), <a href="https://github.com/expressjs/express" class=LURL target=_top>https://github.com/expressjs/express</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Express_Sessions" >Express Sessions</a></td><td class=SDescription>require(&lsquo;express-session&rsquo;), <a href="https://github.com/expressjs/session" class=LURL target=_top>https://github.com/expressjs/session</a></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Busboy" >Busboy</a></td><td class=SDescription>require(&lsquo;connect-busboy&rsquo;), <a href="https://github.com/mscdex/connect-busboy" class=LURL target=_top>https://github.com/mscdex/connect-busboy</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#MySQLStore" >MySQLStore</a></td><td class=SDescription>require(&lsquo;express-mysql-session&rsquo;)(session), <a href="https://www.npmjs.com/package/express-mysql-session" class=LURL target=_top>https://www.npmjs.com<wbr>/package<wbr>/express-mysql-session</a></td></tr><tr class="SSection"><td class=SEntry><a href="#Libraries" >Libraries</a></td><td class=SDescription>Xample uses the following libraries</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#alertify.min.js" >alertify.<wbr>min.js</a></td><td class=SDescription>for custom html alert notifications</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#highlight.min.js" >highlight.<wbr>min.js</a></td><td class=SDescription>for code block rendering</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#MathJax.js" >MathJax.js</a></td><td class=SDescription>for asciiMath &amp; Latex rendering</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#pdf.js" >pdf.js</a></td><td class=SDescription>for converting pdfs into &lt;canvas&gt; objects</td></tr><tr class="SSection"><td class=SEntry><a href="#Styles" >Styles</a></td><td class=SDescription>Xample uses the following css styles.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#block.css" >block.css</a></td><td class=SDescription>for styling blocks &amp; pages</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#vs.css" >vs.css</a></td><td class=SDescription>for code block rendering</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#alertify.core.css" >alertify.<wbr>core.css</a></td><td class=SDescription>core alertify styles</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#alertify.default.css" >alertify.<wbr>default.css</a></td><td class=SDescription>optional default styles</td></tr><tr class="SSection"><td class=SEntry><a href="#Documentation" >Documentation</a></td><td class=SDescription>Xample documentation is compiled using NaturalDocs. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Compiling_The_Manual" >Compiling The Manual</a></td><td class=SDescription>To compile the doc follow these steps.</td></tr><tr class="SSection"><td class=SEntry><a href="#Comments" >Comments</a></td><td class=SDescription>Xample is commented in the following way.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#NaturalDocs_Comments" >NaturalDocs Comments</a></td><td class=SDescription>These comments are used to generate the documentation. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Asterisk_Comments" >Asterisk Comments</a></td><td class=SDescription>Asterisk comments are used for completed code.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Triple_Slash_Comments" >Triple Slash Comments</a></td><td class=SDescription>Triple slash comments are to marks code where there are design questions or something is incomplete.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Double_Slash_Comments" >Double Slash Comments</a></td><td class=SDescription>Do not use them.</td></tr><tr class="SSection"><td class=SEntry><a href="#Linter" >Linter</a></td><td class=SDescription>ESLint is used as the javascript linter for this project. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#func-style" >func-style</a></td><td class=SDescription>&ldquo;Declarations&rdquo; should be preferred since hoisting is used a lot. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#no-unused-expressions" >no-unused-expressions</a></td><td class=SDescription>When using closures to pass functions with parameters as arguments, this error will be thrown. </td></tr><tr class="SSection"><td class=SEntry><a href="#Error_Codes" >Error Codes</a></td><td class=SDescription>Xample uses these custom error codes.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Logged_errors" >Logged errors</a></td><td class=SDescription>These errors are logged in the analytics databse.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Serious_Errors" >Serious Errors</a></td><td class=SDescription>These errors are not logged &amp; indicate a serious problem.</td></tr><tr class="SSection"><td class=SEntry><a href="#Flow_Charts" >Flow Charts</a></td><td class=SDescription>Xample follows these flow diagrams for executing use cases.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Xample_Flow_Chart" >Xample Flow Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlM1VlZk9SUWt5TTg" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlM1VlZk9SUWt5TTg</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Add_Blocks_Chart" >Add Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlaFdLSVpWRlVXTE0" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlaFdLSVpWRlVXTE0</a></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Delete_Blocks_Chart" >Delete Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlNjl1N0lkRmR5ejQ" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlNjl1N0lkRmR5ejQ</a></td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Save_Blocks_Chart" >Save Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlNXpDWjhhZTVPbXc" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlNXpDWjhhZTVPbXc</a></td></tr><tr class="SSection"><td class=SEntry><a href="#Pages" >Pages</a></td><td class=SDescription>The following are a list of pages loaded by the back-end.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Error_Page" >Error Page</a></td><td class=SDescription>displayError(), this is the 404 error page for unknown URLs</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Landing_Page" >Landing Page</a></td><td class=SDescription>displayLanding(), this is the index page a user sees when not logged in</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Home_Page" >Home Page</a></td><td class=SDescription>displayHome(), this is the index page a user sees when they are logged in</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Profile_Page" >Profile Page</a></td><td class=SDescription>profilePage(), this is the page that displays a user&rsquo;s profile info for editing.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Edit_Page" >Edit Page</a></td><td class=SDescription>editPage(), this is the page that displays the edit mode for a user&rsquo;s xample page</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Choose_Page" >Choose Page</a></td><td class=SDescription>choosePage(), if user exits edit page without saving, they&rsquo;ll be presented with this page. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Show_Page" >Show Page</a></td><td class=SDescription>showPage(), this is the page that displays the presentation mode for a user&rsquo;s xample page</td></tr><tr class="SSection"><td class=SEntry><a href="#Page_Layout" >Page Layout</a></td><td class=SDescription>Xample&rsquo;s web pages are laid out in the following form.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Page_Contents" >Page Contents.</a></td><td class=SDescription>Xample pages are loaded with this content.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#HTML" >HTML</a></td><td class=SDescription>This is an example of the what the page HTML looks like.</td></tr><tr class="SSection"><td class=SEntry><a href="#Database" >Database</a></td><td class=SDescription>Xample uses a MySQL database. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Querying_The_Database" >Querying The Database</a></td><td class=SDescription>When a page requires a query it uses a connection from a pool of connections set up on the back-end. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#Useful_Commands" >Useful Commands</a></td><td class=SDescription>These are commonly used MySQL commands for creating &amp; debugging.</td></tr><tr class="SSection"><td class=SEntry><a href="#Database_Table-xample" >Database Table - xample</a></td><td class=SDescription>This database stores user information, sessions, and user pages.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Users" >Users</a></td><td class=SDescription>This table holds general info for every user.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#qp_subject_category_topic" >qp_subject_category_topic</a></td><td class=SDescription>A redundant table for faster pages sorted queries. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#p_uid" >p_uid</a></td><td class=SDescription>Each user has a table for storing info about their block pages. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#p_uid_pidt_uid_pid" >p_uid_pid &amp; t_uid_pid</a></td><td class=SDescription>Each block page has a table for storing its block data. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#lg_subject_category_topic" >lg_subject_category_topic</a></td><td class=SDescription>A redundant table for faster learning guide sorted queries. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#g_uid" >g_uid</a></td><td class=SDescription>Each user has a table for storing info about their learning guides. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#g_uid_gidc_uid_gid" >g_uid_gid &amp; c_uid_gid</a></td><td class=SDescription>Each guide has a table for storing list data. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#sessions" >sessions</a></td><td class=SDescription>This table stores persistent sessions.</td></tr><tr class="SSection"><td class=SEntry><a href="#Database_Table-xanalytics" >Database Table - xanalytics</a></td><td class=SDescription>This database stores errors and event analytics.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xerror" >xerror</a></td><td class=SDescription>This table stores logged errors.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#xdata" >xdata</a></td><td class=SDescription>This table stores event analytics.</td></tr><tr class="SSection"><td class=SEntry><a href="#Uploaded_Media" >Uploaded Media</a></td><td class=SDescription>Xample stores user uploaded media in a folder called &ldquo;xm&rdquo;.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#File_System_Organization" >File System Organization</a></td><td class=SDescription>The media is stored with the following folder &amp; file configuration.</td></tr><tr class="SSection"><td class=SEntry><a href="#Post_Data(Back-End)" >Post Data (Back-End)</a></td><td class=SDescription>Xample parses POST data on the back-end in the following way.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#Query_String_Package" >Query String Package</a></td><td class=SDescription>It uses the &ldquo;query-string&rdquo; package for extracting key value data.</td></tr><tr class="SSection"><td class=SEntry><a href="#Ajax_Data(Front-End)" >Ajax Data (Front-End)</a></td><td class=SDescription>Xample parses data on the front-end in the following way.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#CSV_Data" >CSV Data.</a></td><td class=SDescription>Data is always received as comma-separated strings which are parsed for their contents.</td></tr><tr class="SSection"><td class=SEntry><a href="#Blocks" >Blocks</a></td><td class=SDescription>Xample can create the following blocks. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xtext" >xtext</a></td><td class=SDescription>This is the WYSIWIG (what you see is what you get) block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#xcode" >xcode</a></td><td class=SDescription>This is the programming code block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#xmath" >xmath</a></td><td class=SDescription>This is the ASCIIMath block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#latex" >latex</a></td><td class=SDescription>This is the LaTeX block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#image" >image</a></td><td class=SDescription>This is the image block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#audio" >audio</a></td><td class=SDescription>This is the audio block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#video" >video</a></td><td class=SDescription>Thus is the video block. </td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#slide" >slide</a></td><td class=SDescription>This is the slide block. </td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#title" >title</a></td><td class=SDescription>This is the title block. </td></tr><tr class="SSection"><td class=SEntry><a href="#Styles" >Styles</a></td><td class=SDescription>Xample uses these CSS styles</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#PageBlocks" >Page &amp; Blocks</a></td><td class=SDescription>...this needs completion.</td></tr><tr class="SSection"><td class=SEntry><a href="#Minify" >Minify</a></td><td class=SDescription></td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#JSCSS" >JS &amp; CSS</a></td><td class=SDescription>Javascript &amp; CSS files are minified before being uploaded. </td></tr><tr class="SSection"><td class=SEntry><a href="#Persistent_Media" >Persistent Media</a></td><td class=SDescription>We allow for these file extensions.</td></tr><tr class="SGeneric SIndent1 SMarked"><td class=SEntry><a href="#ImageMagick" >ImageMagick</a></td><td class=SDescription>We allow for these image file extensions.</td></tr><tr class="SGeneric SIndent1"><td class=SEntry><a href="#FFMPEG" >FFMPEG</a></td><td class=SDescription>We allow for these audio &amp; video file extensions.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
 
 <div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Intro"></a>Intro</h2><div class=CBody><p>Here is a summary of important stuff Xample uses.</p><p>It is highly recommended that you are familiar with the following javascript concepts.</p><ul><li>Promises</li><li>Callbacks</li><li>The DOM (Document Object Model)</li><li>Requiring Packages &amp; The Objects You Get From Them</li><li>Ajax Post &amp; Get Requests</li><li>Relative vs Absolute Urls &amp; Paths, and Where The Server &amp; Domain Are Located On The Computer</li></ul><p>It&rsquo;s useful to know what the following is.</p><ul><li>Sql Injection</li></ul><p>The following libraries are used and thus knowledge of them is also useful.</p><ul><li>highlight.js</li><li>MathJax.js</li><li>pdf.js</li></ul><p>If you want to add to the project, you should learn the following.</p><ul><li>Git</li><li>Natural Docs</li></ul></div></div></div>
 
-<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Environment_Set_Up"></a>Environment Set Up</h2><div class=CBody><p>This section walks through setting up your computer for local testing.</p><p>If you are on Ubuntu, don&rsquo;t install Homebrew &amp; replace &ldquo;brew&rdquo; with &ldquo;apt-get&rdquo;.&nbsp; If you are on Windows, go buy a different computer.</p><h4 class=CHeading>!!&nbsp; Important, only share these files between Git &amp; Test folder</h4><p>xample/page.js xample/xample.js public_html/css/* public_html/js/*</p><p>Set up an bash script that use rsync to synchronize these files.&nbsp; You can run the script inside atom using the &ldquo;script&rdquo; package.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#Work_Flow" >Work Flow</a></td><td class=SDescription>Follow these steps for editing &amp; testing code.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_NVM" >Install NVM</a></td><td class=SDescription>NVM is Node Version Manager. </td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_Node" >Install Node</a></td><td class=SDescription>Node is the engine that runs the server javascript.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_Homebrew" >Install Homebrew</a></td><td class=SDescription>Homebrew is a package manager for installing OS dependencies.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_NPM" >Install NPM</a></td><td class=SDescription>NPM is Node Package Manager for installing Node dependencies.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_ESLint" >Install ESLint</a></td><td class=SDescription>ESLint is a linter that checks javascript syntax for errors and code consistency.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_Gyp" >Install Gyp</a></td><td class=SDescription>Gyp is a depency requirement for the Atom terminal-plus plug-in.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Download_Git_Repo" >Download Git Repo</a></td><td class=SDescription>Get the Xample code.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Create_Test_Folder" >Create Test Folder</a></td><td class=SDescription>Create a folder for testing. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_Atom_From" >Install Atom From</a></td><td class=SDescription>Atom is the preferred IDE for this project.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_Atom_Plugins" >Install Atom Plugins</a></td><td class=SDescription>These plug-ins for Atom help stream-line work flow.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_Xample_Dependencies_In_Test_Folder" >Install Xample Dependencies In Test Folder</a></td><td class=SDescription>These OS &amp; Node dependencies are required for Xample to work.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Configure_MySQL" >Configure MySQL</a></td><td class=SDescription>MySQL is the database software. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Testing" >Testing</a></td><td class=SDescription>Follow these steps to test Xample.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
+<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Environment_Set_Up"></a>Environment Set Up</h2><div class=CBody><p>This section walks through setting up your computer for local testing.</p><p>If you are on Ubuntu, you will mostly use apt-get to install software.&nbsp; If you are on Mac, you will need to download Homebrew to install software.&nbsp; If you are on Windows, go buy a different computer.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#Work_Flow" >Work Flow</a></td><td class=SDescription>Follow these steps for editing &amp; testing code.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_SASS" >Install SASS</a></td><td class=SDescription>Sass is a preprocessor that converts .scss files to .css.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_NVM" >Install NVM</a></td><td class=SDescription>NVM is Node Version Manager. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_Node" >Install Node</a></td><td class=SDescription>Node is the engine that runs the server javascript.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_NPM" >Install NPM</a></td><td class=SDescription>NPM is Node Package Manager for installing Node dependencies.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_ESLint" >Install ESLint</a></td><td class=SDescription>ESLint is a linter that checks javascript syntax for errors and code consistency.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Download_Git_Repo" >Download Git Repo</a></td><td class=SDescription>Get the Xample code.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Add_Folders_To_Shell_Script" >Add Folders To Shell Script</a></td><td class=SDescription>Add the absolute paths to your Git folder &amp; Test folder (you need to create your test folder).</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_Atom_From" >Install Atom From</a></td><td class=SDescription>Atom is the preferred IDE for this project.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Install_Atom_Plugins" >Install Atom Plugins</a></td><td class=SDescription>These plug-ins for Atom help stream-line work flow.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Install_Xample_Dependencies_In_Test_Folder" >Install Xample Dependencies In Test Folder</a></td><td class=SDescription>These OS &amp; Node dependencies are required for Xample to work.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Configure_MySQL" >Configure MySQL</a></td><td class=SDescription>MySQL is the database software. </td></tr><tr class="SGeneric"><td class=SEntry><a href="#Testing" >Testing</a></td><td class=SDescription>Follow these steps to test Xample.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Work_Flow"></a>Work Flow</h3><div class=CBody><p>Follow these steps for editing &amp; testing code.</p><p>1.&nbsp; Edit files in your local Git folder.&nbsp; 2. When ready for testing, copy files from Git folder to Test folder.&nbsp; 3. Run the software inside the Test folder for testing.&nbsp; 4. When ready, push files to remote Git repo from local Git folder.</p></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Work_Flow"></a>Work Flow</h3><div class=CBody><p>Follow these steps for editing &amp; testing code.</p><table border=0 cellspacing=0 cellpadding=0 class=CDescriptionList><tr><td class=CDLEntry>1</td><td class=CDLDescription>Edit files in your local Git folder.</td></tr><tr><td class=CDLEntry>2</td><td class=CDLDescription>When ready for testing, copy files from Git folder to Test folder using the bash script sync.sh</td></tr><tr><td class=CDLEntry>3</td><td class=CDLDescription>Run the software inside the Test folder for testing.</td></tr><tr><td class=CDLEntry>4</td><td class=CDLDescription>When ready, push files to remote Git repo from local Git folder.</td></tr></table></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_NVM"></a>Install NVM</h3><div class=CBody><p>NVM is Node Version Manager.&nbsp; Keeps track of node installations.</p><blockquote><pre>curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.3/install.sh | bash</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_SASS"></a>Install SASS</h3><div class=CBody><p>Sass is a preprocessor that converts .scss files to .css.</p><blockquote><pre>(ubuntu) sudo su -c &quot;gem install sass&quot;
+(mac) gem install sass</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_Node"></a>Install Node</h3><div class=CBody><p>Node is the engine that runs the server javascript.</p><blockquote><pre>nvm install node
-nvm use node</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_NVM"></a>Install NVM</h3><div class=CBody><p>NVM is Node Version Manager.&nbsp; Keeps track of node installations.</p><blockquote><pre>(ubuntu) curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash
+(mac) curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_Homebrew"></a>Install Homebrew</h3><div class=CBody><p>Homebrew is a package manager for installing OS dependencies.</p><blockquote><pre>/usr/bin/ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_Node"></a>Install Node</h3><div class=CBody><p>Node is the engine that runs the server javascript.</p><blockquote><pre>(ubuntu) nvm install node
+(mac) nvm use node</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_NPM"></a>Install NPM</h3><div class=CBody><p>NPM is Node Package Manager for installing Node dependencies.</p><blockquote><pre>brew install npm</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_NPM"></a>Install NPM</h3><div class=CBody><p>NPM is Node Package Manager for installing Node dependencies.</p><blockquote><pre>(ubuntu) apt-get install npm
+(mac) brew install npm</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_ESLint"></a>Install ESLint</h3><div class=CBody><p>ESLint is a linter that checks javascript syntax for errors and code consistency.</p><blockquote><pre>npm install eslint -g</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_ESLint"></a>Install ESLint</h3><div class=CBody><p>ESLint is a linter that checks javascript syntax for errors and code consistency.</p><blockquote><pre>(ubuntu) npm install eslint -g
+(mac) npm install eslint -g</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_Gyp"></a>Install Gyp</h3><div class=CBody><p>Gyp is a depency requirement for the Atom terminal-plus plug-in.</p><blockquote><pre>npm install node-gyp -g</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Download_Git_Repo"></a>Download Git Repo</h3><div class=CBody><p>Get the Xample code.</p><blockquote><pre>(ubuntu) git clone https://github.com/efossas/JS-Xample
+(mac) git clone https://github.com/efossas/JS-Xample</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Download_Git_Repo"></a>Download Git Repo</h3><div class=CBody><p>Get the Xample code.</p><blockquote><pre>git clone https://github.com/efossas/JS-Xample</pre></blockquote></div></div></div>
-
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Create_Test_Folder"></a>Create Test Folder</h3><div class=CBody><p>Create a folder for testing.&nbsp; It will include dependencies no found in the repo.</p><blockquote><pre>mkdir (&lt;TEST-FOLDER&gt;)
-cp (&lt;GIT-FOLDER&gt;)/public_html (&lt;TEST-FOLDER&gt;)/public_html
-cp (&lt;GIT-FOLDER&gt;)/xample (&lt;TEST-FOLDER&gt;)/xample</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Add_Folders_To_Shell_Script"></a>Add Folders To Shell Script</h3><div class=CBody><p>Add the absolute paths to your Git folder &amp; Test folder (you need to create your test folder).</p><blockquote><pre>cp sync-xample.sh sync.sh
+vim sync.sh
+REPO=(&lt;ABSOLUTE-PATH-TO-GIT-FOLDER&gt;)
+TEST=(&lt;ABSOLUTE-PATH-TO-TEST-FOLDER&gt;)</pre></blockquote></div></div></div>
 
 <div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_Atom_From"></a>Install Atom From</h3><div class=CBody><p>Atom is the preferred IDE for this project.</p><p><a href="https://atom.io/" class=LURL target=_top>https://atom.io/</a></p></div></div></div>
 
@@ -46,26 +50,35 @@ apm install jumpy
 apm install file-icons
 apm install pigments
 apm install color-picker
-apm install file-icons
+apm install atom-ternjs
 apm install atom-minify
-apm install terminal-plus
-apm install atom-minify
+apm install regex-railroad-diagram
 apm install script
 apm install git-plus
 apm install merge-conflicts
 apm install git-time-machine
 apm install data-atom
-apm install remote-ftp</pre></blockquote><blockquote><pre>apm install custom-folds</pre></blockquote><ul><li>set open &amp; close tags for custom-folds: &lt;&lt;&lt;code&gt;&gt;&gt; &amp; &lt;&lt;&lt;fold&gt;&gt;&gt;</li></ul></div></div></div>
+apm install remote-ftp
+apm install package-manager</pre></blockquote><blockquote><pre>apm install custom-folds</pre></blockquote><ul><li>set open &amp; close tags for custom-folds: &lt;&lt;&lt;code&gt;&gt;&gt; &amp; &lt;&lt;&lt;fold&gt;&gt;&gt;</li></ul></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_Xample_Dependencies_In_Test_Folder"></a>Install Xample Dependencies In Test Folder</h3><div class=CBody><p>These OS &amp; Node dependencies are required for Xample to work.</p><blockquote><pre>cd (&lt;TEST-FOLDER&gt;)/xample</pre></blockquote><blockquote><pre>npm install</pre></blockquote><blockquote><pre>brew install imagemagick
-brew install mysql</pre></blockquote><p>Install Libre Office 4.3.7.2 From</p><p><a href="https://downloadarchive.documentfoundation.org/libreoffice/old/" class=LURL target=_top>https://downloadarchive.documentfoundation.org<wbr>/libreoffice<wbr>/old<wbr>/</a></p><blockquote><pre>brew install unoconv</pre></blockquote><p>Download Static Build FFMPEG From</p><p><a href="https://ffmpeg.org/download.html" class=LURL target=_top>https://ffmpeg.org/download.html</a></p><ul><li>Unzip ffmpeg into &ldquo;xample/&rdquo; &amp; rename ffmpeg folder to &ldquo;ffmpeg&rdquo;</li></ul></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Install_Xample_Dependencies_In_Test_Folder"></a>Install Xample Dependencies In Test Folder</h3><div class=CBody><p>These OS &amp; Node dependencies are required for Xample to work.</p><blockquote><pre>cd (&lt;TEST-FOLDER&gt;)/xample</pre></blockquote><blockquote><pre>npm install</pre></blockquote><blockquote><pre>(ubuntu) apt-get install imagemagick
+(mac) brew install imagemagick</pre></blockquote><ul><li>Use &ldquo;mysql-server&rdquo;, if you&rsquo;re on Ubuntu.</li></ul><blockquote><pre>brew install mysql</pre></blockquote><h4 class=CHeading>Install Libre Office 4.3.7.2 From</h4><p><a href="https://downloadarchive.documentfoundation.org/libreoffice/old/" class=LURL target=_top>https://downloadarchive.documentfoundation.org<wbr>/libreoffice<wbr>/old<wbr>/</a></p><blockquote><pre>(ubuntu) apt-get install unoconv
+(mac) brew install unoconv</pre></blockquote><h4 class=CHeading>Download Static Build FFMPEG From</h4><p><a href="https://ffmpeg.org/download.html" class=LURL target=_top>https://ffmpeg.org/download.html</a></p><ul><li>Unzip ffmpeg into &ldquo;xample/&rdquo; &amp; rename ffmpeg folder to &ldquo;ffmpeg&rdquo;</li></ul></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Configure_MySQL"></a>Configure MySQL</h3><div class=CBody><p>MySQL is the database software.&nbsp; It requires configuring.</p><ul><li>the following two lines are needed hack for MAC OSX</li></ul><blockquote><pre>sudo mkdir /var/mysql
-sudo ln -s /tmp/mysql.sock /var/mysql/mysql.sock</pre></blockquote><ul><li>Start MySQL, log in, &amp; configure the databases.</li></ul><blockquote><pre>sudo brew services start mysql</pre></blockquote><blockquote><pre>mysql -uroot
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Configure_MySQL"></a>Configure MySQL</h3><div class=CBody><p>MySQL is the database software.&nbsp; It requires configuring.&nbsp; Getting it to work in Mac OS X is kind of a pain in the ass.&nbsp; Try using Homebrew, but you may need to crate an alias (it&rsquo;s often installed in /usr/local/mysql/bin/mysql).&nbsp; With Ubuntu, it&rsquo;s fairly easy.&nbsp; Just use apt-get.</p><blockquote><pre>(ubuntu) sudo services start mysql
+(mac) sudo brew services start mysql</pre></blockquote><blockquote><pre>cd (&lt;GIT-FOLDER&gt;)/db</pre></blockquote><blockquote><pre>node sqlGenerator.js</pre></blockquote><blockquote><pre>mysql -uroot
 source (&lt;GIT-FOLDER&gt;)/db/initialize.sql</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Testing"></a>Testing</h3><div class=CBody><p>Follow these steps to test Xample.</p><p>You can leave mysql running or stop it in between testing. start mysql:</p><blockquote><pre>sudo brew services start mysql</pre></blockquote><p>stop mysql:</p><blockquote><pre>sudo brew services stop mysql</pre></blockquote><p>To test, make sure mysql is running.</p><blockquote><pre>cd (&lt;TEST-FOLDER&gt;)/xample
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Testing"></a>Testing</h3><div class=CBody><p>Follow these steps to test Xample.</p><p>Make sure mysql is running.</p><blockquote><pre>cd (&lt;TEST-FOLDER&gt;)/xample
 node xample.js local 2020</pre></blockquote><p>&rdquo;2020&rdquo; is the port number.&nbsp; If not included it defaults to 2020, or you can specify a different one if needed.</p><p>Now go to your web browser and type: <a href="http://localhost:2020" class=LURL target=_top>http://localhost:2020</a></p></div></div></div>
+
+<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Tools"></a>Tools</h2><div class=CBody><p>These are work flow tools used for communication.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#Zenhub" >Zenhub</a></td><td class=SDescription>Zenhub adds storyboards to the Github.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Slack" >Slack</a></td><td class=SDescription>Slack is used for all communication due to its channels.</td></tr><tr class="SGeneric"><td class=SEntry><a href="#Draw.io" >Draw.io</a></td><td class=SDescription>Draw.io is used for creating flow charts.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Zenhub"></a>Zenhub</h3><div class=CBody><p>Zenhub adds storyboards to the Github.</p></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Slack"></a>Slack</h3><div class=CBody><p>Slack is used for all communication due to its channels.</p></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Draw.io"></a>Draw.io</h3><div class=CBody><p>Draw.io is used for creating flow charts.</p></div></div></div>
 
 <div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Files"></a>Files</h2><div class=CBody><p>Xamples has these main files.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#xample.js" >xample.js</a></td><td class=SDescription>the server</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#page.js" >page.js</a></td><td class=SDescription>the back-end</td></tr><tr class="SGeneric"><td class=SEntry><a href="#navigation.js" >navigation.js</a></td><td class=SDescription>the front-end</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
 
@@ -127,11 +140,17 @@ node xample.js local 2020</pre></blockquote><p>&rdquo;2020&rdquo; is the port nu
 
 <div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Double_Slash_Comments"></a>Double Slash Comments</h3><div class=CBody><p>Do not use them.</p></div></div></div>
 
+<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Linter"></a>Linter</h2><div class=CBody><p>ESLint is used as the javascript linter for this project.&nbsp; Linting rules are stored in .eslintrc.json.&nbsp; If there are important reasons for keeping rules in that file, they should be listed here.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#func-style" >func-style</a></td><td class=SDescription>&ldquo;Declarations&rdquo; should be preferred since hoisting is used a lot. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#no-unused-expressions" >no-unused-expressions</a></td><td class=SDescription>When using closures to pass functions with parameters as arguments, this error will be thrown. </td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="func-style"></a>func-style</h3><div class=CBody><p>&rdquo;Declarations&rdquo; should be preferred since hoisting is used a lot.&nbsp; Arrow notation should not be allowed since uglifyjs cannot handle them.</p></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="no-unused-expressions"></a>no-unused-expressions</h3><div class=CBody><p>When using closures to pass functions with parameters as arguments, this error will be thrown.&nbsp; Hence, it should be left disabled.</p></div></div></div>
+
 <div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Error_Codes"></a>Error Codes</h2><div class=CBody><p>Xample uses these custom error codes.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#Logged_errors" >Logged errors</a></td><td class=SDescription>These errors are logged in the analytics databse.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Serious_Errors" >Serious Errors</a></td><td class=SDescription>These errors are not logged &amp; indicate a serious problem.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Logged_errors"></a>Logged errors</h3><div class=CBody><p>These errors are logged in the analytics databse.</p><p>These errors are stored using a short int.&nbsp; They can range from 0 - 255.</p><ul><li>110 : convert media error</li><li>111 : remove media error</li><li>120-130 : file system error</li><li>150 : front-end error</li><li>199 : overload attack</li><li>200-220 : db query errors</li><li>221 : db connection error</li></ul></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Logged_errors"></a>Logged errors</h3><div class=CBody><p>These errors are logged in the analytics databse.</p><p>These errors are stored using a short int.&nbsp; They can range from 0 - 255.</p><ul><li>110 : convert media error</li><li>111 : remove media error</li><li>112 : delete media error</li><li>120-130 : file system error</li><li>150 : front-end error</li><li>199 : overload attack</li><li>200-220 : db query errors</li><li>221 : db connection error</li></ul></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Serious_Errors"></a>Serious Errors</h3><div class=CBody><p>These errors are not logged &amp; indicate a serious problem.</p><ul><li>666 : uncaught exception</li></ul><p>The uncaught exception is not sent to the database.&nbsp; It indicates a serious failure and the app may have crashed.&nbsp; The app attempts to send a slack message when this occurs.&nbsp; Other than that, it will display in the terminal running the server.</p></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Serious_Errors"></a>Serious Errors</h3><div class=CBody><p>These errors are not logged &amp; indicate a serious problem.</p><ul><li>666 : uncaught exception</li></ul><p>The uncaught exception is not sent to the database.&nbsp; It indicates a serious failure and the app may have crashed.&nbsp; The app attempts to send a slack message when this occurs &amp; tries to log the error in errors/666.txt.&nbsp; If logging the error fails, it will display it in the terminal running the server.</p><ul><li>667 : journal db error</li></ul><p>These are errors that occur when the analytics.journal function cannot log to the analytics database.&nbsp; The error is written to errors/667.txt.&nbsp; If that fails, the error is displayed to the terminal running the server.</p></div></div></div>
 
 <div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Flow_Charts"></a>Flow Charts</h2><div class=CBody><p>Xample follows these flow diagrams for executing use cases.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#Xample_Flow_Chart" >Xample Flow Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlM1VlZk9SUWt5TTg" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlM1VlZk9SUWt5TTg</a></td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Add_Blocks_Chart" >Add Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlaFdLSVpWRlVXTE0" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlaFdLSVpWRlVXTE0</a></td></tr><tr class="SGeneric"><td class=SEntry><a href="#Delete_Blocks_Chart" >Delete Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlNjl1N0lkRmR5ejQ" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlNjl1N0lkRmR5ejQ</a></td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#Save_Blocks_Chart" >Save Blocks Chart</a></td><td class=SDescription><a href="https://drive.google.com/open?id=0B1-za7ikYAAlNXpDWjhhZTVPbXc" class=LURL target=_top>https://drive.google.com<wbr>/open?id=0B1-za7ikYAAlNXpDWjhhZTVPbXc</a></td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
 
@@ -195,13 +214,21 @@ SELECT COUNT(DISTINCT(column)) FROM table;
 DELETE FROM table WHERE column != 'value';</pre></blockquote><blockquote><pre>LOAD DATA INFILE '/tmp/file.txt' INTO TABLE table COLUMNS TERMINATED BY '$' LINES TERMINATED BY '\n' IGNORE 1 LINES (column, @ignore);</pre></blockquote><blockquote><pre>CREATE USER 'nodesql'@'localhost' IDENTIFIED BY '(&lt;PASSWORD&gt;)';
 GRANT ALL PRIVILEGES ON xample.* TO 'nodesql'@'localhost';</pre></blockquote></div></div></div>
 
-<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Database_Table-xample"></a>Database Table - xample</h2><div class=CBody><p>This database stores user information, sessions, and user pages.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#Users" >Users</a></td><td class=SDescription>This table holds general info for every user.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#u_uid" >u_uid</a></td><td class=SDescription>Each user has a table for storing info about their pages. </td></tr><tr class="SGeneric"><td class=SEntry><a href="#p_uid_pid" >p_uid_pid</a></td><td class=SDescription>Each page has a table for storing info about their blocks. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#sessions" >sessions</a></td><td class=SDescription>This table stores persistent sessions.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
+<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Database_Table-xample"></a>Database Table - xample</h2><div class=CBody><p>This database stores user information, sessions, and user pages.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#Users" >Users</a></td><td class=SDescription>This table holds general info for every user.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#qp_subject_category_topic" >qp_subject_category_topic</a></td><td class=SDescription>A redundant table for faster pages sorted queries. </td></tr><tr class="SGeneric"><td class=SEntry><a href="#p_uid" >p_uid</a></td><td class=SDescription>Each user has a table for storing info about their block pages. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#p_uid_pidt_uid_pid" >p_uid_pid &amp; t_uid_pid</a></td><td class=SDescription>Each block page has a table for storing its block data. </td></tr><tr class="SGeneric"><td class=SEntry><a href="#lg_subject_category_topic" >lg_subject_category_topic</a></td><td class=SDescription>A redundant table for faster learning guide sorted queries. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#g_uid" >g_uid</a></td><td class=SDescription>Each user has a table for storing info about their learning guides. </td></tr><tr class="SGeneric"><td class=SEntry><a href="#g_uid_gidc_uid_gid" >g_uid_gid &amp; c_uid_gid</a></td><td class=SDescription>Each guide has a table for storing list data. </td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#sessions" >sessions</a></td><td class=SDescription>This table stores persistent sessions.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
 
 <div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="Users"></a>Users</h3><div class=CBody><p>This table holds general info for every user.</p><p>1. uid (primary key) 2. username 3. password 4. email 5. phone 6. autosave</p><blockquote><pre>CREATE TABLE Users (uid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(50), phone VARCHAR(15), autosave SMALLINT UNSIGNED NOT NULL );</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="u_uid"></a>u_uid</h3><div class=CBody><p>Each user has a table for storing info about their pages.&nbsp; The table is named &ldquo;u_&rdquo; + uid.</p><table border=0 cellspacing=0 cellpadding=0 class=CDescriptionList><tr><td class=CDLEntry>uid</td><td class=CDLDescription>user ID</td></tr></table><p>1. pid (primary key) 2. pagename 3. status</p><blockquote><pre>CREATE TABLE u_ (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50) NOT NULL, status BOOLEAN NOT NULL);</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="qp_subject_category_topic"></a>qp_subject_category_topic</h3><div class=CBody><p>A redundant table for faster pages sorted queries.&nbsp; One is made for each subject, subject_category, and subject_category_topic combination.</p><p>1. uid 2. pid 3. pagename 4. tags 5. created 6. edited 7. ranks 8. views 9. imageurl 10. blurb</p><blockquote><pre>CREATE TABLE qp_subject_category_topic (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );</pre></blockquote></div></div></div>
 
-<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="p_uid_pid"></a>p_uid_pid</h3><div class=CBody><p>Each page has a table for storing info about their blocks.&nbsp; The table is named &ldquo;p_&rdquo; + uid + &ldquo;_&rdquo; + pid.</p><table border=0 cellspacing=0 cellpadding=0 class=CDescriptionList><tr><td class=CDLEntry>pid</td><td class=CDLDescription>page ID</td></tr></table><blockquote><pre>CREATE TABLE p_ (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(1024) );</pre></blockquote></div></div></div>
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="p_uid"></a>p_uid</h3><div class=CBody><p>Each user has a table for storing info about their block pages.&nbsp; The table is named &ldquo;p_&rdquo; + uid.</p><p>1. pid (primary key) 2. pagename 3. status 4. subject 5. category 6. topic 7. tags 8. created 9. edited 10. ranks 11. views 12. imageurl 13. blurb</p><blockquote><pre>CREATE TABLE p_ (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500) );</pre></blockquote></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="p_uid_pidt_uid_pid"></a>p_uid_pid &amp; t_uid_pid</h3><div class=CBody><p>Each block page has a table for storing its block data.&nbsp; The table is named &ldquo;p_&rdquo; + uid + &ldquo;<u>&rdquo; + pid.&nbsp; Temporary page tables are used to store back ups in case a connection is lost.&nbsp; They use the prefix &ldquo;t</u>&rdquo;.</p><p>1. bid (primary key) 2. type 3. content</p><blockquote><pre>CREATE TABLE p_ (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) );</pre></blockquote></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="lg_subject_category_topic"></a>lg_subject_category_topic</h3><div class=CBody><p>A redundant table for faster learning guide sorted queries.&nbsp; One is made for each subject, subject_category, and subject_category_topic combination.</p><p>1. uid 2. pid 3. pagename 4. tags 5. created 6. edited 7. ranks 8. views 9. imageurl 10. blurb</p><blockquote><pre>CREATE TABLE lg_subject_category_topic (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );</pre></blockquote></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="g_uid"></a>g_uid</h3><div class=CBody><p>Each user has a table for storing info about their learning guides.&nbsp; The table is named &ldquo;g_&rdquo; + uid.</p><p>1. gid (primary key) 2. guidename 3. status 4. subject 5. category 6. topic 7. tags 8. created 9. edited 10. ranks 11. views 12. imageurl 13. blurb</p><blockquote><pre>CREATE TABLE g_ (gid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, guidename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500));</pre></blockquote></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="g_uid_gidc_uid_gid"></a>g_uid_gid &amp; c_uid_gid</h3><div class=CBody><p>Each guide has a table for storing list data.&nbsp; The table is named &ldquo;g_&rdquo; + uid + &ldquo;<u>&rdquo; + gid.&nbsp; Temporary guide tables are used to store back ups in case a connection is lost.&nbsp; They use the prefix &ldquo;c</u>&rdquo; (conditional).</p><p>1. lid (primary key) 2. links</p><blockquote><pre>CREATE TABLE g_ (lid TINYINT UNSIGNED, links VARCHAR(1024) );</pre></blockquote></div></div></div>
 
 <div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="sessions"></a>sessions</h3><div class=CBody><p>This table stores persistent sessions.</p><p>1. session_id 2. expires 3. data</p><blockquote><pre>CREATE TABLE sessions (session_id VARCHAR(255) NOT NULL PRIMARY KEY, expires DATETIME NOT NULL, data TEXT NOT NULL);</pre></blockquote></div></div></div>
 
@@ -250,9 +277,547 @@ mediaContent -&gt; (block content,)</pre></blockquote></div></div></div>
 
 <div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="PageBlocks"></a>Page &amp; Blocks</h3><div class=CBody><p>...this needs completion.</p></div></div></div>
 
-<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Minify"></a>Minify</h2><div class=CBody></div></div></div>
+<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Minify"></a>Minify</h2><div class=CBody><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#JSCSS" >JS &amp; CSS</a></td><td class=SDescription>Javascript &amp; CSS files are minified before being uploaded. </td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
 
 <div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="JSCSS"></a>JS &amp; CSS</h3><div class=CBody><p>Javascript &amp; CSS files are minified before being uploaded.&nbsp; Use the atom-minify plug-in for minifying content before uploading javascript and css files to the production server.</p></div></div></div>
+
+<div class="CSection"><div class=CTopic><h2 class=CTitle><a name="Persistent_Media"></a>Persistent Media</h2><div class=CBody><p>We allow for these file extensions.</p><!--START_ND_SUMMARY--><div class=Summary><div class=STitle>Summary</div><div class=SBorder><table border=0 cellspacing=0 cellpadding=0 class=STable><tr class="SGeneric"><td class=SEntry><a href="#ImageMagick" >ImageMagick</a></td><td class=SDescription>We allow for these image file extensions.</td></tr><tr class="SGeneric SMarked"><td class=SEntry><a href="#FFMPEG" >FFMPEG</a></td><td class=SDescription>We allow for these audio &amp; video file extensions.</td></tr></table></div></div><!--END_ND_SUMMARY--></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="ImageMagick"></a>ImageMagick</h3><div class=CBody><p>We allow for these image file extensions.</p><ul><li>.bmp</li><li>.bmp2</li><li>.bmp3</li><li>.jpeg</li><li>.jpg</li><li>.pdf</li><li>.png</li><li>.svg</li></ul><p>However, ImageMagick supports all of the following extensions.&nbsp; You can view a full list with the following command.</p><blockquote><pre>identify -list format</pre></blockquote><blockquote><pre>DNG
+AAI*
+AI
+ART*
+ARW
+AVI
+AVS*
+BGR*
+BGRA*
+BGRO*
+BMP*
+BMP2*
+BMP3*
+BRF*
+CAL*
+CALS*
+CANVAS*
+CAPTION*
+CIN*
+CIP*
+CLIP*
+CMYK*
+CMYKA*
+CR2
+CRW
+CUR*
+CUT*
+DATA*
+DCM*
+DICOM
+DCR
+DCX*
+DDS*
+DFONT*
+DNG
+DOT
+DPX*
+DXT5*
+EPDF
+EPI
+EPS
+EPS2*
+EPS3*
+EPSF
+EPSI
+EPT
+EPT2
+EPT3
+ERF
+FAX*
+FAX
+FRACTAL*
+FTS*
+G3*
+GIF*
+GIF87*
+GRADIENT*
+GRAY*
+GROUP4*
+GV
+H*
+HALD*
+HDR*
+HISTOGRAM*
+HRZ*
+HTM*
+HTML*
+ICB*
+ICO*
+ICON*
+IIQ
+INFO
+INLINE*
+IPL*
+ISOBRL*
+ISOBRL6*
+JNG*
+See
+format
+JNX*
+JPE*
+JPEG*
+JPG*
+JPS*
+JSON
+K25
+KDC
+LABEL*
+M2V
+M4V
+MAC*
+MAGICK*
+MAP*
+MASK*
+MAT
+MATTE*
+MEF
+MIFF*
+MKV
+MNG*
+MONO*
+MOV
+MP4
+MPC*
+MPEG
+MPG
+MRW
+MSL*
+MSVG
+MTV*
+MVG*
+NEF
+NRW
+NULL*
+ORF
+OTB*
+OTF*
+PAL*
+PALM*
+PAM*
+PANGO*
+PATTERN*
+PBM*
+PCD*
+PCDS*
+PCL
+PCT*
+PCX*
+PDB*
+PDF
+PDFA
+PEF
+PES*
+PFA*
+PFB*
+PFM*
+PGM*
+PICON*
+PICT*
+PIX*
+PJPEG*
+PLASMA*
+PNG*
+PNG00*
+PNG24*
+PNG32*
+PNG48*
+PNG64*
+PNG8*
+PNM*
+PPM*
+PREVIEW*
+PS
+PS2*
+PS3*
+PSB*
+PSD*
+PTIF*
+PWP*
+RAF
+RAS*
+RAW
+RGB*
+RGBA*
+RGBO*
+RGF*
+RLA*
+RLE*
+RMF
+RW2
+SCR*
+SCT*
+SFW*
+SGI*
+SHTML*
+SIX*
+SIXEL*
+SR2
+SRF
+STEGANO*
+SUN*
+SVG
+SVGZ
+TEXT*
+TGA*
+THUMBNAIL*
+TIFF*
+TIFF64*
+TILE*
+TIM*
+TTC*
+TTF*
+TXT*
+UBRL*
+UBRL6*
+UIL*
+UYVY*
+VDA*
+VICAR*
+VID*
+VIFF*
+VIPS*
+VST*
+WBMP*
+WMV
+WPG*
+X3F
+XBM*
+XC*
+XCF*
+XPM*
+XPS
+XV*
+YCbCr*
+YCbCrA*
+YUV*</pre></blockquote></div></div></div>
+
+<div class="CGeneric"><div class=CTopic><h3 class=CTitle><a name="FFMPEG"></a>FFMPEG</h3><div class=CBody><p>We allow for these audio &amp; video file extensions.</p><p>Audio extensions are,</p><ul><li>.aac</li><li>.aiff</li><li>.m4a</li><li>.mp3</li><li>.ogg</li><li>.ra</li><li>.wav</li><li>.wma</li></ul><p>Video extensions are,</p><ul><li>.avi</li><li>.flv</li><li>.mov</li><li>.mp4</li><li>.mpeg</li><li>.ogg</li><li>.rm</li><li>.webm</li><li>.wmv</li></ul><p>However, FFMPEG supports all the following file extensions.&nbsp; You can view a full list with the following command.</p><blockquote><pre>./ffmpeg -formats</pre></blockquote><blockquote><pre>3g2
+3gp
+4xm
+a64
+aa
+aac
+ac3
+acm
+act
+adf
+adp
+ads
+adts
+adx
+aea
+afc
+aiff
+aix
+alaw
+alias
+amr
+anm
+apc
+ape
+apng
+aqtitle
+asf
+asf
+asf
+ass
+ast
+au
+avi
+avm2
+avr
+avs
+bethsoftvid
+bfi
+bfstm
+bin
+bink
+bit
+bmp
+bmv
+boa
+brender
+brstm
+c93
+caf
+cavsvideo
+cdg
+cdxl
+cine
+concat
+crc
+dash
+data
+daud
+dcstr
+dds
+dfa
+dirac
+dnxhd
+dpx
+dsf
+dsicin
+dss
+dts
+dtshd
+dv
+dvbsub
+dvbtxt
+dvd
+dxa
+ea
+ea
+eac3
+epaf
+exr
+f32be
+f32le
+f4v
+f64be
+f64le
+ffm
+ffmetadata
+film
+filmstrip
+flac
+flic
+flv
+framecrc
+framehash
+framemd5
+frm
+fsb
+g722
+g723
+g729
+genh
+gif
+gsm
+gxf
+h261
+h263
+h264
+hash
+hds
+hevc
+hls
+hls
+applehttp
+hnm
+ico
+idcin
+idf
+iff
+ilbc
+image2
+image2pipe
+ingenient
+ipmovie
+ipod
+ircam
+ismv
+iss
+iv8
+ivf
+ivr
+j2k
+jacosub
+jpeg
+jpegls
+jv
+latm
+lavfi
+live
+lmlm4
+loas
+lrc
+lvf
+lxf
+m4v
+matroska
+webm
+md5
+mgsts
+microdvd
+mjpeg
+mkvtimestamp
+mlp
+mlv
+mm
+mmf
+mov
+mp4
+m4a
+3gp
+3g2
+mj2
+mp2
+mp3
+mp4
+mpc
+mpc8
+mpeg
+mpeg1video
+mpeg2video
+mpegts
+mpegtsraw
+mpegvideo
+mpjpeg
+mpl2
+mpsub
+msf
+msnwctcp
+mtaf
+mtv
+mulaw
+musx
+mv
+mvi
+mxf
+mxf
+mxf
+mxg
+nc
+nistsphere
+nsv
+null
+nut
+nuv
+oga
+ogg
+oma
+opus
+paf
+pam
+pbm
+pcx
+pgm
+pgmyuv
+pictor
+pjs
+pmp
+png
+ppm
+psp
+psxstr
+pva
+pvf
+qcp
+qdraw
+r3d
+rawvideo
+realtext
+redspark
+rl2
+rm
+roq
+rpl
+rsd
+rso
+rtp
+rtp
+rtsp
+s16be
+s16le
+s24be
+s24le
+s32be
+s32le
+s8
+sami
+sap
+sbg
+sdp
+sdr2
+segment
+sgi
+shn
+siff
+singlejpeg
+sln
+smjpeg
+smk
+smoothstreaming
+smush
+sol
+sox
+spdif
+spx
+srt
+stl
+stream
+ssegment
+subviewer
+subviewer1
+sunrast
+sup
+svag
+svcd
+swf
+tak
+tedcaptions
+tee
+thp
+tiertexseq
+tiff
+tmv
+truehd
+tta
+tty
+txd
+u16be
+u16le
+u24be
+u24le
+u32be
+u32le
+u8
+uncodedframecrc
+v210
+v210x
+vag
+vc1
+vc1test
+vcd
+vivo
+vmd
+vob
+vobsub
+voc
+vpk
+vplayer
+vqf
+w64
+wav
+wc3movie
+webm
+webm
+webm
+webp
+webp
+webvtt
+wsaud
+wsd
+wsvqa
+wtv
+wv
+wve
+xa
+xbin
+xmv
+xvag
+xwma
+yop
+yuv4mpegpipe</pre></blockquote></div></div></div>
 
 </div><!--Content-->
 
@@ -260,9 +825,10 @@ mediaContent -&gt; (block content,)</pre></blockquote></div></div></div>
 <div id=Footer>By Eric Fossas&nbsp; &middot;&nbsp; <a href="http://www.naturaldocs.org">Generated by Natural Docs</a></div><!--Footer-->
 
 
-<div id=Menu><div class=MTitle>Xample<div class=MSubTitle>Media Block Generator</div></div><div class=MEntry><div class=MFile id=MSelected>Xample Overview</div></div><div class=MEntry><div class=MGroup><a href="javascript:ToggleMenu('MGroupContent1')">Files</a><div class=MGroupContent id=MGroupContent1><div class=MEntry><div class=MFile><a href="../public_html/js/navigation-js.html">Navigation</a></div></div><div class=MEntry><div class=MFile><a href="../xample/page-js.html">Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/xample-js.html">Xample</a></div></div></div></div></div><div class=MEntry><div class=MGroup><a href="javascript:ToggleMenu('MGroupContent2')">Index</a><div class=MGroupContent id=MGroupContent2><div class=MEntry><div class=MIndex><a href="../../index/General.html">Everything</a></div></div><div class=MEntry><div class=MIndex><a href="../../index/Functions.html">Functions</a></div></div></div></div></div><script type="text/javascript"><!--
+<div id=Menu><div class=MTitle>Xample<div class=MSubTitle>Media Block Generator</div></div><div class=MEntry><div class=MFile id=MSelected>Xample Overview</div></div><div class=MEntry><div class=MGroup><a href="javascript:ToggleMenu('MGroupContent4')">Files</a><div class=MGroupContent id=MGroupContent4><div class=MEntry><div class=MFile><a href="../xample/filemedia-js.html">File Media</a></div></div><div class=MEntry><div class=MFile><a href="../xample/helper-js.html">Helper</a></div></div><div class=MEntry><div class=MGroup><a href="javascript:ToggleMenu('MGroupContent1')">Loads</a><div class=MGroupContent id=MGroupContent1><div class=MEntry><div class=MFile><a href="../xample/loads/editlg-js.html">Edit Learning Guide</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/explore-js.html">Edit Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/editpage-js.html">Edit Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/home-js.html">Home</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/loader-js.html">Loader</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/notfound-js.html">Not Found</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/page-js.html">Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/profile-js.html">Profile</a></div></div><div class=MEntry><div class=MFile><a href="../xample/loads/start-js.html">Start</a></div></div></div></div></div><div class=MEntry><div class=MFile><a href="../xample/rts-js.html">Page</a></div></div><div class=MEntry><div class=MGroup><a href="javascript:ToggleMenu('MGroupContent2')">Public</a><div class=MGroupContent id=MGroupContent2><div class=MEntry><div class=MFile><a href="../xample/public/js/bengine-js.html">Block Engine</a></div></div><div class=MEntry><div class=MFile><a href="../xample/public/js/bp-js.html">Block Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/public/js/lg-js.html">Learning Guide</a></div></div><div class=MEntry><div class=MFile><a href="../xample/public/js/nav-js.html">Navigation</a></div></div><div class=MEntry><div class=MFile><a href="../xample/public/js/omni-js.html">Omni</a></div></div></div></div></div><div class=MEntry><div class=MFile><a href="../xample/querydb-js.html">QueryDB</a></div></div><div class=MEntry><div class=MGroup><a href="javascript:ToggleMenu('MGroupContent3')">Routes</a><div class=MGroupContent id=MGroupContent3><div class=MEntry><div class=MFile><a href="../xample/routes/createlg-js.html">Create Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/createpage-js.html">Create Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/deletepage-js.html">Delete Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/deletelg-js.html">Delete Page</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/getlgs-js.html">Get Learning Guides</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/getpages-js.html">Get Pages</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/getprofiledata-js.html">Get Profile Data</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/getsubjects-js.html">Get Subjects</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/journalerror-js.html">journalerror</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/login-js.html">Log In</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/logout-js.html">Log Out</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/revertblocks-js.html">Revert</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/saveblocks-js.html">Save Blocks</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/savepagesettings-js.html">Save Page Settings</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/saveprofile-js.html">Save Profile</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/signup-js.html">Sign Up</a></div></div><div class=MEntry><div class=MFile><a href="../xample/routes/uploadmedia-js.html">Upload Media</a></div></div></div></div></div><div class=MEntry><div class=MFile><a href="../xample/analytics-js.html">Stats</a></div></div><div class=MEntry><div class=MFile><a href="../xample/xample-js.html">Xample</a></div></div></div></div></div><div class=MEntry><div class=MGroup><a href="javascript:ToggleMenu('MGroupContent5')">Index</a><div class=MGroupContent id=MGroupContent5><div class=MEntry><div class=MIndex><a href="../../index/General.html">Everything</a></div></div><div class=MEntry><div class=MIndex><a href="../../index/Functions.html">Functions</a></div></div></div></div></div><script type="text/javascript"><!--
 var searchPanel = new SearchPanel("searchPanel", "HTML", "../../search");
---></script><div id=MSearchPanel class=MSearchPanelInactive><input type=text id=MSearchField value=Search onFocus="searchPanel.OnSearchFieldFocus(true)" onBlur="searchPanel.OnSearchFieldFocus(false)" onKeyUp="searchPanel.OnSearchFieldChange()"><select id=MSearchType onFocus="searchPanel.OnSearchTypeFocus(true)" onBlur="searchPanel.OnSearchTypeFocus(false)" onChange="searchPanel.OnSearchTypeChange()"><option  id=MSearchEverything selected value="General">Everything</option><option value="Functions">Functions</option></select></div></div><!--Menu-->
+--></script><div id=MSearchPanel class=MSearchPanelInactive><input type=text id=MSearchField value=Search onFocus="searchPanel.OnSearchFieldFocus(true)" onBlur="searchPanel.OnSearchFieldFocus(false)" onKeyUp="searchPanel.OnSearchFieldChange()"><select id=MSearchType onFocus="searchPanel.OnSearchTypeFocus(true)" onBlur="searchPanel.OnSearchTypeFocus(false)" onChange="searchPanel.OnSearchTypeChange()"><option  id=MSearchEverything selected value="General">Everything</option><option value="Functions">Functions</option></select></div><script language=JavaScript><!--
+HideAllBut([4, 5], 6);// --></script></div><!--Menu-->
 
 
 

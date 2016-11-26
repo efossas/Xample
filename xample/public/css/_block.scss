@@ -1,0 +1,494 @@
+/*** Xample Page & Bengine ***/
+
+/* Save Bar */
+.savebar {
+	padding: 20px 0px 20px 0px;
+}
+
+#savebar {
+	text-align: center;
+	height: 60px;
+	width: 100%;
+
+	background-color: white;
+	border: 0px solid transparent;
+	border-color: black;
+	border-radius: 1px;
+}
+
+#saveprogress {
+	width: 100%;
+	height: 30px;
+}
+
+#saveinfo {
+	width: 100%;
+	height: 30px;
+}
+
+#autosave {
+	width: 100%;
+	height: 22px;
+	padding: 8px 0 0 0;
+}
+
+#savestatus {
+	width: 100%;
+	height: 26px;
+	padding: 4px 0 0 0;
+}
+
+/* Page Info */
+.page-link {
+	display: inline-block;
+	width: 100%;
+	padding: 6px;
+	text-align: center;
+	font-weight: 500;
+
+	a {
+		font-weight: 500;
+	}
+
+	a:hover {
+		color: black;
+	}
+
+}
+
+.page-title {
+	display: inline-block;
+	width: 100%;
+	height: 32px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 0px 0px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	font-weight: 300;
+	color: black;
+}
+
+/* Blocks */
+#x-blocks {
+	margin: 0;
+	padding: 0;
+}
+
+.block {
+	margin: 0;
+	padding: 0;
+}
+
+/* Block Button Styles */
+.blockbtns {
+	max-width: $site-width;
+	margin: 10px auto 0px auto;
+	position: relative;
+}
+
+.blockbtn {
+	color: black;
+	border: 1px solid transparent;
+	border-color: black;
+	border-radius: 2px;
+
+	width: 100%;
+
+	padding: 6px 12px;
+	text-align: center;
+
+	cursor: pointer;
+	transition: background-color .5s;
+	touch-action: manipulation;
+
+	font-size: 1em;
+	font-weight: 400;
+}
+
+.addbtn {
+	background-color: #00ffe1;
+}
+
+.addbtn:hover {
+	background-color: #00a895;
+}
+
+.delbtn {
+	background-color: #ff1111;
+}
+
+.delbtn:hover {
+	background-color: #d31e1e;
+}
+
+/* Block Styles */
+.xtext {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xTex, .xTex-show {
+	display: inline-block;
+	overflow-y: auto;
+
+	width: $site-width;
+	height: 200px;
+	border: 1px solid black;
+	border-radius: 2px;
+	background-color: white;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	font-weight: 300;
+	color: black;
+}
+
+.xTex-show {
+	padding: 8px;
+	margin-bottom: 12px;
+}
+
+.xcode {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xCde, .xCde-show {
+	white-space: pre-line;
+
+	display: inline-block;
+	width: $site-width;
+	height: 300px;
+	border: 1px solid black;
+	border-radius: 2px;
+	background-color: white;
+
+	line-height: 1.8em;
+
+	background-image: -webkit-linear-gradient(#ccc, #ccc 3px, white 4px, white 18px, #ccc 19px, #ccc 32px);
+    background-image: -moz-linear-gradient(#ccc, #ccc 3px, white 4px, white 18px, #ccc 19px, #ccc 32px);
+    background-image: -ms-linear-gradient(#ccc, #ccc 3px, white 4px, white 18px, #ccc 19px, #ccc 32px);
+    background-image: -o-linear-gradient(#ccc, #ccc 3px, white 4px, white 18px, #ccc 19px, #ccc 32px);
+	background-image: linear-gradient(#efefef, #efefef 5px, white 6px, white 28px, #efefef 29px, #efefef 50px);
+
+	background-size: 100% 50px;
+
+	padding: 4px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.xCde-show {
+	margin-bottom: 12px;
+}
+
+.latex {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xLtx {
+	display: inline-block;
+	width: $site-width;
+	height: 100px;
+	border: 1px solid black;
+	border-radius: 2px;
+	background-color: white;
+
+	padding: 4px 6px;
+	margin: 2px 0 0 0;
+	box-sizing: border-box;
+}
+
+.latexImage, .latexImage-show {
+	display: inline-block;
+	width: $site-width;
+	height: 200px;
+	border: 1px solid black;
+	border-radius: 2px;
+	background-color: white;
+
+	padding: 4px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.latexImage-show {
+	margin-bottom: 12px;
+}
+
+
+.xmath {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xMat {
+	display: inline-block;
+	width: $site-width;
+	height: 100px;
+	border: 1px solid black;
+	border-radius: 2px;
+	background-color: white;
+
+	padding: 4px 6px;
+	margin: 2px 0 0 0;
+	box-sizing: border-box;
+
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.mathImage, .mathImage-show {
+	display: inline-block;
+	width: $site-width;
+	height: 200px;
+	border: 1px solid black;
+	border-radius: 2px;
+	background-color: white;
+
+	padding: 4px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.mathImage-show {
+	margin-bottom: 12px;
+}
+
+.image {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xImg, .xImg-show {
+	display: inline-block;
+	width: $site-width;
+	height: 405px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.xImg-show {
+	margin-bottom: 12px;
+}
+
+.audio {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xAud, .xAud-show {
+	display: inline-block;
+	width: $site-width;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.xAud-show {
+	margin-bottom: 12px;
+}
+
+.video {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xVid, .xVid-show {
+	display: inline-block;
+	width: $site-width;
+	height: 405px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.xVid-show {
+	margin-bottom: 12px;
+}
+
+.slide {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xSli, .xSli-show {
+	display: inline-block;
+	width: $site-width;
+	height: 405px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.xSli-show {
+	margin-bottom: 12px;
+}
+
+svg {
+	width: 100%;
+	height: 100%
+}
+
+.xsvgs {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xSvg {
+	display: inline-block;
+	width: $site-width;
+	height: 405px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+.title {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xTit {
+	display: inline-block;
+	width: $site-width;
+	height: 32px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 4px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	font-weight: 300;
+	color: black;
+}
+
+.xTit-show {
+	display: inline-block;
+	width: $site-width;
+	height: 46px;
+	background-color: rgba(118, 118, 118, 0.2);
+	border: 1px solid black;
+	border-bottom-color: rgba(118, 118, 118, 0.2);
+	border-radius: 2px;
+
+	padding: 6px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 2em;
+	font-weight: 900;
+	color: black;
+}
+
+.xlist {
+	max-width: $site-width;
+	margin: 0px auto 0 auto;
+}
+
+.xLrg {
+	display: inline-block;
+	width: $site-width;
+	height: 100%;
+	border: 0px solid black;
+	border-radius: 2px;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+}
+
+input.xLrg {
+	display: inline-block;
+	width: 100%;
+	height: 32px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 0px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	font-weight: 300;
+	color: black;
+}
+
+/* Mobile Size */
+@media screen and (max-width: $site-width) {
+    .page-title { width: 100%; }
+
+    .blockbtns { width: 100%; }
+	.blockbtn { width: 100%; }
+
+	.xtext { max-width: 100%; margin: 0px auto 0 auto; }
+	.xTex, .xTex-show { width: 100%; }
+
+	.xcode { max-width: 100%; margin: 0px auto 0 auto; }
+	.xCde, .xCde-show { width: 100%; }
+
+	.latex { max-width: 100%; margin: 0px auto 0 auto; }
+	.xLtx { width: 100%; }
+	.latexImage, .latexImage-show { width: 100%; }
+
+	.xmath { max-width: 100%; margin: 0px auto 0 auto; }
+	.xMat { width: 100%; }
+	.mathImage, .mathImage-show { width: 100%; }
+
+	.image { max-width: 100%; margin: 0px auto 0 auto; }
+	.xImg, .xImg-show { width: 100%; height: 80%; }
+
+	.audio { max-width: 100%; margin: 0px auto 0 auto; }
+	.xAud, .xAud-show { width: 100%; }
+
+	.video { max-width: 100%; margin: 0px auto 0 auto; }
+	.xVid, .xVid-show { width: 100%; height: 80%; }
+
+	.xsvgs { max-width: 100%; margin: 0px auto 0 auto; }
+	.xSvg, .xSvg-show { width: 100%; height: 80%; }
+
+	.slide { max-width: 100%; margin: 0px auto 0 auto; }
+	.xSli, .xSli-show { width: 100%; height: 80%; }
+
+	.title { max-width: 100%; margin: 0px auto 0 auto; }
+	.xTit, .xTit-show { width: 100%; }
+
+	.xlist { max-width: 100%; margin: 0px auto 0 auto; }
+	.xLrg, .xLrg-show { width: 100%; }
+}

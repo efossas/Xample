@@ -52,7 +52,7 @@
         "no-invalid-regexp": ["error"],
         "no-iterator": ["error"],
         "no-labels": ["warn"],
-        "no-loop-func": ["error"],
+        "no-loop-func": ["warn"],
         "no-mixed-operators": ["error"],
         "no-mixed-spaces-and-tabs": ["error"],
         "no-multiple-empty-lines": ["error"],

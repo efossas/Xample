@@ -182,7 +182,7 @@ process.stdin.resume();
 		nothing - *
 */
 function exitHandler() {
-	console.log('\nClean up routine complete. Xample app terminated.');
+	console.log('Clean up routine complete. Xample app terminated.');
     process.exit();
 }
 
@@ -279,13 +279,13 @@ app.set("fileRoute",__dirname + "/public/");
 
 /* routes */
 app.get('/',rts.start);
-app.get('/begin',rts.begin); /// THIS IS TEMPORARY FOR TESTING REACTJS!!!
 app.post('/createlg',rts.createlg);
 app.post('/createpage',rts.createpage);
 app.post('/deletelg',rts.deletelg);
 app.post('/deletepage',rts.deletepage);
 app.get('/editpage*',rts.editpage);
 app.get('/editlg*',rts.editlg);
+app.get('/explore*',rts.explore);
 app.post('/getlgs',rts.getlgs);
 app.post('/getpages',rts.getpages); /// breaks REST ??
 app.post('/getprofiledata',rts.getprofiledata);
@@ -298,6 +298,7 @@ app.get('/page*',rts.page);
 app.get('/profile',rts.profile);
 app.post('/revertblocks',rts.revertblocks);
 app.post('/saveblocks',rts.saveblocks);
+app.post('/savepagesettings',rts.savepagesettings);
 app.post('/saveprofile',rts.saveprofile);
 app.post('/signup',rts.signup);
 app.post('/uploadmedia*',rts.uploadmedia); /// breaks REST ?? uses get query with post method

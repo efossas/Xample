@@ -34,85 +34,69 @@ Section: Environment Set Up
 
 This section walks through setting up your computer for local testing.
 
-If you are on Ubuntu, don't install Homebrew & replace "brew" with "apt-get".
+If you are on Ubuntu, you will mostly use apt-get to install software.
+If you are on Mac, you will need to download Homebrew to install software.
 If you are on Windows, go buy a different computer.
-
-!! Important, only share these files between Git & Test folder:
-
-o xample/page.js
-o xample/xample.js
-o public_html/css/*
-o public_html/js/*
-
-Set up a bash script that uses rsync to synchronize these files.
-You can run the script inside atom using the "script" package.
 
 Topic: Work Flow
 
 Follow these steps for editing & testing code.
 
 1 - Edit files in your local Git folder.
-2 - When ready for testing, copy files from Git folder to Test folder.
+2 - When ready for testing, copy files from Git folder to Test folder using the bash script sync.sh
 3 - Run the software inside the Test folder for testing.
 4 - When ready, push files to remote Git repo from local Git folder.
 
-Topic: Install sass
+Topic: Install SASS
 
 Sass is a preprocessor that converts .scss files to .css.
 
-linux> sudo su -c "gem install sass"
-mac> gem install sass
+> (ubuntu) sudo su -c "gem install sass"
+> (mac) gem install sass
 
 Topic: Install NVM
 
 NVM is Node Version Manager. Keeps track of node installations.
 
-> curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.3/install.sh | bash
+> (ubuntu) curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash
+> (mac) curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash
 
 Topic: Install Node
 
 Node is the engine that runs the server javascript.
 
-> nvm install node
-> nvm use node
-
-Topic: Install Homebrew
-
-Homebrew is a package manager for installing OS dependencies.
-
-> /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+> (ubuntu) nvm install node
+> (mac) nvm use node
 
 Topic: Install NPM
 
 NPM is Node Package Manager for installing Node dependencies.
 
-> brew install npm
+> (ubuntu) apt-get install npm
+> (mac) brew install npm
 
 Topic: Install ESLint
 
 ESLint is a linter that checks javascript syntax for errors and code consistency.
 
-> npm install eslint -g
-
-Topic: Install Gyp
-
-Gyp is a depency requirement for the Atom terminal-plus plug-in.
-
-> npm install node-gyp -g
+> (ubuntu) npm install eslint -g
+> (mac) npm install eslint -g
 
 Topic: Download Git Repo
 
 Get the Xample code.
 
-> git clone https://github.com/efossas/JS-Xample
+> (ubuntu) git clone https://github.com/efossas/JS-Xample
+> (mac) git clone https://github.com/efossas/JS-Xample
 
-Topic: Create Test Folder
+Topic: Add Folders To Shell Script
 
-Create a folder for testing. It will include dependencies no found in the repo.
+Add the absolute paths to your Git folder & Test folder (you need to create your test folder).
 
-> mkdir (<TEST-FOLDER>)
-> cp (<GIT-FOLDER>)/public_html (<TEST-FOLDER>)/public_html
-> cp (<GIT-FOLDER>)/xample (<TEST-FOLDER>)/xample
+> cp sync-xample.sh sync.sh
+> vim sync.sh
+> REPO=(<ABSOLUTE-PATH-TO-GIT-FOLDER>)
+> TEST=(<ABSOLUTE-PATH-TO-TEST-FOLDER>)
 
 Topic: Install Atom From
 
@@ -133,7 +117,6 @@ These plug-ins for Atom help stream-line work flow.
 > apm install atom-ternjs
 > apm install atom-minify
 > apm install regex-railroad-diagram
-> apm install atom-terminal-panel
 > apm install script
 > apm install git-plus
 > apm install merge-conflicts
@@ -153,7 +136,8 @@ These OS & Node dependencies are required for Xample to work.
 
 > npm install
 
-> brew install imagemagick
+> (ubuntu) apt-get install imagemagick
+> (mac) brew install imagemagick
 
 - Use "mysql-server", if you're on Ubuntu.
 > brew install mysql
@@ -162,7 +146,8 @@ Install Libre Office 4.3.7.2 From:
 
 https://downloadarchive.documentfoundation.org/libreoffice/old/
 
-> brew install unoconv
+> (ubuntu) apt-get install unoconv
+> (mac) brew install unoconv
 
 Download Static Build FFMPEG From:
 
@@ -172,14 +157,14 @@ https://ffmpeg.org/download.html
 
 Topic: Configure MySQL
 
-MySQL is the database software. It requires configuring.
+MySQL is the database software. It requires configuring. Getting it to work in Mac OS X is kind of a pain in the ass. Try using Homebrew, but you may need to crate an alias (it's often installed in /usr/local/mysql/bin/mysql). With Ubuntu, it's fairly easy. Just use apt-get.
 
-- the following two lines are needed hack for MAC OSX
-> sudo mkdir /var/mysql
-> sudo ln -s /tmp/mysql.sock /var/mysql/mysql.sock
+> (ubuntu) sudo services start mysql
+> (mac) sudo brew services start mysql
 
-- Start MySQL, log in, & configure the databases.
-> sudo brew services start mysql
+> cd (<GIT-FOLDER>)/db
+
+> node sqlGenerator.js
 
 > mysql -uroot
 > source (<GIT-FOLDER>)/db/initialize.sql
@@ -188,13 +173,7 @@ Topic: Testing
 
 Follow these steps to test Xample.
 
-You can leave mysql running or stop it in between testing.
-start mysql:
-> sudo brew services start mysql
-stop mysql:
-> sudo brew services stop mysql
-
-To test, make sure mysql is running.
+Make sure mysql is running.
 
 > cd (<TEST-FOLDER>)/xample
 > node xample.js local 2020
@@ -519,6 +498,22 @@ This table holds general info for every user.
 
 > CREATE TABLE Users (uid INT UNSIGNED AUTO_INCREMENT PRIMARY KEY, username VARCHAR(50) NOT NULL, password CHAR(60) NOT NULL, email VARCHAR(50), phone VARCHAR(15), autosave SMALLINT UNSIGNED NOT NULL );
 
+Topic: qp_subject_category_topic
+A redundant table for faster pages sorted queries. One is made for each subject, subject_category, and subject_category_topic combination.
+
+1. uid
+2. pid
+3. pagename
+4. tags
+5. created
+6. edited
+7. ranks
+8. views
+9. imageurl
+10. blurb
+
+> CREATE TABLE qp_subject_category_topic (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );
+
 Topic: p_uid
 Each user has a table for storing info about their block pages. The table is named "p_" + uid.
 
@@ -528,17 +523,40 @@ Each user has a table for storing info about their block pages. The table is nam
 4. subject
 5. category
 6. topic
+7. tags
+8. created
+9. edited
+10. ranks
+11. views
+12. imageurl
+13. blurb
 
-> CREATE TABLE p_ (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32));
+> CREATE TABLE p_ (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500) );
 
 Topic: p_uid_pid & t_uid_pid
 Each block page has a table for storing its block data. The table is named "p_" + uid + "_" + pid. Temporary page tables are used to store back ups in case a connection is lost. They use the prefix "t_".
 
 1. bid (primary key)
-2. mediatype
-3. mediacontent
+2. type
+3. content
 
 > CREATE TABLE p_ (bid TINYINT UNSIGNED, mediatype CHAR(5), mediacontent VARCHAR(4096) );
+
+Topic: lg_subject_category_topic
+A redundant table for faster learning guide sorted queries. One is made for each subject, subject_category, and subject_category_topic combination.
+
+1. uid
+2. pid
+3. pagename
+4. tags
+5. created
+6. edited
+7. ranks
+8. views
+9. imageurl
+10. blurb
+
+> CREATE TABLE lg_subject_category_topic (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );
 
 Topic: g_uid
 Each user has a table for storing info about their learning guides. The table is named "g_" + uid.
@@ -549,8 +567,15 @@ Each user has a table for storing info about their learning guides. The table is
 4. subject
 5. category
 6. topic
+7. tags
+8. created
+9. edited
+10. ranks
+11. views
+12. imageurl
+13. blurb
 
-> CREATE TABLE g_ (gid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, guidename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32));
+> CREATE TABLE g_ (gid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, guidename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500));
 
 Topic: g_uid_gid & c_uid_gid
 Each guide has a table for storing list data. The table is named "g_" + uid + "_" + gid. Temporary guide tables are used to store back ups in case a connection is lost. They use the prefix "c_" (conditional).

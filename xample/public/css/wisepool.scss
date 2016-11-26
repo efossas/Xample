@@ -1,0 +1,54 @@
+/* Base Styles */
+
+@import 'vars';
+@import 'wrapper';
+@import 'html';
+@import 'grid';
+@import 'bars';
+@import 'buttons';
+@import 'box';
+@import 'block';
+
+#content {
+	max-width: 800px;
+	margin: 0 auto 0 auto;
+	position: relative;
+}
+
+.search-bar {
+	@extend .wrapper;
+	margin-top: 12px;
+}
+
+.text-input {
+	display: inline-block;
+	width: 100%;
+	height: 32px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 0px 0px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	font-weight: 300;
+	color: black;
+}
+
+.log-input {
+	@extend .text-input;
+	font-size: 0.9em;
+	border-radius: 0px;
+	border-top-width: 0px;
+	border-bottom-width: 0px;
+	outline: none;
+}
+
+/* Mobile Size */
+@media screen and (max-width: $site-width) {
+	#content { width: 100%; }
+}

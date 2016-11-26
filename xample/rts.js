@@ -12,9 +12,9 @@
 // <<<code>>>
 
 /* load functions, for loading pages */
-var l_begin = require('./loads/begin.js');
 var l_editpage = require('./loads/editpage.js');
 var l_editlg = require('./loads/editlg.js');
+var l_explore = require('./loads/explore.js');
 var l_home = require('./loads/home.js');
 var l_notfound = require('./loads/notfound.js');
 var l_page = require('./loads/page.js');
@@ -35,6 +35,7 @@ var r_login = require('./routes/login.js');
 var r_logout = require('./routes/logout.js');
 var r_revertblocks = require('./routes/revertblocks.js');
 var r_saveblocks = require('./routes/saveblocks.js');
+var r_savepagesettings = require('./routes/savepagesettings.js');
 var r_saveprofile = require('./routes/saveprofile.js');
 var r_signup = require('./routes/signup.js');
 var r_uploadmedia = require('./routes/uploadmedia.js');
@@ -49,13 +50,13 @@ var r_uploadmedia = require('./routes/uploadmedia.js');
 // <<<code>>>
 
 module.exports = {
-    begin: l_begin.begin,
     createlg: r_createlg.createlg,
     createpage: r_createpage.createpage,
     deletelg: r_deletelg.deletelg,
     deletepage: r_deletepage.deletepage,
     editpage: l_editpage.editpage,
     editlg: l_editlg.editlg,
+    explore: l_explore.explore,
     getlgs: r_getlgs.getlgs,
     getpages: r_getpages.getpages,
     getprofiledata: r_getprofiledata.getprofiledata,
@@ -69,6 +70,7 @@ module.exports = {
     profile: l_profile.profile,
     revertblocks: r_revertblocks.revertblocks,
     saveblocks: r_saveblocks.saveblocks,
+    savepagesettings: r_savepagesettings.savepagesettings,
     saveprofile: r_saveprofile.saveprofile,
     signup: r_signup.signup,
     start: l_start.start,

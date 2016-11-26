@@ -2,23 +2,23 @@
     "computer science":
         {
         "data":
-            ["regex","structures","algorithms"]
+            ["algorithms","regex","structures"]
         ,"programming":
-                ["procedural","object oriented","functional"]
+            ["functional","object oriented","procedural"]
         ,"systems":
-            ["binary","assembly","memory"]
+            ["assembly","binary","memory"]
         ,"terminal":
-            ["commands","bash","version control"]
+            ["bash","commands","version control"]
         ,"visual":
             ["latex","svg"]
         ,"web":
-            ["html","css","php","sql","javascript"]
+            ["back end","css","html","javascript","sql"]
         },
     "mathematics":
         {
         "algebra":
-            ["one","two"]
+            ["complex numbers","exponents","linear equations","logarithms","polynomial equations","quadratic equations"]
         ,"calculus":
-            ["one","two"]
+            ["derivatives","integrals","limits","series"]
         }
 }

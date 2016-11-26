@@ -1,0 +1,121 @@
+/*** HTML elements ***/
+
+html {
+	height: 100%;
+}
+
+body {
+	height: 100%;
+	background-color: #fdfdfd;
+
+	margin: 0;
+	padding: 0;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 14px;
+	font-weight: 300;
+	color: black;
+}
+
+footer, .footer {
+	padding: 40px 0px;
+}
+
+/* removes blue border after buttons are clicked */
+button:focus, a:focus, select:focus, select[multiple]:focus {
+	outline: none;
+}
+
+/* terribe fucking hack to get rid of firefox random extra padding */
+button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+h2 {
+	display: inline-block;
+	width: 100%;
+	height: 46px;
+	background-color: rgb(244, 244, 244);
+	border: 0px solid black;
+	border-bottom-width: 1px;
+	border-radius: 2px;
+
+	padding: 7px 7px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 2em;
+	font-weight: 900;
+	color: black;
+}
+
+h3 {
+	display: inline-block;
+	width: 100%;
+	height: 32px;
+	background-color: transparent;
+	border: 0px solid black;
+	border-bottom-width: 1px;
+	border-radius: 2px;
+
+	padding: 6px 6px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	text-align: center;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1.2em;
+	font-weight: 600;
+	color: black;
+}
+
+progress {
+	width: 100%;
+	height: 22px;
+	padding: 8px 0 0 0;
+}
+
+select {
+	/* adjusts width to include input styles */
+	box-sizing: border-box;
+
+	display: block;
+	width: 100%;
+	height: 30px;
+	padding: 2px 3px 2px 3px;
+	border-radius: 0px;
+	border-color: black;
+
+	font-size: 1em;
+	background-color: white;
+	color: black;
+}
+
+/* stupid hack for webkit, remove comment for square corners */
+select {
+  /* -webkit-appearance: none; */
+  -webkit-border-radius: 0px;
+}
+
+select option {
+	background-color: white;
+	color: black;
+}
+
+select[multiple] {
+	width: 100%;
+	font-size: 1em;
+	height: 120px;
+}
+
+/* Mobile Size */
+
+@media screen and (max-width: $site-width) {
+	h2 { width: 100%; }
+	h3 { width: 100%; }
+}

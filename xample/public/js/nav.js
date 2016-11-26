@@ -79,26 +79,100 @@ var globalScope = {};
 		success - html node, log in sign up div
 */
 function barLog() {
-	var login = formLogin();
 
-	/* this function will reveal the sign up form onclick */
-	function displaySignUp() {
-		document.getElementById('logdisplay').removeChild(document.getElementById('signupbtn'));
-		document.getElementById('logdisplay').appendChild(formSignUp());
+	/* create parent <div> */
+	var logBar = document.createElement('div');
+	logBar.setAttribute('class','log-bar');
+	logBar.setAttribute('id','form-login');
+
+	/* create top row */
+	var rowTop = document.createElement('div');
+	rowTop.setAttribute('class','row');
+	rowTop.setAttribute('id','top-bar');
+
+	function expandLog() {
+		/* create empty col */
+		var colEmptyLog = document.createElement('div');
+		colEmptyLog.setAttribute('class','col col-50');
+
+		/* create username column */
+		var colUsername = document.createElement('div');
+		colUsername.setAttribute('class','col col-20');
+
+		/* create username text <input> */
+		var username = document.createElement('input');
+		username.setAttribute('class','log-input');
+		username.setAttribute('type','text');
+		username.setAttribute('name','username-login');
+		username.setAttribute('maxlength','50');
+		username.setAttribute('placeholder','User Name');
+		username.setAttribute('style','border-left-width:2px;');
+
+		colUsername.appendChild(username);
+
+		/* create password column */
+		var colPassword = document.createElement('div');
+		colPassword.setAttribute('class','col col-20');
+
+		/* create password <input> */
+		var password = document.createElement('input');
+		password.setAttribute('class','log-input');
+		password.setAttribute('type','password');
+		password.setAttribute('name','password-login');
+		password.setAttribute('maxlength','32');
+		password.setAttribute('placeholder','Password');
+
+		colPassword.appendChild(password);
+
+		/* create submit button column */
+		var colSubmit = document.createElement('div');
+		colSubmit.setAttribute('class','col col-10');
+
+		/* create form submit <button> */
+		var submit = btnSubmit('Log In','login()','green');
+		submit.setAttribute('style','border-color:black;border-left-width:1px;');
+
+		colSubmit.appendChild(submit);
+
+		emptyDiv(rowTop);
+		rowTop.appendChild(colEmptyLog);
+		rowTop.appendChild(colUsername);
+		rowTop.appendChild(colPassword);
+		rowTop.appendChild(colSubmit);
 	}
 
-	var signupbtn = document.createElement('button');
-	signupbtn.setAttribute('type','button');
-	signupbtn.setAttribute('id','signupbtn');
-	signupbtn.onclick = displaySignUp;
-	signupbtn.innerHTML = "Sign Up";
+	function expandSign() {
+		var sign = formSignUp();
 
-	var formLog = document.createElement('div');
-	formLog.appendChild(login);
-	formLog.appendChild(document.createElement('hr')); /// remove this later, when you style
-	formLog.appendChild(signupbtn);
+		emptyDiv(rowTop);
+		rowTop.appendChild(sign);
+	}
 
-	return formLog;
+	/* create expand buttons */
+	var logBtn = btnSubmit('Log In',expandLog,'none');
+	var signBtn = btnSubmit('Sign Up',expandSign,'none');
+
+	/* create columns */
+	var colEmpty = document.createElement('div');
+	colEmpty.setAttribute('class','col col-70');
+
+	var colLogBtn = document.createElement('div');
+	colLogBtn.setAttribute('class','col col-15');
+	colLogBtn.appendChild(logBtn);
+
+	var colSignBtn = document.createElement('div');
+	colSignBtn.setAttribute('class','col col-15');
+	colSignBtn.appendChild(signBtn);
+
+	/* add columns to top row */
+	rowTop.appendChild(colEmpty);
+	rowTop.appendChild(colLogBtn);
+	rowTop.appendChild(colSignBtn);
+
+	/* append the elements to the parent <div> */
+	logBar.appendChild(rowTop);
+
+	return logBar;
 }
 
 /*
@@ -149,6 +223,214 @@ function barSearch() {
 	searchDiv.appendChild(resultsRow);
 
 	return searchDiv;
+}
+
+/*
+	Function: boxCreate
+
+	Creates a content box for displaying info about pages.
+
+	Parameters:
+
+		* - none
+
+	Returns:
+
+		success - html node, box
+*/
+function boxCreate() {
+	/* holds the entire link */
+	var box = document.createElement('div');
+	box.setAttribute('class','content-box');
+
+	/* holds title, author, rating, & bookmark */
+	var topRow = document.createElement('div');
+	topRow.setAttribute('class','row');
+
+	/* create title */
+	var colTitle = document.createElement('div');
+	colTitle.setAttribute('class','col col-60');
+
+	var title = document.createElement('div');
+	title.setAttribute('class','box-title');
+	title.innerHTML = "";
+	colTitle.appendChild(title);
+
+	/* create author */
+	var colAuthor = document.createElement('div');
+	colAuthor.setAttribute('class','col col-15');
+
+	var author = document.createElement('div');
+	author.setAttribute('class','box-author');
+	colAuthor.appendChild(author);
+
+	/* create rating */
+	var colRating = document.createElement('div');
+	colRating.setAttribute('class','col col-15');
+
+	var rating = document.createElement('div');
+	rating.setAttribute('class','box-rating');
+	colRating.appendChild(rating);
+
+	var ratingBar = document.createElement('div');
+	ratingBar.setAttribute('class','rating-bar');
+	ratingBar.setAttribute('role','progressbar');
+	rating.appendChild(ratingBar);
+
+	/* create bookmark */
+	var colBookmark = document.createElement('div');
+	colBookmark.setAttribute('class','col col-5');
+
+	var bookmark = document.createElement('div');
+	bookmark.setAttribute('class','box-bookmark');
+	colBookmark.appendChild(bookmark);
+
+	var star = document.createElement('input');
+	star.setAttribute('type','checkbox');
+	star.setAttribute('class','star');
+	bookmark.appendChild(star);
+
+	/* create expand */
+	var colExpand = document.createElement('div');
+	colExpand.setAttribute('class','col col-5');
+
+	var expand = document.createElement('div');
+	expand.setAttribute('class','box-expand');
+	colExpand.appendChild(expand);
+
+	/* add expand btn */
+	var btnExpand = btnSubmit('+','expandRow(this)','none');
+	expand.appendChild(btnExpand);
+
+	/* append to top row */
+	topRow.appendChild(colTitle);
+	topRow.appendChild(colAuthor);
+	topRow.appendChild(colRating);
+	topRow.appendChild(colBookmark);
+	topRow.appendChild(colExpand);
+
+	/* holds image and a row */
+	var bottomRow = document.createElement('div');
+	bottomRow.setAttribute('class','row');
+	bottomRow.setAttribute('style','display:none;visibility:hidden;');
+
+	/* create image */
+	var colImage = document.createElement('div');
+	colImage.setAttribute('class','col col-35');
+
+	var image = document.createElement('div');
+	image.setAttribute('class','box-image');
+	colImage.appendChild(image);
+
+	/* upper row for right section, holds blurb */
+	var upperRow = document.createElement('div');
+	upperRow.setAttribute('class','row');
+
+	/* create blurb */
+	var colBlurb = document.createElement('div');
+	colBlurb.setAttribute('class','col col-100');
+
+	var blurb = document.createElement('div');
+	blurb.setAttribute('class','box-blurb');
+	colBlurb.appendChild(blurb);
+
+	/* append to upper row */
+	upperRow.appendChild(colBlurb);
+
+	/* lower row for right section, holds created, edited, ranks, views */
+	var lowerRow = document.createElement('div');
+	lowerRow.setAttribute('class','row');
+
+	/* create date created */
+	var colCreated = document.createElement('div');
+	colCreated.setAttribute('class','col col-25');
+
+	var created = document.createElement('div');
+	created.setAttribute('class','box-created');
+	colCreated.appendChild(created);
+
+	/* create edited */
+	var colEdited = document.createElement('div');
+	colEdited.setAttribute('class','col col-25');
+
+	var edited = document.createElement('div');
+	edited.setAttribute('class','box-edited');
+	colEdited.appendChild(edited);
+
+	/* create ranks */
+	var colRanks = document.createElement('div');
+	colRanks.setAttribute('class','col col-25');
+
+	var ranks = document.createElement('div');
+	ranks.setAttribute('class','box-ranks');
+	colRanks.appendChild(ranks);
+
+	/* views */
+	var colViews = document.createElement('div');
+	colViews.setAttribute('class','col col-25');
+
+	var views = document.createElement('div');
+	views.setAttribute('class','box-views');
+	colViews.appendChild(views);
+
+	/* append to bottom row */
+	lowerRow.appendChild(colCreated);
+	lowerRow.appendChild(colEdited);
+	lowerRow.appendChild(colRanks);
+	lowerRow.appendChild(colViews);
+
+	/* column for upper and lower rows */
+	var colRightSection = document.createElement('div');
+	colRightSection.setAttribute('class','col col-65');
+
+	/* append upper and lower rows to right section */
+	colRightSection.appendChild(upperRow);
+	colRightSection.appendChild(lowerRow);
+
+	/* append left and right sections to bottom row */
+	bottomRow.appendChild(colImage);
+	bottomRow.appendChild(colRightSection);
+
+	/* append rows to div & set visibility */
+	box.appendChild(topRow);
+	box.appendChild(bottomRow);
+
+	return box;
+}
+
+/*
+	Function: dashBookmarks
+
+	Create dash for viewing users bookmarks.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, bookmarks dash
+*/
+function dashBookmarks() {
+	/* create header */
+	var rowHeader = document.createElement('div');
+	rowHeader.setAttribute('class','row');
+
+	var colHeader = document.createElement('div');
+	colHeader.setAttribute('class','col col-100');
+
+	var dashHeader = document.createElement('h2');
+	dashHeader.innerHTML = "Bookmarks";
+
+	colHeader.appendChild(dashHeader);
+	rowHeader.appendChild(colHeader);
+
+	/* append the page links to a form div */
+	var dashBookmarks = document.createElement('div');
+	dashBookmarks.setAttribute('class','bookmarks-box');
+	dashBookmarks.appendChild(rowHeader);
+
+	return dashBookmarks;
 }
 
 /*
@@ -279,7 +561,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			var categoryCol = document.createElement('div');
 			categoryCol.setAttribute('class','col col-100');
 
-			var categoryUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category'));
+			var categoryUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category'));
 			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>',categoryUrl,'none');
 
 			categoryCol.appendChild(categoryBtn);
@@ -300,7 +582,7 @@ function dashExplore(exploreHeader,linkRoute) {
 				var currentTopicCol = document.createElement('div');
 				currentTopicCol.setAttribute('class','col col-100');
 
-				var topicUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
+				var topicUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
 
 				var currentTopicBtn = btnLink(currentTopic,topicUrl,'none');
 
@@ -357,7 +639,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			subjectCol.setAttribute('class','col col-100');
 			subjectCol.setAttribute('style','border-bottom-color:black;border-bottom-width:1px;');
 
-			var subjectUrl = createURL('/' + linkRoute + '?subject=' + this.getAttribute('data-subject'));
+			var subjectUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject'));
 			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>',subjectUrl,'none');
 			subjectCol.appendChild(subjectBtn);
 
@@ -399,57 +681,120 @@ function dashExplore(exploreHeader,linkRoute) {
 }
 
 /*
-	Function: formLogin
+	Function: barFilter
 
-	Create a log in form. This returns an html node containing the form. On submit, the form calls login()
+	Make the form for filtering content searches.
 
 	Parameters:
 
 		none
 
-	Form:
-
-		username-login - the user name
-		password-login - the password
-
 	Returns:
 
-		success - html node, log in form
+		success - html node, filter form
 */
-function formLogin() {
+function barFilter() {
+	var row = document.createElement('div');
+	row.setAttribute('class','row');
 
-	/* create parent <div> */
-	var login = document.createElement('div');
-	login.setAttribute('class','form');
-	login.setAttribute('id','form-login');
+	var colRating = document.createElement('div');
+	colRating.setAttribute('class','col col-15');
 
-	/* create username text <input> */
-	var username = document.createElement('input');
-	username.setAttribute('type','text');
-	username.setAttribute('name','username-login');
-	username.setAttribute('maxlength','50');
-	username.setAttribute('placeholder','User Name');
+	var minRating = document.createElement('input');
+	minRating.setAttribute('id','min-rating');
+	minRating.setAttribute('placeholder','min rating');
 
-	/* create password <input> */
-	var password = document.createElement('input');
-	password.setAttribute('type','password');
-	password.setAttribute('name','password-login');
-	password.setAttribute('maxlength','32');
-	password.setAttribute('placeholder','Password');
+	var maxRating = document.createElement('input');
+	maxRating.setAttribute('id','max-rating');
+	maxRating.setAttribute('placeholder','max rating');
 
-	/* create form submit <button> */
-	var submit = document.createElement('button');
-	submit.setAttribute('type','button');
-	submit.setAttribute('name','submit-login');
-	submit.setAttribute('onclick','login();');
-	submit.innerHTML = "Log In";
+	colRating.appendChild(minRating);
+	colRating.appendChild(maxRating);
 
-	/* append the elements to the parent <div> */
-	login.appendChild(username);
-	login.appendChild(password);
-	login.appendChild(submit);
+	var colRanks = document.createElement('div');
+	colRanks.setAttribute('class','col col-20');
 
-	return login;
+	var minRanks = document.createElement('input');
+	minRanks.setAttribute('id','min-ranks');
+	minRanks.setAttribute('placeholder','min ranks');
+
+	var maxRanks = document.createElement('input');
+	maxRanks.setAttribute('id','max-ranks');
+	maxRanks.setAttribute('placeholder','max ranks');
+
+	colRanks.appendChild(minRanks);
+	colRanks.appendChild(maxRanks);
+
+	var colViews = document.createElement('div');
+	colViews.setAttribute('class','col col-20');
+
+	var minViews = document.createElement('input');
+	minViews.setAttribute('id','min-views');
+	minViews.setAttribute('placeholder','min views');
+
+	var maxViews = document.createElement('input');
+	maxViews.setAttribute('id','max-views');
+	maxViews.setAttribute('placeholder','max views');
+
+	colViews.appendChild(minViews);
+	colViews.appendChild(maxViews);
+
+	var colDate = document.createElement('div');
+	colDate.setAttribute('class','col col-15');
+
+	var minDate = document.createElement('input');
+	minDate.setAttribute('id','min-date');
+	minDate.setAttribute('placeholder','min date');
+
+	var maxDate = document.createElement('input');
+	maxDate.setAttribute('id','max-date');
+	maxDate.setAttribute('placeholder','max date');
+
+	colDate.appendChild(minDate);
+	colDate.appendChild(maxDate);
+
+	var colFilterBtn = document.createElement('div');
+	colFilterBtn.setAttribute('class','col col-15');
+
+	var btnFilterApply = btnSubmit('Apply Filter','','none');
+	btnFilterApply.className += " savebar";
+	colFilterBtn.appendChild(btnFilterApply);
+
+	var colExpand = document.createElement('div');
+	colExpand.setAttribute('class','col col-15');
+
+	function expandAll() {
+		var boxes = document.getElementsByClassName('content-box');
+		var count = boxes.length;
+		if(this.innerHTML === "Expand All") {
+			for(var i = 0; i < count; i++) {
+				boxes[i].children[1].setAttribute('style','display:block;visibility:visible;');
+			}
+			this.innerHTML = "Collapse All";
+		} else {
+			for(var j = 0; j < count; j++) {
+				boxes[j].children[1].setAttribute('style','display:none;visibility:hidden;');
+			}
+			this.innerHTML = "Expand All";
+		}
+	}
+
+	var btnExpandAll = btnSubmit('Expand All',expandAll,'none');
+	btnExpandAll.className += " savebar";
+	colExpand.appendChild(btnExpandAll);
+
+	row.appendChild(colRating);
+	row.appendChild(colRanks);
+	row.appendChild(colViews);
+	row.appendChild(colDate);
+	row.appendChild(colFilterBtn);
+	row.appendChild(colExpand);
+
+	var filter = document.createElement('div');
+	filter.setAttribute('class','filter-bar');
+	filter.appendChild(row);
+
+	return filter;
 }
 
 /*
@@ -460,25 +805,43 @@ function formLogin() {
 	Parameters:
 
 		type - string, the name of the type of content page to create.
+		data - string, comma-separated like so: id,name,id,name etc.
 
 	Returns:
 
 		success - html node, user content creation form
 */
 function formGenerateUserContent(type,data) {
+	var fullCapital;
 	var capital;
 	var lower;
 	var deleteFunc;
 	if(type === 'blockpage') {
+		fullCapital = 'Pages';
 		capital = 'Page';
 		lower = 'page';
 		deleteFunc = deletePage;
 	} else if(type === 'lg') {
+		fullCapital = 'Learning Guides';
 		capital = 'LG';
 		lower = 'lg';
 		deleteFunc = deleteLG;
 	}
 
+	/* create header */
+	var rowHeader = document.createElement('div');
+	rowHeader.setAttribute('class','row');
+
+	var colHeader = document.createElement('div');
+	colHeader.setAttribute('class','col col-100');
+
+	var formHeader = document.createElement('h2');
+	formHeader.innerHTML = fullCapital;
+
+	colHeader.appendChild(formHeader);
+	rowHeader.appendChild(colHeader);
+
+	/* create new page form */
 	var row_Content = document.createElement("div");
 	row_Content.setAttribute("class","row");
 
@@ -494,10 +857,11 @@ function formGenerateUserContent(type,data) {
 	/* input element is for page name */
 	var title = document.createElement('input');
 	title.setAttribute('type','text');
-	title.setAttribute('class','text-input');
+	title.setAttribute('class','log-input');
 	title.setAttribute('name',lower + 'name-create');
 	title.setAttribute('maxlength','50');
-	title.setAttribute('placeholder',capital + ' Name');
+	title.setAttribute('placeholder','New ' + capital + ' Name');
+	title.setAttribute('style','border-left-width:0px;');
 
 	/* submit button that calls createpage() */
 	var submit = btnSubmit("Create " + capital,"create" + lower + "()","green");
@@ -505,9 +869,6 @@ function formGenerateUserContent(type,data) {
 	/* append elements to row */
 	colLeft_Content.appendChild(title);
 	colRight_Content.appendChild(submit);
-
-	/* get the page data from comma-separated string */
-	var dataarray = data.split(',');
 
 	/* row 3 */
 	var row_dataBox = document.createElement("div");
@@ -531,6 +892,9 @@ function formGenerateUserContent(type,data) {
 	/* append elements to datadiv */
 	datadiv.appendChild(selectBox);
 
+	/* get the page data from comma-separated string */
+	var dataarray = data.split(',');
+
 	/* get number of pages, each page has two data (link,name), so 1 is empty */
 	var count;
 	if(dataarray.length === 1) {
@@ -538,16 +902,40 @@ function formGenerateUserContent(type,data) {
 	} else {
 		count = dataarray.length / 2;
 	}
+	var origCount = count;
+
+	/* sort the data by name */
+	var i = 0;
+	var idNameArray = [];
+	while(count > 0) {
+		var currentPage = {};
+		currentPage['id'] = dataarray[i];
+		currentPage['name'] = dataarray[i + 1];
+		idNameArray.push(currentPage);
+		i += 2;
+		count--;
+	}
+
+	idNameArray.sort(function(a,b) {
+		if(a['name'] < b['name']) {
+			return -1;
+		} else if(a['name'] > b['name']) {
+			return 1;
+		} else {
+			return 0;
+		}
+	});
 
 	/* create page links and append to data div */
-	var i = 0;
+	i = 0;
+	count = origCount;
 	while(count > 0) {
 		var option = document.createElement('option');
-		option.setAttribute('value',dataarray[i]);
-		option.innerHTML = dataarray[i + 1];
+		option.setAttribute('value',idNameArray[i]['id']);
+		option.innerHTML = idNameArray[i]['name'];
 		selectBox.appendChild(option);
 
-		i += 2;
+		i++;
 		count--;
 	}
 
@@ -609,6 +997,7 @@ function formGenerateUserContent(type,data) {
 	var generateUserContentDiv = document.createElement('div');
 	generateUserContentDiv.setAttribute('class','page-gen');
 	generateUserContentDiv.setAttribute('id',type + '-gen');
+	generateUserContentDiv.appendChild(rowHeader);
 	generateUserContentDiv.appendChild(row_Content);
 	generateUserContentDiv.appendChild(row_dataBox);
 	generateUserContentDiv.appendChild(row_dataSubmitButtons);
@@ -644,61 +1033,89 @@ function formSignUp() {
 	signup.setAttribute('class','form');
 	signup.setAttribute('id','form-signup');
 
+	/* username column */
+	var colUsername = document.createElement('div');
+	colUsername.setAttribute('class','col col-17');
+
 	/* create username text <input> */
 	var username = document.createElement('input');
+	username.setAttribute('class','log-input');
 	username.setAttribute('type','text');
 	username.setAttribute('name','username-signup');
 	username.setAttribute('maxlength','50');
 	username.setAttribute('placeholder','User Name');
+	username.setAttribute('style','border-left-width:0px;');
+	colUsername.appendChild(username);
+
+	/* email column */
+	var colEmail = document.createElement('div');
+	colEmail.setAttribute('class','col col-17');
 
 	/* create email text <input> */
 	var email = document.createElement('input');
+	email.setAttribute('class','log-input');
 	email.setAttribute('type','text');
 	email.setAttribute('name','email-signup');
 	email.setAttribute('maxlength','50');
 	email.setAttribute('placeholder','Email - optional');
+	colEmail.appendChild(email);
+
+	/* phone column */
+	var colPhone = document.createElement('div');
+	colPhone.setAttribute('class','col col-17');
 
 	/* create phone text <input> */
 	var phone = document.createElement('input');
+	phone.setAttribute('class','log-input');
 	phone.setAttribute('type','text');
 	phone.setAttribute('name','phone-signup');
-	phone.setAttribute('maxlength','15');
+	phone.setAttribute('maxlength','17');
 	phone.setAttribute('placeholder','Phone - optional');
+	colPhone.appendChild(phone);
+
+	/* password column */
+	var colPassword = document.createElement('div');
+	colPassword.setAttribute('class','col col-17');
 
 	/* create password <input> */
 	var password = document.createElement('input');
+	password.setAttribute('class','log-input');
 	password.setAttribute('type','password');
 	password.setAttribute('name','password-signup');
 	password.setAttribute('maxlength','32');
 	password.setAttribute('placeholder','Password');
+	colPassword.appendChild(password);
+
+	/* password check column */
+	var colPasswordc = document.createElement('div');
+	colPasswordc.setAttribute('class','col col-17');
 
 	/* create another password <input> */
 	var passwordc = document.createElement('input');
+	passwordc.setAttribute('class','log-input');
 	passwordc.setAttribute('type','password');
 	passwordc.setAttribute('name','password-signup-check');
 	passwordc.setAttribute('maxlength','32');
 	passwordc.setAttribute('placeholder','Repeat Password');
+	colPasswordc.appendChild(passwordc);
+
+	/* submit button column */
+	var colSubmit = document.createElement('div');
+	colSubmit.setAttribute('class','col col-15');
 
 	/* create form submit <button> */
-	var submit = document.createElement('button');
-	submit.setAttribute('type','button');
+	var submit = btnSubmit('Sign Up','signup()','green');
 	submit.setAttribute('value','submit-signup');
-	submit.setAttribute('onclick','signup();');
-	submit.innerHTML = "Sign Up";
-
-	/* create error <div> for displaying errors */
-	var error = document.createElement('div');
-	error.setAttribute('class','error');
-	error.setAttribute('id','error-signup');
+	submit.setAttribute('style','border-color:black;border-left-width:1px;');
+	colSubmit.appendChild(submit);
 
 	/* append the elements to the parent <div> */
-	signup.appendChild(username);
-	signup.appendChild(email);
-	signup.appendChild(phone);
-	signup.appendChild(password);
-	signup.appendChild(passwordc);
-	signup.appendChild(submit);
-	signup.appendChild(error);
+	signup.appendChild(colUsername);
+	signup.appendChild(colEmail);
+	signup.appendChild(colPhone);
+	signup.appendChild(colPassword);
+	signup.appendChild(colPasswordc);
+	signup.appendChild(colSubmit);
 
 	return signup;
 }
@@ -721,7 +1138,7 @@ function formSignUp() {
 */
 function rowProfileCheck(check,field,placeholders,description) {
 	var row = document.createElement("div");
-	row.setAttribute("class","row");
+	row.setAttribute("class","row profile-row");
 
 	var colLeft = document.createElement("div");
 	colLeft.setAttribute("class","col col-15");
@@ -734,6 +1151,11 @@ function rowProfileCheck(check,field,placeholders,description) {
 
 	var colRight = document.createElement("div");
 	colRight.setAttribute("class","col col-15");
+
+	/* title */
+	var profileTitle = document.createElement('div');
+	profileTitle.setAttribute('class','profile-title');
+	profileTitle.innerHTML = description;
 
 	/* first input */
 	var first = document.createElement('input');
@@ -759,7 +1181,7 @@ function rowProfileCheck(check,field,placeholders,description) {
 	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + check + '","' + field + '"])');
 	saveBtn.innerHTML = "Save";
 
-	colLeft.innerHTML = description;
+	colLeft.appendChild(profileTitle);
 	colMiddleLeft.appendChild(first);
 	colMiddleRight.appendChild(second);
 	colRight.appendChild(saveBtn);
@@ -790,7 +1212,7 @@ function rowProfileCheck(check,field,placeholders,description) {
 function rowProfileSingle(field,description,data) {
 
 	var row = document.createElement("div");
-	row.setAttribute("class","row");
+	row.setAttribute("class","row profile-row");
 
 	var colLeft = document.createElement("div");
 	colLeft.setAttribute("class","col col-15");
@@ -800,6 +1222,11 @@ function rowProfileSingle(field,description,data) {
 
 	var colRight = document.createElement("div");
 	colRight.setAttribute("class","col col-15");
+
+	/* title */
+	var profileTitle = document.createElement('div');
+	profileTitle.setAttribute('class','profile-title');
+	profileTitle.innerHTML = description;
 
 	/* username input */
 	var fieldInput = document.createElement('input');
@@ -817,7 +1244,7 @@ function rowProfileSingle(field,description,data) {
 	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
 	saveBtn.innerHTML = "Save";
 
-	colLeft.innerHTML = description;
+	colLeft.appendChild(profileTitle);
 	colMiddle.appendChild(fieldInput);
 	colRight.appendChild(saveBtn);
 
@@ -836,6 +1263,61 @@ function rowProfileSingle(field,description,data) {
 ***/
 
 // <<<code>>>
+
+/*
+	Function: pageExplore
+
+	Displays the page for exploring content.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		nothing - *
+*/
+function pageExplore(logstatus,data) {
+	var main = document.getElementById('content');
+
+	/* create and append menu based on log status */
+	var menu;
+	if(logstatus === true) {
+		menu = barMenu();
+	} else {
+		menu = barLog();
+	}
+	main.appendChild(menu);
+
+	/* create filter menu */
+	var filter = barFilter();
+	main.appendChild(filter);
+
+	/* create box template */
+	var box = boxCreate();
+
+	/* loop through links & insert data into boxes */
+	var index = 0;
+	while(index < 10) {
+		var newBox = box.cloneNode(true);
+		newBox.setAttribute('id',index);
+
+		newBox.querySelector(".box-title").innerHTML = "<a href=''>Metric Modulation In Early 90's Heavy Metal</a>";
+		newBox.querySelector(".box-author").innerHTML = "<a href=''>author</a>";
+		var percentage = 65;
+		newBox.querySelector(".rating-bar").className += " w" + (percentage - (percentage % 10));
+		newBox.querySelector(".rating-bar").style = "width:" + percentage + "%";
+		newBox.querySelector(".star").checked = false;
+		newBox.querySelector(".box-image").innerHTML = "Image";
+		newBox.querySelector(".box-blurb").innerHTML = "Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest!";
+		newBox.querySelector(".box-created").innerHTML = "created: 00/00/00";
+		newBox.querySelector(".box-edited").innerHTML = "edited: 00/00/00";
+		newBox.querySelector(".box-ranks").innerHTML = "ranks: #########";
+		newBox.querySelector(".box-views").innerHTML = "views: #########";
+		main.appendChild(newBox);
+		index++;
+	}
+}
 
 /*
 	Function: pageHome
@@ -858,7 +1340,9 @@ function pageHome() {
 	var main = document.getElementById('content');
 	main.appendChild(menu);
 
-	main.appendChild(document.createElement('hr')); /// remove this later, when you style
+	/* create bookmarks dash */
+	var bookmarks = dashBookmarks();
+	main.appendChild(bookmarks);
 
 	/* fetch user pages */
 	var promiseBP = getPages();
@@ -870,8 +1354,6 @@ function pageHome() {
 		/* block page create form */
 		var row_PageCreate = formGenerateUserContent('blockpage',values[0]);
 		main.appendChild(row_PageCreate);
-
-		main.appendChild(document.createElement('hr')); /// remove this later, when you style
 
 		/* learning guide create form */
 		var row_LgCreate = formGenerateUserContent('lg',values[1]);
@@ -912,11 +1394,11 @@ function pageLanding(logstatus) {
 	main.appendChild(search);
 
 	/* pages div */
-	var explorePages = dashExplore('Pages','explorePages');
+	var explorePages = dashExplore('Pages','explore?content=bp');
 	main.appendChild(explorePages);
 
 	/* learning guide div */
-	var exploreLGs = dashExplore('Learning Guides','exploreLGs');
+	var exploreLGs = dashExplore('Learning Guides','explore?content=lg');
 	main.appendChild(exploreLGs);
 }
 
@@ -954,7 +1436,7 @@ function pageProfile(profiledata) {
 
 	/* create a div to hold the page links */
 	var profilediv = document.createElement('div');
-	profilediv.setAttribute('class','profilelist');
+	profilediv.setAttribute('class','profile-list');
 
 	/* make mandatory profile rows */
 	var row_Username = rowProfileSingle("username","Username:",profileinfo.username);

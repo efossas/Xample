@@ -19,7 +19,7 @@ rsync -a -v $REPO/xample/loads/* $TEST/xample/loads/
 rsync -a -v $REPO/xample/routes/* $TEST/xample/routes/
 
 # convert sass to css
-sass --sourcemap=none --update $REPO/xample/public/css/:$TEST/xample/public/css/
+sass --no-cache --sourcemap=none --update $REPO/xample/public/css/:$TEST/xample/public/css/
 
 # copy frontend files
 rsync -a -v $REPO/xample/public/css/*.css $TEST/xample/public/css/

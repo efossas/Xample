@@ -41,6 +41,7 @@ var globalScope = {};
 	global saveBlocks: true
 	global parseBlock: true
 	global deparseBlock: true
+	global barPageSettings: true
 */
 /* list any objects js dependencies */
 /*
@@ -908,208 +909,6 @@ function loadWhichPage(pid,which) {
 // <<<fold>>>
 
 /***
-	Section: Display Functions
-	These are functions to create, remove, or show page elements (except for blocks).
-***/
-
-// <<<code>>>
-
-/*
-	Function: formDropDownsSCT
-
-	Creates the form for selecting Subject, Category, Topic.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - html node, dropdowns.
-*/
-function formDropDownsSCT() {
-	/* used for making the default first selection grey in the dropdowns */
-	function greyFirstSelect(selectTag) {
-		if(selectTag.selectedIndex === 0) {
-			selectTag.style = "color: grey";
-		} else {
-			selectTag.style = "color: black";
-		}
-	}
-
-	/* this function will be called onchange of subject drop down */
-	function loadCategories() {
-
-		/* get the selected subject */
-		var subject = this.options[this.selectedIndex].value;
-
-		/* get & empty the category selection element */
-		var listCategories = document.getElementById("select-category");
-		emptyDiv(listCategories);
-
-		/* create the default first selection */
-		var optionCategory = document.createElement('option');
-		optionCategory.setAttribute("value","");
-		optionCategory.innerHTML = "choose category";
-		listCategories.appendChild(optionCategory);
-
-		/* get & empty the topic selection element */
-		var listTopics = document.getElementById("select-topic");
-		emptyDiv(listTopics);
-
-		/* create the default first selection */
-		var optionTopic = document.createElement('option');
-		optionTopic.setAttribute("value","");
-		optionTopic.innerHTML = "choose topic";
-		listTopics.appendChild(optionTopic);
-
-		if(subject !== "") {
-
-			/* get the categories for that subject */
-			var categories = Object.keys(globalScope.subjects[subject]);
-			var count = categories.length;
-
-			/* fill the selection element with categories */
-			for(var i = 0; i < count; i++) {
-				optionCategory = document.createElement('option');
-				optionCategory.setAttribute('value',categories[i]);
-				optionCategory.innerHTML = categories[i];
-				listCategories.appendChild(optionCategory);
-			}
-
-			/* reset the selection to "choose category" */
-			listCategories.selectedIndex = 0;
-		}
-
-		/* grey the first selected */
-		greyFirstSelect(this);
-		greyFirstSelect(listCategories);
-	}
-
-	/* this function will be called onchange of categories dropdown */
-	function loadTopics() {
-
-		/* get the selected category */
-		var category = this.options[this.selectedIndex].value;
-
-		/* get the selected subject using id */
-		var selectSubject = document.getElementById("select-subject");
-		var subject = selectSubject.options[selectSubject.selectedIndex].value;
-
-		/* get & empty the topic selection element */
-		var listTopics = document.getElementById("select-topic");
-		emptyDiv(listTopics);
-
-		/* create the default first option */
-		var optionTopic = document.createElement('option');
-		optionTopic.innerHTML = "choose topic";
-		optionTopic.setAttribute("value","");
-		listTopics.appendChild(optionTopic);
-
-		/* just in case subject hasn't been selected */
-		if(subject !== "" && category !== "") {
-
-			/* get the topics for the category */
-			var topics = globalScope.subjects[subject][category];
-			var count = topics.length;
-
-			/* fill the selection element with topics */
-			for(var i = 0; i < count; i++) {
-				optionTopic = document.createElement('option');
-				optionTopic.setAttribute('value',topics[i]);
-				optionTopic.innerHTML = topics[i];
-				listTopics.appendChild(optionTopic);
-			}
-
-			/* reset the selection to "choose topic" */
-			listTopics.selectedIndex = 0;
-		}
-
-		/* grey the first selected */
-		greyFirstSelect(this);
-		greyFirstSelect(listTopics);
-	}
-
-	var row_SubjectSelect = document.createElement("div");
-	row_SubjectSelect.setAttribute("class","row");
-
-	var colLeft_SubjectSelect = document.createElement("div");
-	colLeft_SubjectSelect.setAttribute("class","col col-33");
-
-	var colMiddle_SubjectSelect = document.createElement("div");
-	colMiddle_SubjectSelect.setAttribute("class","col col-33");
-
-	var colRight_SubjectSelect = document.createElement("div");
-	colRight_SubjectSelect.setAttribute("class","col col-33");
-
-	row_SubjectSelect.appendChild(colLeft_SubjectSelect);
-	row_SubjectSelect.appendChild(colMiddle_SubjectSelect);
-	row_SubjectSelect.appendChild(colRight_SubjectSelect);
-
-	/* create select tags */
-	var listSubjects = document.createElement('select');
-	listSubjects.setAttribute("id","select-subject");
-	listSubjects.onchange = loadCategories;
-	listSubjects.style = "color: grey";
-
-	var listCategories = document.createElement('select');
-	listCategories.setAttribute("id","select-category");
-	listCategories.onchange = loadTopics;
-	listCategories.style = "color: grey";
-
-	var listTopics = document.createElement('select');
-	listTopics.setAttribute("id","select-topic");
-	listTopics.setAttribute("onchange","greyFirstSelect(this);");
-	listTopics.style = "color: grey";
-
-	/* get subjects for select topic list */
-	var subjectsPromise = getSubjects();
-
-	subjectsPromise.then(function(success) {
-		var subjectsData = JSON.parse(success);
-		globalScope.subjects = subjectsData;
-
-		/* first box - subject names */
-		var subjectsNames = Object.keys(subjectsData);
-		var subjectsCount = subjectsNames.length;
-
-		var optionSubject = document.createElement('option');
-		optionSubject.innerHTML = "choose subject";
-		optionSubject.setAttribute("value","");
-		listSubjects.appendChild(optionSubject);
-
-		for(var i = 0; i < subjectsCount; i++) {
-			optionSubject = document.createElement('option');
-			optionSubject.setAttribute('value',subjectsNames[i]);
-			optionSubject.innerHTML = subjectsNames[i];
-			listSubjects.appendChild(optionSubject);
-		}
-
-		/* second box - category names */
-		var optionCategory = document.createElement('option');
-		optionCategory.innerHTML = "choose category";
-		listCategories.appendChild(optionCategory);
-
-		/* third box - topic names */
-		var optionTopic = document.createElement('option');
-		optionTopic.innerHTML = "choose topic";
-		listTopics.appendChild(optionTopic);
-
-	},function(error) {
-		///journal console.log("getSubjects promise error: " + error);
-	});
-
-	/* append lists to columns */
-	colLeft_SubjectSelect.appendChild(listSubjects);
-	colMiddle_SubjectSelect.appendChild(listCategories);
-	colRight_SubjectSelect.appendChild(listTopics);
-
-	return row_SubjectSelect;
-}
-
-// <<<fold>>>
-
-/***
 	Section: Page Functions
 	These are the only functions called directly by back-end to start a page.
 ***/
@@ -1195,23 +994,22 @@ function pageChoose(pid) {
 
 	Parameters:
 
-		pagedata - string, page data is received in the format "pid,pagename,(mediaType,mediaContent,)"
+		aid - number, the author id; which is the uid of the creator of the block page
+		pagedata - string, page data is received in the format "type,content,type,content,etc."
+		pageinfo - json string, page info is what goes into the settings
 
 	Returns:
 
 		nothing - *
 */
-function pageEdit(pagedata) {
+function pageEdit(aid,pagedata,pageinfo) {
 
 	/* grab the main div */
 	var main = document.getElementById('content');
 
-	/* block array -> pid,pagename,mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
-	var blockarray = pagedata.split(',');
-
 	/* hidden pid & title */
-	var pid = blockarray[0];
-	var pagename = blockarray[1];
+	var pid = pageinfo.pid;
+	var pagename = pageinfo.pagename;
 
 	/*** MENU & STATUS BAR ***/
 
@@ -1219,43 +1017,27 @@ function pageEdit(pagedata) {
 	var menu = barMenu();
 	var status = barStatus(pid);
 
-	/* create settings div for submenu */
-	var rowSettings = document.createElement("div");
-	rowSettings.setAttribute("class","row");
-
-	var colSettings = document.createElement("div");
-	colSettings.setAttribute("class","col col-100");
-
-	var pageSettings = document.createElement('div');
-	pageSettings.innerHTML = "Hi There";
-
-	/* append page settings to column,row,main */
-	colSettings.appendChild(pageSettings);
-	rowSettings.appendChild(colSettings);
+	var pageSettings = barPageSettings(aid,pageinfo);
 
 	/* create submenu */
-	var submenu = barSubMenu('Page Settings',rowSettings);
+	var submenu = barSubMenu('Page Settings',pageSettings);
 
 	/* append menu & status to main */
 	main.appendChild(menu);
 	main.appendChild(status);
 	main.appendChild(submenu);
 
-	/// PAGE OPTIONS NEED TO BE ADDED HERE
-
-	/* page title input */
-	var title = document.createElement('input');
-	title.setAttribute('type','text');
-	title.setAttribute('name','pagename');
-	title.setAttribute('class','page-title');
-	title.setAttribute('maxlength','50');
-	title.setAttribute('value',pagename);
-	title.setAttribute('style','display: none;');
-	menu.appendChild(title);
-
 	/*** BLOCKS ***/
 
-	blockEngineStart('content',x,["bp",pid],blockarray.splice(2,blockarray.length));
+	/* block array -> mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
+	var blockarray;
+	if(pagedata !== "") {
+		blockarray = pagedata.split(',');
+	} else {
+		blockarray = [];
+	}
+
+	blockEngineStart('content',x,["bp",pid],blockarray);
 
 	/*** AFTER STUFF ***/
 

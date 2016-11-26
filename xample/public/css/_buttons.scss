@@ -1,0 +1,103 @@
+/*** Buttons ***/
+
+/* Submit Button */
+.menubtn {
+	color: black;
+	border: 0px solid transparent;
+	border-radius: 0px;
+
+	padding: 6px 12px 6px 12px;
+	margin: 0;
+	line-height: 20px;
+	text-align: center;
+
+	cursor: pointer;
+	transition: background-color .5s;
+	touch-action: manipulation;
+
+	font-size: 1em;
+	font-weight: 400;
+}
+
+/* Link Button */
+a.btn {
+	color: black;
+	border: 0px solid transparent;
+
+	margin: 0;
+	padding: 6px 0px 6px 0px;
+	line-height: 20px;
+	text-align: center;
+
+	cursor: pointer;
+	transition: background-color .5s;
+	touch-action: manipulation;
+
+	font-size: 1em;
+	font-weight: 400;
+
+	display:inline-block;
+	width: 100%;
+
+    text-decoration: none;
+}
+
+a.inbtn {
+	color: black;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	margin: 0;
+	padding: 7px 0px 7px 0px;
+
+	cursor: pointer;
+	transition: background-color .5s;
+	touch-action: manipulation;
+
+	text-align: center;
+	font-size: 1em;
+	font-weight: 400;
+
+	display:inline-block;
+	width: 100%;
+	box-sizing: border-box;
+
+    text-decoration: none;
+}
+
+a.savebar {
+	padding: 19px 0px 19px 0px;
+}
+
+/* Colors */
+.none-btn {
+	width: 100%;
+	background-color: transparent;
+}
+
+.none-btn:hover {
+	background-color: rgba(0, 0, 0, 0.2);
+}
+
+.green-btn {
+	width: 100%;
+	background-color: #00ffe1;
+}
+
+.green-btn:hover {
+	background-color: #00a895;
+}
+
+.red-btn {
+	width: 100%;
+	background-color: #ff1111;
+}
+
+.red-btn:hover {
+	background-color: #d31e1e;
+}
+
+/* Mobile Size */
+@media screen and (max-width: $site-width) {
+    a.btn { width: 100%; }
+}

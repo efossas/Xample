@@ -47,8 +47,57 @@ File: Xample Overview  (manual_docs/manual.txt)
 
 Group: Files  {
 
-   File: Navigation  (public_html/js/navigation.js)
-   File: Page  (xample/page.js)
+   File: File Media  (xample/filemedia.js)
+   File: Helper  (xample/helper.js)
+
+   Group: Loads  {
+
+      File: Edit Learning Guide  (xample/loads/editlg.js)
+      File: Edit Page  (xample/loads/explore.js)
+      File: Edit Page  (xample/loads/editpage.js)
+      File: Home  (xample/loads/home.js)
+      File: Loader  (xample/loads/loader.js)
+      File: Not Found  (xample/loads/notfound.js)
+      File: Page  (xample/loads/page.js)
+      File: Profile  (xample/loads/profile.js)
+      File: Start  (xample/loads/start.js)
+      }  # Group: Loads
+
+   File: Page  (xample/rts.js)
+
+   Group: Public  {
+
+      File: Block Engine  (xample/public/js/bengine.js)
+      File: Block Page  (xample/public/js/bp.js)
+      File: Learning Guide  (xample/public/js/lg.js)
+      File: Navigation  (xample/public/js/nav.js)
+      File: Omni  (xample/public/js/omni.js)
+      }  # Group: Public
+
+   File: QueryDB  (xample/querydb.js)
+
+   Group: Routes  {
+
+      File: Create Page  (xample/routes/createlg.js)
+      File: Create Page  (xample/routes/createpage.js)
+      File: Delete Page  (xample/routes/deletepage.js)
+      File: Delete Page  (xample/routes/deletelg.js)
+      File: Get Learning Guides  (xample/routes/getlgs.js)
+      File: Get Pages  (xample/routes/getpages.js)
+      File: Get Profile Data  (xample/routes/getprofiledata.js)
+      File: Get Subjects  (xample/routes/getsubjects.js)
+      File: journalerror  (xample/routes/journalerror.js)
+      File: Log In  (xample/routes/login.js)
+      File: Log Out  (xample/routes/logout.js)
+      File: Revert  (xample/routes/revertblocks.js)
+      File: Save Blocks  (xample/routes/saveblocks.js)
+      File: Save Page Settings  (xample/routes/savepagesettings.js)
+      File: Save Profile  (xample/routes/saveprofile.js)
+      File: Sign Up  (xample/routes/signup.js)
+      File: Upload Media  (xample/routes/uploadmedia.js)
+      }  # Group: Routes
+
+   File: Stats  (xample/analytics.js)
    File: Xample  (xample/xample.js)
    }  # Group: Files
 

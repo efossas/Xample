@@ -68,52 +68,48 @@ exports.editpage = function(request,response) {
                     /* load the edit page with the page data */
                     loader.loadBlockPage(request,response,"<script>pageChoose('" + pid + "');</script>");
                 } else {
-					var qry = "SELECT pagename FROM p_" + uid + " WHERE pid=" + pid;
 
-					connection.query(qry,function(err,rows,fields) {
-						if(err) {
+					var promiseSettings = querydb.getPageSettings(connection,uid,pid);
+
+					promiseSettings.then(function(pageSettings) {
+						if(pageSettings === -1) {
 							response.end('err');
-							analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
+							analytics.journal(true,201,'getPageSettings()',uid,analytics.__line,__function,__filename);
 						} else {
-							/* sql query is undefined if a user tries to edit page with invalid pid */
-							if(typeof rows[0] === 'undefined') {
-								loader.absentRequest(request,response);
-							} else {
-								var pagename = rows[0].pagename;
+							var pageinfo = JSON.stringify(pageSettings);
 
-								var qry = "SELECT type,content FROM " + tid + uid + "_" + pid;
+							var qry = "SELECT type,content FROM " + tid + uid + "_" + pid;
 
-								connection.query(qry,function(err,rows,fields) {
-									if(err) {
-										response.end('err');
-										analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
-									} else {
-										var pagedata = pid + "," + pagename;
+							connection.query(qry,function(err,rows,fields) {
+								if(err) {
+									response.end('err');
+									analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
+								} else {
+									var pagedata = "";
 
-										/* i is for accessing row array, j is for keeping track of rows left to parse */
-										var i = 0;
-										var j = rows.length;
+									/* i is for accessing row array, j is for keeping track of rows left to parse */
+									var i = 0;
+									var j = rows.length;
 
-										/* append commas to each row except for the last one */
-										if(j > 0) {
-											pagedata += ",";
-										}
-										while(j > 1) {
-											pagedata += rows[i].type + "," + rows[i].content + ",";
-											i++;
-											j--;
-										}
-										if(j === 1) {
-											pagedata += rows[i].type + "," + rows[i].content;
-										}
-
-										/* load the edit page with the page data */
-										loader.loadBlockPage(request,response,"<script>pageEdit('" + pagedata + "');</script>");
-										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+									/* append commas to each row except for the last one */
+									while(j > 1) {
+										pagedata += rows[i].type + "," + rows[i].content + ",";
+										i++;
+										j--;
 									}
-								});
-							}
+									if(j === 1) {
+										pagedata += rows[i].type + "," + rows[i].content;
+									}
+
+									/* load the edit page with the page data */
+									loader.loadBlockPage(request,response,"<script>pageEdit('" + uid + "','" + pagedata + "'," + pageinfo + ");</script>");
+									analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+								}
+							});
 						}
+					},function(err) {
+						response.end('err');
+						analytics.journal(true,203,err,uid,analytics.__line,__function,__filename);
 					});
 					connection.release();
 				}
