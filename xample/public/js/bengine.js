@@ -29,6 +29,7 @@ var globalBlockEngine = {};
 	global progressFinalize:true
 	global progressUpdate:true
 	global getUserFields:true
+	global getSubjects:true
 */
 /* list any objects js dependencies */
 /*
@@ -674,6 +675,295 @@ function parseBlock(blockType,blockText) {
 	return parsed;
 }
 
+/*
+	Function: formDropDownsSCT
+
+	Creates the form for selecting Subject, Category, Topic.
+
+	Parameters:
+
+		aid - the author id
+		settings - object, with settings as properties
+
+	Returns:
+
+		success - html node, dropdowns.
+*/
+function barPageSettings(aid,settings) {
+	var pageSettings = document.createElement('div');
+	pageSettings.setAttribute('class','settings-bar col-100');
+
+	/* show mode page link */
+	var showLink = document.createElement('div');
+	showLink.setAttribute('class','page-link');
+	var slink = createURL('/page?a=' + aid + '&p=' + settings.pid);
+	showLink.innerHTML = "<a href='" + slink + "' target='_blank'>" + slink + "</a>";
+	pageSettings.appendChild(showLink);
+
+	/* page title input */
+	var title = document.createElement('input');
+	title.setAttribute('type','text');
+	title.setAttribute('name','pagename');
+	title.setAttribute('id','pagetitle');
+	title.setAttribute('class','page-title');
+	title.setAttribute('maxlength','50');
+	title.setAttribute('value',settings.pagename);
+	pageSettings.appendChild(title);
+
+	/* drop downs for choosing page subj,cat,top */
+	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
+	pageSettings.appendChild(ddsct);
+
+	/* page settings save */
+	var btnSaveSettings = btnSubmit('Save Page Settings','savePageSettings()','none');
+	pageSettings.appendChild(btnSaveSettings);
+
+	return pageSettings;
+}
+
+/*
+	Function: formDropDownsSCT
+
+	Creates the form for selecting Subject, Category, Topic.
+
+	Parameters:
+
+		defSub - string, default subject; leave empty otherwise
+		defCat - string, default category; leave empty otherwise
+		defTop - string, default topic; leave empty otherwise
+
+	Returns:
+
+		success - html node, dropdowns.
+*/
+function formDropDownsSCT(defSub,defCat,defTop) {
+	/* used for making the default first selection grey in the dropdowns */
+	function greyFirstSelect(selectTag) {
+		if(selectTag.selectedIndex === 0) {
+			selectTag.style = "color: grey";
+		} else {
+			selectTag.style = "color: black";
+		}
+	}
+
+	/* this function will be called onchange of subject drop down */
+	function loadCategories() {
+
+		/* get the selected subject */
+		var subject = this.options[this.selectedIndex].value;
+
+		/* get & empty the category selection element */
+		var listCategories = document.getElementById("select-category");
+		emptyDiv(listCategories);
+
+		/* create the default first selection */
+		var optionCategory = document.createElement('option');
+		optionCategory.setAttribute("value","");
+		optionCategory.innerHTML = "choose category";
+		listCategories.appendChild(optionCategory);
+
+		/* get & empty the topic selection element */
+		var listTopics = document.getElementById("select-topic");
+		emptyDiv(listTopics);
+
+		/* create the default first selection */
+		var optionTopic = document.createElement('option');
+		optionTopic.setAttribute("value","");
+		optionTopic.innerHTML = "choose topic";
+		listTopics.appendChild(optionTopic);
+
+		if(subject !== "") {
+
+			/* get the categories for that subject */
+			var categories = Object.keys(globalBlockEngine.subjects[subject]);
+			var count = categories.length;
+
+			/* fill the selection element with categories */
+			for(var i = 0; i < count; i++) {
+				optionCategory = document.createElement('option');
+				optionCategory.setAttribute('value',categories[i]);
+				optionCategory.innerHTML = categories[i];
+				listCategories.appendChild(optionCategory);
+			}
+
+			/* reset the selection to "choose category" */
+			listCategories.selectedIndex = 0;
+		}
+
+		/* grey the first selected */
+		greyFirstSelect(this);
+		greyFirstSelect(listCategories);
+		greyFirstSelect(listTopics);
+	}
+
+	/* this function will be called onchange of categories dropdown */
+	function loadTopics() {
+
+		/* get the selected category */
+		var category = this.options[this.selectedIndex].value;
+
+		/* get the selected subject using id */
+		var selectSubject = document.getElementById("select-subject");
+		var subject = selectSubject.options[selectSubject.selectedIndex].value;
+
+		/* get & empty the topic selection element */
+		var listTopics = document.getElementById("select-topic");
+		emptyDiv(listTopics);
+
+		/* create the default first option */
+		var optionTopic = document.createElement('option');
+		optionTopic.innerHTML = "choose topic";
+		optionTopic.setAttribute("value","");
+		listTopics.appendChild(optionTopic);
+
+		/* just in case subject hasn't been selected */
+		if(subject !== "" && category !== "") {
+
+			/* get the topics for the category */
+			var topics = globalBlockEngine.subjects[subject][category];
+			var count = topics.length;
+
+			/* fill the selection element with topics */
+			for(var i = 0; i < count; i++) {
+				optionTopic = document.createElement('option');
+				optionTopic.setAttribute('value',topics[i]);
+				optionTopic.innerHTML = topics[i];
+				listTopics.appendChild(optionTopic);
+			}
+
+			/* reset the selection to "choose topic" */
+			listTopics.selectedIndex = 0;
+		}
+
+		/* grey the first selected */
+		greyFirstSelect(this);
+		greyFirstSelect(listTopics);
+	}
+
+	var row_SubjectSelect = document.createElement("div");
+	row_SubjectSelect.setAttribute("class","row");
+
+	var colLeft_SubjectSelect = document.createElement("div");
+	colLeft_SubjectSelect.setAttribute("class","col col-33");
+
+	var colMiddle_SubjectSelect = document.createElement("div");
+	colMiddle_SubjectSelect.setAttribute("class","col col-33");
+
+	var colRight_SubjectSelect = document.createElement("div");
+	colRight_SubjectSelect.setAttribute("class","col col-33");
+
+	row_SubjectSelect.appendChild(colLeft_SubjectSelect);
+	row_SubjectSelect.appendChild(colMiddle_SubjectSelect);
+	row_SubjectSelect.appendChild(colRight_SubjectSelect);
+
+	/* create select tags */
+	var listSubjects = document.createElement('select');
+	listSubjects.setAttribute("id","select-subject");
+	listSubjects.onchange = loadCategories;
+	listSubjects.style = "color: grey";
+
+	var listCategories = document.createElement('select');
+	listCategories.setAttribute("id","select-category");
+	listCategories.onchange = loadTopics;
+	listCategories.style = "color: grey";
+
+	var listTopics = document.createElement('select');
+	listTopics.setAttribute("id","select-topic");
+	listTopics.onchange = function() {
+		greyFirstSelect(listTopics);
+	};
+	listTopics.style = "color: grey";
+
+	/* get subjects for select topic list */
+	var subjectsPromise = getSubjects();
+
+	subjectsPromise.then(function(success) {
+		var subjectsData = JSON.parse(success);
+		globalBlockEngine.subjects = subjectsData;
+
+		/* first box - subject names */
+		var subjectsNames = Object.keys(subjectsData);
+		var subjectsCount = subjectsNames.length;
+
+		var optionSubject = document.createElement('option');
+		optionSubject.innerHTML = "choose subject";
+		optionSubject.setAttribute("value","");
+		listSubjects.appendChild(optionSubject);
+
+		/* loop through and add subjects. */
+		var foundSubject = false;
+		for(var i = 0; i < subjectsCount; i++) {
+			optionSubject = document.createElement('option');
+			optionSubject.setAttribute('value',subjectsNames[i]);
+			optionSubject.innerHTML = subjectsNames[i];
+			listSubjects.appendChild(optionSubject);
+			if(subjectsNames[i] === defSub) {
+				optionSubject.setAttribute('selected','selected');
+				foundSubject = true;
+			}
+		}
+
+		/* second box - category names */
+		var optionCategory = document.createElement('option');
+		optionCategory.innerHTML = "choose category";
+		listCategories.appendChild(optionCategory);
+
+		/* add categories if this page has saved subject */
+		var foundCategory = false;
+		if(foundSubject) {
+			/* get the categories for that subject */
+			var categories = Object.keys(globalBlockEngine.subjects[defSub]);
+			var countCat = categories.length;
+
+			/* fill the selection element with categories */
+			for(var j = 0; j < countCat; j++) {
+				optionCategory = document.createElement('option');
+				optionCategory.setAttribute('value',categories[j]);
+				optionCategory.innerHTML = categories[j];
+				listCategories.appendChild(optionCategory);
+				if(categories[j] === defCat) {
+					optionCategory.setAttribute('selected','selected');
+					foundCategory = true;
+				}
+			}
+		}
+
+		/* third box - topic names */
+		var optionTopic = document.createElement('option');
+		optionTopic.innerHTML = "choose topic";
+		listTopics.appendChild(optionTopic);
+
+		/* add topics if this page has saved category */
+		if(foundCategory) {
+			/* get the topics for the category */
+			var topics = globalBlockEngine.subjects[defSub][defCat];
+			var countTop = topics.length;
+
+			/* fill the selection element with topics */
+			for(var k = 0; k < countTop; k++) {
+				optionTopic = document.createElement('option');
+				optionTopic.setAttribute('value',topics[k]);
+				optionTopic.innerHTML = topics[k];
+				listTopics.appendChild(optionTopic);
+				if(topics[k] === defTop) {
+					optionTopic.setAttribute('selected','selected');
+				}
+			}
+
+		}
+
+	},function(error) {
+		///journal console.log("getSubjects promise error: " + error);
+	});
+
+	/* append lists to columns */
+	colLeft_SubjectSelect.appendChild(listSubjects);
+	colMiddle_SubjectSelect.appendChild(listCategories);
+	colRight_SubjectSelect.appendChild(listTopics);
+
+	return row_SubjectSelect;
+}
+
 // <<<fold>>>
 
 /***
@@ -839,6 +1129,63 @@ function saveBlocks(which) {
 			}
         }
     };
+
+	xmlhttp.send(params);
+}
+
+/*
+	Function: savePageSettings
+
+	This function makes an ajax request to save the page settings.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		none
+*/
+function savePageSettings() {
+	/* create the url destination for the ajax request */
+	var url = createURL("/savepagesettings");
+
+	/* get the pid & page name */
+	var pid = document.getElementById('x-id').getAttribute('data-xid');
+	var pagetitle = document.getElementById('pagetitle').value;
+	var subject = document.getElementById('select-subject').value;
+	var category = document.getElementById('select-category').value;
+	var topic = document.getElementById('select-topic').value;
+	var tags = "";
+	var imageurl = "";
+	var blurb = "";
+
+	var xmlhttp;
+	xmlhttp = new XMLHttpRequest();
+
+	var params = "pid=" + pid + "&p=" + pagetitle + "&s=" + subject + "&c=" + category + "&t=" + topic + "&g=" + tags + "&i=" + imageurl + "&b=" + blurb;
+
+	xmlhttp.open("POST",url,true);
+
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				if(xmlhttp.responseText === "nosaveloggedout") {
+					alertify.alert("Save Settings Error. You Are Not Logged In.");
+				} else if(xmlhttp.responseText === "nosubjectnotsaved") {
+					alertify.alert("Save Settings Error. Please Enter At Least A Subject.");
+				} else if (xmlhttp.responseText === "settingssaved") {
+					alertify.log("Settings Saved!","success");
+				} else {
+					alertify.alert("An Error Occured. Please Try Again Later");
+				}
+			} else {
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+			}
+		}
+	};
 
 	xmlhttp.send(params);
 }

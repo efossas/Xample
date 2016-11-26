@@ -60,9 +60,6 @@ exports.createlg = function(request,response) {
 
                 /* escape the page name to prevent Sql injection */
                 var guidename = connection.escape(POST.guidename);
-                var subject = "'none'";
-                var category = "'none'";
-                var topic = "'none'";
 
                 /* check if page name exists */
                 var promise = querydb.searchGuidename(connection,uid,guidename);
@@ -73,7 +70,7 @@ exports.createlg = function(request,response) {
                     } else {
                         /* insert page into user's page table */
 
-                        var qryUser = "INSERT INTO g_" + uid + " (guidename,status,subject,category,topic) VALUES (" + guidename + ",1," + subject + "," + category + "," + topic + ")";
+                        var qryUser = "INSERT INTO g_" + uid + " (guidename,status,created,edited,ranks,views) VALUES (" + guidename + ",1,NOW(),NOW(),0,0)";
                         connection.query(qryUser,function(err,rows,fields) {
                             if (err) {
                                 response.end('err');

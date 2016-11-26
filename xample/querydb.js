@@ -160,6 +160,82 @@ exports.searchPagename = function(connection,uid,pagename) {
 };
 
 /*
+	Function: getPageSettings
+
+	This searches user's table and returns all of the page's adjustable settings
+
+	Parameters:
+
+		connection - a MySQL connection
+		uid - the user's id
+		pid - the page id
+
+	Returns:
+
+		success - promise, json object
+		error - promise, empty array
+*/
+exports.getPageSettings = function(connection,uid,pid) {
+	var promise = new Promise(function(resolve,reject) {
+
+		var qry = "SELECT pid,pagename,subject,category,topic,tags,imageurl,blurb FROM p_" + uid + " WHERE pid=" + pid;
+
+		/* query the database */
+		connection.query(qry,function(err,rows,fields) {
+			if(err) {
+				reject(err);
+			} else {
+				if(typeof rows[0] !== 'undefined') {
+					resolve(rows[0]);
+				} else {
+					resolve(-1);
+				}
+			}
+		});
+	});
+
+	return promise;
+};
+
+/*
+	Function: getPageSubjectCategoryTopic
+
+	This searches user's table and returns a page's subject, category, and topic.
+
+	Parameters:
+
+		connection - a MySQL connection
+		uid - the user's id
+		pid - the page id
+
+	Returns:
+
+		success - promise, array [subject,category,topic]
+		error - promise, empty array
+*/
+exports.getPageSubjectCategoryTopic = function(connection,uid,pid) {
+	var promise = new Promise(function(resolve,reject) {
+
+		var qry = "SELECT subject,category,topic FROM p_" + uid + " WHERE pid=" + pid;
+
+		/* query the database */
+		connection.query(qry,function(err,rows,fields) {
+			if(err) {
+				reject(err);
+			} else {
+				if(typeof rows[0] !== 'undefined') {
+					resolve([rows[0].subject,rows[0].category,rows[0].topic]);
+				} else {
+					resolve([]);
+				}
+			}
+		});
+	});
+
+	return promise;
+};
+
+/*
 	Function: searchPid
 
 	This finds a the pid for a user's page.
@@ -220,7 +296,6 @@ exports.searchPid = function(connection,uid,pagename) {
 exports.searchPageStatus = function(connection,uid,pid) {
 	var promise = new Promise(function(resolve,reject) {
 
-		/* username must have connection.escape() already applied, which adds '' */
 		var qry = "SELECT status FROM p_" + uid + " WHERE pid=" + pid;
 
 		/* query the database */
@@ -232,6 +307,48 @@ exports.searchPageStatus = function(connection,uid,pid) {
 					resolve(Number(rows[0].status));
 				} else {
 					resolve(-1);
+				}
+			}
+		});
+	});
+
+	return promise;
+};
+
+/*
+	Function: searchRedundantTable
+
+	Search and return a row in a redundant table matching a user's page.
+
+	Parameters:
+
+		connection - a MySQL connection
+		uid - the user's id
+		pid - the page id
+		redTable - the name of the redundant table
+
+	Returns:
+
+		promise - number
+
+	Return Values:
+		success - 0 does not exist || 1 does exist
+		error - error string
+*/
+exports.searchRedundantTable = function(connection,uid,pid,redTable) {
+	var promise = new Promise(function(resolve,reject) {
+
+		var qry = "SELECT * FROM " + redTable + " WHERE uid=" + uid + " AND pid=" + pid;
+
+		/* query the database */
+		connection.query(qry,function(err,rows,fields) {
+			if(err) {
+				reject(err);
+			} else {
+				if(typeof rows[0] !== 'undefined') {
+					resolve(1);
+				} else {
+					resolve(0);
 				}
 			}
 		});
@@ -260,7 +377,7 @@ exports.searchPageStatus = function(connection,uid,pid) {
 exports.changePagename = function(connection,uid,pid,pagename) {
 	var promise = new Promise(function(resolve,reject) {
 
-		/* username must have connection.escape() already applied, which adds '' */
+		/* pagename must have connection.escape() already applied, which adds '' */
 		var qry = "UPDATE p_" + uid + " SET pagename=" + pagename + " WHERE pid=" + pid;
 
 		/* query the database */

@@ -1309,7 +1309,7 @@ function pageExplore(logstatus,data) {
 		newBox.querySelector(".rating-bar").style = "width:" + percentage + "%";
 		newBox.querySelector(".star").checked = false;
 		newBox.querySelector(".box-image").innerHTML = "Image";
-		newBox.querySelector(".box-blurb").innerHTML = "Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest!";
+		newBox.querySelector(".box-blurb").innerHTML = "Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest!";
 		newBox.querySelector(".box-created").innerHTML = "created: 00/00/00";
 		newBox.querySelector(".box-edited").innerHTML = "edited: 00/00/00";
 		newBox.querySelector(".box-ranks").innerHTML = "ranks: #########";

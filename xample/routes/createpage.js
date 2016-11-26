@@ -61,9 +61,6 @@ exports.createpage = function(request,response) {
 
                 /* escape the page name to prevent Sql injection */
                 var pagename = connection.escape(POST.pagename);
-                var subject = "'none'";
-                var category = "'none'";
-                var topic = "'none'";
 
                 /* check if page name exists */
                 var promise = querydb.searchPagename(connection,uid,pagename);
@@ -74,7 +71,8 @@ exports.createpage = function(request,response) {
                     } else {
                         /* insert page into user's page table */
 
-                        var qryUser = "INSERT INTO p_" + uid + " (pagename,status,subject,category,topic) VALUES (" + pagename + ",1," + subject + "," + category + "," + topic + ")";
+                        var qryUser = "INSERT INTO p_" + uid + " (pagename,status,edited,created,ranks,views) VALUES (" + pagename + ",1,NOW(),NOW(),0,0)";
+
                         connection.query(qryUser,function(err,rows,fields) {
                             if (err) {
                                 response.end('err');
