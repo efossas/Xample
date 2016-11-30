@@ -30,6 +30,6 @@ exports.logout = function(request,response) {
 	request.session.destroy();
 
 	response.end('loggedout');
-	analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+	analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 	uid = "";
 };

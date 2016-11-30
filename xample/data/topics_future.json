@@ -1,0 +1,103 @@
+{
+    "arts":
+        {
+            "architecture":
+                []
+            ,"dance":
+                []
+            ,"film":
+                []
+            ,"literature":
+                []
+            ,"music":
+                []
+            ,"visual":
+                []
+        },
+    "biology":
+        {
+            "anatomy":
+                []
+            ,"biochemistry":
+                []
+            ,"cellular":
+                []
+            ,"embryology":
+                []
+            ,"genetics":
+                []
+            ,"immunology-pathology":
+                []
+            ,"microbiology":
+                []
+            ,"neuro science":
+                []
+            ,"nutrition":
+                []
+            ,"physiology":
+                []
+            ,"taxonomy":
+                []
+        },
+    "chemistry":
+        {
+
+        }
+    "computer science":
+        {
+            "algorithms":
+                ["asymptotic growth rates","divide and conquer","dynamic programming","greedy","mathematical","linear programming","patterns","searching","sorting","traversal"]
+            ,"data structures":
+                ["associative array","deque","dynamic array","graph","multidimensional array","linked list","stack","static array","tree","queue"]
+            ,"languages":
+                ["domain specific","general purpose"]
+            ,"programming":
+                ["functional","imperative","object oriented"]
+            ,"systems":
+                ["assembly","binary","memory"]
+        },
+    "humanities and social science":
+        {
+            "archaeology-history":
+                []
+            ,"anthropology":
+                []
+            ,"economics":
+                []
+            ,"law":
+                []
+            ,"language":
+                []
+            ,"philosophy":
+                []
+            ,"psychology":
+                []
+            ,"sociology":
+                []
+        },
+    "mathematics":
+        {
+            "algebra":
+                []
+            ,"arithmetic":
+                []
+            ,"calculus":
+                []
+            ,"discrete math":
+                []
+            ,"geometry":
+                []
+            ,"linar algebra":
+                []
+            ,"probability":
+                []
+            ,"statistics":
+                []
+            ,"trigonometry":
+                []
+        },
+    "physics":
+        {
+
+        }
+}

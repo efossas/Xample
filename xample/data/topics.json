@@ -1,18 +1,16 @@
 {
     "computer science":
         {
-        "data":
-            ["algorithms","regex","structures"]
-        ,"programming":
-            ["functional","object oriented","procedural"]
-        ,"systems":
-            ["assembly","binary","memory"]
-        ,"terminal":
-            ["bash","commands","version control"]
-        ,"visual":
-            ["latex","svg"]
-        ,"web":
-            ["back end","css","html","javascript","sql"]
+            "algorithms":
+                ["asymptotic growth rates","divide and conquer","dynamic programming","greedy","mathematical","linear programming","patterns","searching","sorting","traversal"]
+            ,"data structures":
+                ["associative array","deque","dynamic array","graph","multidimensional array","linked list","stack","static array","tree","queue"]
+            ,"languages":
+                ["domain specific","general purpose"]
+            ,"programming":
+                ["functional","imperative","object oriented"]
+            ,"systems":
+                ["assembly","binary","memory"]
         },
     "mathematics":
         {

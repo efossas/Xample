@@ -905,6 +905,7 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 
 		/* second box - category names */
 		var optionCategory = document.createElement('option');
+		optionCategory.setAttribute("value","");
 		optionCategory.innerHTML = "choose category";
 		listCategories.appendChild(optionCategory);
 
@@ -930,6 +931,7 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 
 		/* third box - topic names */
 		var optionTopic = document.createElement('option');
+		optionTopic.setAttribute("value","");
 		optionTopic.innerHTML = "choose topic";
 		listTopics.appendChild(optionTopic);
 

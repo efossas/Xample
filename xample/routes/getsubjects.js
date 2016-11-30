@@ -32,7 +32,7 @@ exports.getsubjects = function(request,response) {
     fs.readFile('data/topics.json',function(err,data) {
         if (err) {
             response.end("err");
-            analytics.journal(1,120,err,uid,analytics.__line,__function,__filename);
+            analytics.journal(1,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
         } else {
             response.end(data.toString());
         }

@@ -19,6 +19,16 @@
 	font-weight: 400;
 }
 
+.savebarbtn {
+	@extend .menubtn;
+	padding: 20px 0px 20px 0px;
+}
+
+.filterbarbtn {
+	@extend .menubtn;
+	padding: 26px 0px 26px 0px;
+}
+
 /* Link Button */
 a.btn {
 	color: black;
@@ -67,6 +77,26 @@ a.inbtn {
 
 a.savebar {
 	padding: 19px 0px 19px 0px;
+}
+
+/* Check Buttons */
+.checkbtn {
+	color: black;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	width: 100%;
+	padding: 4px 8px 4px 8px;
+	margin: 0;
+	line-height: 14px;
+	text-align: center;
+
+	cursor: pointer;
+	transition: background-color .5s;
+	touch-action: manipulation;
+
+	font-size: 1em;
+	font-weight: 400;
 }
 
 /* Colors */

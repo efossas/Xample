@@ -1,0 +1,40 @@
+["video","audio","image","text","math","topic","","","aerospace","agriculture","astronomy","business","civil-environmental","communications","construction","education","electrical","energy-nuclear-petroleum","finance","health","information","manufacturing","materials","mechanical","natural-resources","planetary-earth","retail-wholesale","service","transportation","","","",""]
+
+[["none",0],["video",1],["audio",2],["image",4],["text",8],["math",16],["topic",32],["",64],["",128],["aerospace",256],["agriculture",512],["astronomy",1024],["business",2048],["civil-environmental",4096],["communications",8192],["construction",16384],["education",32768],["electrical",65536],["energy-nuclear-petroleum",131072],["finance",262144],["health",524288],["information",1048576],["manufacturing",2097152],["materials",4194304],["mechanical",8388608],["natural-resources",16777216],["planetary-earth",33554432],["retail-wholesale",67108864],["service",134217728],["transportation",268435456],["",536870912],["",1073741824],["",2147483648],["",4294967296]]
+
+{
+    "none":0,
+    "video":1,
+    "audio":2,
+    "image":4,
+    "text":8,
+    "math":16,
+    "topic":32,
+    "":64,
+    "":128,
+    "aerospace":256,
+    "agriculture":512,
+    "astronomy":1024,
+    "business":2048,
+    "civil-environmental":4096,
+    "communications":8192,
+    "construction":16384,
+    "education":32768,
+    "electrical":65536,
+    "energy-nuclear-petroleum":131072,
+    "finance":262144,
+    "health":524288,
+    "information":1048576,
+    "manufacturing":2097152,
+    "materials":4194304,
+    "mechanical":8388608,
+    "natural-resources":16777216,
+    "planetary-earth":33554432,
+    "retail-wholesale":67108864,
+    "service":134217728,
+    "transportation":268435456,
+    "":536870912,
+    "":1073741824,
+    "":2147483648,
+    "":4294967296
+}

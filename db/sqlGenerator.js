@@ -18,18 +18,18 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
         var categoriesCount = categories.length;
 
         /* subject */
-        var prefixSub = ["qp_","lg_"];
+        var prefixSub = ["bp_","lg_"];
         prefixSub.forEach(function(prefix,index) {
-            var sqlSubjectArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );\n"];
+            var sqlSubjectArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
             sqlFile += sqlSubjectArray.join("");
         });
 
         for(var j = 0; j < categoriesCount; j++) {
             /* subject_category */
-            var prefixCat = ["qp_","lg_"];
+            var prefixCat = ["bp_","lg_"];
             prefixCat.forEach(function(prefix,index) {
-                var sqlCategoryArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,""),"_",categories[j].replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );\n"];
+                var sqlCategoryArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,""),"_",categories[j].replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
                 sqlFile += sqlCategoryArray.join("");
             });
@@ -37,9 +37,9 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
             var topics = tree[subjects[i]][categories[j]];
             topics.forEach(function(item,index) {
                 /* subject_category_topic */
-                var prefixTop = ["qp_","lg_"];
+                var prefixTop = ["bp_","lg_"];
                 prefixTop.forEach(function(prefix,index) {
-                    var sqlTopicArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,""),"_",categories[j].replace(/ /g,""),"_",item.replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );\n"];
+                    var sqlTopicArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,""),"_",categories[j].replace(/ /g,""),"_",item.replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
                     sqlFile += sqlTopicArray.join("");
                 });

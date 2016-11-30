@@ -46,7 +46,7 @@ exports.createpage = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
                 request.connection.destroy();
-                analytics.journal(true,199,"Overload Attack!",0,analytics.__line,__function,__filename);
+                analytics.journal(true,199,"Overload Attack!",0,global.__stack[1].getLineNumber(),__function,__filename);
             }
         });
 
@@ -54,7 +54,7 @@ exports.createpage = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
-                    analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                 }
 
                 var POST = qs.parse(body);
@@ -71,12 +71,12 @@ exports.createpage = function(request,response) {
                     } else {
                         /* insert page into user's page table */
 
-                        var qryUser = "INSERT INTO p_" + uid + " (pagename,status,edited,created,ranks,views) VALUES (" + pagename + ",1,NOW(),NOW(),0,0)";
+                        var qryUser = "INSERT INTO p_" + uid + " (pagename,status,tags,edited,created,ranks,views,rating) VALUES (" + pagename + ",1,0,NOW(),NOW(),0,0,0)";
 
                         connection.query(qryUser,function(err,rows,fields) {
                             if (err) {
                                 response.end('err');
-                                analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
+                                analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else {
                                 /* grab the pid of the new page name from the user's page table */
                                 var promisePid = querydb.searchPid(connection,uid,pagename);
@@ -84,7 +84,7 @@ exports.createpage = function(request,response) {
                                 promisePid.then(function(success) {
                                     if(success === -1) {
                                         response.end('err');
-                                        analytics.journal(true,203,"pid not found after page insert",uid,analytics.__line,__function,__filename);
+                                        analytics.journal(true,203,"pid not found after page insert",uid,global.__stack[1].getLineNumber(),__function,__filename);
                                     } else {
                                         var pid = success;
 
@@ -94,7 +94,7 @@ exports.createpage = function(request,response) {
                                         connection.query(qryPage,function(err,rows,fields) {
 											if (err) {
 												response.end('err');
-												analytics.journal(true,204,err,uid,analytics.__line,__function,__filename);
+												analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 											}
 										});
 
@@ -104,7 +104,7 @@ exports.createpage = function(request,response) {
 										connection.query(qryTemp,function(err,rows,fields) {
 											if (err) {
 												response.end('err');
-												analytics.journal(true,205,err,uid,analytics.__line,__function,__filename);
+												analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 											}
 										});
 
@@ -112,22 +112,22 @@ exports.createpage = function(request,response) {
 										fs.mkdir(request.app.get('fileRoute') + "xm/" + uid + "/" + pid,function(err) {
 											/* don't consider existing folders as a mkdir error */
 											if(err && err.code !== "EEXIST") {
-												analytics.journal(true,120,err,uid,analytics.__line,__function,__filename);
+												analytics.journal(true,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 											}
 										});
 										response.end(pid.toString());
-										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+										analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 									}
 								},function(error) {
 									response.end('err');
-									analytics.journal(true,202,error,uid,analytics.__line,__function,__filename);
+									analytics.journal(true,202,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								});
 							}
 						});
 					}
 				},function(error) {
 					response.end('err');
-					analytics.journal(true,200,error,0,analytics.__line,__function,__filename);
+					analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
 				});
                 connection.release();
             });

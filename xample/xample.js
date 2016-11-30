@@ -15,26 +15,41 @@
 // <<<code>>>
 
 /* grab command line arguments, 0 -> node, 1 -> path to .js, 2+ -> actual arguments */
+var processes;
 var port;
 var host;
 
 switch(process.argv.length) {
+	case 5:
+		processes = Number(process.argv[4]);
+		port = Number(process.argv[3]);
+		host = process.argv[2];
+		break;
 	case 4:
+		processes = 1;
 		port = Number(process.argv[3]);
 		host = process.argv[2];
 		break;
 	case 3:
+		processes = 1;
 		port = 2020;
 		host = process.argv[2];
 		break;
 	default:
-		console.log("Wrong number of arguments. Usage: node xample.js [local|remote] [port]");
+		console.log("Wrong number of arguments. Usage: node xample.js [local|remote] [port] [processes]");
 		process.exit();
 }
 
 /* check for that valid port number was given */
 if(port > 65535 || port < 1) {
 	console.log("Invalid port number. Port argument must be between 1 & 65535");
+	process.exit();
+}
+
+/* check for that number of processes is possible */
+const numCPUs = require('os').cpus().length;
+if(processes < 0 || processes > numCPUs) {
+	console.log("Invalid processes number. This server can only run up to " + numCPUs + " processes.");
 	process.exit();
 }
 
@@ -62,11 +77,16 @@ switch(host) {
 // <<<code>>>
 
 const cluster = require('cluster');
-const numCPUs = require('os').cpus().length;
+
+/* if argument was 0, run numCPUs, else run the number requested */
+var stopFork = numCPUs;
+if(processes > 0) {
+	stopFork = processes;
+}
 
 if (cluster.isMaster) {
 	/* fork workers */
-	for (var i = 0; i < numCPUs; i++) {
+	for (var i = 0; i < stopFork; i++) {
 		cluster.fork();
 	}
 
@@ -99,6 +119,25 @@ if (cluster.isMaster) {
 
 /* global require:true */
 /* global process:true */
+/* global __stack:true */
+
+/* These set __line to return the current line number where they are used. They are used for logging errors.  */
+Object.defineProperty(global,'__stack',{
+get: function stacker() {
+        var orig = Error.prepareStackTrace;
+        Error.prepareStackTrace = function(_,stack) {
+            return stack;
+        };
+        var err = new Error();
+        Error.captureStackTrace(err,stacker); /// was arguments.callee instead of stacker
+        var stack = err.stack;
+        Error.prepareStackTrace = orig;
+        return stack;
+    }
+});
+
+/* for retrieving line number: global._stack[1].getLineNumber(), however required functions add to line number */
+global.__stack = __stack;
 
 var rts = require('./rts.js');
 var express = require('express');

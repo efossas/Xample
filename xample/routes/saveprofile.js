@@ -45,7 +45,7 @@ exports.saveprofile = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,analytics.__line,__function,__filename);
+				analytics.journal(true,199,"Overload Attack!",uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -53,7 +53,7 @@ exports.saveprofile = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
-                    analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                 }
 
                 var POST = qs.parse(body);
@@ -68,7 +68,7 @@ exports.saveprofile = function(request,response) {
                     connection.query(qryGetPass,function(err,rows,fields) {
 						if(err) {
 							response.end('err');
-							analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
+							analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
 							if(ps.verify(currentPassword,rows[0].password)) {
 								var hash = ps.generate(newPassword);
@@ -77,7 +77,7 @@ exports.saveprofile = function(request,response) {
                                 connection.query(qryUpdatePass,function(err,rows,fields) {
 									if(err) {
 										response.end('err');
-										analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
+										analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 									} else {
 										/// if only
 									}
@@ -96,7 +96,7 @@ exports.saveprofile = function(request,response) {
                 /* count could be less than one, if say, only password was being updated */
                 if(count < 1) {
                     response.end('profilesaved');
-                    analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+                    analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                 } else {
                     var qryArray = ["UPDATE Users SET "];
 
@@ -111,10 +111,10 @@ exports.saveprofile = function(request,response) {
                     connection.query(qry,function(err,rows,fields) {
 						if(err) {
 							response.end('err');
-							analytics.journal(true,203,err,uid,analytics.__line,__function,__filename);
+							analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
 							response.end('profilesaved');
-							analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+							analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 						}
                     });
                 }

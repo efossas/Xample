@@ -58,7 +58,7 @@ exports.editpage = function(request,response) {
 
         pool.getConnection(function(err,connection) {
             if(err) {
-                analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
             }
 
             var promise = querydb.searchPageStatus(connection,uid,pid);
@@ -74,7 +74,7 @@ exports.editpage = function(request,response) {
 					promiseSettings.then(function(pageSettings) {
 						if(pageSettings === -1) {
 							response.end('err');
-							analytics.journal(true,201,'getPageSettings()',uid,analytics.__line,__function,__filename);
+							analytics.journal(true,201,'getPageSettings()',uid,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
 							var pageinfo = JSON.stringify(pageSettings);
 
@@ -83,7 +83,7 @@ exports.editpage = function(request,response) {
 							connection.query(qry,function(err,rows,fields) {
 								if(err) {
 									response.end('err');
-									analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
+									analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
 									var pagedata = "";
 
@@ -103,19 +103,19 @@ exports.editpage = function(request,response) {
 
 									/* load the edit page with the page data */
 									loader.loadBlockPage(request,response,"<script>pageEdit('" + uid + "','" + pagedata + "'," + pageinfo + ");</script>");
-									analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 								}
 							});
 						}
 					},function(err) {
 						response.end('err');
-						analytics.journal(true,203,err,uid,analytics.__line,__function,__filename);
+						analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 					});
 					connection.release();
 				}
 			},function(error) {
 				response.end('err');
-				analytics.journal(true,200,error,uid,analytics.__line,__function,__filename);
+				analytics.journal(true,200,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			});
         });
 	}

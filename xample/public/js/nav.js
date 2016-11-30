@@ -687,77 +687,346 @@ function dashExplore(exploreHeader,linkRoute) {
 
 	Parameters:
 
-		none
+		sort - string, the type of sort already applied
+		tags - string, the tags already applied
 
 	Returns:
 
 		success - html node, filter form
 */
-function barFilter() {
+function barFilter(sort,tags) {
 	var row = document.createElement('div');
 	row.setAttribute('class','row');
 
+	var formDiv = document.createElement('form');
+	formDiv.setAttribute('id','filterForm');
+	formDiv.setAttribute('class','col col-70');
+	formDiv.setAttribute('action','');
+
+	/* start top row */
+	var topRow = document.createElement('div');
+	topRow.setAttribute('class','row');
+
+	/* create category tag section */
+	var colTags = document.createElement('div');
+	colTags.setAttribute('class','col col-25');
+
+	var TagSelect = document.createElement('select');
+	TagSelect.setAttribute('id','tag');
+
+	globalScope.tagKeys = new Map([["none",0],["video",1],["audio",2],["image",4],["text",8],["math",16],["topic",32],["",64],["",128],["aerospace",256],["agriculture",512],["astronomy",1024],["business",2048],["civil-environmental",4096],["communications",8192],["construction",16384],["education",32768],["electrical",65536],["energy-nuclear-petroleum",131072],["finance",262144],["health",524288],["information",1048576],["manufacturing",2097152],["materials",4194304],["mechanical",8388608],["natural-resources",16777216],["planetary-earth",33554432],["retail-wholesale",67108864],["service",134217728],["transportation",268435456],["",536870912],["",1073741824],["",2147483648],["",4294967296]]);
+
+	var options = ["none","aerospace","agriculture","astronomy","business","civil-environmental","communications","construction","education","electrical","energy-nuclear-petroleum","finance","health","information","manufacturing","materials","mechanical","naturalresources","planetary-earth","retail-wholesale","service","transportation"];
+
+	options.forEach(function(item,index) {
+		var currentOption = document.createElement('option');
+		currentOption.setAttribute('value',item);
+		currentOption.innerHTML = item;
+		TagSelect.appendChild(currentOption);
+	});
+
+	colTags.appendChild(TagSelect);
+
+	/* set selected index for tag category */
+	var tagIndex;
+	var tagCategory = Number(tags) & 4294967040;
+	if(tagCategory) {
+		tagIndex = Math.log2(tagCategory) - 2;
+	} else {
+		tagIndex = 0;
+	}
+
+	TagSelect.selectedIndex = tagIndex;
+
+	/* create sort radio buttons */
 	var colRating = document.createElement('div');
-	colRating.setAttribute('class','col col-15');
+	colRating.setAttribute('class','col col-14');
 
-	var minRating = document.createElement('input');
-	minRating.setAttribute('id','min-rating');
-	minRating.setAttribute('placeholder','min rating');
+	var Rating = document.createElement('input');
+	Rating.setAttribute('type','radio');
+	Rating.setAttribute('name','sort');
+	Rating.setAttribute('id','rating');
+	Rating.setAttribute('value','rating');
 
-	var maxRating = document.createElement('input');
-	maxRating.setAttribute('id','max-rating');
-	maxRating.setAttribute('placeholder','max rating');
+	var RatingText = document.createElement('span');
+	RatingText.innerHTML = "Rating";
 
-	colRating.appendChild(minRating);
-	colRating.appendChild(maxRating);
+	var RatingLabel = document.createElement('label');
+	RatingLabel.setAttribute('for','rating');
+	RatingLabel.appendChild(Rating);
+	RatingLabel.appendChild(RatingText);
+
+	colRating.appendChild(RatingLabel);
 
 	var colRanks = document.createElement('div');
-	colRanks.setAttribute('class','col col-20');
+	colRanks.setAttribute('class','col col-14');
 
-	var minRanks = document.createElement('input');
-	minRanks.setAttribute('id','min-ranks');
-	minRanks.setAttribute('placeholder','min ranks');
+	var Ranks = document.createElement('input');
+	Ranks.setAttribute('type','radio');
+	Ranks.setAttribute('name','sort');
+	Ranks.setAttribute('id','ranks');
+	Ranks.setAttribute('value','ranks');
 
-	var maxRanks = document.createElement('input');
-	maxRanks.setAttribute('id','max-ranks');
-	maxRanks.setAttribute('placeholder','max ranks');
+	var RanksText = document.createElement('span');
+	RanksText.innerHTML = "Ranks";
 
-	colRanks.appendChild(minRanks);
-	colRanks.appendChild(maxRanks);
+	var RanksLabel = document.createElement('label');
+	RanksLabel.setAttribute('for','ranks');
+	RanksLabel.appendChild(Ranks);
+	RanksLabel.appendChild(RanksText);
+
+	colRanks.appendChild(RanksLabel);
 
 	var colViews = document.createElement('div');
-	colViews.setAttribute('class','col col-20');
+	colViews.setAttribute('class','col col-14');
 
-	var minViews = document.createElement('input');
-	minViews.setAttribute('id','min-views');
-	minViews.setAttribute('placeholder','min views');
+	var Views = document.createElement('input');
+	Views.setAttribute('type','radio');
+	Views.setAttribute('name','sort');
+	Views.setAttribute('id','views');
+	Views.setAttribute('value','views');
 
-	var maxViews = document.createElement('input');
-	maxViews.setAttribute('id','max-views');
-	maxViews.setAttribute('placeholder','max views');
+	var ViewsText = document.createElement('span');
+	ViewsText.innerHTML = "Views";
 
-	colViews.appendChild(minViews);
-	colViews.appendChild(maxViews);
+	var ViewsLabel = document.createElement('label');
+	ViewsLabel.setAttribute('for','views');
+	ViewsLabel.appendChild(Views);
+	ViewsLabel.appendChild(ViewsText);
 
-	var colDate = document.createElement('div');
-	colDate.setAttribute('class','col col-15');
+	colViews.appendChild(ViewsLabel);
 
-	var minDate = document.createElement('input');
-	minDate.setAttribute('id','min-date');
-	minDate.setAttribute('placeholder','min date');
+	var colCreated = document.createElement('div');
+	colCreated.setAttribute('class','col col-19');
 
-	var maxDate = document.createElement('input');
-	maxDate.setAttribute('id','max-date');
-	maxDate.setAttribute('placeholder','max date');
+	var Created = document.createElement('input');
+	Created.setAttribute('type','radio');
+	Created.setAttribute('name','sort');
+	Created.setAttribute('id','date');
+	Created.setAttribute('value','created');
 
-	colDate.appendChild(minDate);
-	colDate.appendChild(maxDate);
+	var CreatedText = document.createElement('span');
+	CreatedText.innerHTML = "Created";
 
+	var CreatedLabel = document.createElement('label');
+	CreatedLabel.setAttribute('for','created');
+	CreatedLabel.appendChild(Created);
+	CreatedLabel.appendChild(CreatedText);
+
+	colCreated.appendChild(CreatedLabel);
+
+	var colEdited = document.createElement('div');
+	colEdited.setAttribute('class','col col-14');
+
+	var Edited = document.createElement('input');
+	Edited.setAttribute('type','radio');
+	Edited.setAttribute('name','sort');
+	Edited.setAttribute('id','date');
+	Edited.setAttribute('value','edited');
+
+	var EditedText = document.createElement('span');
+	EditedText.innerHTML = "Edited";
+
+	var EditedLabel = document.createElement('label');
+	EditedLabel.setAttribute('for','edited');
+	EditedLabel.appendChild(Edited);
+	EditedLabel.appendChild(EditedText);
+
+	colEdited.appendChild(EditedLabel);
+
+	/* set selected sort */
+	switch(sort) {
+		case "rating":
+			Rating.setAttribute('checked','true');
+			break;
+		case "ranks":
+			Ranks.setAttribute('checked','true');
+			break;
+		case "views":
+			Views.setAttribute('checked','true');
+			break;
+		case "edited":
+			Edited.setAttribute('checked','true');
+			break;
+		case "created":
+			Created.setAttribute('checked','true');
+			break;
+		default:
+			Views.setAttribute('checked','true');
+	}
+
+	/* start bottom row */
+	var bottomRow = document.createElement('div');
+	bottomRow.setAttribute('class','row');
+
+	/* get content type tags */
+	var tagTypes = Number(tags) & 255;
+
+	/* create content type buttons */
+	var colTypeVideo = document.createElement('div');
+	colTypeVideo.setAttribute('class','col col-12');
+
+	var checkVideo = document.createElement('button');
+	checkVideo.setAttribute('class','checkbtn');
+	checkVideo.setAttribute('type','button');
+	checkVideo.setAttribute('name','checkType');
+	checkVideo.setAttribute('value','video');
+	checkVideo.setAttribute('onclick','toggleCheck(this);');
+	checkVideo.innerHTML = "video";
+
+	if(tagTypes & 1) {
+		checkVideo.setAttribute('data-checked','true');
+		checkVideo.style["color"] = "white";
+		checkVideo.style["background-color"] = "blue";
+	}
+
+	colTypeVideo.appendChild(checkVideo);
+
+	var colTypeImage = document.createElement('div');
+	colTypeImage.setAttribute('class','col col-12');
+
+	var checkImage = document.createElement('button');
+	checkImage.setAttribute('class','checkbtn');
+	checkImage.setAttribute('type','button');
+	checkImage.setAttribute('name','checkType');
+	checkImage.setAttribute('value','image');
+	checkImage.setAttribute('onclick','toggleCheck(this);');
+	checkImage.innerHTML = "image";
+
+	if(tagTypes & 2) {
+		checkImage.setAttribute('data-checked','true');
+		checkImage.style["color"] = "white";
+		checkImage.style["background-color"] = "blue";
+	}
+
+	colTypeImage.appendChild(checkImage);
+
+	var colTypeAudio = document.createElement('div');
+	colTypeAudio.setAttribute('class','col col-12');
+
+	var checkAudio = document.createElement('button');
+	checkAudio.setAttribute('class','checkbtn');
+	checkAudio.setAttribute('type','button');
+	checkAudio.setAttribute('name','checkType');
+	checkAudio.setAttribute('value','audio');
+	checkAudio.setAttribute('onclick','toggleCheck(this);');
+	checkAudio.innerHTML = "audio";
+
+	if(tagTypes & 4) {
+		checkAudio.setAttribute('data-checked','true');
+		checkAudio.style["color"] = "white";
+		checkAudio.style["background-color"] = "blue";
+	}
+
+	colTypeAudio.appendChild(checkAudio);
+
+	var colTypeText = document.createElement('div');
+	colTypeText.setAttribute('class','col col-12');
+
+	var checkText = document.createElement('button');
+	checkText.setAttribute('class','checkbtn');
+	checkText.setAttribute('type','button');
+	checkText.setAttribute('name','checkType');
+	checkText.setAttribute('value','text');
+	checkText.setAttribute('onclick','toggleCheck(this);');
+	checkText.innerHTML = "text";
+
+	if(tagTypes & 8) {
+		checkText.setAttribute('data-checked','true');
+		checkText.style["color"] = "white";
+		checkText.style["background-color"] = "blue";
+	}
+
+	colTypeText.appendChild(checkText);
+
+	var colTypeMath = document.createElement('div');
+	colTypeMath.setAttribute('class','col col-12');
+
+	var checkMath = document.createElement('button');
+	checkMath.setAttribute('class','checkbtn');
+	checkMath.setAttribute('type','button');
+	checkMath.setAttribute('name','checkType');
+	checkMath.setAttribute('value','math');
+	checkMath.setAttribute('onclick','toggleCheck(this);');
+	checkMath.innerHTML = "math";
+
+	if(tagTypes & 16) {
+		checkMath.setAttribute('data-checked','true');
+		checkMath.style["color"] = "white";
+		checkMath.style["background-color"] = "blue";
+	}
+
+	colTypeMath.appendChild(checkMath);
+
+	var colTypeCustom = document.createElement('div');
+	colTypeCustom.setAttribute('class','col col-12');
+
+	var checkCustom = document.createElement('button');
+	checkCustom.setAttribute('class','checkbtn');
+	checkCustom.setAttribute('type','button');
+	checkCustom.setAttribute('name','checkType');
+	checkCustom.setAttribute('value','topic');
+	checkCustom.setAttribute('onclick','toggleCheck(this);');
+	checkCustom.innerHTML = "topic";
+
+	if(tagTypes & 32) {
+		checkCustom.setAttribute('data-checked','true');
+		checkCustom.style["color"] = "white";
+		checkCustom.style["background-color"] = "blue";
+	}
+
+	colTypeCustom.appendChild(checkCustom);
+
+	/* buttons for filter bar */
 	var colFilterBtn = document.createElement('div');
 	colFilterBtn.setAttribute('class','col col-15');
 
-	var btnFilterApply = btnSubmit('Apply Filter','','none');
-	btnFilterApply.className += " savebar";
+	function exploreWithFilter() {
+		var form = document.getElementById('filterForm');
+
+		/* get sort value */
+		var sortValue;
+		var sortRadioLength = form.elements['sort'].length;
+		for(var k = 0; k < sortRadioLength; k++) {
+			if(form.elements['sort'][k].checked) {
+				sortValue = form.elements['sort'][k].value;
+			}
+		}
+
+		/* get tag value */
+		var tagValue = form.elements['tag'].options[form.elements['tag'].selectedIndex].value;
+
+		/* get array of block types selected */
+		var typeValue = [];
+		var checkBtnLength = form.elements['checkType'].length;
+		for(k = 0; k < checkBtnLength; k++) {
+			if(form.elements['checkType'][k].getAttribute('data-checked') === "true") {
+				typeValue.push(form.elements['checkType'][k].value);
+			}
+		}
+
+		/* create binary value of block types selected */
+		var typeResult = 0;
+		typeValue.forEach(function(item,index) {
+			typeResult += globalScope.tagKeys.get(item);
+		});
+
+		/* create final binary tag of block types selected & tag category */
+		var tagResult = ((globalScope.tagKeys.get(tagValue) | typeResult) >>> 0).toString(2);
+
+		/* set these into hidden divs for retrieval */
+		var content = document.getElementById('queryContent').value;
+		var subject = document.getElementById('querySubject').value;
+		var category = document.getElementById('queryCategory').value;
+		var topic = document.getElementById('queryTopic').value;
+
+		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&tags=",tagResult];
+
+		window.location = createURL(queryStringArray.join(""));
+	}
+
+	var btnFilterApply = btnSubmit('Apply Filter',exploreWithFilter,'none');
+	btnFilterApply.className += " filterbarbtn";
 	colFilterBtn.appendChild(btnFilterApply);
 
 	var colExpand = document.createElement('div');
@@ -780,13 +1049,28 @@ function barFilter() {
 	}
 
 	var btnExpandAll = btnSubmit('Expand All',expandAll,'none');
-	btnExpandAll.className += " savebar";
+	btnExpandAll.className += " filterbarbtn";
 	colExpand.appendChild(btnExpandAll);
 
-	row.appendChild(colRating);
-	row.appendChild(colRanks);
-	row.appendChild(colViews);
-	row.appendChild(colDate);
+	/* set some row styles */
+	topRow.style["margin-left"] = "8px;";
+	bottomRow.style["margin-left"] = "8px;";
+
+	topRow.appendChild(colTags);
+	topRow.appendChild(colRating);
+	topRow.appendChild(colRanks);
+	topRow.appendChild(colViews);
+	topRow.appendChild(colEdited);
+	topRow.appendChild(colCreated);
+	bottomRow.appendChild(colTypeVideo);
+	bottomRow.appendChild(colTypeImage);
+	bottomRow.appendChild(colTypeAudio);
+	bottomRow.appendChild(colTypeText);
+	bottomRow.appendChild(colTypeMath);
+	bottomRow.appendChild(colTypeCustom);
+	formDiv.appendChild(topRow);
+	formDiv.appendChild(bottomRow);
+	row.appendChild(formDiv);
 	row.appendChild(colFilterBtn);
 	row.appendChild(colExpand);
 
@@ -1271,13 +1555,15 @@ function rowProfileSingle(field,description,data) {
 
 	Parameters:
 
-		none
+		logstatus - boolean, whether the user is logged in or out
+		csct - array, content subject category topic
+		data - string, @@ delineated search data
 
 	Returns:
 
 		nothing - *
 */
-function pageExplore(logstatus,data) {
+function pageExplore(logstatus,csct,data) {
 	var main = document.getElementById('content');
 
 	/* create and append menu based on log status */
@@ -1289,8 +1575,38 @@ function pageExplore(logstatus,data) {
 	}
 	main.appendChild(menu);
 
+	/* determine bp or lg */
+	var prefixResource;
+	if(csct[0] === "bp") {
+		prefixResource = "/page";
+	} else if(csct[0] === "lg") {
+		prefixResource = "/guide";
+	} else {
+		prefixResource = "/error";
+	}
+
+	/* append content subject category topic to hidden divs */
+	var contentHidden = document.createElement('input');
+	contentHidden.setAttribute('type','hidden');
+	contentHidden.setAttribute('value',csct[0]);
+	contentHidden.setAttribute('id','queryContent');
+	var subjectHidden = document.createElement('input');
+	subjectHidden.setAttribute('type','hidden');
+	subjectHidden.setAttribute('value',csct[1]);
+	subjectHidden.setAttribute('id','querySubject');
+	var categoryHidden = document.createElement('input');
+	categoryHidden.setAttribute('type','hidden');
+	categoryHidden.setAttribute('value',csct[2]);
+	categoryHidden.setAttribute('id','queryCategory');
+	var topicHidden = document.createElement('input');
+	topicHidden.setAttribute('type','hidden');
+	topicHidden.setAttribute('value',csct[3]);
+	topicHidden.setAttribute('id','queryTopic');
+
+	main.appendChild(contentHidden).appendChild(subjectHidden).appendChild(categoryHidden).appendChild(topicHidden);
+
 	/* create filter menu */
-	var filter = barFilter();
+	var filter = barFilter(csct[4],csct[5]);
 	main.appendChild(filter);
 
 	/* create box template */
@@ -1298,22 +1614,56 @@ function pageExplore(logstatus,data) {
 
 	/* loop through links & insert data into boxes */
 	var index = 0;
-	while(index < 10) {
+	var searchCount = data.length;
+	while(index < searchCount) {
 		var newBox = box.cloneNode(true);
 		newBox.setAttribute('id',index);
 
-		newBox.querySelector(".box-title").innerHTML = "<a href=''>Metric Modulation In Early 90's Heavy Metal</a>";
-		newBox.querySelector(".box-author").innerHTML = "<a href=''>author</a>";
-		var percentage = 65;
-		newBox.querySelector(".rating-bar").className += " w" + (percentage - (percentage % 10));
-		newBox.querySelector(".rating-bar").style = "width:" + percentage + "%";
-		newBox.querySelector(".star").checked = false;
-		newBox.querySelector(".box-image").innerHTML = "Image";
-		newBox.querySelector(".box-blurb").innerHTML = "Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest!";
-		newBox.querySelector(".box-created").innerHTML = "created: 00/00/00";
-		newBox.querySelector(".box-edited").innerHTML = "edited: 00/00/00";
-		newBox.querySelector(".box-ranks").innerHTML = "ranks: #########";
-		newBox.querySelector(".box-views").innerHTML = "views: #########";
+		/// still need author name, user's bookmarks
+
+		/* page name */
+		var pageURL = createURL(prefixResource + "?a=" + data[index].uid + "&p=" + data[index].pid);
+		var pageLink = document.createElement('a');
+		pageLink.setAttribute('href',pageURL);
+		pageLink.innerHTML = data[index].pagename;
+		newBox.querySelector(".box-title").appendChild(pageLink);
+
+		/* author */
+		newBox.querySelector(".box-author").innerHTML = ""; /// AUTHOR
+
+		/* rating */
+		newBox.querySelector(".rating-bar").className += " w" + (data[index].rating - (data[index].rating % 10));
+		newBox.querySelector(".rating-bar").style = "width:" + data[index].rating + "%";
+
+		/* bookmark */
+		newBox.querySelector(".star").checked = false; /// BOOKMARK
+
+		/* image */
+		var pageImage = document.createElement('img');
+		pageImage.setAttribute('class','explore-img');
+		pageImage.setAttribute('src',data[index].imageurl);
+		newBox.querySelector(".box-image").appendChild(pageImage);
+
+		/* blurb */
+		newBox.querySelector(".box-blurb").innerHTML = data[index].blurb;
+
+		/* created date */
+		var cDateArray = data[index].created.split(/[- :T]/);
+		var createdDate = cDateArray[1] + "/" + cDateArray[2] + "/" + cDateArray[0];
+		newBox.querySelector(".box-created").innerHTML = "created: " + createdDate;
+
+		/* edited date */
+		var eDateArray = data[index].edited.split(/[- :T]/);
+		var editedDate = eDateArray[1] + "/" + eDateArray[2] + "/" + eDateArray[0];
+		newBox.querySelector(".box-edited").innerHTML = "edited: " + editedDate;
+
+		/* ranks */
+		newBox.querySelector(".box-ranks").innerHTML = "ranks: " + data[index].ranks;
+
+		/* views */
+		newBox.querySelector(".box-views").innerHTML = "views: " + data[index].views;
+
+		/* append the new box */
 		main.appendChild(newBox);
 		index++;
 	}
@@ -1463,7 +1813,6 @@ function pageProfile(profiledata) {
 	/* grab the main div and append all of these elements */
 	var main = document.getElementById('content');
 	main.appendChild(menu);
-	main.appendChild(document.createElement('hr')); /// REMOVE THIS AFTER STYLING
 	main.appendChild(profilediv);
 }
 

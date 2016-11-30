@@ -159,6 +159,45 @@ exports.searchPagename = function(connection,uid,pagename) {
 	return promise;
 };
 
+exports.getPageContent = function(connection,content,subject,category,topic,sort,tags) {
+	var promise = new Promise(function(resolve,reject) {
+		/* ensure spaces are removed & create redundant table name */
+		var tableArray = [];
+		if(content) {
+			tableArray.push(content);
+			if(subject) {
+				tableArray.push(subject.replace(/ /g,""));
+				if(category) {
+					tableArray.push(category.replace(/ /g,""));
+					if(topic) {
+						tableArray.push(topic.replace(/ /g,""));
+					}
+				}
+			} else {
+				resolve(-1);
+			}
+		} else {
+			resolve(-1);
+		}
+		var tableName = tableArray.join("_");
+
+		/* create the qry */
+		var qryArray = ["SELECT uid,pid,pagename,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tags," = tags & ",tags," ORDER BY ",sort," ASC LIMIT 50"];
+		var qry = qryArray.join("");
+
+		/* query the database */
+		connection.query(qry,function(err,rows,fields) {
+			if(err) {
+				reject(err);
+			} else {
+				resolve(rows);
+			}
+		});
+	});
+
+	return promise;
+};
+
 /*
 	Function: getPageSettings
 
@@ -224,6 +263,16 @@ exports.getPageSubjectCategoryTopic = function(connection,uid,pid) {
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
+					if(rows[0].subject === null) {
+						rows[0].subject = '';
+						rows[0].category = '';
+						rows[0].topic = '';
+					} else if (rows[0].category === null) {
+						rows[0].category = '';
+						rows[0].topic = '';
+					} else if (rows[0].topic === null) {
+						rows[0].topic = '';
+					}
 					resolve([rows[0].subject,rows[0].category,rows[0].topic]);
 				} else {
 					resolve([]);

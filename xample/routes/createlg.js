@@ -45,7 +45,7 @@ exports.createlg = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
                 request.connection.destroy();
-                analytics.journal(true,199,"Overload Attack!",0,analytics.__line,__function,__filename);
+                analytics.journal(true,199,"Overload Attack!",0,global.__stack[1].getLineNumber(),__function,__filename);
             }
         });
 
@@ -53,7 +53,7 @@ exports.createlg = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
-                    analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                 }
 
                 var POST = qs.parse(body);
@@ -70,11 +70,11 @@ exports.createlg = function(request,response) {
                     } else {
                         /* insert page into user's page table */
 
-                        var qryUser = "INSERT INTO g_" + uid + " (guidename,status,created,edited,ranks,views) VALUES (" + guidename + ",1,NOW(),NOW(),0,0)";
+                        var qryUser = "INSERT INTO g_" + uid + " (guidename,status,tags,created,edited,ranks,views,rating) VALUES (" + guidename + ",1,0,NOW(),NOW(),0,0,0)";
                         connection.query(qryUser,function(err,rows,fields) {
                             if (err) {
                                 response.end('err');
-                                analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
+                                analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else {
                                 /* grab the gid of the new guide name from the user's guide table */
                                 var promiseGid = querydb.searchGid(connection,uid,guidename);
@@ -82,7 +82,7 @@ exports.createlg = function(request,response) {
                                 promiseGid.then(function(success) {
                                     if(success === -1) {
                                         response.end('err');
-                                        analytics.journal(true,203,"gid not found after page insert",uid,analytics.__line,__function,__filename);
+                                        analytics.journal(true,203,"gid not found after page insert",uid,global.__stack[1].getLineNumber(),__function,__filename);
                                     } else {
                                         var gid = success;
 
@@ -92,7 +92,7 @@ exports.createlg = function(request,response) {
                                         connection.query(qryGuide,function(err,rows,fields) {
 											if (err) {
 												response.end('err');
-												analytics.journal(true,204,err,uid,analytics.__line,__function,__filename);
+												analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 											}
 										});
 
@@ -102,23 +102,23 @@ exports.createlg = function(request,response) {
 										connection.query(qryTemp,function(err,rows,fields) {
 											if (err) {
 												response.end('err');
-												analytics.journal(true,205,err,uid,analytics.__line,__function,__filename);
+												analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 											}
 										});
 
 										response.end(gid.toString());
-										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+										analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 									}
 								},function(error) {
 									response.end('err');
-									analytics.journal(true,202,error,uid,analytics.__line,__function,__filename);
+									analytics.journal(true,202,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								});
 							}
 						});
 					}
 				},function(error) {
 					response.end('err');
-					analytics.journal(true,200,error,0,analytics.__line,__function,__filename);
+					analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
 				});
                 connection.release();
             });

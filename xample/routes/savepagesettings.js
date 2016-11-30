@@ -45,7 +45,7 @@ exports.savepagesettings = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,analytics.__line,__function,__filename);
+				analytics.journal(true,199,"Overload Attack!",uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -53,7 +53,7 @@ exports.savepagesettings = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
-                    analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                 }
 
                 var POST = qs.parse(body);
@@ -69,15 +69,18 @@ exports.savepagesettings = function(request,response) {
 				var imageurl = connection.escape(POST.i);
 				var blurb = connection.escape(POST.b);
 
+				/// add check that subject category topic actually exists
+				/// extend this route for learning guides
+
 				if(subjectNoSQ === "") {
 					response.end('nosubjectnotsaved');
-					analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+					analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 				} else {
 					var promise = querydb.getPageSubjectCategoryTopic(connection,uid,pid);
 
 					promise.then(function(a_data) {
 						if(a_data.length < 1) {
-							analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
+							analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 							response.end("databaseerror");
 						} else {
 							/* update user's table */
@@ -86,9 +89,10 @@ exports.savepagesettings = function(request,response) {
 							connection.query(qryUpdate,function(err,rows,fields) {
 								if(err) {
 									response.end('err');
-									analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
+									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
-									var redundantTableArray = ["qp_",subjectNoSQ];
+									/* get redundant table name */
+									var redundantTableArray = ["bp_",subjectNoSQ];
 									if(categoryNoSQ !== "") {
 										redundantTableArray.push("_");
 										redundantTableArray.push(categoryNoSQ);
@@ -99,10 +103,12 @@ exports.savepagesettings = function(request,response) {
 									}
 									var redundantTableName = redundantTableArray.join("");
 
+									/* search if this page is already saved in this redundant table */
 									var promiseRed = querydb.searchRedundantTable(connection,uid,pid,redundantTableName);
 
 									promiseRed.then(function(result) {
 
+										/* if it exists, update, otherwise, insert into it */
 										var qryCopy;
 										if(result) {
 											qryCopy = `UPDATE ${redundantTableName}, p_${uid} SET ${redundantTableName}.pagename=p_${uid}.pagename,${redundantTableName}.tags=p_${uid}.tags,${redundantTableName}.created=p_${uid}.created,${redundantTableName}.edited=p_${uid}.edited,${redundantTableName}.ranks=p_${uid}.ranks,${redundantTableName}.views=p_${uid}.views,${redundantTableName}.imageurl=p_${uid}.imageurl,${redundantTableName}.blurb=p_${uid}.blurb WHERE ${redundantTableName}.uid=${uid} AND ${redundantTableName}.pid=${pid};`;
@@ -113,43 +119,53 @@ exports.savepagesettings = function(request,response) {
 										connection.query(qryCopy,function(err,rows,fields) {
 											if(err) {
 												response.end('err');
-												analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
+												analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 											} else {
-												/* determine change in sub,cat,top. */
-												var prevRedundantTableArray = ["qp_",a_data[0].replace(/ /g,"")];
-												if(a_data[1].replace(/ /g,"")) {
-													prevRedundantTableArray.push("_");
-													prevRedundantTableArray.push(a_data[1].replace(/ /g,""));
-													if(a_data[2].replace(/ /g,"")) {
+												/* get previous redundant table name, if it exists */
+												var prevRedundantTable = "";
+												if(a_data[0]) {
+													var prevRedundantTableArray = ["bp_",a_data[0].replace(/ /g,"")];
+													if(a_data[1].replace(/ /g,"")) {
 														prevRedundantTableArray.push("_");
-														prevRedundantTableArray.push(a_data[2].replace(/ /g,""));
+														prevRedundantTableArray.push(a_data[1].replace(/ /g,""));
+														if(a_data[2].replace(/ /g,"")) {
+															prevRedundantTableArray.push("_");
+															prevRedundantTableArray.push(a_data[2].replace(/ /g,""));
+														}
 													}
+													prevRedundantTable = prevRedundantTableArray.join("");
 												}
-												var prevRedundantTable = prevRedundantTableArray.join("");
 
-												if(redundantTableName !== prevRedundantTable) {
+												/* delete row from previous redundant table if needed */
+												if(prevRedundantTable && redundantTableName !== prevRedundantTable) {
 													/* delete row from previous redundant table */
 													var qryDeletePrev = "DELETE FROM " + prevRedundantTable + " WHERE uid=" + uid + " AND pid=" + pid;
 
 													connection.query(qryDeletePrev,function(err,rows,fields) {
 														if(err) {
-															analytics.journal(true,203,err,uid,analytics.__line,__function,__filename);
+															response.end('err');
+															analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+														} else {
+															response.end('settingssaved');
+															analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 														}
 													});
+												} else {
+													response.end('settingssaved');
+													analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 												}
-												response.end('settingssaved');
-												analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+
 											}
 										});
 									},function(err) {
-										analytics.journal(true,204,err,uid,analytics.__line,__function,__filename);
+										analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 										response.end("databaseerror");
 									});
 								}
 							});
 						}
 					},function(err) {
-						analytics.journal(true,205,err,uid,analytics.__line,__function,__filename);
+						analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						response.end("databaseerror");
 					});
 				}

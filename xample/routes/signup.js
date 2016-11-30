@@ -39,7 +39,7 @@ exports.signup = function(request,response) {
         /* prevent overload attacks */
         if (body.length > 1e6) {
 			request.connection.destroy();
-			analytics.journal(true,199,"Overload Attack!",0,analytics.__line,__function,__filename);
+			analytics.journal(true,199,"Overload Attack!",0,global.__stack[1].getLineNumber(),__function,__filename);
 		}
     });
 
@@ -47,7 +47,7 @@ exports.signup = function(request,response) {
     request.on('end',function() {
         pool.getConnection(function(err,connection) {
             if(err) {
-                analytics.journal(true,221,err,0,analytics.__line,__function,__filename);
+                analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);
             }
 
             var POST = qs.parse(body);
@@ -78,7 +78,7 @@ exports.signup = function(request,response) {
 
 						if (err) {
 							response.end('err');
-							analytics.journal(true,201,err,0,analytics.__line,__function,__filename);
+							analytics.journal(true,201,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
                             var qryUid = "SELECT uid FROM Users WHERE username = " + username;
 
@@ -86,17 +86,17 @@ exports.signup = function(request,response) {
                             connection.query(qryUid,function(err,rows,fields) {
 								if (err) {
 									response.end('err');
-									analytics.journal(true,202,err,0,analytics.__line,__function,__filename);
+									analytics.journal(true,202,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
 									var uid = rows[0].uid;
 
-									var qryBlockPageTable = "CREATE TABLE p_" + uid + " (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500))";
+									var qryBlockPageTable = "CREATE TABLE p_" + uid + " (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128), blurb VARCHAR(500))";
 
 									/* create the user's page table */
 									connection.query(qryBlockPageTable,function(err,rows,fields) {
 										if (err) {
 											response.end('err');
-											analytics.journal(true,203,err,0,analytics.__line,__function,__filename);
+											analytics.journal(true,203,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 										} else {
 											var qryLearningGuideTable = "CREATE TABLE g_" + uid + " (gid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, guidename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500))";
 
@@ -104,18 +104,18 @@ exports.signup = function(request,response) {
 											connection.query(qryLearningGuideTable,function(err,rows,fields) {
 												if (err) {
 													response.end('err');
-													analytics.journal(true,204,err,0,analytics.__line,__function,__filename);
+													analytics.journal(true,204,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 												} else {
 													/* make the user's directory to store pages in later */
 													request.session.uid = uid;
 													fs.mkdir(request.app.get('fileRoute') + "xm/" + uid,function(err) {
 														/* don't consider existing folders as a mkdir error */
 														if(err && err.code !== "EEXIST") {
-															analytics.journal(true,120,err,0,analytics.__line,__function,__filename);
+															analytics.journal(true,120,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 														}
 													});
 													response.end('success');
-													analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+													analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 												}
 											});
 										}
@@ -128,7 +128,7 @@ exports.signup = function(request,response) {
 
 			},function(error) {
 				response.end('err');
-				analytics.journal(true,200,error,0,analytics.__line,__function,__filename);
+				analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
 			});
             connection.release();
         });

@@ -36,5 +36,5 @@ exports.start = function(request,response) {
 	}
 
 	loader.loadPage(request,response,"<script>pageLanding(" + logstatus + ");</script>");
-	analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+	analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 };

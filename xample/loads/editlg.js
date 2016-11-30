@@ -57,7 +57,7 @@ exports.editlg = function(request,response) {
 
         pool.getConnection(function(err,connection) {
             if(err) {
-                analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
             }
 
             var promise = querydb.searchPageStatus(connection,uid,gid);
@@ -73,7 +73,7 @@ exports.editlg = function(request,response) {
 					connection.query(qry,function(err,rows,fields) {
 						if(err) {
 							response.end('err');
-							analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
+							analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
 							/* sql query is undefined if a user tries to edit page with invalid gid */
 							if(typeof rows[0] === 'undefined') {
@@ -86,7 +86,7 @@ exports.editlg = function(request,response) {
 								connection.query(qry,function(err,rows,fields) {
 									if(err) {
 										response.end('err');
-										analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
+										analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 									} else {
 										var guidedata = gid + "," + guidename;
 
@@ -109,7 +109,7 @@ exports.editlg = function(request,response) {
 
 										/* load the edit page with the page data */
 										loader.loadLearningGuidePage(request,response,"<script>pageEditLG('" + guidedata + "');</script>");
-										analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+										analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 									}
 								});
 							}
@@ -119,7 +119,7 @@ exports.editlg = function(request,response) {
 				}
 			},function(error) {
 				response.end('err');
-				analytics.journal(true,200,error,uid,analytics.__line,__function,__filename);
+				analytics.journal(true,200,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			});
         });
 	}

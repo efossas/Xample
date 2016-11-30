@@ -37,14 +37,14 @@ exports.page = function(request,response) {
     } else {
         pool.getConnection(function(err,connection) {
             if(err) {
-                analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
             }
 			var qry = "SELECT pagename FROM p_" + uid + " WHERE pid=" + pid;
 
 			connection.query(qry,function(err,rows,fields) {
 				if(err) {
 					response.end('err');
-					analytics.journal(true,201,err,uid,analytics.__line,__function,__filename);
+					analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 				} else {
 					/* sql query is undefined if a user tries to edit page with invalid pid */
 					if(typeof rows[0] === 'undefined') {
@@ -57,7 +57,7 @@ exports.page = function(request,response) {
 						connection.query(qry,function(err,rows,fields) {
 							if(err) {
 								response.end('err');
-								analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
+								analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 							} else {
 								var pagedata = pid + "," + pagename;
 
@@ -80,7 +80,7 @@ exports.page = function(request,response) {
 
 								/* load the edit page with the page data */
 								loader.loadBlockPage(request,response,"<script>pageShow('" + pagedata + "');</script>");
-								analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+								analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 							}
 						});
 					}

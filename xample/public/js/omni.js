@@ -120,7 +120,7 @@ function emptyDiv(node) {
 }
 
 /*
-	Function: emptyDiv
+	Function: expandRow
 
 	This is only used on the explore page now, after much frustration, a dynamic function could not be attached to the boxes. This could be altered for functionality elsewhere though so it's not such a waste of space.
 
@@ -138,6 +138,31 @@ function expandRow(btn) {
 		extraInfo.style = "display:none;visibility:hidden;";
 	} else {
 		extraInfo.style = "display:block;visibility:visible;";
+	}
+}
+
+/*
+	Function: emptyDiv
+
+	This is used to toggle a checkbtn (view class in styles) between check and not checked.
+
+	Parameters:
+
+		btn - object, the button being clicked
+
+	Returns:
+
+		nothing - *
+*/
+function toggleCheck(btn) {
+	if(btn.getAttribute('data-checked') === 'true') {
+		btn.setAttribute('data-checked','false');
+		btn.style["color"] = "black";
+		btn.style["background-color"] = "buttonface";
+	} else {
+		btn.setAttribute('data-checked','true');
+		btn.style["color"] = "white";
+		btn.style["background-color"] = "blue";
 	}
 }
 
@@ -471,14 +496,14 @@ function barStatus(pid) {
 
 	/* revert button */
 	var revert = btnSubmit('Revert',"revertBlocks()",'none');
-	revert.className += " savebar";
+	revert.className += " savebarbtn";
 	var colRevert = document.createElement("div");
 	colRevert.setAttribute("class","col col-15");
 	colRevert.appendChild(revert);
 
 	/* save button */
 	var save = btnSubmit("Save","saveBlocks(true)","none");
-	save.className += " savebar";
+	save.className += " savebarbtn";
 	var colSave = document.createElement("div");
 	colSave.setAttribute("class","col col-15");
 	colSave.appendChild(save);

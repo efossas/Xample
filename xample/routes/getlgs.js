@@ -32,13 +32,13 @@ exports.getlgs = function(request,response) {
 
     pool.getConnection(function(err,connection) {
         if(err) {
-            analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+            analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
         }
 
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
 				response.end('err');
-				analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
+				analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			} else {
 				var guides = "";
 
@@ -57,7 +57,7 @@ exports.getlgs = function(request,response) {
 				}
 
 				response.end(guides);
-				analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+				analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
 		});
         connection.release();

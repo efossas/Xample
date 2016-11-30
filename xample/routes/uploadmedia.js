@@ -61,11 +61,11 @@ exports.uploadmedia = function(request,response) {
                 promise.then(function(success) {
                     /* respond with the absolute url to the uploaded file */
                     response.end(request.root + success);
-                    analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+                    analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                 },function(error) {
                     response.end('convertmediaerr');
                     /// remove bad media
-                    analytics.journal(true,110,error,uid,analytics.__line,__function,__filename);
+                    analytics.journal(true,110,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
                 });
             });
         });

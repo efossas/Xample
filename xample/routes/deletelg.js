@@ -43,7 +43,7 @@ exports.deletelg = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,analytics.__line,__function,__filename);
+				analytics.journal(true,199,"Overload Attack!",uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -51,7 +51,7 @@ exports.deletelg = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
-                    analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                     response.end('err');
                 } else {
                     var POST = qs.parse(body);
@@ -71,11 +71,11 @@ exports.deletelg = function(request,response) {
                     connection.query(qryDeleteRow,function(err,rows,fields) {
                         if(err) {
                             response.end('err');
-                            analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
+                            analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
                             if(firstQryComplete && secondQryComplete) {
                                 response.end("success");
-                                analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+                                analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else if(firstQryComplete) {
                                 secondQryComplete = true;
                             } else {
@@ -88,11 +88,11 @@ exports.deletelg = function(request,response) {
                     connection.query(qryDeletePermGuide,function(err,rows,fields) {
                         if(err) {
                             response.end('err');
-                            analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
+                            analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
                             if(firstQryComplete && secondQryComplete) {
                                 response.end("success");
-                                analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+                                analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else if(firstQryComplete) {
                                 secondQryComplete = true;
                             } else {
@@ -105,11 +105,11 @@ exports.deletelg = function(request,response) {
                     connection.query(qryDeleteTempGuide,function(err,rows,fields) {
                         if(err) {
                             response.end('err');
-                            analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
+                            analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
                             if(firstQryComplete && secondQryComplete) {
                                 response.end("success");
-                                analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+                                analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else if(firstQryComplete) {
                                 secondQryComplete = true;
                             } else {
