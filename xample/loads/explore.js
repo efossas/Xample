@@ -37,6 +37,7 @@ exports.explore = function(request,response) {
 	var topic = request.query.topic;
 	var sort = request.query.sort;
 	var tags = request.query.tags;
+	var keywords = request.query.keywords;
 
 	/* redirect users if logged out or no page id provided */
 	if(!content && !subject) {
@@ -61,15 +62,18 @@ exports.explore = function(request,response) {
 				if(!tags) {
 					tags = 0;
 				}
+				if(!keywords) {
+					keywords = "";
+				}
 
-				var promise = querydb.getPageContent(connection,content,subject,category,topic,sort,tags);
+				var promise = querydb.getPageContent(connection,content,subject,category,topic,sort,tags,keywords);
 
 				promise.then(function(data) {
 					/* convert array into string */
 					var exploredata = JSON.stringify(data);
 
 					/* create content subject category topic tags array as string, doing it this way to avoid nulls */
-					var csctArray = [content,subject,category,topic,sort,tags];
+					var csctArray = [content,subject,category,topic,sort,tags,keywords];
 					var csctString = "['" + csctArray.join("','") + "']";
 
 					/* finished response */

@@ -86,8 +86,10 @@ a.savebar {
 	border-radius: 2px;
 
 	width: 100%;
-	padding: 4px 8px 4px 8px;
-	margin: 0;
+	margin-top: 8px;
+	margin-bottom: 0px;
+	margin-left: 0px;
+	padding: 6px 8px 6px 8px;
 	line-height: 14px;
 	text-align: center;
 
@@ -129,5 +131,8 @@ a.savebar {
 
 /* Mobile Size */
 @media screen and (max-width: $site-width) {
+
     a.btn { width: 100%; }
+
+	.checkbtn { margin-top: 0px; }
 }

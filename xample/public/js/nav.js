@@ -149,12 +149,17 @@ function barLog() {
 	}
 
 	/* create expand buttons */
+	var explore = btnLink('Explore',createURL('/'),'none');
 	var logBtn = btnSubmit('Log In',expandLog,'none');
 	var signBtn = btnSubmit('Sign Up',expandSign,'none');
 
 	/* create columns */
+	var colExplore = document.createElement("div");
+	colExplore.setAttribute("class","col col-15");
+	colExplore.appendChild(explore);
+
 	var colEmpty = document.createElement('div');
-	colEmpty.setAttribute('class','col col-70');
+	colEmpty.setAttribute('class','col col-55');
 
 	var colLogBtn = document.createElement('div');
 	colLogBtn.setAttribute('class','col col-15');
@@ -165,6 +170,7 @@ function barLog() {
 	colSignBtn.appendChild(signBtn);
 
 	/* add columns to top row */
+	rowTop.appendChild(colExplore);
 	rowTop.appendChild(colEmpty);
 	rowTop.appendChild(colLogBtn);
 	rowTop.appendChild(colSignBtn);
@@ -182,13 +188,14 @@ function barLog() {
 
 	Parameters:
 
-		* - none
+		idname - the id that will be attached to the search div.
+		keywords - existing words to be placed in as value.
 
 	Returns:
 
 		success - html node, search div
 */
-function barSearch() {
+function barSearch(idname,keywords) {
 	/* create the search input */
 	var searchDiv = document.createElement('div');
 	searchDiv.setAttribute('class','search-bar');
@@ -200,9 +207,18 @@ function barSearch() {
 	searchCol.setAttribute('class','col col-100');
 
 	var searchBar = document.createElement('input');
+	searchBar.setAttribute('id',idname);
 	searchBar.setAttribute('class','text-input');
 	searchBar.setAttribute('type','search');
 	searchBar.setAttribute('placeholder','Search');
+
+	/* add existing words to search input */
+	var words = keywords;
+	if(!keywords) {
+		words = '';
+	}
+
+	searchBar.setAttribute('value',words);
 
 	searchCol.appendChild(searchBar);
 	searchRow.appendChild(searchCol);
@@ -694,7 +710,7 @@ function dashExplore(exploreHeader,linkRoute) {
 
 		success - html node, filter form
 */
-function barFilter(sort,tags) {
+function barFilter(sort,tags,keywords) {
 	var row = document.createElement('div');
 	row.setAttribute('class','row');
 
@@ -708,159 +724,35 @@ function barFilter(sort,tags) {
 	topRow.setAttribute('class','row');
 
 	/* create category tag section */
-	var colTags = document.createElement('div');
-	colTags.setAttribute('class','col col-25');
+	var colSort = document.createElement('div');
+	colSort.setAttribute('class','col col-28');
 
-	var TagSelect = document.createElement('select');
-	TagSelect.setAttribute('id','tag');
+	var SortSelect = document.createElement('select');
+	SortSelect.setAttribute('id','sort');
 
-	globalScope.tagKeys = new Map([["none",0],["video",1],["audio",2],["image",4],["text",8],["math",16],["topic",32],["",64],["",128],["aerospace",256],["agriculture",512],["astronomy",1024],["business",2048],["civil-environmental",4096],["communications",8192],["construction",16384],["education",32768],["electrical",65536],["energy-nuclear-petroleum",131072],["finance",262144],["health",524288],["information",1048576],["manufacturing",2097152],["materials",4194304],["mechanical",8388608],["natural-resources",16777216],["planetary-earth",33554432],["retail-wholesale",67108864],["service",134217728],["transportation",268435456],["",536870912],["",1073741824],["",2147483648],["",4294967296]]);
+	var options = ["rating","ranks","views","edited","created"];
 
-	var options = ["none","aerospace","agriculture","astronomy","business","civil-environmental","communications","construction","education","electrical","energy-nuclear-petroleum","finance","health","information","manufacturing","materials","mechanical","naturalresources","planetary-earth","retail-wholesale","service","transportation"];
-
+	var sortIndex = 0;
 	options.forEach(function(item,index) {
 		var currentOption = document.createElement('option');
 		currentOption.setAttribute('value',item);
 		currentOption.innerHTML = item;
-		TagSelect.appendChild(currentOption);
+		SortSelect.appendChild(currentOption);
+
+		if(item === sort) {
+			sortIndex = index;
+		}
 	});
 
-	colTags.appendChild(TagSelect);
+	colSort.appendChild(SortSelect);
 
-	/* set selected index for tag category */
-	var tagIndex;
-	var tagCategory = Number(tags) & 4294967040;
-	if(tagCategory) {
-		tagIndex = Math.log2(tagCategory) - 2;
-	} else {
-		tagIndex = 0;
-	}
+	SortSelect.selectedIndex = sortIndex;
 
-	TagSelect.selectedIndex = tagIndex;
+	/* get convert tag binary to decimal number */
+	var tagTypes = parseInt(tags,2);
 
-	/* create sort radio buttons */
-	var colRating = document.createElement('div');
-	colRating.setAttribute('class','col col-14');
-
-	var Rating = document.createElement('input');
-	Rating.setAttribute('type','radio');
-	Rating.setAttribute('name','sort');
-	Rating.setAttribute('id','rating');
-	Rating.setAttribute('value','rating');
-
-	var RatingText = document.createElement('span');
-	RatingText.innerHTML = "Rating";
-
-	var RatingLabel = document.createElement('label');
-	RatingLabel.setAttribute('for','rating');
-	RatingLabel.appendChild(Rating);
-	RatingLabel.appendChild(RatingText);
-
-	colRating.appendChild(RatingLabel);
-
-	var colRanks = document.createElement('div');
-	colRanks.setAttribute('class','col col-14');
-
-	var Ranks = document.createElement('input');
-	Ranks.setAttribute('type','radio');
-	Ranks.setAttribute('name','sort');
-	Ranks.setAttribute('id','ranks');
-	Ranks.setAttribute('value','ranks');
-
-	var RanksText = document.createElement('span');
-	RanksText.innerHTML = "Ranks";
-
-	var RanksLabel = document.createElement('label');
-	RanksLabel.setAttribute('for','ranks');
-	RanksLabel.appendChild(Ranks);
-	RanksLabel.appendChild(RanksText);
-
-	colRanks.appendChild(RanksLabel);
-
-	var colViews = document.createElement('div');
-	colViews.setAttribute('class','col col-14');
-
-	var Views = document.createElement('input');
-	Views.setAttribute('type','radio');
-	Views.setAttribute('name','sort');
-	Views.setAttribute('id','views');
-	Views.setAttribute('value','views');
-
-	var ViewsText = document.createElement('span');
-	ViewsText.innerHTML = "Views";
-
-	var ViewsLabel = document.createElement('label');
-	ViewsLabel.setAttribute('for','views');
-	ViewsLabel.appendChild(Views);
-	ViewsLabel.appendChild(ViewsText);
-
-	colViews.appendChild(ViewsLabel);
-
-	var colCreated = document.createElement('div');
-	colCreated.setAttribute('class','col col-19');
-
-	var Created = document.createElement('input');
-	Created.setAttribute('type','radio');
-	Created.setAttribute('name','sort');
-	Created.setAttribute('id','date');
-	Created.setAttribute('value','created');
-
-	var CreatedText = document.createElement('span');
-	CreatedText.innerHTML = "Created";
-
-	var CreatedLabel = document.createElement('label');
-	CreatedLabel.setAttribute('for','created');
-	CreatedLabel.appendChild(Created);
-	CreatedLabel.appendChild(CreatedText);
-
-	colCreated.appendChild(CreatedLabel);
-
-	var colEdited = document.createElement('div');
-	colEdited.setAttribute('class','col col-14');
-
-	var Edited = document.createElement('input');
-	Edited.setAttribute('type','radio');
-	Edited.setAttribute('name','sort');
-	Edited.setAttribute('id','date');
-	Edited.setAttribute('value','edited');
-
-	var EditedText = document.createElement('span');
-	EditedText.innerHTML = "Edited";
-
-	var EditedLabel = document.createElement('label');
-	EditedLabel.setAttribute('for','edited');
-	EditedLabel.appendChild(Edited);
-	EditedLabel.appendChild(EditedText);
-
-	colEdited.appendChild(EditedLabel);
-
-	/* set selected sort */
-	switch(sort) {
-		case "rating":
-			Rating.setAttribute('checked','true');
-			break;
-		case "ranks":
-			Ranks.setAttribute('checked','true');
-			break;
-		case "views":
-			Views.setAttribute('checked','true');
-			break;
-		case "edited":
-			Edited.setAttribute('checked','true');
-			break;
-		case "created":
-			Created.setAttribute('checked','true');
-			break;
-		default:
-			Views.setAttribute('checked','true');
-	}
-
-	/* start bottom row */
-	var bottomRow = document.createElement('div');
-	bottomRow.setAttribute('class','row');
-
-	/* get content type tags */
-	var tagTypes = Number(tags) & 255;
+	/* set tag keys */
+	globalScope.tagKeys = new Map([["none",0],["video",1],["audio",2],["image",4],["text",8],["math",16],["topic",32],["",64],["",128]]);
 
 	/* create content type buttons */
 	var colTypeVideo = document.createElement('div');
@@ -882,25 +774,6 @@ function barFilter(sort,tags) {
 
 	colTypeVideo.appendChild(checkVideo);
 
-	var colTypeImage = document.createElement('div');
-	colTypeImage.setAttribute('class','col col-12');
-
-	var checkImage = document.createElement('button');
-	checkImage.setAttribute('class','checkbtn');
-	checkImage.setAttribute('type','button');
-	checkImage.setAttribute('name','checkType');
-	checkImage.setAttribute('value','image');
-	checkImage.setAttribute('onclick','toggleCheck(this);');
-	checkImage.innerHTML = "image";
-
-	if(tagTypes & 2) {
-		checkImage.setAttribute('data-checked','true');
-		checkImage.style["color"] = "white";
-		checkImage.style["background-color"] = "blue";
-	}
-
-	colTypeImage.appendChild(checkImage);
-
 	var colTypeAudio = document.createElement('div');
 	colTypeAudio.setAttribute('class','col col-12');
 
@@ -912,13 +785,32 @@ function barFilter(sort,tags) {
 	checkAudio.setAttribute('onclick','toggleCheck(this);');
 	checkAudio.innerHTML = "audio";
 
-	if(tagTypes & 4) {
+	if(tagTypes & 2) {
 		checkAudio.setAttribute('data-checked','true');
 		checkAudio.style["color"] = "white";
 		checkAudio.style["background-color"] = "blue";
 	}
 
 	colTypeAudio.appendChild(checkAudio);
+
+	var colTypeImage = document.createElement('div');
+	colTypeImage.setAttribute('class','col col-12');
+
+	var checkImage = document.createElement('button');
+	checkImage.setAttribute('class','checkbtn');
+	checkImage.setAttribute('type','button');
+	checkImage.setAttribute('name','checkType');
+	checkImage.setAttribute('value','image');
+	checkImage.setAttribute('onclick','toggleCheck(this);');
+	checkImage.innerHTML = "image";
+
+	if(tagTypes & 4) {
+		checkImage.setAttribute('data-checked','true');
+		checkImage.style["color"] = "white";
+		checkImage.style["background-color"] = "blue";
+	}
+
+	colTypeImage.appendChild(checkImage);
 
 	var colTypeText = document.createElement('div');
 	colTypeText.setAttribute('class','col col-12');
@@ -977,6 +869,13 @@ function barFilter(sort,tags) {
 
 	colTypeCustom.appendChild(checkCustom);
 
+	/* start bottom row */
+	var bottomRow = document.createElement('div');
+	bottomRow.setAttribute('class','row');
+
+	/* only search bar goes in bottom row */
+	var colSearch = barSearch('keywords',keywords);
+
 	/* buttons for filter bar */
 	var colFilterBtn = document.createElement('div');
 	colFilterBtn.setAttribute('class','col col-15');
@@ -985,21 +884,12 @@ function barFilter(sort,tags) {
 		var form = document.getElementById('filterForm');
 
 		/* get sort value */
-		var sortValue;
-		var sortRadioLength = form.elements['sort'].length;
-		for(var k = 0; k < sortRadioLength; k++) {
-			if(form.elements['sort'][k].checked) {
-				sortValue = form.elements['sort'][k].value;
-			}
-		}
-
-		/* get tag value */
-		var tagValue = form.elements['tag'].options[form.elements['tag'].selectedIndex].value;
+		var sortValue = form.elements['sort'].options[form.elements['sort'].selectedIndex].value;
 
 		/* get array of block types selected */
 		var typeValue = [];
 		var checkBtnLength = form.elements['checkType'].length;
-		for(k = 0; k < checkBtnLength; k++) {
+		for(var k = 0; k < checkBtnLength; k++) {
 			if(form.elements['checkType'][k].getAttribute('data-checked') === "true") {
 				typeValue.push(form.elements['checkType'][k].value);
 			}
@@ -1012,7 +902,11 @@ function barFilter(sort,tags) {
 		});
 
 		/* create final binary tag of block types selected & tag category */
-		var tagResult = ((globalScope.tagKeys.get(tagValue) | typeResult) >>> 0).toString(2);
+		var tagResult = ((typeResult) >>> 0).toString(2);
+
+		/* get keywords */
+		var keyWords = document.getElementById('keywords').value;
+		keyWords.replace(/ /g,"_").replace(/[^a-zA-Z ]/g,"");
 
 		/* set these into hidden divs for retrieval */
 		var content = document.getElementById('queryContent').value;
@@ -1020,7 +914,7 @@ function barFilter(sort,tags) {
 		var category = document.getElementById('queryCategory').value;
 		var topic = document.getElementById('queryTopic').value;
 
-		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&tags=",tagResult];
+		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&tags=",tagResult,"&keywords=",keyWords];
 
 		window.location = createURL(queryStringArray.join(""));
 	}
@@ -1056,18 +950,14 @@ function barFilter(sort,tags) {
 	topRow.style["margin-left"] = "8px;";
 	bottomRow.style["margin-left"] = "8px;";
 
-	topRow.appendChild(colTags);
-	topRow.appendChild(colRating);
-	topRow.appendChild(colRanks);
-	topRow.appendChild(colViews);
-	topRow.appendChild(colEdited);
-	topRow.appendChild(colCreated);
-	bottomRow.appendChild(colTypeVideo);
-	bottomRow.appendChild(colTypeImage);
-	bottomRow.appendChild(colTypeAudio);
-	bottomRow.appendChild(colTypeText);
-	bottomRow.appendChild(colTypeMath);
-	bottomRow.appendChild(colTypeCustom);
+	topRow.appendChild(colSort);
+	topRow.appendChild(colTypeVideo);
+	topRow.appendChild(colTypeAudio);
+	topRow.appendChild(colTypeImage);
+	topRow.appendChild(colTypeText);
+	topRow.appendChild(colTypeMath);
+	topRow.appendChild(colTypeCustom);
+	bottomRow.appendChild(colSearch);
 	formDiv.appendChild(topRow);
 	formDiv.appendChild(bottomRow);
 	row.appendChild(formDiv);
@@ -1556,7 +1446,7 @@ function rowProfileSingle(field,description,data) {
 	Parameters:
 
 		logstatus - boolean, whether the user is logged in or out
-		csct - array, content subject category topic
+		csct - array, content subject category topic sort tags keywords
 		data - string, @@ delineated search data
 
 	Returns:
@@ -1606,7 +1496,7 @@ function pageExplore(logstatus,csct,data) {
 	main.appendChild(contentHidden).appendChild(subjectHidden).appendChild(categoryHidden).appendChild(topicHidden);
 
 	/* create filter menu */
-	var filter = barFilter(csct[4],csct[5]);
+	var filter = barFilter(csct[4],csct[5],csct[6]);
 	main.appendChild(filter);
 
 	/* create box template */
@@ -1740,7 +1630,8 @@ function pageLanding(logstatus) {
 	main.appendChild(menu);
 
 	/* search bar */
-	var search = barSearch();
+	var search = barSearch('fullsearch','');
+	search.setAttribute('style','margin-top: 8px;');
 	main.appendChild(search);
 
 	/* pages div */

@@ -159,18 +159,19 @@ exports.searchPagename = function(connection,uid,pagename) {
 	return promise;
 };
 
-exports.getPageContent = function(connection,content,subject,category,topic,sort,tags) {
+exports.getPageContent = function(connection,content,subject,category,topic,sort,tags,keywords) {
 	var promise = new Promise(function(resolve,reject) {
 		/* ensure spaces are removed & create redundant table name */
 		var tableArray = [];
 		if(content) {
 			tableArray.push(content);
+			/* table names use first two letters of each word */
 			if(subject) {
-				tableArray.push(subject.replace(/ /g,""));
+				tableArray.push(subject.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
 				if(category) {
-					tableArray.push(category.replace(/ /g,""));
+					tableArray.push(category.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
 					if(topic) {
-						tableArray.push(topic.replace(/ /g,""));
+						tableArray.push(topic.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
 					}
 				}
 			} else {
@@ -180,6 +181,8 @@ exports.getPageContent = function(connection,content,subject,category,topic,sort
 			resolve(-1);
 		}
 		var tableName = tableArray.join("_");
+
+		/// ADD KEYWORD SEARCH IN BLURB
 
 		/* create the qry */
 		var qryArray = ["SELECT uid,pid,pagename,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tags," = tags & ",tags," ORDER BY ",sort," ASC LIMIT 50"];
