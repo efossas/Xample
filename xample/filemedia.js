@@ -68,7 +68,12 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,pid
 		var exec = require('child_process').exec;
 
         /* create the path to the new file & give it a random file name */
-		var newfile = helper.randomText();
+		var newfile;
+		if(btype === "thumb") {
+			newfile = "thumb";
+		} else {
+			newfile = helper.randomText();
+		}
 
         /* create path to the old file */
         var oldfilepath = absdir + oldfile;
@@ -76,6 +81,7 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,pid
         /* determine the command based on media type */
         var command;
         switch(btype) {
+			case "thumb":
             case "image":
                 newfile += ".jpg";
                 var firstpage = "";

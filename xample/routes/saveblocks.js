@@ -64,28 +64,23 @@ exports.saveblocks = function(request,response) {
 				var xname = POST.xname;
                 var mediaType = POST.mediaType;
                 var mediaContent = POST.mediaContent;
+				var tabid = Number(POST.tabid);
 
 				var tid;
 				var qryStatus;
 				/* 1 -> perm, 0 -> temp */
 				if(xname === "bp") {
-					switch(POST.tabid) {
-						case '0':
-							tid = "t_";
-							break;
-						default:
-							tid = "p_";
-							break;
+					if(tabid) {
+						tid = "p_";
+					} else {
+						tid = "t_";
 					}
 					qryStatus = "UPDATE p_" + uid + " SET status=1 WHERE pid=" + xid;
 				} else if(xname === "lg") {
-					switch(POST.tabid) {
-						case '0':
-							tid = "c_";
-							break;
-						default:
-							tid = "g_";
-							break;
+					if(tabid) {
+						tid = "g_";
+					} else {
+						tid = "c_";
 					}
 					qryStatus = "UPDATE g_" + uid + " SET status=1 WHERE gid=" + xid;
 				} else {
@@ -104,13 +99,47 @@ exports.saveblocks = function(request,response) {
                 var types = mediaType.split(',');
                 var contents = mediaContent.split(',');
 
+				/* this is saving the tags, only on permanent saves & block pages */
+				if(tabid && xname === "bp") {
+					var promiseSettings = querydb.getPageSettings(connection,uid,xid);
+					promiseSettings.then(function(data) {
+						var tagTypes = new Map([["slide",0],["video",1],["audio",2],["image",4],["slide",4],["xtext",8],["xmath",16],["latex",16],["xcode",32]]);
+
+						var tags = 0;
+						types.forEach(function(element,index) {
+							tags = tagTypes.get(element) | tags;
+						});
+
+						var qryTag = "UPDATE p_" + uid + " SET tags=" + tags + ",edited=NOW() WHERE pid=" + xid;
+						connection.query(qryTag,function(err,rows,fields) {
+							if(err) {
+								response.end('err');
+								analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							} else {
+								/* copy tags to redundant table */
+								var redundantTableName = querydb.createRedundantTableName("bp",data.subject,data.category,data.topic);
+								var qryCopy = `UPDATE ${redundantTableName}, p_${uid} SET ${redundantTableName}.tags=p_${uid}.tags WHERE ${redundantTableName}.uid=${uid} AND ${redundantTableName}.pid=${xid};`;
+
+								connection.query(qryCopy,function(err,rows,fields) {
+									if(err) {
+										response.end('err');
+										analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									}
+								});
+							}
+						});
+					},function(error) {
+						/// handle error
+					});
+				}
+
                 /* truncate (remove all rows) from the table */
 				var qryTruncate = "TRUNCATE TABLE " + tid + uid + "_" + xid;
 
 				connection.query(qryTruncate,function(err,rows,fields) {
 					if(err) {
 						response.end('err');
-						analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 					} else {
 
 						/* check that blocks exist to be saved */
@@ -132,7 +161,7 @@ exports.saveblocks = function(request,response) {
                             connection.query(qryInsert,function(err,rows,fields) {
 								if(err) {
 									response.end('err');
-									analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
 									/* only delete unused files on permanent table saves */
 									if(tid === "p_") {

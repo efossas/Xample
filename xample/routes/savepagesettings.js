@@ -60,19 +60,14 @@ exports.savepagesettings = function(request,response) {
 				var pid = connection.escape(POST.pid).replace(/'/g,"");
 				var pagetitle = connection.escape(POST.p);
 				var subject = connection.escape(POST.s);
-				var subjectNoSQ = subject.replace(/[ ']/g,"");
 				var category = connection.escape(POST.c);
-				var categoryNoSQ = category.replace(/[ ']/g,"");
 				var topic = connection.escape(POST.t);
-				var topicNoSQ = topic.replace(/[ ']/g,"");
-				var tags = connection.escape(POST.g);
 				var imageurl = connection.escape(POST.i);
 				var blurb = connection.escape(POST.b);
 
-				/// add check that subject category topic actually exists
 				/// extend this route for learning guides
 
-				if(subjectNoSQ === "") {
+				if(subject.replace(/[']/g,"") === "") {
 					response.end('nosubjectnotsaved');
 					analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 				} else {
@@ -92,16 +87,7 @@ exports.savepagesettings = function(request,response) {
 									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
 									/* get redundant table name */
-									var redundantTableArray = ["bp_",subjectNoSQ];
-									if(categoryNoSQ !== "") {
-										redundantTableArray.push("_");
-										redundantTableArray.push(categoryNoSQ);
-										if(topicNoSQ !== "") {
-											redundantTableArray.push("_");
-											redundantTableArray.push(topicNoSQ);
-										}
-									}
-									var redundantTableName = redundantTableArray.join("");
+									var redundantTableName = querydb.createRedundantTableName("bp",subject,category,topic);
 
 									/* search if this page is already saved in this redundant table */
 									var promiseRed = querydb.searchRedundantTable(connection,uid,pid,redundantTableName);
@@ -111,9 +97,9 @@ exports.savepagesettings = function(request,response) {
 										/* if it exists, update, otherwise, insert into it */
 										var qryCopy;
 										if(result) {
-											qryCopy = `UPDATE ${redundantTableName}, p_${uid} SET ${redundantTableName}.pagename=p_${uid}.pagename,${redundantTableName}.tags=p_${uid}.tags,${redundantTableName}.created=p_${uid}.created,${redundantTableName}.edited=p_${uid}.edited,${redundantTableName}.ranks=p_${uid}.ranks,${redundantTableName}.views=p_${uid}.views,${redundantTableName}.imageurl=p_${uid}.imageurl,${redundantTableName}.blurb=p_${uid}.blurb WHERE ${redundantTableName}.uid=${uid} AND ${redundantTableName}.pid=${pid};`;
+											qryCopy = `UPDATE ${redundantTableName}, p_${uid} SET ${redundantTableName}.pagename=p_${uid}.pagename,${redundantTableName}.created=p_${uid}.created,${redundantTableName}.edited=p_${uid}.edited,${redundantTableName}.ranks=p_${uid}.ranks,${redundantTableName}.views=p_${uid}.views,${redundantTableName}.imageurl=p_${uid}.imageurl,${redundantTableName}.blurb=p_${uid}.blurb WHERE ${redundantTableName}.uid=${uid} AND ${redundantTableName}.pid=${pid};`;
 										} else {
-											qryCopy = `INSERT INTO ${redundantTableName} (uid,pid,pagename,tags,created,edited,ranks,views,imageurl,blurb) SELECT ${uid},${pid},pagename,tags,created,edited,ranks,views,imageurl,blurb FROM p_${uid} WHERE pid=${pid}`;
+											qryCopy = `INSERT INTO ${redundantTableName} (uid,pid,pagename,created,edited,ranks,views,imageurl,blurb) SELECT ${uid},${pid},pagename,created,edited,ranks,views,imageurl,blurb FROM p_${uid} WHERE pid=${pid}`;
 										}
 
 										connection.query(qryCopy,function(err,rows,fields) {
@@ -122,19 +108,7 @@ exports.savepagesettings = function(request,response) {
 												analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 											} else {
 												/* get previous redundant table name, if it exists */
-												var prevRedundantTable = "";
-												if(a_data[0]) {
-													var prevRedundantTableArray = ["bp_",a_data[0].replace(/ /g,"")];
-													if(a_data[1].replace(/ /g,"")) {
-														prevRedundantTableArray.push("_");
-														prevRedundantTableArray.push(a_data[1].replace(/ /g,""));
-														if(a_data[2].replace(/ /g,"")) {
-															prevRedundantTableArray.push("_");
-															prevRedundantTableArray.push(a_data[2].replace(/ /g,""));
-														}
-													}
-													prevRedundantTable = prevRedundantTableArray.join("");
-												}
+												var prevRedundantTable = querydb.createRedundantTableName("bp",a_data[0],a_data[1],a_data[2]);
 
 												/* delete row from previous redundant table if needed */
 												if(prevRedundantTable && redundantTableName !== prevRedundantTable) {

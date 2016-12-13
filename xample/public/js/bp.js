@@ -514,7 +514,7 @@ x.image = new function image() {
 	};
 
 	this.saveContent = function(bid) {
-		/* replace() is for escaping backslashes */
+		/* replace() is for escaping backslashes and making relative path */
 		var imagestr = document.getElementById('a' + bid).children[0].src;
 		return imagestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};

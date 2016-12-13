@@ -676,9 +676,9 @@ function parseBlock(blockType,blockText) {
 }
 
 /*
-	Function: formDropDownsSCT
+	Function: barPageSettings
 
-	Creates the form for selecting Subject, Category, Topic.
+	Creates bar for changing page settings
 
 	Parameters:
 
@@ -713,6 +713,122 @@ function barPageSettings(aid,settings) {
 	/* drop downs for choosing page subj,cat,top */
 	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
 	pageSettings.appendChild(ddsct);
+
+	/* row for image and blurb */
+	var rowImgBlurb = document.createElement('div');
+	rowImgBlurb.setAttribute('class','row');
+
+	function uploadThumb() {
+		/* get the hidden file-select object that will store the user's file selection */
+		var fileSelect = document.getElementById('file-select');
+		fileSelect.setAttribute("accept",".bmp,.bmp2,.bmp3,.jpeg,.jpg,.pdf,.png,.svg");
+
+		fileSelect.click();
+
+		fileSelect.onchange = function() {
+			/* grab the selected file */
+			var file = fileSelect.files[0];
+
+			var notvalid = false;
+			var nofile = false;
+			var errorMsg;
+			if(fileSelect.files.length > 0) {
+				if(file.size > 4294967295) {
+					notvalid = true;
+					errorMsg = "Files Must Be Less Than 4.3 GB";
+				}
+			} else {
+				nofile = true;
+			}
+
+			if(nofile) {
+				/* do nothing, no file selected */
+			} else if(notvalid) {
+				alertify.alert(errorMsg);
+			} else {
+				/* wrap the ajax request in a promise */
+				var promise = new Promise(function(resolve,reject) {
+
+					/* create javascript FormData object and append the file */
+					var formData = new FormData();
+					formData.append('media',file,file.name);
+
+					/* get the page id */
+					var pid = document.getElementsByName('pageid')[0].value;
+
+					/* grab the domain and create the url destination for the ajax request */
+					var url = createURL("/uploadthumb?pid=" + pid);
+
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.open('POST',url,true);
+
+					xmlhttp.onreadystatechange = function() {
+						if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+							if(xmlhttp.status === 200) {
+								if(xmlhttp.responseText === "err") {
+									reject("err");
+								} else if(xmlhttp.responseText === "convertmediaerr") {
+									reject("convertmediaerr");
+								} else if (xmlhttp.responseText === "nouploadloggedout") {
+									alertify.alert("You Can't Upload A Thumbnail Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
+									reject("err");
+								} else {
+									resolve(xmlhttp.responseText);
+								}
+							} else {
+								alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
+								reject("err");
+							}
+						}
+					};
+
+					xmlhttp.send(formData);
+				});
+
+				promise.then(function(imglink) {
+					var linkparts = imglink.split(",");
+					var thumbtag = document.getElementById('pageimg');
+					thumbtag.src = linkparts[1];
+				},function(error) {
+					if(error === "convertmediaerr") {
+						alertify.log("There was an error with that media format. Please try a different file type.");
+					} else {
+						alertify.log("There was an unknown error during thumbnail upload.");
+					}
+				});
+			}
+		};
+	}
+
+	/* page thumbnail img */
+	var colImg = document.createElement('div');
+	colImg.setAttribute('class','col col-33');
+
+	var thumbnail = document.createElement('img');
+	thumbnail.setAttribute('id','pageimg');
+	thumbnail.setAttribute('class','thumb-img');
+	thumbnail.onclick = uploadThumb;
+	thumbnail.setAttribute('src',settings.imageurl);
+	colImg.appendChild(thumbnail);
+
+	/* page blurb input */
+	var colBlurb = document.createElement('div');
+	colBlurb.setAttribute('class','col col-66');
+
+	var blurb = document.createElement('textarea');
+	blurb.setAttribute('name','pageblurb');
+	blurb.setAttribute('id','pageblurb');
+	blurb.setAttribute('class','page-blurb');
+	blurb.setAttribute('rows','4');
+	blurb.setAttribute('maxlength','500');
+	blurb.setAttribute('placeholder','Explain this page here.');
+	blurb.value = settings.blurb;
+	colBlurb.appendChild(blurb);
+
+	/* append img and blurb */
+	rowImgBlurb.appendChild(colImg);
+	rowImgBlurb.appendChild(colBlurb);
+	pageSettings.appendChild(rowImgBlurb);
 
 	/* page settings save */
 	var btnSaveSettings = btnSubmit('Save Page Settings','savePageSettings()','none');
@@ -1158,14 +1274,13 @@ function savePageSettings() {
 	var subject = document.getElementById('select-subject').value;
 	var category = document.getElementById('select-category').value;
 	var topic = document.getElementById('select-topic').value;
-	var tags = "";
-	var imageurl = "";
-	var blurb = "";
+	var imageurl = document.getElementById('pageimg').src.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
+	var blurb = document.getElementById('pageblurb').value;
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "pid=" + pid + "&p=" + pagetitle + "&s=" + subject + "&c=" + category + "&t=" + topic + "&g=" + tags + "&i=" + imageurl + "&b=" + blurb;
+	var params = "pid=" + pid + "&p=" + pagetitle + "&s=" + subject + "&c=" + category + "&t=" + topic + "&i=" + imageurl + "&b=" + blurb;
 
 	xmlhttp.open("POST",url,true);
 

@@ -39,6 +39,7 @@ var r_savepagesettings = require('./routes/savepagesettings.js');
 var r_saveprofile = require('./routes/saveprofile.js');
 var r_signup = require('./routes/signup.js');
 var r_uploadmedia = require('./routes/uploadmedia.js');
+var r_uploadthumb = require('./routes/uploadthumb.js');
 
 // <<<fold>>>
 
@@ -74,7 +75,8 @@ module.exports = {
     saveprofile: r_saveprofile.saveprofile,
     signup: r_signup.signup,
     start: l_start.start,
-    uploadmedia: r_uploadmedia.uploadmedia
+    uploadmedia: r_uploadmedia.uploadmedia,
+    uploadthumb: r_uploadthumb.uploadthumb
 };
 
 // <<<fold>>>

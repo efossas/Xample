@@ -60,7 +60,7 @@ exports.explore = function(request,response) {
 					sort = "views";
 				}
 				if(!tags) {
-					tags = 0;
+					tags = '0';
 				}
 				if(!keywords) {
 					keywords = "";

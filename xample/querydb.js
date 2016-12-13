@@ -159,33 +159,84 @@ exports.searchPagename = function(connection,uid,pagename) {
 	return promise;
 };
 
-exports.getPageContent = function(connection,content,subject,category,topic,sort,tags,keywords) {
-	var promise = new Promise(function(resolve,reject) {
-		/* ensure spaces are removed & create redundant table name */
-		var tableArray = [];
-		if(content) {
-			tableArray.push(content);
-			/* table names use first two letters of each word */
-			if(subject) {
-				tableArray.push(subject.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
-				if(category) {
-					tableArray.push(category.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
-					if(topic) {
-						tableArray.push(topic.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
-					}
+/*
+	Function: createRedundantTableName
+
+	Create database table name from content, subject, category, topic
+
+	Parameters:
+
+		content - string, "bp" or "lg"
+		subject - string, the subject
+		category - string, the category
+		topic - string, the topic
+
+	Returns:
+
+		success - promise, the page name
+		error - promise, -1
+*/
+exports.createRedundantTableName = function(content,subject,category,topic) {
+	/* remove possible escape quotes */
+	var sub = subject.replace(/[']/g,"");
+	var cat = category.replace(/[']/g,"");
+	var top = topic.replace(/[']/g,"");
+
+	/* ensure spaces are removed & create redundant table name */
+	var tableArray = [];
+	if(content) {
+		tableArray.push(content);
+		/* table names use first two letters of each word */
+		if(subject) {
+			tableArray.push(sub.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
+			if(category) {
+				tableArray.push(cat.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
+				if(topic) {
+					tableArray.push(top.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
 				}
-			} else {
-				resolve(-1);
 			}
 		} else {
-			resolve(-1);
+			return "err";
 		}
-		var tableName = tableArray.join("_");
+	} else {
+		return "err";
+	}
+	var tableName = tableArray.join("_");
+	return tableName;
+};
+
+/*
+	Function: getPageContent
+
+	This the main explore search and retrieves matching result
+
+	Parameters:
+
+		connection - a MySQL connection
+		content - string, "bp" or "lg"
+		subject - string, the subject
+		category - string, the category
+		topic - string, the topic
+		sort - string, what column to sort the data by
+		tags - string, binary number as string for block types
+		keywords - string, used to search blurbs
+
+	Returns:
+
+		success - promise, array of page objects
+		error - promise, string of error
+*/
+exports.getPageContent = function(connection,content,subject,category,topic,sort,tags,keywords) {
+	var promise = new Promise(function(resolve,reject) {
+		var tableName = exports.createRedundantTableName(content,subject,category,topic);
 
 		/// ADD KEYWORD SEARCH IN BLURB
 
+		/* convert binary string tags to decimal number */
+		var tagDec = parseInt(tags,2);
+
 		/* create the qry */
-		var qryArray = ["SELECT uid,pid,pagename,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tags," = tags & ",tags," ORDER BY ",sort," ASC LIMIT 50"];
+		var qryArray = ["SELECT uid,pid,pagename,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tagDec," = tags & ",tagDec," ORDER BY ",sort," ASC LIMIT 50"];
 		var qry = qryArray.join("");
 
 		/* query the database */

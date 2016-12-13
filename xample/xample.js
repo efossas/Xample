@@ -341,6 +341,7 @@ app.post('/savepagesettings',rts.savepagesettings);
 app.post('/saveprofile',rts.saveprofile);
 app.post('/signup',rts.signup);
 app.post('/uploadmedia*',rts.uploadmedia); /// breaks REST ?? uses get query with post method
+app.post('/uploadthumb*',rts.uploadthumb); /// breaks REST ?? uses get query with post method
 
 app.all('*',rts.notfound);
 
