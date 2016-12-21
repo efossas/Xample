@@ -4,8 +4,9 @@
 	Loads block page in show mode.
 */
 
-var loader = require('./loader.js');
 var analytics = require('./../analytics.js');
+var helper = require('./../helper.js');
+var loader = require('./loader.js');
 var querydb = require('./../querydb.js');
 
 /*
@@ -28,47 +29,66 @@ exports.page = function(request,response) {
     var pool = request.app.get("pool");
 
 	/* get the author's id & pid from the get request */
-	var uid = request.query.a;
+	var aid = request.query.a;
 	var pid = request.query.p;
+	var menuToggle = request.query.m;
+
+	/* detect is the user is logged in for views */
+	var logstatus;
+	var uid;
+	if(request.session.uid) {
+		logstatus = "true";
+		uid = request.session.uid;
+	} else {
+		logstatus = "false";
+		uid = 0;
+		/* look for cookie from previous visit */
+		/// CODE THIS
+
+		/* if no cookie, register ip address instead */
+		/// CODE THIS
+	}
 
 	/* redirect users if logged out or no page id provided */
-	if(typeof uid === 'undefined' || typeof pid === 'undefined') {
+	if(typeof aid === 'undefined' || typeof pid === 'undefined') {
         loader.loadBlockPage(request,response,"<script>pageError('badquerystring');</script>");
     } else {
         pool.getConnection(function(err,connection) {
             if(err) {
+				loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
                 analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-            }
-			var qry = "SELECT pagename FROM p_" + uid + " WHERE pid=" + pid;
+            } else {
+				var prefix = helper.getTablePrefixFromPageType('page');
 
-			connection.query(qry,function(err,rows,fields) {
-				if(err) {
-					response.end('err');
-					analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-				} else {
-					/* sql query is undefined if a user tries to edit page with invalid pid */
-					if(typeof rows[0] === 'undefined') {
-						loader.absentRequest(request,response);
+				var promiseSettings = querydb.getPageSettings(connection,prefix,uid,pid);
+
+				promiseSettings.then(function(pageSettings) {
+					if(pageSettings.err === 'notfound') {
+						loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+						analytics.journal(true,201,{message:'getPageSettings()'},uid,global.__stack[1].getLineNumber(),__function,__filename);
 					} else {
-						var pagename = rows[0].pagename;
+						/* change to generic names for front-end bar script */
+						pageSettings['id'] = pageSettings['xid'];
+						delete pageSettings['xid'];
+						pageSettings['name'] = pageSettings['xname'];
+						delete pageSettings['xname'];
 
-						var qry = "SELECT type,content FROM p_" + uid + "_" + pid;
+						var pageinfo = JSON.stringify(pageSettings);
+
+						var qry = "SELECT type,content FROM " + prefix + "_" + aid + "_" + pid;
 
 						connection.query(qry,function(err,rows,fields) {
 							if(err) {
-								response.end('err');
+								loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
 								analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 							} else {
-								var pagedata = pid + "," + pagename;
+								var pagedata = "";
 
 								/* i is for accessing row array, j is for keeping track of rows left to parse */
 								var i = 0;
 								var j = rows.length;
 
 								/* append commas to each row except for the last one */
-								if(j > 0) {
-									pagedata += ",";
-								}
 								while(j > 1) {
 									pagedata += rows[i].type + "," + rows[i].content + ",";
 									i++;
@@ -78,15 +98,21 @@ exports.page = function(request,response) {
 									pagedata += rows[i].type + "," + rows[i].content;
 								}
 
+								/* toggles the menu on or off */
+								var mToggle = 'true';
+								if(menuToggle === 'false') {
+									mToggle = 'false';
+								}
+
 								/* load the edit page with the page data */
-								loader.loadBlockPage(request,response,"<script>pageShow('" + pagedata + "');</script>");
+								loader.loadBlockPage(request,response,"<script>pageShow(" + mToggle + ",'" + uid + "','" + pagedata + "'," + pageinfo + ");</script>");
 								analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 							}
 						});
 					}
-				}
-			});
-			connection.release();
+				});
+				connection.release();
+			}
         });
 	}
 };

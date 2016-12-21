@@ -29,6 +29,9 @@ exports.login = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	var body = '';
 
     /* when the request gets data, append it to the body string */
@@ -38,7 +41,8 @@ exports.login = function(request,response) {
         /* prevent overload attacks */
         if (body.length > 1e6) {
 			request.connection.destroy();
-			analytics.journal(true,199,"Overload Attack!",0,global.__stack[1].getLineNumber(),__function,__filename);
+			var errmsg = {message:"Overload Attack!"};
+			analytics.journal(true,199,errmsg,0,global.__stack[1].getLineNumber(),__function,__filename);
 		}
     });
 
@@ -46,49 +50,57 @@ exports.login = function(request,response) {
     request.on('end',function() {
         pool.getConnection(function(err,connection) {
             if(err) {
+				result.msg = 'err';
+				response.end(JSON.stringify(result));
                 analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-            }
+            } else {
+				var POST = qs.parse(body);
 
-            var POST = qs.parse(body);
+				/* change info as needed */
+				var username = connection.escape(POST.username);
 
-            /* change info as needed */
-            var username = connection.escape(POST.username);
+				/* check if username already exists */
+				var promise = querydb.getUidFromUsername(connection,username);
 
-            /* check if username already exists */
-            var promise = querydb.searchUid(connection,username);
+				promise.then(function(success) {
+					if(success === "") {
+						result.msg = 'notfound';
+						response.end(JSON.stringify(result));
+					} else {
+						var uid = success;
 
-            promise.then(function(success) {
+						var qry = "SELECT password FROM Users WHERE uid = '" + uid + "'";
 
-                if(success === -1) {
-                    response.end('notfound');
-                } else {
-                    var uid = success;
-
-                    var qry = "SELECT password FROM Users WHERE uid = '" + uid + "'";
-
-                    /* retrieve the user's password */
-                    connection.query(qry,function(err,rows,fields) {
-						if (err) {
-							response.end('err');
-							analytics.journal(true,201,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-						} else {
-							/* check that the entered password matches the stored password */
-							if(ps.verify(POST.password,rows[0].password)) {
-								/* set the user's session, this indicates logged in status */
-								request.session.uid = uid;
-								response.end('loggedin');
-								analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+						/* retrieve the user's password */
+						connection.query(qry,function(err,rows,fields) {
+							if (err) {
+								result.msg = 'err';
+								response.end(JSON.stringify(result));
+								analytics.journal(true,201,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 							} else {
-								response.end('incorrect');
+								/* check that the entered password matches the stored password */
+								if(ps.verify(POST.password,rows[0].password)) {
+									/* set the user's session, this indicates logged in status */
+									request.session.uid = uid;
+
+									/* respond */
+									result.msg = 'loggedin';
+									response.end(JSON.stringify(result));
+									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+								} else {
+									result.msg = 'incorrect';
+									response.end(JSON.stringify(result));
+								}
 							}
-						}
-					});
-				}
-			},function(error) {
-				response.end('err');
-				analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
-			});
-            connection.release();
+						});
+					}
+				},function(error) {
+					result.msg = 'err';
+					response.end(JSON.stringify(result));
+					analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
+				});
+				connection.release();
+			}
         });
 	});
 };

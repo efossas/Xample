@@ -25,18 +25,21 @@
 	global barSubMenu:true
 	global barStatus:true
 	global getUserFields:true
+	global watermark:true
 */
 /* from bengine.js */
 /*
 	global x:true
 	global globalBlockEngine:true
 	global blockButtons:true
+	global blockContentShow:true
 	global blockEngineStart:true
 	global generateBlock: true
 	global countBlocks: true
 	global saveBlocks: true
 	global parseBlock: true
 	global deparseBlock: true
+	global barPageSettings: true
 */
 /* list any objects js dependencies */
 /*
@@ -86,7 +89,7 @@ x.xlist = new function xlist() {
 			if(data.length === 1) {
 				newLinkInput.value = '';
 			} else {
-				newLinkInput.value = 'pg=' + data[0] + '&ui=' + data[1];
+				newLinkInput.value = 'p=' + data[0] + '&a=' + data[1];
 			}
 
 			var newLinkInputDiv = document.createElement('div');
@@ -124,41 +127,44 @@ x.xlist = new function xlist() {
 
 	this.afterDOMinsert = function(bid,data) {
 		/* append necessary functions to body */
-		function delLink(btn) {
-			btn.parentNode.parentNode.parentNode.removeChild(btn.parentNode.parentNode);
+		if(!document.getElementById('xlist-functions')) {
+			function delLink(btn) {
+				btn.parentNode.parentNode.parentNode.removeChild(btn.parentNode.parentNode);
+			}
+
+			function addLink(btn) {
+				var newLinkBtn = document.createElement('a');
+				newLinkBtn.setAttribute('class','inbtn delbtn');
+				newLinkBtn.setAttribute('onclick','delLink(this)');
+				newLinkBtn.innerHTML = '-';
+
+				var newLinkBtnDiv = document.createElement('div');
+				newLinkBtnDiv.setAttribute('class','col col-10');
+				newLinkBtnDiv.appendChild(newLinkBtn);
+
+				var newLinkInput = document.createElement('input');
+				newLinkInput.setAttribute('class','xLrg');
+				newLinkInput.setAttribute('type','text');
+				newLinkInput.maxlength = 64;
+
+				var newLinkInputDiv = document.createElement('div');
+				newLinkInputDiv.setAttribute('class','col col-90');
+				newLinkInputDiv.appendChild(newLinkInput);
+
+				var newLinkDiv = document.createElement('div');
+				newLinkDiv.setAttribute('class','row');
+				newLinkDiv.appendChild(newLinkBtnDiv);
+				newLinkDiv.appendChild(newLinkInputDiv);
+
+				btn.parentNode.parentNode.insertBefore(newLinkDiv,btn.parentNode);
+			}
+
+			var script = document.createElement('script');
+			script.type = 'text/javascript';
+			script.id = 'xlist-functions';
+			script.text = String(delLink) + String(addLink);
+			document.body.appendChild(script);
 		}
-
-		function addLink(btn) {
-			var newLinkBtn = document.createElement('a');
-			newLinkBtn.setAttribute('class','inbtn delbtn');
-			newLinkBtn.setAttribute('onclick','delLink(this)');
-			newLinkBtn.innerHTML = '-';
-
-			var newLinkBtnDiv = document.createElement('div');
-			newLinkBtnDiv.setAttribute('class','col col-10');
-			newLinkBtnDiv.appendChild(newLinkBtn);
-
-			var newLinkInput = document.createElement('input');
-			newLinkInput.setAttribute('class','xLrg');
-			newLinkInput.setAttribute('type','text');
-			newLinkInput.maxlength = 64;
-
-			var newLinkInputDiv = document.createElement('div');
-			newLinkInputDiv.setAttribute('class','col col-90');
-			newLinkInputDiv.appendChild(newLinkInput);
-
-			var newLinkDiv = document.createElement('div');
-			newLinkDiv.setAttribute('class','row');
-			newLinkDiv.appendChild(newLinkBtnDiv);
-			newLinkDiv.appendChild(newLinkInputDiv);
-
-			btn.parentNode.parentNode.insertBefore(newLinkDiv,btn.parentNode);
-		}
-
-		var script = document.createElement('script');
-		script.type = 'text/javascript';
-		script.text = String(delLink) + String(addLink);
-		document.body.appendChild(script);
 	};
 
 	this.saveContent = function(bid) {
@@ -172,16 +178,16 @@ x.xlist = new function xlist() {
 
 				/* if empty, ignore saving this input */
 				if(current !== "") {
-					var pgRegEx = /pg=([0-9]+)/;
+					var pgRegEx = /p=([0-9]+)/;
 					var pg = pgRegEx.exec(current);
 
-					var uiRegEx = /ui=([0-9]+)/;
-					var ui = uiRegEx.exec(current);
+					var aiRegEx = /a=([0-9]+)/;
+					var ai = aiRegEx.exec(current);
 
-					if(pg === null || ui === null) {
+					if(pg === null || ai === null) {
 						/// HANDLE INVALID LINKS
 					} else {
-						linkContent.push(pg[1] + '$' + ui[1]);
+						linkContent.push(pg[1] + '$' + ai[1]);
 					}
 				}
 			}
@@ -193,6 +199,98 @@ x.xlist = new function xlist() {
 };
 
 // <<<fold>>>
+
+function barGuide(chcount,guidedata) {
+	var guide = document.createElement('div');
+	guide.setAttribute('class','guide-bar');
+
+	var guideselect = document.createElement('div');
+	guideselect.setAttribute('class','guide-box');
+
+	function listSelect(evt) {
+		var aid = this.getAttribute('data-aid');
+		var xid = this.getAttribute('data-xid');
+
+		var blockFrame = document.getElementById('blockpage');
+		blockFrame.src = 'page?a=' + aid + '&p=' + xid + '&m=false';
+	}
+
+	function listHover(evt) {
+		this.style = 'background-color:rgba(58, 50, 200, 0.2)';
+	}
+
+	function listOff(evt) {
+		this.style = 'background-color:transparent';
+	}
+
+	var listCount = guidedata.length;
+	for(var i = 0; i < listCount; i++) {
+		var row = document.createElement('div');
+
+		switch(i) {
+			case 0:
+				row.setAttribute('class','row toprow'); break;
+			case listCount - 1:
+				row.setAttribute('class','row bottomrow'); break;
+			default:
+				row.setAttribute('class','row');
+		}
+
+		row.setAttribute('data-aid',guidedata[i].aid);
+		row.setAttribute('data-xid',guidedata[i].xid);
+
+		/* left buffer */
+		var colLeft = document.createElement('div');
+		colLeft.setAttribute('class','col col-2');
+
+		/* page position in list */
+		var colPgNum = document.createElement('div');
+		colPgNum.setAttribute('class','col col-3 padtop');
+		colPgNum.innerHTML = (i + 1);
+
+		/* page thumbnail */
+		var colImg = document.createElement('div');
+		colImg.setAttribute('class','col col-6');
+
+		var thumb = document.createElement('img');
+		thumb.src = guidedata[i].imageurl;
+
+		colImg.appendChild(thumb);
+
+		/* page name */
+		var colName = document.createElement('div');
+		colName.setAttribute('class','col col-67 padtop');
+		colName.innerHTML = guidedata[i].xname;
+
+		/* page author */
+		var colAuthor = document.createElement('div');
+		colAuthor.setAttribute('class','col col-20 padtop');
+		colAuthor.setAttribute('style','text-align:right');
+		colAuthor.innerHTML = guidedata[i].username;
+
+		/* right buffer */
+		var colRight = document.createElement('div');
+		colRight.setAttribute('class','col col-2');
+
+		/* append everything */
+		row.appendChild(colLeft);
+		row.appendChild(colPgNum);
+		row.appendChild(colImg);
+		row.appendChild(colName);
+		row.appendChild(colAuthor);
+		row.appendChild(colRight);
+
+		row.addEventListener('click',listSelect,true);
+		row.addEventListener('mouseover',listHover,true);
+		row.addEventListener('mouseout',listOff,true);
+
+		guideselect.appendChild(row);
+	}
+
+	guide.appendChild(guideselect);
+
+	return guide;
+}
 
 /***
 	Section: Page Functions
@@ -214,60 +312,42 @@ x.xlist = new function xlist() {
 
 		nothing - *
 */
-function pageEditLG(guidedata) {
+function pageEditLG(aid,guidedata,guideinfo) {
 
 	/* grab the main div */
 	var main = document.getElementById('content');
 
-	/* block array -> pid,pagename,mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
-	var blockarray = guidedata.split(',');
-
 	/* hidden pid & title */
-	var gid = blockarray[0];
-	var guidename = blockarray[1];
+	var gid = guideinfo.id;
+	var guidename = guideinfo.name;
 
-	/* MENU & STATUS BAR */
+	/*** MENU & STATUS BAR ***/
 
+	/* create menu & status bar */
 	var menu = barMenu();
 	var status = barStatus(gid);
 
-	/* create settings div for submenu */
-	var rowSettings = document.createElement("div");
-	rowSettings.setAttribute("class","row");
-
-	var colSettings = document.createElement("div");
-	colSettings.setAttribute("class","col col-100");
-
-	var pageSettings = document.createElement('div');
-	pageSettings.innerHTML = "Hi There";
-
-	/* append page settings to column,row,main */
-	colSettings.appendChild(pageSettings);
-	rowSettings.appendChild(colSettings);
+	var guideSettings = barPageSettings('guide',aid,guideinfo);
 
 	/* create submenu */
-	var submenu = barSubMenu('Learning Guide Settings',rowSettings);
+	var submenu = barSubMenu('Guide Settings',guideSettings);
 
 	/* append menu & status to main */
 	main.appendChild(menu);
 	main.appendChild(status);
 	main.appendChild(submenu);
 
-	/* page title input */
-	var title = document.createElement('input');
-	title.setAttribute('type','text');
-	title.setAttribute('name','pagename');
-	title.setAttribute('class','page-title');
-	title.setAttribute('maxlength','50');
-	title.setAttribute('value',guidename);
-	title.setAttribute('style','display: none;');
-	menu.appendChild(title);
-
-	/// PAGE OPTIONS NEED TO BE ADDED HERE
-
 	/*** BLOCKS ***/
 
-	blockEngineStart('content',x,["lg",gid],blockarray.splice(2,blockarray.length));
+	/* block array -> mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
+	var blockarray;
+	if(guidedata !== "") {
+		blockarray = guidedata.split(',');
+	} else {
+		blockarray = [];
+	}
+
+	blockEngineStart('content',x,["guide",gid,'t'],blockarray);
 
 	/*** AFTER STUFF ***/
 
@@ -285,6 +365,66 @@ function pageEditLG(guidedata) {
 		}
 		return null;
 	};
+}
+
+/*
+	Function: pageShowGuide
+
+	This function loads guide data in show mode.
+
+	Parameters:
+
+		chcount - number, the number of guide chapters in the guide
+		guidedata - json string, array of objects containing page data like name,author,chapter,image url
+
+	Returns:
+
+		nothing - *
+*/
+function pageShowGuide(chcount,guidedata) {
+	/* grab the main div */
+	var main = document.getElementById('content');
+
+	/* watermark */
+	main.appendChild(watermark());
+
+	/*** MENU BAR ***/
+
+	/* create menu & status bar */
+	var menu = barMenu();
+
+	/* append menu & status to main */
+	main.appendChild(menu);
+
+	/* parse through guide obj & create guide/chapters */
+	var guideobj = JSON.parse(guidedata);
+
+	var guide = barGuide(chcount,guideobj);
+
+	main.appendChild(guide);
+
+	/* space div in between guide & page display */
+	var spaceDiv = document.createElement('div');
+	spaceDiv.setAttribute('style','padding-bottom:20px;');
+	main.appendChild(spaceDiv);
+
+	/* div for displaying block page */
+	var blockDisplay = document.createElement('div');
+	blockDisplay.setAttribute('id','block-display');
+	blockDisplay.setAttribute('class','block-display');
+
+	function reFrame() {
+		this.style.height = this.contentWindow.document.body.scrollHeight + 'px';
+	}
+
+	var blockFrame = document.createElement('iframe');
+	blockFrame.setAttribute('id','blockpage');
+	blockFrame.setAttribute('frameborder','0');
+	blockFrame.setAttribute('scrolling','no');
+	blockFrame.addEventListener('load',reFrame);
+	blockDisplay.appendChild(blockFrame);
+
+	main.appendChild(blockDisplay);
 }
 
 // <<<fold>>>

@@ -15,14 +15,14 @@ var analytics = require('./analytics.js');
 
 		filepath - the path to the file to remove, starting with public folder
 		uid - optional, user id, this is purely for debugging if something goes wrong
-		pid - optional, page id, this is purely for debigging if something goes wrong
+		did - optional, directory id, this is purely for debigging if something goes wrong
 
 	Returns:
 
 		success - string, 'success'
 		error - string, error message
 */
-function removeMedia(filepath,uid = 0,pid = 0) {
+function removeMedia(filepath,uid = 0,did = 0) {
 	var exec = require('child_process').exec;
 
     /* set up the remove command */
@@ -31,7 +31,7 @@ function removeMedia(filepath,uid = 0,pid = 0) {
 	/* execute the remove command */
 	exec(command,function(error,stdout,stderr) {
 		if (error !== null) {
-			return 'Exec Error (removemedia) (uid:' + uid + ') (pid:' + pid + ' -> ' + stdout + stderr;
+			return 'Exec Error (removemedia) (uid:' + uid + ') (did:' + did + ' -> ' + stdout + stderr;
 		} else {
 			return 'success';
 		}
@@ -51,14 +51,14 @@ exports.removeMedia = removeMedia;
 		reldir - the relative path to the folder that contains the file (path inside public)
 		btype - the media type, "image" "audio" "video" "slide"
 		uid - optional, user id, this is purely for debugging if something goes wrong
-		pid - optional, page id, this is purely for debigging if something goes wrong
+		did - optional, directory id, this is purely for debigging if something goes wrong
 
 	Returns:
 
 		success - promise, new file path, relative to the domain name
 		error - promise, -1
 */
-exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,pid = 0) {
+exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did = 0) {
 	var __function = "convertMedia";
 
 	var helper = require("./helper.js");
@@ -116,13 +116,13 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,pid
 			var child = exec(command,function(error,stdout,stderr) {
 
 				/* delete the old uploaded file no matter what */
-				var err = removeMedia(oldfilepath,uid,pid);
+				var err = removeMedia(oldfilepath,uid,did);
 				if(err !== "success") {
-					analytics.journal(true,111,'Exec Error (removemedia) (uid:' + uid + ') (pid:' + pid + ' -> ' + stdout + stderr,uid,analytics.__line,__function,__filename);
+					analytics.journal(true,111,'Exec Error (removemedia) (uid:' + uid + ') (did:' + did + ' -> ' + stdout + stderr,uid,analytics.__line,__function,__filename);
 				}
 
 				if (error !== null) {
-					reject('Exec Error (createmedia) (uid:' + uid + ') (pid:' + pid + ' -> ' + stdout + stderr);
+					reject('Exec Error (createmedia) (uid:' + uid + ') (did:' + did + ' -> ' + stdout + stderr);
 				} else {
 					resolve("," + reldir + newfile);
 				}
@@ -235,21 +235,21 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,pid
 
         fileRoute - absolute path to folder where files are stored, not including xm/
 		uid - the user id
-		pid - the page id
+		did - the directory id
 
 	Returns:
 
 		success - number, 1
 		error - number, -1
 */
-exports.deleteMedia = function(connection,fileRoute,uid,pid) {
+exports.deleteMedia = function(connection,fileRoute,uid,did) {
 	var __function = "deleteMedia";
 
 	/* get list of media file names in the page table */
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT mediaContent FROM p_" + uid + "_" + pid + " WHERE mediaType='image' OR mediaType='audio' OR mediaType='video' OR mediaType='xsvgs' OR mediaType='slide'";
+		var qry = "SELECT mediaContent FROM p_" + uid + "_" + did + " WHERE mediaType='image' OR mediaType='audio' OR mediaType='video' OR mediaType='xsvgs' OR mediaType='slide'";
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
@@ -263,7 +263,7 @@ exports.deleteMedia = function(connection,fileRoute,uid,pid) {
 
 					/* get only the file name */
 					for (var i = 0; i < mediaCount; i++) {
-						table[i] = rows[i].mediaContent.replace("xm/" + uid + "/" + pid + "/","");
+						table[i] = rows[i].mediaContent.replace("xm/" + uid + "/" + did + "/","");
 					}
 					resolve(table);
 				} else {
@@ -279,7 +279,7 @@ exports.deleteMedia = function(connection,fileRoute,uid,pid) {
 			var exec = require('child_process').exec;
 
             /* set up command to find all files in the folder */
-            var command = "ls " + fileRoute + "xm/" + uid + "/" + pid + "/";
+            var command = "ls " + fileRoute + "xm/" + uid + "/" + did + "/";
 
 			/* execute the find files command */
 			exec(command,function(error,stdout,stderr) {
@@ -307,7 +307,7 @@ exports.deleteMedia = function(connection,fileRoute,uid,pid) {
 					if (difference.length > 0) {
 						command = "rm ";
 						difference.forEach(function(filename) {
-							command += fileRoute + "xm/" + uid + "/" + pid + "/" + filename + " ";
+							command += fileRoute + "xm/" + uid + "/" + did + "/" + filename + " ";
 						});
 
                         /// todo: this had childrm = exec before

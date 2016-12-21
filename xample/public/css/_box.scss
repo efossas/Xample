@@ -1,5 +1,18 @@
 /*** General Box Type Divs ***/
 
+/* Error Box - All Pages */
+.errmsg {
+	@extend .wrapper;
+
+	margin-top: 16px;
+	margin-bottom: 16px;
+	box-shadow: 1px 1px 1px $shadow;
+
+	p {
+		padding: 6px;
+	}
+}
+
 /* Bookmarks Box - Home Page */
 .bookmarks-box {
 	@extend .wrapper;
@@ -36,6 +49,16 @@
 	border-radius: 2px;
 	background-color: white;
 	box-shadow: 1px 1px 1px $shadow;
+}
+
+/* Block Display Box - Learning Guide Page */
+.block-display {
+	@extend .wrapper;
+
+	iframe {
+		width: 100%;
+		box-sizing: border-box;
+	}
 }
 
 /* Link Box - Explore Page */

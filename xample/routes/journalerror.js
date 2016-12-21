@@ -62,6 +62,8 @@ exports.journalerror = function(request,response) {
 			var linenum = connection.escape(POST.linenum);
 			var script = connection.escape(POST.urlsource);
 
+			response.end("");
+
 			/* journal the frontend error, don't have function where error occurred though */
 			analytics.journal(true,150,message,uid,linenum,'',script);
 		});

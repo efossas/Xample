@@ -52,8 +52,8 @@ exports.explore = function(request,response) {
 		}
 		pool.getConnection(function(err,connection) {
 			if(err) {
-				analytics.journal(true,220,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 				loader.loadPage(request,response,"<script>pageError('dberror');</script>");
+				analytics.journal(true,220,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			} else {
 				/* if coming from the main page, neither sort nor tags are defined */
 				if(!sort) {
@@ -66,7 +66,7 @@ exports.explore = function(request,response) {
 					keywords = "";
 				}
 
-				var promise = querydb.getPageContent(connection,content,subject,category,topic,sort,tags,keywords);
+				var promise = querydb.searchPageResults(connection,content,subject,category,topic,sort,tags,keywords);
 
 				promise.then(function(data) {
 					/* convert array into string */
@@ -81,8 +81,8 @@ exports.explore = function(request,response) {
 					loader.loadPage(request,response,"<script>pageExplore(" + logstatus + "," + csctString + "," + exploredata + ");</script>");
 
 				},function(err) {
-					analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 					loader.loadPage(request,response,"<script>pageError('queryerror');</script>");
+					analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 				});
 			}
 		});

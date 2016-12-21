@@ -166,6 +166,27 @@ function toggleCheck(btn) {
 	}
 }
 
+/*
+	Function: watermark
+
+	Generates a watermark div. Append anywhere and it works.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		object - html node
+*/
+function watermark() {
+	var wm = document.createElement('div');
+	wm.setAttribute('id','watermark');
+	wm.innerHTML = 'Wisepool';
+
+	return wm;
+}
+
 // <<<fold>>>
 
 /***
@@ -203,10 +224,14 @@ function logout() {
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "loggedout") {
-					window.location = createURL("/");
-				} else {
-					alertify.alert("An Unknown Error Occurred");
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'loggedout':
+						window.location = createURL("/"); break;
+					case 'err':
+					default:
+						alertify.alert("An Unknown Error Occurred");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -537,14 +562,6 @@ function barStatus(pid) {
 	rowOne.appendChild(colSaveBar);
 	rowOne.appendChild(colSave);
 
-	var pageid = document.createElement('input');
-	pageid.setAttribute('type','hidden');
-	pageid.setAttribute('name','pageid');
-	pageid.setAttribute('value',pid);
-
-	/* append hidden values to bar */
-	statusBar.appendChild(pageid);
-
 	/* append row to status bar */
 	statusBar.appendChild(rowOne);
 
@@ -629,7 +646,7 @@ function progressUpdate(value) {
 
 	Parameters:
 
-		error - string indicating the type of error
+		error - string, message to display user.
 
 	Returns:
 
@@ -637,13 +654,11 @@ function progressUpdate(value) {
 */
 function pageError(error) {
 	var errorMessage = document.createElement("div");
-	if(error === "noeditloggedout") {
-		errorMessage.innerHTML = "You Cannot Edit The Requested Page Because You Are Logged Out.";
-	} else if(error === "notfound") {
-		errorMessage.innerHTML = "There URL You Requested Does Not Exist";
-	}
+	errorMessage.setAttribute('class','errmsg');
+	errorMessage.innerHTML = '<h2>Error</h2><br><p>' + error + '</p>';
 
 	var main = document.getElementById('content');
+	emptyDiv(main);
 	main.appendChild(errorMessage);
 }
 
@@ -685,10 +700,15 @@ function getSubjects() {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "err") {
-						reject("err");
-					} else {
-						resolve(xmlhttp.responseText);
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data); break;
+						case 'err':
+							reject('err'); break;
+						default:
+							reject('unknown');
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -734,15 +754,19 @@ function getUserFields(fields) {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "err") {
-						reject("err");
-						} else if (xmlhttp.responseText === "noprofiledataloggedout") {
-							reject("noprofiledataloggedout");
-						} else {
-							resolve(JSON.parse(xmlhttp.responseText));
-						}
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data.profiledata); break;
+						case 'noprofiledataloggedout':
+							reject('noprofiledataloggedout'); break;
+						case 'err':
+						default:
+							reject('err');
+					}
 				} else {
-					reject("err");
+					reject('err');
 				}
 			}
 		};
@@ -781,16 +805,10 @@ function journalError(message,source,linenum,colnum,error) {
 	xmlhttp.open("POST",url,true);
 
 	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-	if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-		if(xmlhttp.status === 200) {
-			if(xmlhttp.responseText === "success") {
-				// error reported
-		} else {
-			// error not reported
-		}
-	}
+
+	// no reason to check anything, this is the end of the line
+
 	xmlhttp.send(params);
-   }
 }
 
 // <<<fold>>>

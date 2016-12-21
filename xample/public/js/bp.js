@@ -28,6 +28,7 @@ var globalScope = {};
 	global barSubMenu:true
 	global getSubjects:true
 	global getUserFields:true
+	global watermark:true
 */
 /* from bengine.js */
 /*
@@ -1008,8 +1009,8 @@ function pageEdit(aid,pagedata,pageinfo) {
 	var main = document.getElementById('content');
 
 	/* hidden pid & title */
-	var pid = pageinfo.pid;
-	var pagename = pageinfo.pagename;
+	var pid = pageinfo.id;
+	var pagename = pageinfo.name;
 
 	/*** MENU & STATUS BAR ***/
 
@@ -1017,7 +1018,7 @@ function pageEdit(aid,pagedata,pageinfo) {
 	var menu = barMenu();
 	var status = barStatus(pid);
 
-	var pageSettings = barPageSettings(aid,pageinfo);
+	var pageSettings = barPageSettings('page',aid,pageinfo);
 
 	/* create submenu */
 	var submenu = barSubMenu('Page Settings',pageSettings);
@@ -1037,7 +1038,7 @@ function pageEdit(aid,pagedata,pageinfo) {
 		blockarray = [];
 	}
 
-	blockEngineStart('content',x,["bp",pid],blockarray);
+	blockEngineStart('content',x,["page",pid,pid],blockarray);
 
 	/*** AFTER STUFF ***/
 
@@ -1078,49 +1079,64 @@ function pageEdit(aid,pagedata,pageinfo) {
 
 	Parameters:
 
-		pagedata - string, page data is received in the format "pid,pagename,(mediaType,mediaContent,)"
+		mtoggle - boolean, true displays all & false displays only blocks
+		aid - number, the author id; which is the uid of the creator of the block page
+		pagedata - string, page data is received in the format "type,content,type,content,etc."
+		pageinfo - json string, page info is what goes into the settings
 
 	Returns:
 
 		nothing - *
 */
-function pageShow(pagedata) {
+function pageShow(mtoggle,aid,pagedata,pageinfo) {
 	/* grab the main div */
 	var main = document.getElementById('content');
 
-	/* block array -> pid,pagename,mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
-	var blockarray = pagedata.split(',');
-
 	/* hidden pid & title */
-	var pid = blockarray[0];
-	var pagename = blockarray[1];
+	var pid = pageinfo.id;
+	var pagename = pageinfo.name;
 
-	/*** MENU BAR ***/
+	if(mtoggle) {
 
-	/* create menu & status bar */
-	var menu = barMenu();
+		/* watermark */
+		main.appendChild(watermark());
 
-	/* append menu & status to main */
-	main.appendChild(menu);
+		/*** MENU BAR ***/
 
-	/// UH... WHERE DOES THIS PAGE TITLE GO??
-	var spaceDiv = document.createElement('div');
-	spaceDiv.setAttribute('style','padding-bottom:20px;');
-	main.appendChild(spaceDiv);
+		/* create menu & status bar */
+		var menu = barMenu();
 
-	/* page title input */
-	var title = document.createElement('input');
-	title.setAttribute('type','text');
-	title.setAttribute('name','pagename');
-	title.setAttribute('class','page-title');
-	title.setAttribute('maxlength','50');
-	title.setAttribute('value',pagename);
-	title.setAttribute('style','display: none;');
-	menu.appendChild(title);
+		/* append menu & status to main */
+		main.appendChild(menu);
+
+		/// UH... WHERE DOES THIS PAGE TITLE GO??
+		var spaceDiv = document.createElement('div');
+		spaceDiv.setAttribute('style','padding-bottom:20px;');
+		main.appendChild(spaceDiv);
+
+		/* page title input */
+		var title = document.createElement('input');
+		title.setAttribute('type','text');
+		title.setAttribute('name','pagename');
+		title.setAttribute('class','page-title');
+		title.setAttribute('maxlength','50');
+		title.setAttribute('value',pagename);
+		title.setAttribute('style','display: none;');
+		menu.appendChild(title);
+
+	}
 
 	/*** BLOCKS ***/
 
-	blockContentShow('content',x,["bp",pid],blockarray.splice(2,blockarray.length));
+	/* block array -> mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
+	var blockarray;
+	if(pagedata !== "") {
+		blockarray = pagedata.split(',');
+	} else {
+		blockarray = [];
+	}
+
+	blockContentShow('content',x,["page",pid],blockarray);
 }
 
 // <<<fold>>>

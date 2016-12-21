@@ -73,7 +73,7 @@ function writeToErrorLog(datedError,isError,idNumber,message,userID,lineNumber,f
 		isError - boolean, true for logging to error database, false for logging to action database.
 		idNumber - number, id number for the error or action. (0-255 only)
 		userID - number, user ID associated with log. set to 0 if not applicable.
-		message - string, the error message, if there is one.
+		message - object, contains properties with error information.
 		lineNumber - number, line number where the error or action occurred. should be set with global __line
 		functionName - string, function where the error or action occurred. define __function
 		scriptName - string, script file where the error or action occurred. shooud be set with global __filename

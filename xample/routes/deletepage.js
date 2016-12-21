@@ -5,6 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
+var helper = require('./../helper.js');
 
 /*
 	Function: deletepage
@@ -27,12 +28,16 @@ exports.deletepage = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* get the user's id */
 	var uid = request.session.uid;
 
 	/* if the user is not logged in, respond with 'nosaveloggedout' */
     if(typeof uid === 'undefined') {
-        response.end('nodeleteloggedout');
+		result.msg = 'nodeleteloggedout';
+        response.end(JSON.stringify(result));
     } else {
         var body = '';
 
@@ -43,7 +48,8 @@ exports.deletepage = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,global.__stack[1].getLineNumber(),__function,__filename);
+				var err = {message:"Overload Attack!"};
+				analytics.journal(true,199,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -51,17 +57,22 @@ exports.deletepage = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
-                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                    response.end('err');
+					result.msg = 'err';
+                    response.end(JSON.stringify(result));
+					analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                 } else {
                     var POST = qs.parse(body);
 
                     /* change info as needed */
-                    var pid = connection.escape(POST.pid).replace(/'/g,'');
+                    var xid = connection.escape(POST.xid).replace(/'/g,'');
+					var pagetype = connection.escape(POST.pt).replace(/'/g,'');
 
-                    var qryDeleteRow = "DELETE FROM p_" + uid + " WHERE pid=" + pid;
-                    var qryDeletePermPage = "DROP TABLE p_" + uid + "_" + pid;
-                    var qryDeleteTempPage = "DROP TABLE t_" + uid + "_" + pid;
+					var prefix = helper.getTablePrefixFromPageType(pagetype);
+					var prefixTemp = helper.getTempTablePrefixFromPageType(pagetype);
+
+                    var qryDeleteRow = "DELETE FROM " + prefix + "_" + uid + "_0 WHERE xid=" + xid;
+                    var qryDeletePermPage = "DROP TABLE " + prefix + "_" + uid + "_" + xid;
+                    var qryDeleteTempPage = "DROP TABLE " + prefixTemp + "_" + uid + "_" + xid;
 
                     /* three async queries, use this flag for knowning when to send response */
                     var firstQryComplete = false;
@@ -70,11 +81,14 @@ exports.deletepage = function(request,response) {
                     /* delete page row from user's page list */
                     connection.query(qryDeleteRow,function(err,rows,fields) {
                         if(err) {
-                            response.end('err');
+							result.msg = 'err';
+                            response.end(JSON.stringify(result));
+							err.input = qryDeleteRow;
                             analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
                             if(firstQryComplete && secondQryComplete) {
-                                response.end("success");
+								result.msg = 'success';
+                                response.end(JSON.stringify(result));
                                 analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else if(firstQryComplete) {
                                 secondQryComplete = true;
@@ -87,11 +101,14 @@ exports.deletepage = function(request,response) {
                     /* delete the permanent page table */
                     connection.query(qryDeletePermPage,function(err,rows,fields) {
                         if(err) {
-                            response.end('err');
+							result.msg = 'err';
+                            response.end(JSON.stringify(result));
+							err.input = qryDeletePermPage;
                             analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
                             if(firstQryComplete && secondQryComplete) {
-                                response.end("success");
+								result.msg = 'success';
+                                response.end(JSON.stringify(result));
                                 analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else if(firstQryComplete) {
                                 secondQryComplete = true;
@@ -104,11 +121,14 @@ exports.deletepage = function(request,response) {
                     /* delete the temporary page */
                     connection.query(qryDeleteTempPage,function(err,rows,fields) {
                         if(err) {
-                            response.end('err');
+							result.msg = 'err';
+							response.end(JSON.stringify(result));
+							err.input = qryDeleteTempPage;
                             analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
                             if(firstQryComplete && secondQryComplete) {
-                                response.end("success");
+								result.msg = 'success';
+                                response.end(JSON.stringify(result));
                                 analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                             } else if(firstQryComplete) {
                                 secondQryComplete = true;

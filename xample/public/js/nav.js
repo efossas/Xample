@@ -44,6 +44,7 @@ var globalScope = {};
 	global barLog:true
 	global barMenu:true
 	global getSubjects:true
+	global journalError:true
 */
 
 /* list any objects from other js files here */
@@ -491,8 +492,8 @@ function dashExplore(exploreHeader,linkRoute) {
 	/* get subjects for select topic list */
 	var subjectsPromise = getSubjects();
 
-	subjectsPromise.then(function(success) {
-		var subjectsData = JSON.parse(success);
+	subjectsPromise.then(function(data) {
+		var subjectsData = data;
 		globalScope.subjects = subjectsData;
 
 		function showTop() {
@@ -690,7 +691,10 @@ function dashExplore(exploreHeader,linkRoute) {
 			explore.appendChild(categoryRow);
 		}
 	},function(error) {
-		/// handle error
+		alertify.alert("There Was An Error Getting The Subjects");
+		if(error === "unknown") {
+			journalError("getSubjects() unknown result.msg","nav.js",new Error().lineNumber,"","");
+		}
 	});
 
 	return exploreDash;
@@ -978,28 +982,22 @@ function barFilter(sort,tags,keywords) {
 
 	Parameters:
 
-		type - string, the name of the type of content page to create.
+		pagetype - string, the name of the type of content page to create.
 		data - string, comma-separated like so: id,name,id,name etc.
 
 	Returns:
 
 		success - html node, user content creation form
 */
-function formGenerateUserContent(type,data) {
+function formGenerateUserContent(pagetype,data) {
 	var fullCapital;
 	var capital;
-	var lower;
-	var deleteFunc;
-	if(type === 'blockpage') {
+	if(pagetype === 'page') {
 		fullCapital = 'Pages';
 		capital = 'Page';
-		lower = 'page';
-		deleteFunc = deletePage;
-	} else if(type === 'lg') {
+	} else if(pagetype === 'guide') {
 		fullCapital = 'Learning Guides';
 		capital = 'LG';
-		lower = 'lg';
-		deleteFunc = deleteLG;
 	}
 
 	/* create header */
@@ -1032,13 +1030,13 @@ function formGenerateUserContent(type,data) {
 	var title = document.createElement('input');
 	title.setAttribute('type','text');
 	title.setAttribute('class','log-input');
-	title.setAttribute('name',lower + 'name-create');
+	title.setAttribute('name',pagetype + 'name-create');
 	title.setAttribute('maxlength','50');
 	title.setAttribute('placeholder','New ' + capital + ' Name');
 	title.setAttribute('style','border-left-width:0px;');
 
 	/* submit button that calls createpage() */
-	var submit = btnSubmit("Create " + capital,"create" + lower + "()","green");
+	var submit = btnSubmit("Create " + capital,"createpage('" + pagetype + "')","green");
 
 	/* append elements to row */
 	colLeft_Content.appendChild(title);
@@ -1053,7 +1051,7 @@ function formGenerateUserContent(type,data) {
 
 	/* create a div to hold the page links */
 	var datadiv = document.createElement('div');
-	datadiv.setAttribute('class',lower + 'list');
+	datadiv.setAttribute('class',pagetype + 'list');
 
 	/* append elements to row 3 */
 	row_dataBox.appendChild(datadiv);
@@ -1061,7 +1059,7 @@ function formGenerateUserContent(type,data) {
 	/* create select multiple box for page names */
 	var selectBox = document.createElement('select');
 	selectBox.setAttribute('multiple','true');
-	selectBox.setAttribute('id',lower + '-select');
+	selectBox.setAttribute('id',pagetype + '-select');
 
 	/* append elements to datadiv */
 	datadiv.appendChild(selectBox);
@@ -1091,9 +1089,9 @@ function formGenerateUserContent(type,data) {
 	}
 
 	idNameArray.sort(function(a,b) {
-		if(a['name'] < b['name']) {
+		if(a['name'].toUpperCase() < b['name'].toUpperCase()) {
 			return -1;
-		} else if(a['name'] > b['name']) {
+		} else if(a['name'].toUpperCase() > b['name'].toUpperCase()) {
 			return 1;
 		} else {
 			return 0;
@@ -1128,13 +1126,13 @@ function formGenerateUserContent(type,data) {
 
 	/* this function is called when a block page link is clicked on */
 	function goToPage() {
-		var selectBox = document.getElementById(lower + "-select");
+		var selectBox = document.getElementById(pagetype + "-select");
 		var dataop = selectBox.value;
 
 		if(dataop === "") {
 			alertify.alert("Please Select A " + capital);
 		} else {
-			var link = createURL("/edit" + lower + "?" + lower + "=" + dataop);
+			var link = createURL("/edit" + pagetype + "?" + pagetype + "=" + dataop);
 			window.open(link,"_self");
 		}
 	}
@@ -1144,7 +1142,7 @@ function formGenerateUserContent(type,data) {
 
 	/* this function is called to double check deleting a block page */
 	function deletePageConfirm() {
-		var selectBox = document.getElementById(lower + "-select");
+		var selectBox = document.getElementById(pagetype + "-select");
 		var datapage = selectBox.value;
 
 		if(datapage === "") {
@@ -1152,7 +1150,7 @@ function formGenerateUserContent(type,data) {
 		} else {
 			alertify.confirm("Are You Sure You Want To Delete This? This Is Permanent.",function(accepted) {
 				if (accepted) {
-					deleteFunc(datapage);
+					deletePage(pagetype,datapage);
 				} else {
 					// user clicked "cancel"
 				}
@@ -1170,7 +1168,7 @@ function formGenerateUserContent(type,data) {
 	/* append the page links to a form div */
 	var generateUserContentDiv = document.createElement('div');
 	generateUserContentDiv.setAttribute('class','page-gen');
-	generateUserContentDiv.setAttribute('id',type + '-gen');
+	generateUserContentDiv.setAttribute('id',pagetype + '-gen');
 	generateUserContentDiv.appendChild(rowHeader);
 	generateUserContentDiv.appendChild(row_Content);
 	generateUserContentDiv.appendChild(row_dataBox);
@@ -1209,7 +1207,7 @@ function formSignUp() {
 
 	/* username column */
 	var colUsername = document.createElement('div');
-	colUsername.setAttribute('class','col col-17');
+	colUsername.setAttribute('class','col col-21');
 
 	/* create username text <input> */
 	var username = document.createElement('input');
@@ -1223,7 +1221,7 @@ function formSignUp() {
 
 	/* email column */
 	var colEmail = document.createElement('div');
-	colEmail.setAttribute('class','col col-17');
+	colEmail.setAttribute('class','col col-30');
 
 	/* create email text <input> */
 	var email = document.createElement('input');
@@ -1231,21 +1229,8 @@ function formSignUp() {
 	email.setAttribute('type','text');
 	email.setAttribute('name','email-signup');
 	email.setAttribute('maxlength','50');
-	email.setAttribute('placeholder','Email - optional');
+	email.setAttribute('placeholder','Email');
 	colEmail.appendChild(email);
-
-	/* phone column */
-	var colPhone = document.createElement('div');
-	colPhone.setAttribute('class','col col-17');
-
-	/* create phone text <input> */
-	var phone = document.createElement('input');
-	phone.setAttribute('class','log-input');
-	phone.setAttribute('type','text');
-	phone.setAttribute('name','phone-signup');
-	phone.setAttribute('maxlength','17');
-	phone.setAttribute('placeholder','Phone - optional');
-	colPhone.appendChild(phone);
 
 	/* password column */
 	var colPassword = document.createElement('div');
@@ -1286,7 +1271,6 @@ function formSignUp() {
 	/* append the elements to the parent <div> */
 	signup.appendChild(colUsername);
 	signup.appendChild(colEmail);
-	signup.appendChild(colPhone);
 	signup.appendChild(colPassword);
 	signup.appendChild(colPasswordc);
 	signup.appendChild(colSubmit);
@@ -1515,7 +1499,7 @@ function pageExplore(logstatus,csct,data) {
 		var pageURL = createURL(prefixResource + "?a=" + data[index].uid + "&p=" + data[index].pid);
 		var pageLink = document.createElement('a');
 		pageLink.setAttribute('href',pageURL);
-		pageLink.innerHTML = data[index].pagename;
+		pageLink.innerHTML = data[index].xname;
 		newBox.querySelector(".box-title").appendChild(pageLink);
 
 		/* author */
@@ -1585,21 +1569,21 @@ function pageHome() {
 	main.appendChild(bookmarks);
 
 	/* fetch user pages */
-	var promiseBP = getPages();
+	var promiseBP = getPages("page");
 
 	/* fetch user learning guides */
-	var promiseLG = getLearningGuides();
+	var promiseLG = getPages("guide");
 
 	Promise.all([promiseBP,promiseLG]).then(function(values) {
 		/* block page create form */
-		var row_PageCreate = formGenerateUserContent('blockpage',values[0]);
+		var row_PageCreate = formGenerateUserContent('page',values[0]);
 		main.appendChild(row_PageCreate);
 
 		/* learning guide create form */
-		var row_LgCreate = formGenerateUserContent('lg',values[1]);
+		var row_LgCreate = formGenerateUserContent('guide',values[1]);
 		main.appendChild(row_LgCreate);
 	},function(error) {
-		console.log(error);
+		alertify.alert("There Was An Error Getting Your Pages.");
 	});
 }
 
@@ -1657,15 +1641,6 @@ function pageLanding(logstatus) {
 		nothing - *
 */
 function pageProfile(profiledata) {
-
-	/// if profiledata == "err" handle this
-	/// if profiledata == "noprofileloggedout" handle this
-	if(profiledata === "err") {
-		console.log("profile error");
-	} else if (profiledata === "noprofileloggedout") {
-		console.log("profile logged out");
-	}
-
 	var profileinfo = JSON.parse(profiledata);
 
 	/* MENU */
@@ -1752,14 +1727,18 @@ function login() {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "loggedin") {
-					window.location = createURL("/home");
-				} else if(xmlhttp.responseText === "incorrect") {
-					alertify.alert("The Passowrd Was Incorrect");
-				} else if(xmlhttp.responseText === "notfound") {
-					alertify.alert("The Username Could Not Be Found");
-				} else {
-					alertify.alert("An Unknown Error Occurred");
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'loggedin':
+						window.location = createURL("/home"); break;
+					case 'incorrect':
+						alertify.alert("The Passowrd Was Incorrect"); break;
+					case 'notfound':
+						alertify.alert("The Username Could Not Be Found"); break;
+					case 'err':
+					default:
+						alertify.alert("An Unknown Error Occurred");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1791,19 +1770,19 @@ function signup() {
 	/* get the user information */
 	var username = document.getElementsByName('username-signup')[0].value;
 	var email = document.getElementsByName('email-signup')[0].value;
-	var phone = document.getElementsByName('phone-signup')[0].value;
 	var password = document.getElementsByName('password-signup')[0].value;
 	var passwordcheck = document.getElementsByName('password-signup-check')[0].value;
 
-	/// todo: instant validation needed
+	/* check that the passwords match */
 	if(password !== passwordcheck) {
-		/// oh fuck
+		alertify.alert("The Passwords You Entered Do Not Match.");
+		return;
 	}
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "username=" + username + "&email=" + email + "&phone=" + phone + "&password=" + password;
+	var params = "username=" + username + "&email=" + email + "&password=" + password;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1812,12 +1791,16 @@ function signup() {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "success") {
-					window.location = createURL("/home");
-				} else if(xmlhttp.responseText === "exists") {
-					alertify.alert("That Username Already Exists.\nPlease Choose A Different One.");
-				} else {
-					alertify.alert("An Unknown Error Occurred");
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'success':
+						window.location = createURL("/home"); break;
+					case 'exists':
+						alertify.alert("That Username Already Exists.\nPlease Choose A Different One."); break;
+					case 'err':
+					default:
+						alertify.alert("An Unknown Error Occurred");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1829,88 +1812,33 @@ function signup() {
 }
 
 /*
-	Function: createlg
-
-	This function creates a user learning guide.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		nothing - *
-*/
-function createlg() {
-
-	/* create the url destination for the ajax request */
-	var url = createURL("/createlg");
-
-	/* get the page name */
-	var guidename = document.getElementsByName('lgname-create')[0].value;
-
-	if(guidename === "") {
-		alertify.alert("Please Enter A Guide Name.");
-	} else {
-		var xmlhttp;
-		xmlhttp = new XMLHttpRequest();
-
-		var params = "guidename=" + guidename;
-
-		xmlhttp.open("POST",url,true);
-
-		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "pageexists") {
-						alertify.alert("You Already Have A Guide With That Name.");
-					} else if (xmlhttp.responseText === "nocreateloggedout") {
-						alertify.alert("Unable To Create Page. You Are Logged Out.");
-					} else if (xmlhttp.responseText === "err") {
-						alertify.alert("An Error Occured. Please Try Again Later.");
-					} else {
-						window.location = createURL("/editlg?lg=" + xmlhttp.responseText);
-					}
-				} else {
-					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-				}
-			}
-		};
-
-		xmlhttp.send(params);
-	}
-}
-
-/*
 	Function: createpage
 
 	This function creates a user page.
 
 	Parameters:
 
-		none
+		pagetype - string, ["page","guide"]
 
 	Returns:
 
 		nothing - *
 */
-function createpage() {
+function createpage(pagetype) {
 
 	/* create the url destination for the ajax request */
 	var url = createURL("/createpage");
 
 	/* get the page name */
-	var pagename = document.getElementsByName('pagename-create')[0].value;
+	var xname = document.getElementsByName(pagetype + 'name-create')[0].value;
 
-	if(pagename === "") {
-		alertify.alert("Please Enter A Page Name.");
+	if(xname === "") {
+		alertify.alert("Please Enter A Name.");
 	} else {
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();
 
-		var params = "pagename=" + pagename;
+		var params = "xname=" + xname + "&pt=" + pagetype;
 
 		xmlhttp.open("POST",url,true);
 
@@ -1919,14 +1847,32 @@ function createpage() {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "pageexists") {
-						alertify.alert("You Already Have A Page With That Name.");
-					} else if (xmlhttp.responseText === "nocreateloggedout") {
-						alertify.alert("Unable To Create Page. You Are Logged Out.");
-					} else if (xmlhttp.responseText === "err") {
-						alertify.alert("An Error Occured. Please Try Again Later.");
-					} else {
-						window.location = createURL("/editpage?page=" + xmlhttp.responseText);
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case "success":
+							/* insert page into select box */
+							var selectBox = document.getElementById(pagetype + '-select');
+							var optLength = selectBox.length;
+
+							var option = document.createElement("option");
+							option.text = xname;
+							option.value = result.data.xid;
+
+							for(var i = 0; i < optLength + 1; i++) {
+								if(i === optLength || selectBox.options[i].text.toUpperCase() > xname.toUpperCase()) {
+									selectBox.add(option,i);
+									break;
+								}
+							}
+							break;
+						case "pageexists":
+							alertify.alert("You Already Have A Page With That Name."); break;
+						case "nocreateloggedout":
+							alertify.alert("Unable To Create Page. You Are Logged Out."); break;
+						case "err":
+						default:
+							alertify.alert("An Error Occured. Please Try Again Later."); break;
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1936,59 +1882,6 @@ function createpage() {
 
 		xmlhttp.send(params);
 	}
-}
-
-/*
-	Function: deleteLG
-
-	This function deletes the selected user learning guide.
-
-	Parameters:
-
-		gid - guide id
-
-	Returns:
-
-		none - *
-*/
-function deleteLG(gid) {
-	/* create the url destination for the ajax request */
-	var url = createURL("/deletelg");
-
-	var xmlhttp;
-	xmlhttp = new XMLHttpRequest();
-
-	var params = "gid=" + gid;
-
-	xmlhttp.open("POST",url,true);
-
-	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "success") {
-					var selectBox = document.getElementById('lg-select');
-					var count = selectBox.length;
-					var optionToRemove;
-					for(var i = 0; i < count; i++) {
-						if(selectBox.options[i].value === gid) {
-							optionToRemove = selectBox.options[i];
-						}
-					}
-					selectBox.removeChild(optionToRemove);
-				} else if(xmlhttp.responseText === "nodeleteloggedout") {
-					alertify.alert("Could Not Delete Guide. You Are Logged Out.");
-				} else {
-					alertify.alert("There Was A Problem Deleting The Guide.");
-				}
-			} else {
-				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-			}
-		}
-	};
-
-	xmlhttp.send(params);
 }
 
 /*
@@ -1998,20 +1891,20 @@ function deleteLG(gid) {
 
 	Parameters:
 
-		pid - page id
+		xid - page id
 
 	Returns:
 
 		none - *
 */
-function deletePage(pid) {
+function deletePage(pagetype,xid) {
 	/* create the url destination for the ajax request */
 	var url = createURL("/deletepage");
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "pid=" + pid;
+	var params = "xid=" + xid + "&pt=" + pagetype;
 
 	xmlhttp.open("POST",url,true);
 
@@ -2020,20 +1913,25 @@ function deletePage(pid) {
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "success") {
-					var selectBox = document.getElementById('page-select');
-					var count = selectBox.length;
-					var optionToRemove;
-					for(var i = 0; i < count; i++) {
-						if(selectBox.options[i].value === pid) {
-							optionToRemove = selectBox.options[i];
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'success':
+						var selectBox = document.getElementById(pagetype + '-select');
+						var count = selectBox.length;
+						var optionToRemove;
+						for(var i = 0; i < count; i++) {
+							if(selectBox.options[i].value === xid) {
+								optionToRemove = selectBox.options[i];
+							}
 						}
-					}
-					selectBox.removeChild(optionToRemove);
-				} else if(xmlhttp.responseText === "nodeleteloggedout") {
-					alertify.alert("Could Not Delete Page. You Are Logged Out.");
-				} else {
-					alertify.alert("There Was A Problem Deleting The Page.");
+						selectBox.removeChild(optionToRemove);
+						break;
+					case 'nodeleteloggedout':
+						alertify.alert("Could Not Delete Page. You Are Logged Out."); break;
+					case 'err':
+					default:
+						alertify.alert("There Was A Problem Deleting The Page.");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -2045,69 +1943,23 @@ function deletePage(pid) {
 }
 
 /*
-	Function: getLearningGuides
-
-	This function fetches a user's learning guides. It returns a promise containing learning guide data in the following format (lid,lgname,)
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		success - promise, pagedata
-*/
-function getLearningGuides() {
-	var promise = new Promise(function(resolve,reject) {
-
-		/* create the url destination for the ajax request */
-		var url = createURL("/getlgs");
-
-		var xmlhttp;
-		xmlhttp = new XMLHttpRequest();
-
-		xmlhttp.open("POST",url,true);
-
-		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "err") {
-						reject("err");
-					} else {
-						resolve(xmlhttp.responseText);
-					}
-				} else {
-					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-				}
-			}
-		};
-
-		xmlhttp.send();
-	});
-
-	return promise;
-}
-
-/*
 	Function: getPages
 
-	This function fetches a user's pages. It returns a promise containing page data in the following format (pid,pagename,)
+	This function fetches a user's pages. It returns a promise containing page data in the following format (xid,xname,)
 
 	Parameters:
 
-		none
+		pagetype - string, ["guide","page"]
 
 	Returns:
 
 		success - promise, pagedata
 */
-function getPages() {
+function getPages(pagetype) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* create the url destination for the ajax request */
-		var url = createURL("/getpages");
+		var url = createURL("/getpages?pt=" + pagetype);
 
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();
@@ -2119,10 +1971,14 @@ function getPages() {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "err") {
-						reject("err");
-					} else {
-						resolve(xmlhttp.responseText);
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data.pages); break;
+						case 'err':
+						default:
+							reject('err');
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -2178,16 +2034,20 @@ function saveProfileInfo(btn,fields) {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "profilesaved") {
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'profilesaved':
 						btn.style = "background-color: #00ffe1";
-						alertify.log("Saved!","success");
-					} else if (xmlhttp.responseText === "nosaveloggedout") {
+						alertify.log("Saved!","success"); break;
+					case 'nosaveloggedout':
 						btn.style = "background-color: #e83e3e";
-						alertify.alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
-					} else {
+						alertify.alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again."); break;
+					case 'err':
+					default:
 						btn.style = "background-color: #e83e3e";
 						alertify.alert("An Unknown Error Occurred");
-					}
+				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}

@@ -13,7 +13,7 @@ CREATE TABLE sessions (session_id VARCHAR(255) NOT NULL PRIMARY KEY, expires INT
 CREATE DATABASE xanalytics;
 USE xanalytics;
 
-CREATE TABLE xerror (ekey BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, id TINYINT UNSIGNED, scriptName VARCHAR(32), functionName VARCHAR(32), lineNumber SMALLINT UNSIGNED, userID INT UNSIGNED, eventTime DATETIME, message VARCHAR(256) );
+CREATE TABLE xerror (ekey BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, id TINYINT UNSIGNED, scriptName VARCHAR(32), functionName VARCHAR(32), lineNumber SMALLINT UNSIGNED, userID INT UNSIGNED, eventTime DATETIME, message VARCHAR(1024) );
 
 CREATE TABLE xdata (scriptName VARCHAR(32), functionName VARCHAR(32), lineNumber SMALLINT UNSIGNED, userID INT UNSIGNED, eventTime DATETIME );
 
@@ -21,3 +21,5 @@ CREATE USER 'nodesql'@'localhost' IDENTIFIED BY 'Vup}Ur34';
 GRANT ALL PRIVILEGES ON xample.* TO 'nodesql'@'localhost';
 GRANT ALL PRIVILEGES ON xanalytics.* TO 'nodesql'@'localhost';
 GRANT ALL PRIVILEGES ON xsessionstore.* TO 'nodesql'@'localhost';
+
+USE xample;

@@ -5,6 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
+var helper = require('./../helper.js');
 var querydb = require('./../querydb.js');
 
 /*
@@ -29,12 +30,16 @@ exports.createpage = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* get the user's id */
 	var uid = request.session.uid;
 
 	/* if the user is not logged in, respond with 'nosaveloggedout' */
     if(typeof uid === 'undefined') {
-        response.end('nocreateloggedout');
+		result.msg = 'nocreateloggedout';
+        response.end(JSON.stringify(result));
     } else {
 
 		var body = '';
@@ -46,7 +51,8 @@ exports.createpage = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
                 request.connection.destroy();
-                analytics.journal(true,199,"Overload Attack!",0,global.__stack[1].getLineNumber(),__function,__filename);
+				var errmsg = {message:"Overload Attack!"};
+                analytics.journal(true,199,errmsg,0,global.__stack[1].getLineNumber(),__function,__filename);
             }
         });
 
@@ -54,82 +60,101 @@ exports.createpage = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
+					result.msg = 'err';
+                    response.end(JSON.stringify(result));
                     analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                }
+                } else {
+					var POST = qs.parse(body);
 
-                var POST = qs.parse(body);
+					/* escape the page name to prevent Sql injection */
+					var xname = connection.escape(POST.xname);
+					var pagetype = connection.escape(POST.pt).replace(/'/g,"");
 
-                /* escape the page name to prevent Sql injection */
-                var pagename = connection.escape(POST.pagename);
+					var prefix = helper.getTablePrefixFromPageType(pagetype);
 
-                /* check if page name exists */
-                var promise = querydb.searchPagename(connection,uid,pagename);
+					/* check if page name exists */
+					var promise = querydb.searchXnameMatch(connection,prefix,uid,xname);
 
-                promise.then(function(success) {
-                    if(success !== -1) {
-                        response.end('pageexists');
-                    } else {
-                        /* insert page into user's page table */
+					promise.then(function(match) {
+						if(match) {
+							result.msg = 'pageexists';
+							response.end(JSON.stringify(result));
+						} else {
+							/* insert page into user's page table */
+							var qryUser = "INSERT INTO " + prefix + "_" + uid + "_0 (xname,status,edited,created,ranks,views,rating,imageurl) VALUES (" + xname + ",1,NOW(),NOW(),0,0,0,'')";
 
-                        var qryUser = "INSERT INTO p_" + uid + " (pagename,status,tags,edited,created,ranks,views,rating) VALUES (" + pagename + ",1,0,NOW(),NOW(),0,0,0)";
+							connection.query(qryUser,function(err,rows,fields) {
+								if (err) {
+									result.msg = 'err';
+									response.end(JSON.stringify(result));
+									err.input = qryUser;
+									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+								} else {
+									/* grab the pid of the new page name from the user's page table */
+									var promiseXid = querydb.getXidFromXname(connection,prefix,uid,xname);
 
-                        connection.query(qryUser,function(err,rows,fields) {
-                            if (err) {
-                                response.end('err');
-                                analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                            } else {
-                                /* grab the pid of the new page name from the user's page table */
-                                var promisePid = querydb.searchPid(connection,uid,pagename);
+									promiseXid.then(function(xid) {
+										if(xid === "") {
+											result.msg = 'err';
+											response.end(JSON.stringify(result));
+											var err = {message:"xid not found after page insert"};
+											analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										} else {
+											/* create the page's permanent table */
+											var qryPage = "CREATE TABLE " + prefix + "_" + uid + "_" + xid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
 
-                                promisePid.then(function(success) {
-                                    if(success === -1) {
-                                        response.end('err');
-                                        analytics.journal(true,203,"pid not found after page insert",uid,global.__stack[1].getLineNumber(),__function,__filename);
-                                    } else {
-                                        var pid = success;
+											connection.query(qryPage,function(err,rows,fields) {
+												if (err) {
+													result.msg = 'err';
+													response.end(JSON.stringify(result));
+													err.input = qryPage;
+													analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+												}
+											});
 
-                                        /* create the page's permanent table */
-                                        var qryPage = "CREATE TABLE p_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
+											var prefixTemp = helper.getTempTablePrefixFromPageType(pagetype);
 
-                                        connection.query(qryPage,function(err,rows,fields) {
-											if (err) {
-												response.end('err');
-												analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-											}
-										});
+											/* create the page's temporary table */
+											var qryTemp = "CREATE TABLE " + prefixTemp + "_" + uid + "_" + xid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
 
-										/* create the page's temporary table */
-										var qryTemp = "CREATE TABLE t_" + uid + "_" + pid + " (bid TINYINT UNSIGNED, type CHAR(5), content VARCHAR(4096) )";
+											connection.query(qryTemp,function(err,rows,fields) {
+												if (err) {
+													result.msg = 'err';
+													response.end(JSON.stringify(result));
+													err.input = qryTemp;
+													analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+												}
+											});
 
-										connection.query(qryTemp,function(err,rows,fields) {
-											if (err) {
-												response.end('err');
-												analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-											}
-										});
-
-										/* make a folder in user's media folder to store future media uploads */
-										fs.mkdir(request.app.get('fileRoute') + "xm/" + uid + "/" + pid,function(err) {
-											/* don't consider existing folders as a mkdir error */
-											if(err && err.code !== "EEXIST") {
-												analytics.journal(true,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-											}
-										});
-										response.end(pid.toString());
-										analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-									}
-								},function(error) {
-									response.end('err');
-									analytics.journal(true,202,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
-								});
-							}
-						});
-					}
-				},function(error) {
-					response.end('err');
-					analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
-				});
-                connection.release();
+											/* make a folder in user's media folder to store future media uploads */
+											var dirPath = request.app.get('fileRoute') + "xm/" + uid + "/" + xid;
+											fs.mkdir(dirPath,function(err) {
+												/* don't consider existing folders as a mkdir error */
+												if(err && err.code !== "EEXIST") {
+													err.input = dirPath;
+													analytics.journal(true,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+												}
+											});
+											result.msg = 'success';
+											result.data.xid = xid.toString();
+											response.end(JSON.stringify(result));
+											analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+										}
+									},function(error) {
+										result.msg = 'err';
+										response.end(JSON.stringify(result));
+										analytics.journal(true,202,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									});
+								}
+							});
+						}
+					},function(error) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						analytics.journal(true,200,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
+					});
+					connection.release();
+				}
             });
 		});
 	}

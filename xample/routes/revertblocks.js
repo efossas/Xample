@@ -5,6 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
+var helper = require('./../helper.js');
 
 /*
 	Function: revert
@@ -27,13 +28,16 @@ exports.revertblocks = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* grab the user's id */
 	var uid = request.session.uid;
 
 	if(typeof uid === 'undefined') {
-        response.end('norevertloggedout');
+		result.msg = 'norevertloggedout';
+		response.end(JSON.stringify(result));
     } else {
-
 		var body = '';
 
         /* when the request gets data, append it to the body string */
@@ -43,7 +47,8 @@ exports.revertblocks = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,global.__stack[1].getLineNumber(),__function,__filename);
+				var errmsg = {message:"Overload Attack!"};
+				analytics.journal(true,199,errmsg,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -52,64 +57,64 @@ exports.revertblocks = function(request,response) {
 			var POST = qs.parse(body);
 
 			if(typeof POST.xid === 'undefined') {
-                response.end('noxid');
+				result.msg = 'noxid';
+				response.end(JSON.stringify(result));
             } else {
 				var xid = POST.xid;
-				var xname = POST.xname;
+				var pagetype = POST.pagetype;
 
-				var tid;
-				var qryStatus;
-				if(xname === "bp") {
-					tid = "p_";
-					qryStatus = "UPDATE " + tid + uid + " SET status=1 WHERE pid=" + xid;
-				} else if(xname === "lg") {
-					tid = "g_";
-					qryStatus = "UPDATE " + tid + uid + " SET status=1 WHERE gid=" + xid;
-				} else {
-					/// else throw invalid parameter error!!
-				}
+				var prefix = helper.getTablePrefixFromPageType(pagetype);
+
+				var qryStatus = "UPDATE " + prefix + "_" + uid + "_0 SET status=1 WHERE xid=" + xid;
 
                 pool.getConnection(function(err,connection) {
                     if(err) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
                         analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                    }
+                    } else {
+						connection.query(qryStatus,function(err,rows,fields) {
+							if(err) {
+								result.msg = 'err';
+								response.end(JSON.stringify(result));
+								err.input = qryStatus;
+								analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							} else {
+								var qryPageData = "SELECT type,content FROM " + prefix + "_" + uid + "_" + xid;
 
-					connection.query(qryStatus,function(err,rows,fields) {
-						if(err) {
-							response.end('err');
-							analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-						} else {
+								connection.query(qryPageData,function(err,rows,fields) {
+									if(err) {
+										result.msg = 'err';
+										response.end(JSON.stringify(result));
+										err.input = qryPageData;
+										analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									} else {
+										var pagedata = "";
 
-							var qryPageData = "SELECT type,content FROM " + tid + uid + "_" + xid;
+										/* i is for accessing row array, j is for keeping track of rows left to parse */
+										var i = 0;
+										var j = rows.length;
 
-							connection.query(qryPageData,function(err,rows,fields) {
-								if(err) {
-									response.end('err');
-									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-								} else {
-									var pagedata = "";
+										/* append commas to each row except for the last one */
+										while(j > 1) {
+											pagedata += rows[i].type + "," + rows[i].content + ",";
+											i++;
+											j--;
+										}
+										if(j === 1) {
+											pagedata += rows[i].type + "," + rows[i].content;
+										}
 
-									/* i is for accessing row array, j is for keeping track of rows left to parse */
-									var i = 0;
-									var j = rows.length;
-
-									/* append commas to each row except for the last one */
-									while(j > 1) {
-										pagedata += rows[i].type + "," + rows[i].content + ",";
-										i++;
-										j--;
+										result.msg = 'success';
+										result.data = pagedata;
+										response.end(JSON.stringify(result));
+										analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 									}
-									if(j === 1) {
-										pagedata += rows[i].type + "," + rows[i].content;
-									}
-
-									response.end(pagedata);
-									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-								}
-							});
-						}
-					});
-                    connection.release();
+								});
+							}
+						});
+						connection.release();
+					}
                 });
 			}
 		});

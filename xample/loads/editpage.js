@@ -4,8 +4,9 @@
 	Loads block page in edit mode.
 */
 
-var loader = require('./loader.js');
 var analytics = require('./../analytics.js');
+var helper = require('./../helper.js');
+var loader = require('./loader.js');
 var querydb = require('./../querydb.js');
 
 /*
@@ -30,14 +31,10 @@ exports.editpage = function(request,response) {
 	/* get the user's id, getting it from the session ensures user's can edit other users pages */
 	var uid = request.session.uid;
 
-	/* get the pid from the get request */
-	var pid = request.query.page;
-
 	/* redirect users if logged out or no page id provided */
-	if(typeof uid === 'undefined' || typeof pid === 'undefined') {
-        loader.loadBlockPage(request,response,"<script>pageError('noeditloggedout');</script>");
+	if(typeof uid === 'undefined') {
+        loader.loadPage(request,response,"<script>pageLanding(false);</script>");
     } else {
-
 		/* get table identifier */
 		var temp = request.query.temp;
 
@@ -46,77 +43,93 @@ exports.editpage = function(request,response) {
 		var searchstatus;
 
 		if(temp === "true") {
-			tid = "t_";
+			tid = helper.getTempTablePrefixFromPageType('page') + "_";
 			searchstatus = false;
 		} else if (temp === "false") {
-			tid = "p_";
+			tid = helper.getTablePrefixFromPageType('page') + "_";
 			searchstatus = false;
 		} else {
-			tid = "p_";
+			tid = helper.getTablePrefixFromPageType('page') + "_";
 			searchstatus = true;
 		}
 
+		var prefix = helper.getTablePrefixFromPageType('page');
+
         pool.getConnection(function(err,connection) {
             if(err) {
+				loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
                 analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-            }
+            } else {
+				/* get the pid from the get request */
+				var pid = connection.escape(request.query.page).replace(/'/g,"");
 
-            var promise = querydb.searchPageStatus(connection,uid,pid);
+				if(typeof pid === 'undefined') {
+					loader.loadBlockPage(request,response,"<script>pageError('badquery');</script>");
+				} else {
+					var promise = querydb.getStatusFromXid(connection,prefix,uid,pid);
 
-            promise.then(function(success) {
-                if(searchstatus && success === 0) {
-                    /* load the edit page with the page data */
-                    loader.loadBlockPage(request,response,"<script>pageChoose('" + pid + "');</script>");
-                } else {
-
-					var promiseSettings = querydb.getPageSettings(connection,uid,pid);
-
-					promiseSettings.then(function(pageSettings) {
-						if(pageSettings === -1) {
-							response.end('err');
-							analytics.journal(true,201,'getPageSettings()',uid,global.__stack[1].getLineNumber(),__function,__filename);
+					promise.then(function(status) {
+						if(searchstatus && status === 0) {
+							/* load the edit page with the page data */
+							loader.loadBlockPage(request,response,"<script>pageChoose('" + pid + "');</script>");
 						} else {
-							var pageinfo = JSON.stringify(pageSettings);
 
-							var qry = "SELECT type,content FROM " + tid + uid + "_" + pid;
+							var promiseSettings = querydb.getPageSettings(connection,prefix,uid,pid);
 
-							connection.query(qry,function(err,rows,fields) {
-								if(err) {
-									response.end('err');
-									analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							promiseSettings.then(function(pageSettings) {
+								if(pageSettings.err === 'notfound') {
+									loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+									analytics.journal(true,201,{message:'getPageSettings()'},uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
-									var pagedata = "";
+									/* change to generic names for front-end bar script */
+									pageSettings['id'] = pageSettings['xid'];
+									delete pageSettings['xid'];
+									pageSettings['name'] = pageSettings['xname'];
+									delete pageSettings['xname'];
 
-									/* i is for accessing row array, j is for keeping track of rows left to parse */
-									var i = 0;
-									var j = rows.length;
+									var pageinfo = JSON.stringify(pageSettings);
 
-									/* append commas to each row except for the last one */
-									while(j > 1) {
-										pagedata += rows[i].type + "," + rows[i].content + ",";
-										i++;
-										j--;
-									}
-									if(j === 1) {
-										pagedata += rows[i].type + "," + rows[i].content;
-									}
+									var qry = "SELECT type,content FROM " + tid + uid + "_" + pid;
 
-									/* load the edit page with the page data */
-									loader.loadBlockPage(request,response,"<script>pageEdit('" + uid + "','" + pagedata + "'," + pageinfo + ");</script>");
-									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+									connection.query(qry,function(err,rows,fields) {
+										if(err) {
+											loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+											analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										} else {
+											var pagedata = "";
+
+											/* i is for accessing row array, j is for keeping track of rows left to parse */
+											var i = 0;
+											var j = rows.length;
+
+											/* append commas to each row except for the last one */
+											while(j > 1) {
+												pagedata += rows[i].type + "," + rows[i].content + ",";
+												i++;
+												j--;
+											}
+											if(j === 1) {
+												pagedata += rows[i].type + "," + rows[i].content;
+											}
+
+											/* load the edit page with the page data */
+											loader.loadBlockPage(request,response,"<script>pageEdit('" + uid + "','" + pagedata + "'," + pageinfo + ");</script>");
+											analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+										}
+									});
 								}
+							},function(err) {
+								loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+								analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 							});
+							connection.release();
 						}
-					},function(err) {
-						response.end('err');
-						analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+					},function(error) {
+						loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+						analytics.journal(true,200,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 					});
-					connection.release();
 				}
-			},function(error) {
-				response.end('err');
-				analytics.journal(true,200,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
-			});
+			}
         });
 	}
 };

@@ -44,24 +44,24 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
         var categoriesCount = categories.length;
 
         /* subject */
-        var prefixSub = ["bp_","lg_"];
+        var prefixSub = ["red_bp_","red_lg_"];
         prefixSub.forEach(function(prefix,index) {
             var tableName = prefix + reduceName(subjects[i]);
             check(tableName);
 
-            var sqlSubjectArray = ["CREATE TABLE ",tableName," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
+            var sqlSubjectArray = ["CREATE TABLE ",tableName," (uid INT UNSIGNED, xid SMALLINT UNSIGNED, xname VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
             sqlFile += sqlSubjectArray.join("");
         });
 
         for(var j = 0; j < categoriesCount; j++) {
             /* subject_category */
-            var prefixCat = ["bp_","lg_"];
+            var prefixCat = ["red_bp_","red_lg_"];
             prefixCat.forEach(function(prefix,index) {
                 var tableName = prefix + reduceName(subjects[i]) + "_" + reduceName(categories[j]);
                 check(tableName);
 
-                var sqlCategoryArray = ["CREATE TABLE ",tableName," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
+                var sqlCategoryArray = ["CREATE TABLE ",tableName," (uid INT UNSIGNED, xid SMALLINT UNSIGNED, xname VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
                 sqlFile += sqlCategoryArray.join("");
             });
@@ -69,12 +69,12 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
             var topics = tree[subjects[i]][categories[j]];
             topics.forEach(function(item,index) {
                 /* subject_category_topic */
-                var prefixTop = ["bp_","lg_"];
+                var prefixTop = ["red_bp_","red_lg_"];
                 prefixTop.forEach(function(prefix,index) {
                     var tableName = prefix + reduceName(subjects[i]) + "_" + reduceName(categories[j]) + "_" + reduceName(item);
                     check(tableName);
 
-                    var sqlTopicArray = ["CREATE TABLE ",tableName," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
+                    var sqlTopicArray = ["CREATE TABLE ",tableName," (uid INT UNSIGNED, xid SMALLINT UNSIGNED, xname VARCHAR(50), tags BIGINT UNSIGNED NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
                     sqlFile += sqlTopicArray.join("");
                 });

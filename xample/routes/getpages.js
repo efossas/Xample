@@ -5,6 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
+var helper = require('./../helper.js');
 
 /*
 	Function: getpages
@@ -25,19 +26,30 @@ exports.getpages = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* get the user's id */
 	var uid = request.session.uid;
-
-    var qry = "SELECT pid,pagename FROM p_" + uid;
 
     pool.getConnection(function(err,connection) {
         if(err) {
             analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
         }
 
+		/* get the page type */
+		var pagetype = connection.escape(request.query.pt).replace(/'/g,"");
+
+		var prefix = helper.getTablePrefixFromPageType(pagetype);
+
+		/* retrieve page data */
+		var qry = "SELECT xid,xname FROM " + prefix + "_" + uid + "_0";
+
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
-				response.end('err');
+				result.msg = 'err';
+				response.end(JSON.stringify((result)));
+				err.input = qry;
 				analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			} else {
 				var pages = "";
@@ -48,15 +60,17 @@ exports.getpages = function(request,response) {
 
 				/* append commas to each row except for the last one */
 				while(j > 1) {
-					pages += rows[i].pid + "," + rows[i].pagename + ",";
+					pages += rows[i].xid + "," + rows[i].xname + ",";
 					i++;
 					j--;
 				}
 				if(j === 1) {
-					pages += rows[i].pid + "," + rows[i].pagename;
+					pages += rows[i].xid + "," + rows[i].xname;
 				}
 
-				response.end(pages);
+				result.msg = 'success';
+				result.data.pages = pages;
+				response.end(JSON.stringify(result));
 				analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
 		});

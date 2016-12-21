@@ -87,7 +87,14 @@ if(processes > 0) {
 if (cluster.isMaster) {
 	/* fork workers */
 	for (var i = 0; i < stopFork; i++) {
-		cluster.fork();
+		var worker = cluster.fork();
+
+		/* receive message from worker to master */
+		worker.on('message',function(msg) {
+			if(msg.code === 'fatal') {
+				process.exit();
+			}
+		});
 	}
 
 	/* if a cluster dies, fork a new one */
@@ -140,6 +147,17 @@ get: function stacker() {
 global.__stack = __stack;
 
 var rts = require('./rts.js');
+
+/* test if any routes are broken */
+for (var rt in rts) {
+    if (rts.hasOwnProperty(rt)) {
+        if(typeof rts[rt] === 'undefined') {
+            console.log('fatal error, undefined route: ' + rt);
+            process.send({code:'fatal'});
+        }
+    }
+}
+
 var express = require('express');
 var busboy = require('connect-busboy');
 var session = require('express-session');
@@ -318,17 +336,15 @@ app.set("fileRoute",__dirname + "/public/");
 
 /* routes */
 app.get('/',rts.start);
-app.post('/createlg',rts.createlg);
 app.post('/createpage',rts.createpage);
-app.post('/deletelg',rts.deletelg);
 app.post('/deletepage',rts.deletepage);
 app.get('/editpage*',rts.editpage);
-app.get('/editlg*',rts.editlg);
+app.get('/editguide*',rts.editguide);
 app.get('/explore*',rts.explore);
-app.post('/getlgs',rts.getlgs);
-app.post('/getpages',rts.getpages); /// breaks REST ??
+app.post('/getpages*',rts.getpages);
 app.post('/getprofiledata',rts.getprofiledata);
 app.post('/getsubjects',rts.getsubjects);
+app.get('/guide*',rts.guide);
 app.get('/home',rts.home);
 app.post('/journalerror',rts.journalerror);
 app.post('/login',rts.login);
@@ -340,8 +356,8 @@ app.post('/saveblocks',rts.saveblocks);
 app.post('/savepagesettings',rts.savepagesettings);
 app.post('/saveprofile',rts.saveprofile);
 app.post('/signup',rts.signup);
-app.post('/uploadmedia*',rts.uploadmedia); /// breaks REST ?? uses get query with post method
-app.post('/uploadthumb*',rts.uploadthumb); /// breaks REST ?? uses get query with post method
+app.post('/uploadmedia*',rts.uploadmedia);
+app.post('/uploadthumb*',rts.uploadthumb);
 
 app.all('*',rts.notfound);
 

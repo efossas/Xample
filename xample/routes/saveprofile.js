@@ -28,12 +28,16 @@ exports.saveprofile = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* get the user's id */
 	var uid = request.session.uid;
 
 	/* if the user is not logged in, respond with 'nosaveloggedout' */
     if(typeof uid === 'undefined') {
-        response.end('nosaveloggedout');
+		result.msg = 'nosaveloggedout';
+        response.end(JSON.stringify(result));
     } else {
 
 		var body = '';
@@ -45,7 +49,8 @@ exports.saveprofile = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,global.__stack[1].getLineNumber(),__function,__filename);
+				var errmsg = {message:"Overload Attack!"};
+				analytics.journal(true,199,errmsg,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -53,72 +58,77 @@ exports.saveprofile = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
+					result.msg = 'err';
+					response.end(JSON.stringify(result));
                     analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                }
-
-                var POST = qs.parse(body);
-
-                /* profile data that requires checks should be queried here and deleted */
-                if(Object.prototype.hasOwnProperty.call(POST,'newPass')) {
-                    var currentPassword = POST.currentPass;
-                    var newPassword = POST.newPass;
-
-                    var qryGetPass = "SELECT password FROM Users WHERE uid=" + uid;
-
-                    connection.query(qryGetPass,function(err,rows,fields) {
-						if(err) {
-							response.end('err');
-							analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-						} else {
-							if(ps.verify(currentPassword,rows[0].password)) {
-								var hash = ps.generate(newPassword);
-								var qryUpdatePass = "UPDATE Users SET password='" + hash + "' WHERE uid=" + uid;
-
-                                connection.query(qryUpdatePass,function(err,rows,fields) {
-									if(err) {
-										response.end('err');
-										analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-									} else {
-										/// if only
-									}
-								});
-							}
-						}
-                    });
-
-                    delete POST.currentPass;
-                    delete POST.newPass;
-                }
-
-                var keys = Object.keys(POST);
-                var count = keys.length;
-
-                /* count could be less than one, if say, only password was being updated */
-                if(count < 1) {
-                    response.end('profilesaved');
-                    analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                 } else {
-                    var qryArray = ["UPDATE Users SET "];
+					var POST = qs.parse(body);
 
-                    for(var i = 0; i < count; i++) {
-                        var current = keys[i];
-                        qryArray.push(current + "=" + connection.escape(POST[current]) + " ");
-                    }
+					/* profile data that requires checks should be queried here and deleted */
+					if(Object.prototype.hasOwnProperty.call(POST,'newPass')) {
+						var currentPassword = POST.currentPass;
+						var newPassword = POST.newPass;
 
-                    qryArray.push("WHERE uid=" + uid);
-                    var qry = qryArray.join("");
+						var qryGetPass = "SELECT password FROM Users WHERE uid=" + uid;
 
-                    connection.query(qry,function(err,rows,fields) {
-						if(err) {
-							response.end('err');
-							analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-						} else {
-							response.end('profilesaved');
-							analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+						connection.query(qryGetPass,function(err,rows,fields) {
+							if(err) {
+								result.msg = 'err';
+								response.end(JSON.stringify(result));
+								analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							} else {
+								if(ps.verify(currentPassword,rows[0].password)) {
+									var hash = ps.generate(newPassword);
+									var qryUpdatePass = "UPDATE Users SET password='" + hash + "' WHERE uid=" + uid;
+
+									connection.query(qryUpdatePass,function(err,rows,fields) {
+										if(err) {
+											result.msg = 'err';
+											response.end(JSON.stringify(result));
+											analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										}
+									});
+								}
+							}
+						});
+
+						delete POST.currentPass;
+						delete POST.newPass;
+					}
+
+					var keys = Object.keys(POST);
+					var count = keys.length;
+
+					/* count could be less than one, if say, only password was being updated */
+					if(count < 1) {
+						result.msg = 'profilesaved';
+						response.end(JSON.stringify(result));
+						analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+					} else {
+						var qryArray = ["UPDATE Users SET "];
+
+						for(var i = 0; i < count; i++) {
+							var current = keys[i];
+							qryArray.push(current + "=" + connection.escape(POST[current]) + " ");
 						}
-                    });
-                }
-                connection.release();
+
+						qryArray.push("WHERE uid=" + uid);
+						var qry = qryArray.join("");
+
+						connection.query(qry,function(err,rows,fields) {
+							if(err) {
+								result.msg = 'err';
+								response.end(JSON.stringify(result));
+								analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							} else {
+								result.msg = 'profilesaved';
+								response.end(JSON.stringify(result));
+								analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+							}
+						});
+					}
+					connection.release();
+				}
             });
         });
 	}

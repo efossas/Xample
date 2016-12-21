@@ -27,11 +27,15 @@ exports.getprofiledata = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* grab the user's id */
 	var uid = request.session.uid;
 
 	if(typeof uid === 'undefined') {
-        response.end('noprofiledataloggedout');
+		result.msg = 'noprofiledataloggedout';
+        response.end(JSON.stringify(result));
     } else {
 
 		var body = '';
@@ -43,7 +47,8 @@ exports.getprofiledata = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,global.__stack[1].getLineNumber(),__function,__filename);
+				var errmsg = {message:"Overload Attack!"};
+				analytics.journal(true,199,errmsg,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -52,25 +57,32 @@ exports.getprofiledata = function(request,response) {
 
             var POST = qs.parse(body);
 
-			var qry = "SELECT " + POST.fields + " FROM Users WHERE uid=" + uid;
-
 			pool.getConnection(function(err,connection) {
                 if(err) {
+					result.msg = 'err';
+                    response.end(JSON.stringify(result));
                     analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                }
+                } else {
+					var qry = "SELECT " + connection.escape(POST.fields).replace(/'/g,"") + " FROM Users WHERE uid=" + uid;
 
-				connection.query(qry,function(err,rows,fields) {
-					if(err) {
-						response.end('err');
-						analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-					} else {
-						var profiledata = JSON.stringify(rows[0]);
-
-						response.end(profiledata);
-						analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-					}
-				});
-                connection.release();
+					connection.query(qry,function(err,rows,fields) {
+						if(err) {
+							result.msg = 'err';
+							response.end(JSON.stringify(result));
+							analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						} else {
+							result.msg = 'success';
+							if(rows[0] === 'undefined') {
+								result.data.profiledata = {};
+							} else {
+								result.data.profiledata = rows[0];
+							}
+							response.end(JSON.stringify(result));
+							analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+						}
+					});
+					connection.release();
+				}
 			});
 		});
 	}

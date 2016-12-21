@@ -30,7 +30,7 @@ exports.profile = function(request,response) {
 	var uid = request.session.uid;
 
 	if(typeof uid === 'undefined') {
-        loader.loadPage(request,response,"<script>pageProfile('noprofileloggedout');</script>");
+        loader.loadPage(request,response,"<script>pageError('noprofileloggedout');</script>");
     } else {
 
 		var qry = "SELECT username,email,phone,autosave,defaulttext FROM Users WHERE uid=" + uid;
@@ -42,7 +42,7 @@ exports.profile = function(request,response) {
 
 			connection.query(qry,function(err,rows,fields) {
 				if(err) {
-					loader.loadPage(request,response,"<script>pageProfile('err');</script>");
+					loader.loadPage(request,response,"<script>pageError('dberr');</script>");
 					analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 				} else {
 					var data = {};
