@@ -1,5 +1,6 @@
 DROP DATABASE xample;
-DROP DATABASE xsessionstore;
+DROP DATABASE xred;
 DROP DATABASE xanalytics;
+DROP DATABASE xsessionstore;
 
 DROP USER 'nodesql'@'localhost';

@@ -6,7 +6,7 @@
 
 var loader = require('./loader.js');
 var analytics = require('./../analytics.js');
-var querydb = require('./../querydb.js');
+var queryPageDB = require('./../querypagedb.js');
 
 /*
 	Function: explore
@@ -25,7 +25,7 @@ var querydb = require('./../querydb.js');
 exports.explore = function(request,response) {
 	var __function = "explore";
 
-    var pool = request.app.get("pool");
+    var red = request.app.get("red");
 
 	/* get the user's id, getting it from the session ensures user's can edit other users pages */
 	var uid = request.session.uid;
@@ -50,7 +50,7 @@ exports.explore = function(request,response) {
 			logstatus = "false";
 			uid = 0;
 		}
-		pool.getConnection(function(err,connection) {
+		red.getConnection(function(err,connection) {
 			if(err) {
 				loader.loadPage(request,response,"<script>pageError('dberror');</script>");
 				analytics.journal(true,220,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
@@ -66,7 +66,7 @@ exports.explore = function(request,response) {
 					keywords = "";
 				}
 
-				var promise = querydb.searchPageResults(connection,content,subject,category,topic,sort,tags,keywords);
+				var promise = queryPageDB.searchPageResults(connection,content,subject,category,topic,sort,tags,keywords);
 
 				promise.then(function(data) {
 					/* convert array into string */

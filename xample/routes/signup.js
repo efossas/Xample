@@ -6,21 +6,12 @@
 
 var analytics = require('./../analytics.js');
 var helper = require('./../helper.js');
-var querydb = require('./../querydb.js');
+var queryUserDB = require('./../queryuserdb.js');
 
 /*
 	Function: signup
 
 	Ajax, handles the sign up routine.
-
-		1 - Get the sign up data
-		2 - Check if username exists
-		3 - Add user to Users table
-		4 - Get user's generated uid
-		5 - Create user's page table
-		6 - Create user's guide table
-		7 - Create user's directory for page media
-		8 - Create user's directory for misc thumbnails
 
 	Parameters:
 
@@ -39,6 +30,7 @@ exports.signup = function(request,response) {
 	var fs = require('fs');
 
     var pool = request.app.get("pool");
+	var userdb = request.app.get("userdb");
 
 	/* create response object */
 	var result = {msg:"",data:{}};
@@ -57,118 +49,105 @@ exports.signup = function(request,response) {
 		}
     });
 
-    /* when the request ends, parse the POST data, & process the sql queries */
+    /* when the request ends, parse the POST data, & process the queries */
     request.on('end',function() {
-        pool.getConnection(function(err,connection) {
-            if(err) {
-				result.msg = 'err';
-				response.end(JSON.stringify(result));
-                analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-            } else {
-				var POST = qs.parse(body);
+		var POST = qs.parse(body);
 
-				/* change info as needed */
-				var hash = ps.generate(POST.password);
+        /* get the data */
+        var hash = ps.generate(POST.password);
+        var username = POST.username;
+        var email = POST.email;
 
-				/* escape these to prevent MySQL injection */
-				var username = connection.escape(POST.username);
-				var email = connection.escape(POST.email);
+		/* ensure username is not taken */
+		var promiseCheckUsername = queryUserDB.getDocByUsername(userdb,username);
+		promiseCheckUsername.then(function(users) {
+			if(users.length > 0) {
+				result.msg = 'exists';
+                response.end(JSON.stringify(result));
+				return;
+			}
 
-				/* check if username already exists */
-				var promise = querydb.getUidFromUsername(connection,username);
+			/* add the user to db */
+			var promiseCreateUser = queryUserDB.createUser(userdb,username,hash,email);
+			promiseCreateUser.then(function(res) {
+				/* log the user in */
+				var uid = res.ops[0]._id;
+				request.session.uid = uid;
 
-				promise.then(function(uidsearch) {
-					if(uidsearch !== "") {
-						result.msg = 'exists';
+				pool.getConnection(function(err,connection) {
+					if(err) {
+						result.msg = 'err';
 						response.end(JSON.stringify(result));
-					} else {
-						var qryUser = "INSERT INTO Users (username,password,email,autosave,defaulttext) VALUES (" + username + ",'" + hash + "'," + email + ",0,1)";
-
-						/* create the user in the Users table */
-						connection.query(qryUser,function(err,rows,fields) {
-							if (err) {
-								result.msg = 'err';
-								response.end(JSON.stringify(result));
-								err.input = qryUser;
-								analytics.journal(true,201,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-							} else {
-								/* retrieve the user's new uid */
-								var qryUid = "SELECT uid FROM Users WHERE username = " + username;
-
-								connection.query(qryUid,function(err,rows,fields) {
-									if (err) {
-										result.msg = 'err';
-										response.end(JSON.stringify(result));
-										err.input = qryUid;
-										analytics.journal(true,202,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-									} else {
-										var uid = rows[0].uid;
-
-										var prefixPage = helper.getTablePrefixFromPageType("page");
-
-										/* create the user's page table */
-										var qryBlockPageTable = "CREATE TABLE " + prefixPage + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
-
-										connection.query(qryBlockPageTable,function(err,rows,fields) {
-											if (err) {
-												result.msg = 'err';
-												response.end(JSON.stringify(result));
-												err.input = qryBlockPageTable;
-												analytics.journal(true,203,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-											} else {
-												var prefixGuide = helper.getTablePrefixFromPageType("guide");
-
-												/* create the user's guide table */
-												var qryLearningGuideTable = "CREATE TABLE " + prefixGuide + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
-
-												connection.query(qryLearningGuideTable,function(err,rows,fields) {
-													if (err) {
-														result.msg = 'err';
-														response.end(JSON.stringify(result));
-														err.input = "qryLearningGuideTable";
-														analytics.journal(true,204,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-													} else {
-														/* make the user's directory to store pages in later */
-														request.session.uid = uid;
-
-														var dirPath = request.app.get('fileRoute') + "xm/" + uid;
-														fs.mkdir(dirPath,function(err) {
-															/* don't consider existing folders as a mkdir error */
-															if(err && err.code !== "EEXIST") {
-																err.input = dirPath;
-																analytics.journal(true,120,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-															}
-
-															var thumbPath = dirPath + "/t";
-															fs.mkdir(thumbPath,function(err) {
-																/* don't consider existing folders as a mkdir error */
-																if(err && err.code !== "EEXIST") {
-																	err.input = thumbPath;
-																	analytics.journal(true,121,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-																}
-															});
-														});
-
-														result.msg = 'success';
-														response.end(JSON.stringify(result));
-														analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-													}
-												});
-											}
-										});
-									}
-								});
-							}
-						});
+						analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+						return;
 					}
 
-				},function(error) {
-					result.msg = 'err';
+					var prefixPage = helper.getTablePrefixFromPageType("page");
+
+					/* create the user's page table */
+					var qryBlockPageTable = "CREATE TABLE " + prefixPage + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
+
+					connection.query(qryBlockPageTable,function(err,rows,fields) {
+						if (err) {
+							result.msg = 'err';
+							response.end(JSON.stringify(result));
+							err.input = qryBlockPageTable;
+							analytics.journal(true,203,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+						} else {
+							var prefixGuide = helper.getTablePrefixFromPageType("guide");
+
+							/* create the user's guide table */
+							var qryLearningGuideTable = "CREATE TABLE " + prefixGuide + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
+
+							connection.query(qryLearningGuideTable,function(err,rows,fields) {
+								if (err) {
+									result.msg = 'err';
+									response.end(JSON.stringify(result));
+									err.input = qryLearningGuideTable;
+									analytics.journal(true,204,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+								} else {
+									/* make the user's directory to store pages in later */
+									request.session.uid = uid;
+
+									var dirPath = request.app.get('fileRoute') + "xm/" + uid;
+									fs.mkdir(dirPath,function(err) {
+										/* don't consider existing folders as a mkdir error */
+										if(err && err.code !== "EEXIST") {
+											err.input = dirPath;
+											analytics.journal(true,120,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+										}
+
+										var thumbPath = dirPath + "/t";
+										fs.mkdir(thumbPath,function(err) {
+											/* don't consider existing folders as a mkdir error */
+											if(err && err.code !== "EEXIST") {
+												err.input = thumbPath;
+												analytics.journal(true,121,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+											}
+										});
+									});
+
+									result.msg = 'success';
+									response.end(JSON.stringify(result));
+									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+								}
+							});
+						}
+					});
+
+					result.msg = 'success';
 					response.end(JSON.stringify(result));
-					analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
+					analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 				});
-				connection.release();
-			}
-        });
+			},function(err) {
+				result.msg = 'err';
+				response.end(JSON.stringify(result));
+				analytics.journal(true,202,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+			});
+		},function(err) {
+			result.msg = 'err';
+			response.end(JSON.stringify(result));
+			analytics.journal(true,201,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+		});
     });
 };

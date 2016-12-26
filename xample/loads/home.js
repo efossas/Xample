@@ -25,7 +25,9 @@ exports.home = function(request,response) {
 	var __function = "start";
 
 	/* detect is the user is logged in by checking for a session */
-	if(request.session.uid) {
+	var uid = request.session.uid;
+
+	if(uid) {
 		loader.loadPage(request,response,"<script>pageHome();</script>");
 		analytics.journal(false,0,"",request.session.uid,global.__stack[1].getLineNumber(),__function,__filename);
 	} else {

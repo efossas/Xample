@@ -5,7 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
-var querydb = require('./../querydb.js');
+var queryUserDB = require('./../queryuserdb.js');
 
 /*
 	Function: login
@@ -27,7 +27,7 @@ exports.login = function(request,response) {
 	var qs = require('querystring');
 	var ps = require('password-hash');
 
-    var pool = request.app.get("pool");
+    var userdb = request.app.get("userdb");
 
 	/* create response object */
 	var result = {msg:"",data:{}};
@@ -48,59 +48,28 @@ exports.login = function(request,response) {
 
     /* when the request ends, parse the POST data, & process the sql queries */
     request.on('end',function() {
-        pool.getConnection(function(err,connection) {
-            if(err) {
-				result.msg = 'err';
+
+		var POST = qs.parse(body);
+
+		/* change info as needed */
+		var username = POST.username;
+
+		var promiseGetUser = queryUserDB.getDocByUsername(userdb,username);
+		promiseGetUser.then(function(userdata) {
+			/* check that the entered password matches the stored password */
+			if(ps.verify(POST.password,userdata[0].password)) {
+				/* set the user's session, this indicates logged in status */
+				request.session.uid = userdata[0]._id;
+
+				result.msg = 'loggedin';
 				response.end(JSON.stringify(result));
-                analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-            } else {
-				var POST = qs.parse(body);
-
-				/* change info as needed */
-				var username = connection.escape(POST.username);
-
-				/* check if username already exists */
-				var promise = querydb.getUidFromUsername(connection,username);
-
-				promise.then(function(success) {
-					if(success === "") {
-						result.msg = 'notfound';
-						response.end(JSON.stringify(result));
-					} else {
-						var uid = success;
-
-						var qry = "SELECT password FROM Users WHERE uid = '" + uid + "'";
-
-						/* retrieve the user's password */
-						connection.query(qry,function(err,rows,fields) {
-							if (err) {
-								result.msg = 'err';
-								response.end(JSON.stringify(result));
-								analytics.journal(true,201,err,0,global.__stack[1].getLineNumber(),__function,__filename);
-							} else {
-								/* check that the entered password matches the stored password */
-								if(ps.verify(POST.password,rows[0].password)) {
-									/* set the user's session, this indicates logged in status */
-									request.session.uid = uid;
-
-									/* respond */
-									result.msg = 'loggedin';
-									response.end(JSON.stringify(result));
-									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-								} else {
-									result.msg = 'incorrect';
-									response.end(JSON.stringify(result));
-								}
-							}
-						});
-					}
-				},function(error) {
-					result.msg = 'err';
-					response.end(JSON.stringify(result));
-					analytics.journal(true,200,error,0,global.__stack[1].getLineNumber(),__function,__filename);
-				});
-				connection.release();
+				analytics.journal(false,0,"",userdata[0]._id,analytics.__line,__function,__filename);
+			} else {
+				result.msg = 'incorrect';
+				response.end(JSON.stringify(result));
 			}
-        });
+		},function(error) {
+			/// handle error
+		});
 	});
 };

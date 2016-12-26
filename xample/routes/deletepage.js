@@ -68,15 +68,12 @@ exports.deletepage = function(request,response) {
 					var pagetype = connection.escape(POST.pt).replace(/'/g,'');
 
 					var prefix = helper.getTablePrefixFromPageType(pagetype);
-					var prefixTemp = helper.getTempTablePrefixFromPageType(pagetype);
 
                     var qryDeleteRow = "DELETE FROM " + prefix + "_" + uid + "_0 WHERE xid=" + xid;
                     var qryDeletePermPage = "DROP TABLE " + prefix + "_" + uid + "_" + xid;
-                    var qryDeleteTempPage = "DROP TABLE " + prefixTemp + "_" + uid + "_" + xid;
 
-                    /* three async queries, use this flag for knowning when to send response */
-                    var firstQryComplete = false;
-                    var secondQryComplete = false;
+                    /* two async queries, use this flag for knowning when to send response */
+                    var otherQryComplete = false;
 
                     /* delete page row from user's page list */
                     connection.query(qryDeleteRow,function(err,rows,fields) {
@@ -86,19 +83,17 @@ exports.deletepage = function(request,response) {
 							err.input = qryDeleteRow;
                             analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
-                            if(firstQryComplete && secondQryComplete) {
+                            if(otherQryComplete) {
 								result.msg = 'success';
                                 response.end(JSON.stringify(result));
                                 analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-                            } else if(firstQryComplete) {
-                                secondQryComplete = true;
                             } else {
-                                firstQryComplete = true;
+                                otherQryComplete = true;
                             }
                         }
                     });
 
-                    /* delete the permanent page table */
+                    /* delete the page table */
                     connection.query(qryDeletePermPage,function(err,rows,fields) {
                         if(err) {
 							result.msg = 'err';
@@ -106,34 +101,12 @@ exports.deletepage = function(request,response) {
 							err.input = qryDeletePermPage;
                             analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                         } else {
-                            if(firstQryComplete && secondQryComplete) {
+                            if(otherQryComplete) {
 								result.msg = 'success';
                                 response.end(JSON.stringify(result));
                                 analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-                            } else if(firstQryComplete) {
-                                secondQryComplete = true;
                             } else {
-                                firstQryComplete = true;
-                            }
-                        }
-                    });
-
-                    /* delete the temporary page */
-                    connection.query(qryDeleteTempPage,function(err,rows,fields) {
-                        if(err) {
-							result.msg = 'err';
-							response.end(JSON.stringify(result));
-							err.input = qryDeleteTempPage;
-                            analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                        } else {
-                            if(firstQryComplete && secondQryComplete) {
-								result.msg = 'success';
-                                response.end(JSON.stringify(result));
-                                analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-                            } else if(firstQryComplete) {
-                                secondQryComplete = true;
-                            } else {
-                                firstQryComplete = true;
+                                otherQryComplete = true;
                             }
                         }
                     });

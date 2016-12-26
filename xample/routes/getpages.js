@@ -12,6 +12,10 @@ var helper = require('./../helper.js');
 
 	Ajax, used to get a list of the user's xample pages. The data given to the http response is a comma-separate string in the following format. pid,pagename, If the user has no pages, an empty string is returned.
 
+	1 - Get the form data
+	2 - Get the page data
+	3 - Format the page data
+
 	Parameters:
 
 		request - http request
@@ -44,7 +48,6 @@ exports.getpages = function(request,response) {
 
 		/* retrieve page data */
 		var qry = "SELECT xid,xname FROM " + prefix + "_" + uid + "_0";
-
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
 				result.msg = 'err';

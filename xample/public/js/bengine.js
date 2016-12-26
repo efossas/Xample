@@ -815,7 +815,9 @@ function barPageSettings(pagetype,aid,settings) {
 	thumbnail.setAttribute('id','pageimg');
 	thumbnail.setAttribute('class','thumb-img');
 	thumbnail.onclick = uploadThumb;
-	thumbnail.setAttribute('src',settings.imageurl);
+	if(settings.imageurl !== "") {
+		thumbnail.setAttribute('src',settings.imageurl);
+	}
 	colImg.appendChild(thumbnail);
 
 	/* page blurb input */

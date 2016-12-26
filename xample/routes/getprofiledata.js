@@ -5,6 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
+var queryUserDB = require('./../queryuserdb.js');
 
 /*
 	Function: getprofiledata
@@ -25,7 +26,7 @@ exports.getprofiledata = function(request,response) {
 
 	var qs = require('querystring');
 
-    var pool = request.app.get("pool");
+    var userdb = request.app.get("userdb");
 
 	/* create response object */
 	var result = {msg:"",data:{}};
@@ -57,32 +58,25 @@ exports.getprofiledata = function(request,response) {
 
             var POST = qs.parse(body);
 
-			pool.getConnection(function(err,connection) {
-                if(err) {
-					result.msg = 'err';
-                    response.end(JSON.stringify(result));
-                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                } else {
-					var qry = "SELECT " + connection.escape(POST.fields).replace(/'/g,"") + " FROM Users WHERE uid=" + uid;
+			var promiseUser = queryUserDB.getDocByUid(userdb,uid);
+			promiseUser.then(function(data) {
+				var fields = POST.fields.replace(/'/g,"").split(",");
 
-					connection.query(qry,function(err,rows,fields) {
-						if(err) {
-							result.msg = 'err';
-							response.end(JSON.stringify(result));
-							analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-						} else {
-							result.msg = 'success';
-							if(rows[0] === 'undefined') {
-								result.data.profiledata = {};
-							} else {
-								result.data.profiledata = rows[0];
-							}
-							response.end(JSON.stringify(result));
-							analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-						}
-					});
-					connection.release();
-				}
+				var profiledata = {};
+
+				fields.map(function(value) {
+					profiledata[value] = data[0][value];
+				});
+
+				result.data.profiledata = profiledata;
+
+				result.msg = 'success';
+				response.end(JSON.stringify(result));
+				analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+			},function(err) {
+				result.msg = 'err';
+				response.end(JSON.stringify(err));
+				analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			});
 		});
 	}

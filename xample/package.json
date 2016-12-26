@@ -5,13 +5,16 @@
   "main": "xample.js",
   "dependencies": {
     "connect-busboy": "0.0.2",
+    "connect-redis": "^3.1.0",
     "express": "^4.13.4",
+    "express-mysql-session": "^1.1.1",
     "express-session": "^1.7.6",
+    "mongodb": "^2.2.16",
     "mysql": "^2.10.2",
     "password-hash": "^1.2.2",
+    "redis": "^2.6.3",
     "request": "^2.72.0",
-    "express-mysql-session": "^1.1.1",
-    "uglify-js": "*"
+    "uglify-js": "^2.7.5"
   },
   "repository": {
   "type": "git",

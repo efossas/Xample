@@ -65,20 +65,29 @@ exports.revertblocks = function(request,response) {
 
 				var prefix = helper.getTablePrefixFromPageType(pagetype);
 
-				var qryStatus = "UPDATE " + prefix + "_" + uid + "_0 SET status=1 WHERE xid=" + xid;
-
                 pool.getConnection(function(err,connection) {
                     if(err) {
 						result.msg = 'err';
 						response.end(JSON.stringify(result));
                         analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
                     } else {
+						/* change status, no need to wait for this */
+						var qryStatus = "UPDATE " + prefix + "_" + uid + "_0 SET status=1 WHERE xid=" + xid;
 						connection.query(qryStatus,function(err,rows,fields) {
+							if(err) {
+								err.input = qryStatus;
+								analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							}
+						});
+
+						/* delete any temp rows so only perm rows are delivered */
+						var qryTruncate = "DELETE FROM " + prefix + "_" + uid + "_" + xid + " WHERE bt='t'";
+						connection.query(qryTruncate,function(err,rows,fields) {
 							if(err) {
 								result.msg = 'err';
 								response.end(JSON.stringify(result));
-								err.input = qryStatus;
-								analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+								err.input = qryTruncate;
+								analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 							} else {
 								var qryPageData = "SELECT type,content FROM " + prefix + "_" + uid + "_" + xid;
 
@@ -87,7 +96,7 @@ exports.revertblocks = function(request,response) {
 										result.msg = 'err';
 										response.end(JSON.stringify(result));
 										err.input = qryPageData;
-										analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 									} else {
 										var pagedata = "";
 

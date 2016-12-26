@@ -7,7 +7,7 @@
 var analytics = require('./../analytics.js');
 var helper = require('./../helper.js');
 var loader = require('./loader.js');
-var querydb = require('./../querydb.js');
+var querypagedb = require('./../querypagedb.js');
 
 /*
 	Function: editpage
@@ -43,13 +43,13 @@ exports.editpage = function(request,response) {
 		var searchstatus;
 
 		if(temp === "true") {
-			tid = helper.getTempTablePrefixFromPageType('page') + "_";
+			tid = 't';
 			searchstatus = false;
 		} else if (temp === "false") {
-			tid = helper.getTablePrefixFromPageType('page') + "_";
+			tid = 'p';
 			searchstatus = false;
 		} else {
-			tid = helper.getTablePrefixFromPageType('page') + "_";
+			tid = 'p';
 			searchstatus = true;
 		}
 
@@ -66,7 +66,7 @@ exports.editpage = function(request,response) {
 				if(typeof pid === 'undefined') {
 					loader.loadBlockPage(request,response,"<script>pageError('badquery');</script>");
 				} else {
-					var promise = querydb.getStatusFromXid(connection,prefix,uid,pid);
+					var promise = querypagedb.getStatusFromXid(connection,prefix,uid,pid);
 
 					promise.then(function(status) {
 						if(searchstatus && status === 0) {
@@ -74,7 +74,7 @@ exports.editpage = function(request,response) {
 							loader.loadBlockPage(request,response,"<script>pageChoose('" + pid + "');</script>");
 						} else {
 
-							var promiseSettings = querydb.getPageSettings(connection,prefix,uid,pid);
+							var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,pid);
 
 							promiseSettings.then(function(pageSettings) {
 								if(pageSettings.err === 'notfound') {
@@ -89,11 +89,12 @@ exports.editpage = function(request,response) {
 
 									var pageinfo = JSON.stringify(pageSettings);
 
-									var qry = "SELECT type,content FROM " + tid + uid + "_" + pid;
+									var qry = "SELECT type,content FROM " + prefix + "_" + uid + "_" + pid + " WHERE bt='" + tid + "'";
 
 									connection.query(qry,function(err,rows,fields) {
 										if(err) {
 											loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+											err.input = qry;
 											analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 										} else {
 											var pagedata = "";

@@ -7,7 +7,7 @@
 var analytics = require('./../analytics.js');
 var filemedia = require('./../filemedia.js');
 var helper = require('./../helper.js');
-var querydb = require('./../querydb.js');
+var querypagedb = require('./../querypagedb.js');
 
 /*
 	Function: saveblocks
@@ -74,15 +74,18 @@ exports.saveblocks = function(request,response) {
 					var tabid = Number(POST.tabid);
 
 					var prefix = helper.getTablePrefixFromPageType(pagetype);
-					var prefixTemp = helper.getTempTablePrefixFromPageType(pagetype);
 
-					var qryStatus = "UPDATE " + prefix + "_" + uid + "_0 SET status=1 WHERE xid=" + xid;
+					var uTable = prefix + "_" + uid + "_0";
+					var bTable = prefix + "_" + uid + "_" + xid;
+					var qryStatus;
 
 					var tid;
 					if(tabid) {
-						tid = prefix;
+						tid = "p";
+						qryStatus = "UPDATE " + uTable + " SET status=1 WHERE xid=" + xid;
 					} else {
-						tid = prefixTemp;
+						tid = "t";
+						qryStatus = "UPDATE " + uTable + " SET status=0 WHERE xid=" + xid;
 					}
 
 					/* this is changing the temp || perm save status */
@@ -101,8 +104,7 @@ exports.saveblocks = function(request,response) {
 
 					/* this is saving the tags, only on permanent saves & block pages */
 					if(tabid && pagetype === "page") {
-						var promiseSettings = querydb.getPageSettings(connection,prefix,uid,xid);
-
+						var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,xid);
 						promiseSettings.then(function(data) {
 							var tagTypes = new Map([["slide",0],["video",1],["audio",2],["image",4],["slide",4],["xtext",8],["xmath",16],["latex",16],["xcode",32]]);
 
@@ -111,7 +113,7 @@ exports.saveblocks = function(request,response) {
 								tags = tagTypes.get(element) | tags;
 							});
 
-							var qryTag = "UPDATE " + prefix + "_" + uid + "_0 SET tags=" + tags + ",edited=NOW() WHERE xid=" + xid;
+							var qryTag = "UPDATE " + uTable + " SET tags=" + tags + ",edited=NOW() WHERE xid=" + xid;
 
 							connection.query(qryTag,function(err,rows,fields) {
 								if(err) {
@@ -119,9 +121,9 @@ exports.saveblocks = function(request,response) {
 									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
 									/* copy tags to redundant table */
-									var redundantTableName = querydb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
+									var cRed = querypagedb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
 
-									var qryCopy = `UPDATE ${redundantTableName}, ${prefix}_${uid}_0 SET ${redundantTableName}.tags=${prefix}_${uid}_0.tags WHERE ${redundantTableName}.uid=${uid} AND ${redundantTableName}.xid=${xid} AND ${prefix}_${uid}_0.xid=${xid};`;
+									var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.tags = xample.${uTable}.tags WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
 
 									connection.query(qryCopy,function(err,rows,fields) {
 										if(err) {
@@ -136,8 +138,14 @@ exports.saveblocks = function(request,response) {
 						});
 					}
 
-					/* truncate (remove all rows) from the table */
-					var qryTruncate = "TRUNCATE TABLE " + tid + "_" + uid + "_" + xid;
+					/* remove all rows from the table if perm, if temp remove just temp rows */
+					var qryTruncate;
+					if(tid === 'p') {
+						qryTruncate = "TRUNCATE TABLE " + bTable;
+					} else {
+						qryTruncate = "DELETE FROM " + bTable + " WHERE bt='" + tid
+						+ "'";
+					}
 
 					connection.query(qryTruncate,function(err,rows,fields) {
 						if(err) {
@@ -150,16 +158,16 @@ exports.saveblocks = function(request,response) {
 							if(types[0] !== 'undefined') {
 
 								/* create the query and remove unused media from user's page folder as well */
-								var qryInsert = "INSERT INTO " + tid + "_" + uid + "_" + xid + " (bid,type,content) VALUES ";
+								var qryInsert = "INSERT INTO " + bTable + " (bid,type,content,bt) VALUES ";
 
 								var i = 0;
 								var stop = types.length - 1;
 
 								while(i < stop) {
-									qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
+									qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ",'" + tid + "'),";
 									i++;
 								}
-								qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ")";
+								qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ",'" + tid + "')";
 
 								/* save the blocks */
 								connection.query(qryInsert,function(err,rows,fields) {
@@ -170,7 +178,7 @@ exports.saveblocks = function(request,response) {
 										analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 									} else {
 										/* only delete unused files on permanent table saves */
-										if(tid === "bp") {
+										if(tid === 'p') {
 											filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
 										}
 
@@ -185,7 +193,7 @@ exports.saveblocks = function(request,response) {
 								response.end(JSON.stringify(result));
 
 								/* there could have been blocks deleted though, so delete if perm save */
-								if(tid === "bp") {
+								if(tid === 'p') {
 									filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
 								}
 								analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);

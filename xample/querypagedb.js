@@ -1,6 +1,6 @@
 /* eslint-env node, es6 */
 /*
-	Title: QueryDB
+	Title: QueryPageDB
 	Contains functions for querying the database.
 */
 
@@ -182,10 +182,6 @@ exports.searchXnameMatch = function(connection,prefix,uid,xname) {
 		error - string, empty
 */
 exports.createRedundantTableName = function(content,subject,category,topic) {
-	/* remove possible escape quotes */
-	var sub = subject.replace(/[']/g,"");
-	var cat = category.replace(/[']/g,"");
-	var top = topic.replace(/[']/g,"");
 
 	/* ensure spaces are removed & create redundant table name */
 	var tableArray = [];
@@ -194,10 +190,14 @@ exports.createRedundantTableName = function(content,subject,category,topic) {
 		tableArray.push(content);
 		/* table names use first two letters of each word */
 		if(subject) {
+			/* remove possible escape quotes */
+			var sub = subject.replace(/[']/g,"");
 			tableArray.push(sub.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
 			if(category) {
+				var cat = category.replace(/[']/g,"");
 				tableArray.push(cat.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
 				if(topic) {
+					var top = topic.replace(/[']/g,"");
 					tableArray.push(top.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
 				}
 			}
@@ -242,7 +242,8 @@ exports.searchPageResults = function(connection,content,subject,category,topic,s
 		var tagDec = parseInt(tags,2);
 
 		/* create the qry */
-		var qryArray = ["SELECT uid,xid,xname,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tagDec," = tags & ",tagDec," ORDER BY ",sort," ASC LIMIT 50"];
+		var qryArray = ["SELECT uid,xid,xname,username AS author,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tagDec," = tags & ",tagDec," ORDER BY ",sort," ASC LIMIT 50"];
+
 		var qry = qryArray.join("");
 
 		/* query the database */

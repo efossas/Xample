@@ -23,6 +23,7 @@ stats.getConnection(function(error,connection) {
         console.log('analytics db connection error: ' + error);
         console.log(' ');
         connection.release();
+        process.send({code:'fatal'});
     }
 });
 
@@ -108,9 +109,9 @@ exports.journal = function(isError,idNumber,message,userID,lineNumber,functionNa
         /* create query to journal data or error */
 		var qry = "";
 		if(isError) {
-			qry = "INSERT INTO xerror (id, scriptName, functionName, lineNumber, userID, eventTime, message) VALUES (" + idNumber + ", '" + fileName + "', '" + functionName + "', " + lineNumber + ", " + userID + ", NOW(), '" + connection.escape(message).replace(/['"`]+/g,'') + "')";
+			qry = "INSERT INTO xerror (id, scriptName, functionName, lineNumber, userID, eventTime, message) VALUES (" + idNumber + ", '" + fileName + "', '" + functionName + "', " + lineNumber + ", '" + userID + "', NOW(), '" + connection.escape(message).replace(/['"`]+/g,'') + "')";
 		} else {
-			qry = "INSERT INTO xdata (scriptName, functionName, lineNumber, userID, eventTime) VALUES ('" + fileName + "', '" + functionName + "', " + lineNumber + ", " + userID + ", NOW() )";
+			qry = "INSERT INTO xdata (scriptName, functionName, lineNumber, userID, eventTime) VALUES ('" + fileName + "', '" + functionName + "', " + lineNumber + ", '" + userID + "', NOW() )";
 		}
 
 		connection.query(qry,function(error,rows,fields) {

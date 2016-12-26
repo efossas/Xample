@@ -136,7 +136,7 @@ get: function stacker() {
             return stack;
         };
         var err = new Error();
-        Error.captureStackTrace(err,stacker); /// was arguments.callee instead of stacker
+        Error.captureStackTrace(err,stacker);
         var stack = err.stack;
         Error.prepareStackTrace = orig;
         return stack;
@@ -160,8 +160,6 @@ for (var rt in rts) {
 
 var express = require('express');
 var busboy = require('connect-busboy');
-var session = require('express-session');
-var MySQLStore = require('express-mysql-session')(session);
 
 // <<<fold>>>
 
@@ -174,77 +172,6 @@ var MySQLStore = require('express-mysql-session')(session);
 
 /* express requests will have root which is the http path to this server */
 express.request.root = root;
-
-// <<<fold>>>
-
-/*
-	Section: Server Exit
-	These functions handle uncaught errors and program exit procedure
-*/
-
-// <<<code>>>
-
-function slack(message) {
-	var request = require('request');
-
-	var postData = {};
-	postData.username = "xample-error";
-	postData.icon_emoji = ":rage:";
-	// postData.channel = "#error";
-	postData.text = message;
-
-	var option = {
-		url:   'https:///hooks.slack.com/services/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',
-		body:  JSON.stringify(postData)
-	};
-
-	request.post(option,function(err,res,body) {
-		if(body === "ok" && !err) {
-			console.log("Error Sent To Slack");
-		}
-	});
-}
-
-/* prevents node from exiting on error */
-process.on('uncaughtException',function(error) {
-	var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + error;
-
-	slack(datedError);
-
-	var fs = require('fs');
-	fs.appendFile("error/666.txt",datedError,function(err) {
-		if(err) {
-			console.log('666: ' + datedError);
-			console.log('fs: ' + err);
-			console.log(' ');
-			return -1;
-		}
-		return 0;
-	});
-});
-
-/* ensures stdin continues after uncaught exception */
-process.stdin.resume();
-
-/*
-	Function: exitHandler
-	Used to run code when the program exits. Called on SIGINT (ctrl^c)
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		nothing - *
-*/
-function exitHandler() {
-	console.log('Clean up routine complete. Xample app terminated.');
-    process.exit();
-}
-
-/* calls exitHandler() on SIGINT, ctrl^c */
-process.on('SIGINT',exitHandler);
 
 // <<<fold>>>
 
@@ -278,51 +205,101 @@ var pool = mysql.createPool({
 	database : 'xample'
 });
 
+var red = mysql.createPool({
+	connectionLimit : 100,
+	host     : 'localhost',
+	user     : 'nodesql',
+	password : 'Vup}Ur34',
+	database : 'xred'
+});
+
 /* immediately test a connection, if this fails, it's considered fatal */
 pool.getConnection(function(error,connection) {
 	if(error) {
 		console.log('xample main db connection error: ' + error);
 		console.log(' ');
 		connection.release();
-		process.exit(1);
+		process.send({code:'fatal'});
 	} else {
 		connection.release();
 	}
 });
 
-/* pass pool into request object, request.app.get("pool") */
-app.set("pool",pool);
-
-/* first test session db connection, if this fails, it's considered fatal */
-var testSessConnect = mysql.createConnection({
-	host     : 'localhost',
-	user     : 'nodesql',
-	password : 'Vup}Ur34',
-	database : 'xsessionstore'
-});
-var testError;
-testSessConnect.connect(function(error) {
+red.getConnection(function(error,connection) {
 	if(error) {
-		testError = error;
+		console.log('xample redundant db connection error: ' + error);
+		console.log(' ');
+		connection.release();
+		process.send({code:'fatal'});
+	} else {
+		connection.release();
 	}
 });
-if(testError) {
-	console.log('xample session db connection error: ' + testError);
-	console.log(' ');
-	testSessConnect.destroy();
-	process.exit(1);
-} else {
-	testSessConnect.end();
-}
+
+/* pass pool & red into request object, request.app.get("pool") & request.app.get("red") */
+app.set("pool",pool);
+app.set("red",red);
+
+/* set up mongodb */
+var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
+
+/* default mongodb url */
+MongoClient.connect('mongodb://localhost:27017/xuser',function(err,db) {
+	if(err) {
+		console.log('xample nosql db connection error: ' + err);
+		console.log(' ');
+		process.send({code:'fatal'});
+	} else {
+		/* pass userdb into request object, request.app.get("userdb") */
+		app.set("userdb",db);
+	}
+});
+
+/* set up redis */
+var redis = require("redis");
+
+var cachedb = redis.createClient();
+cachedb.auth('a1bc60f3ee230db84e6e584700ac277f0aab5f6b3f4c7dec2173371c32ef00d4');
+cachedb.select(1,function() { /* ... */ });
+
+/* pass pool into request object, request.app.get("pool") */
+app.set("cachedb",cachedb);
 
 /* set up session store */
-var sessionStore = new MySQLStore({
-	connectionLimit : 100,
-	host     : 'localhost',
-	user     : 'nodesql',
-	password : 'Vup}Ur34',
-	database : 'xsessionstore'
-});
+var session = require('express-session');
+
+var storename = 'redis';
+
+var sessionStore;
+switch(storename) {
+	case 'mysql':
+		var MySQLStore = require('express-mysql-session')(session);
+		sessionStore = new MySQLStore({
+			connectionLimit : 100,
+			host     : 'localhost',
+			user     : 'nodesql',
+			password : 'Vup}Ur34',
+			database : 'xsessionstore'
+		});
+		break;
+	case 'redis':
+		var clientRedisSession = redis.createClient();
+		var RedisStore = require('connect-redis')(session);
+		sessionStore = new RedisStore({
+			host: 'localhost',
+			port: 6379,
+			client: clientRedisSession,
+			db: 15,
+			pass: 'a1bc60f3ee230db84e6e584700ac277f0aab5f6b3f4c7dec2173371c32ef00d4',
+			disableTTL: true,
+			prefix: 'session:'
+		});
+		break;
+	default:
+		process.send({code:'fatal'});
+}
+
 app.use(session({
 	key : 'xsessionkey',
 	secret: 'KZtX0C0qlhvi)d',
@@ -365,6 +342,82 @@ app.all('*',rts.notfound);
 app.listen(port,function() {
 	console.log("listening...");
 });
+
+// <<<fold>>>
+
+/*
+	Section: Server Exit
+	These functions handle uncaught errors and program exit procedure
+*/
+
+// <<<code>>>
+
+function slack(message) {
+	var request = require('request');
+
+	var postData = {};
+	postData.username = "xample-error";
+	postData.icon_emoji = ":rage:";
+	postData.channel = "#error";
+	postData.text = message;
+
+	var option = {
+		url:   'https://hooks.slack.com/services/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',
+		body:  JSON.stringify(postData)
+	};
+
+	request.post(option,function(err,res,body) {
+		if(body === "ok" && !err) {
+			console.log("Error Sent To Slack");
+		}
+	});
+}
+
+/* prevents node from exiting on error */
+process.on('uncaughtException',function(error) {
+	var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + ' ' + error + '\n';
+
+	/* slack message is disabled in testing */
+	if(host === 'remote') {
+		slack(datedError);
+	}
+
+	/* write error to file, if failed, print to console */
+	var fs = require('fs');
+	fs.appendFile("error/666.txt",datedError,function(err) {
+		if(err) {
+			console.log('666: ' + datedError);
+			console.log('fs: ' + err);
+			console.log(' ');
+			return -1;
+		}
+		return 0;
+	});
+});
+
+/* ensures stdin continues after uncaught exception */
+process.stdin.resume();
+
+/*
+	Function: exitHandler
+	Used to run code when the program exits. Called on SIGINT (ctrl^c)
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		nothing - *
+*/
+function exitHandler() {
+	userdb.close();
+	console.log('Clean up routine complete. Xample app terminated.');
+    process.exit();
+}
+
+/* calls exitHandler() on SIGINT, ctrl^c */
+process.on('SIGINT',exitHandler);
 
 // <<<fold>>>
 

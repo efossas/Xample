@@ -6,7 +6,8 @@
 
 var analytics = require('./../analytics.js');
 var helper = require('./../helper.js');
-var querydb = require('./../querydb.js');
+var queryPageDB = require('./../querypagedb.js');
+var queryUserDB = require('./../queryuserdb.js');
 
 /*
 	Function: savepagesettings
@@ -28,6 +29,8 @@ exports.savepagesettings = function(request,response) {
 	var qs = require('querystring');
 
     var pool = request.app.get("pool");
+	var red = request.app.get("red");
+	var userdb = request.app.get("userdb");
 
 	/* create response object */
 	var result = {msg:"",data:{}};
@@ -52,6 +55,7 @@ exports.savepagesettings = function(request,response) {
 				request.connection.destroy();
 				var errmsg = {message:"Overload Attack!"};
 				analytics.journal(true,199,errmsg,uid,global.__stack[1].getLineNumber(),__function,__filename);
+				return;
 			}
         });
 
@@ -62,115 +66,126 @@ exports.savepagesettings = function(request,response) {
 					result.msg = 'err';
                     response.end(JSON.stringify(result));
                     analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                } else {
-					var POST = qs.parse(body);
-					var pagetype = connection.escape(POST.pt).replace(/'/g,"");
-					var pid = connection.escape(POST.id).replace(/'/g,"");
-					var pagetitle = connection.escape(POST.p);
-					var subject = connection.escape(POST.s);
-					var category = connection.escape(POST.c);
-					var topic = connection.escape(POST.t);
-					var imageurl = connection.escape(POST.i);
-					var blurb = connection.escape(POST.b);
+					return;
+                }
 
-					var prefix = helper.getTablePrefixFromPageType(pagetype);
+				var POST = qs.parse(body);
+				var pagetype = connection.escape(POST.pt).replace(/'/g,"");
+				var pid = connection.escape(POST.id).replace(/'/g,"");
+				var pagetitle = connection.escape(POST.p);
+				var subject = connection.escape(POST.s);
+				var category = connection.escape(POST.c);
+				var topic = connection.escape(POST.t);
+				var imageurl = connection.escape(POST.i);
+				var blurb = connection.escape(POST.b);
 
-					if(subject.replace(/[']/g,"") === "") {
-						result.msg = 'nosubjectnotsaved';
+				var prefix = helper.getTablePrefixFromPageType(pagetype);
+
+				if(subject.replace(/[']/g,"") === "") {
+					result.msg = 'nosubjectnotsaved';
+					response.end(JSON.stringify(result));
+					analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+					return;
+				} else if (!pagetype) {
+					result.msg = 'invalidpagetype';
+					response.end(JSON.stringify(result));
+					analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+					return;
+				}
+
+				/* get the previous subject category topic */
+				var promiseSubCatTop = queryPageDB.getPageSubjectCategoryTopic(connection,prefix,uid,pid);
+
+				/* get username from user db */
+				var promiseUsername = queryUserDB.getDocByUid(userdb,uid);
+
+				Promise.all([promiseSubCatTop,promiseUsername]).then(function(values) {
+					var prev_subcattop = values[0];
+					var username = values[1][0].username;
+
+					if(prev_subcattop.length < 1) {
+						result.msg = 'err';
 						response.end(JSON.stringify(result));
-						analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-					} else if (!pagetype) {
-						result.msg = 'invalidpagetype';
-						response.end(JSON.stringify(result));
-						analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-					} else {
-						var promise = querydb.getPageSubjectCategoryTopic(connection,prefix,uid,pid);
+						analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						return;
+					}
 
-						promise.then(function(a_data) {
-							if(a_data.length < 1) {
+					/* get previous redundant table name, if it exists */
+					var pRed = queryPageDB.createRedundantTableName(prefix,prev_subcattop[0],prev_subcattop[1],prev_subcattop[2]);
+
+					/* create user's table name */
+					var uTable = prefix + "_" + uid + "_0";
+
+					/* update user's table */
+					var qryUpdateArray = ["UPDATE ",uTable," SET ","xname=",pagetitle,",subject=",subject,",category=",category,",topic=",topic,",imageurl=",imageurl,",blurb=",blurb,",edited=NOW() WHERE ","xid=",pid];
+
+					var qryUpdate = qryUpdateArray.join("");
+					connection.query(qryUpdate,function(err,rows,fields) {
+						if(err) {
+							result.msg = 'err';
+							response.end(JSON.stringify(result));
+							err.input = qryUpdate;
+							analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							return;
+						}
+
+						/* get connection to update redundant tables */
+						red.getConnection(function(err,connred) {
+							if(err) {
 								result.msg = 'err';
 								response.end(JSON.stringify(result));
-								analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-							} else {
-								/* update user's table */
-								var qryUpdateArray = ["UPDATE ",prefix,"_",uid,"_0 SET ","xname=",pagetitle,",subject=",subject,",category=",category,",topic=",topic,",imageurl=",imageurl,",blurb=",blurb,",edited=NOW() WHERE ","xid=",pid];
+								analytics.journal(true,222,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+								return;
+							}
 
-								var qryUpdate = qryUpdateArray.join("");
+							/* get redundant table name */
+							var cRed = queryPageDB.createRedundantTableName(prefix,subject,category,topic);
 
-								connection.query(qryUpdate,function(err,rows,fields) {
+							if(cRed !== pRed) {
+								/* insert into red */
+								var qryInsertRed = `INSERT INTO xred.${cRed} (uid,xid,username,xname,created,edited,imageurl,blurb) SELECT '${uid}',${pid},'${username}',xname,created,edited,imageurl,blurb FROM xample.${uTable} WHERE xid=${pid}`;
+								connred.query(qryInsertRed,function(err,rows,fields) {
 									if(err) {
 										result.msg = 'err';
-										response.end(JSON.stringify(result));
-										err.input = qryUpdate;
-										analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-									} else {
-										/* get redundant table name */
-										var redundantTableName = querydb.createRedundantTableName(prefix,subject,category,topic);
+										err.input = qryInsertRed;
+										analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									}
+								});
 
-										/* search if this page is already saved in this redundant table */
-										var promiseRed = querydb.searchRedundantTable(connection,uid,pid,redundantTableName);
-
-										promiseRed.then(function(exists) {
-											/* if it exists, update, otherwise, insert into it */
-											var qryCopy;
-											if(exists) {
-												qryCopy = `UPDATE ${redundantTableName}, ${prefix}_${uid}_0 SET ${redundantTableName}.xname=${prefix}_${uid}_0.xname,${redundantTableName}.created=${prefix}_${uid}_0.created,${redundantTableName}.edited=${prefix}_${uid}_0.edited,${redundantTableName}.ranks=${prefix}_${uid}_0.ranks,${redundantTableName}.views=${prefix}_${uid}_0.views,${redundantTableName}.imageurl=${prefix}_${uid}_0.imageurl,${redundantTableName}.blurb=${prefix}_${uid}_0.blurb WHERE ${redundantTableName}.uid=${uid} AND ${redundantTableName}.xid=${pid} AND ${prefix}_${uid}_0.xid = ${pid}`;
-											} else {
-												qryCopy = `INSERT INTO ${redundantTableName} (uid,xid,xname,tags,created,edited,ranks,views,rating,imageurl,blurb) SELECT ${uid},xid,xname,tags,created,edited,ranks,views,rating,imageurl,blurb FROM ${prefix}_${uid}_0 WHERE xid=${pid}`;
-											}
-
-											connection.query(qryCopy,function(err,rows,fields) {
-												if(err) {
-													result.msg = 'err';
-													response.end(JSON.stringify(result));
-													err.input = qryCopy;
-													analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-												} else {
-													/* get previous redundant table name, if it exists */
-													var prevRedundantTable = querydb.createRedundantTableName(prefix,a_data[0],a_data[1],a_data[2]);
-
-													/* delete row from previous redundant table if needed */
-													if(prevRedundantTable && redundantTableName !== prevRedundantTable) {
-														/* delete row from previous redundant table */
-														var qryDeletePrev = "DELETE FROM " + prevRedundantTable + " WHERE uid=" + uid + " AND xid=" + pid;
-
-														connection.query(qryDeletePrev,function(err,rows,fields) {
-															if(err) {
-																result.msg = 'err';
-																response.end(JSON.stringify(result));
-																err.input = qryDeletePrev;
-																analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-															} else {
-																result.msg = 'settingssaved';
-																response.end(JSON.stringify(result));
-																analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-															}
-														});
-													} else {
-														result.msg = 'settingssaved';
-														response.end(JSON.stringify(result));
-														analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-													}
-
-												}
-											});
-										},function(err) {
+								/* delete from prev red */
+								if(pRed) {
+									var qryDeleteFromPrevRed = `DELETE FROM ${pRed} WHERE uid='${uid}' AND xid=${pid}`;
+									connred.query(qryDeleteFromPrevRed,function(err,rows,fields) {
+										if(err) {
 											result.msg = 'err';
-											response.end(JSON.stringify(result));
-											analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-										});
+											err.input = qryDeleteFromPrevRed;
+											analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										}
+									});
+								}
+							} else {
+								/* update red */
+								var qryUpdateRed = `UPDATE xred.${cRed},xample.${uTable} SET xred.${cRed}.xname = xample.${uTable}.xname , xred.${cRed}.username = '${username}' , xred.${cRed}.created = xample.${uTable}.created , xred.${cRed}.edited = xample.${uTable}.edited , xred.${cRed}.imageurl = xample.${uTable}.imageurl , xred.${cRed}.blurb = xample.${uTable}.blurb WHERE xred.${cRed}.xid = ${pid} AND xred.${cRed}.uid = '${uid}'`;
+								connred.query(qryUpdateRed,function(err,rows,fields) {
+									if(err) {
+										result.msg = 'err';
+										err.input = qryUpdateRed;
+										analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 									}
 								});
 							}
-						},function(err) {
-							result.msg = 'err';
-							response.end(JSON.stringify(result));
-							analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-						});
-					}
 
-					connection.release();
-				}
+							result.msg = 'settingssaved';
+							response.end(JSON.stringify(result));
+							analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+						});
+					});
+				},function(err) {
+					result.msg = 'err';
+					response.end(JSON.stringify(result));
+					analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+				});
+				connection.release();
             });
         });
 	}

@@ -7,7 +7,7 @@
 var analytics = require('./../analytics.js');
 var helper = require('./../helper.js');
 var loader = require('./loader.js');
-var querydb = require('./../querydb.js');
+var querypagedb = require('./../querypagedb.js');
 
 /*
 	Function: page
@@ -68,12 +68,11 @@ exports.guide = function(request,response) {
 					if(err) {
 						err.input = qryGuideContent;
 						loader.loadLearningGuidePage(request,response,"<script>pageError('dberr');</script>");
-						analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 					} else if(typeof rows[0] === 'undefined') {
 						/// handle empty learning guide
 					} else {
-						var qryNameImage = "";
-						var qryAuthor = "";
+						var qryRed = "";
 
 						var rowCount = rows.length;
 						for(var i = 0; i < rowCount; i++) {
@@ -87,22 +86,20 @@ exports.guide = function(request,response) {
 
 								if(ids[0] !== '') {
 									/* pid->0, aid->1 */
-									qryNameImage += "(SELECT " + ids[1] + " AS 'uid'," + (i + 1) + " as 'ch',xid,xname,imageurl FROM " + prefixPage + "_" + ids[1] + "_0 WHERE xid=" + ids[0] + ") UNION ";
-
-									qryAuthor += "(SELECT uid,username FROM Users WHERE uid=" + ids[1] + ") UNION ";
+									qryRed += "(SELECT '" + ids[1] + "' AS 'aid'," + (i + 1) + " as 'ch',username,xid,xname,imageurl FROM " + prefixPage + "_" + ids[1] + "_0 WHERE xid=" + ids[0] + ") UNION ";
 								}
 							}
 						}
 
 						/* slices remove UNION at end */
-						var qry = "SELECT authors.uid AS 'aid',ch,xid,xname,username,imageurl FROM (" + qryNameImage.slice(0,-7) + ") AS nameimage JOIN (" + qryAuthor.slice(0,-7) + ") AS authors ON nameimage.uid=authors.uid";
+						qryRed = qryRed.slice(0,-7);
 
 						/* query the database */
-						connection.query(qry,function(err,rows,fields) {
+						connection.query(qryRed,function(err,rows,fields) {
 							if(err) {
-								err.input = qry;
+								err.input = qryRed;
 								loader.loadLearningGuidePage(request,response,"<script>pageError('dberr');</script>");
-								analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+								analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 							} else {
 								if(typeof rows[0] === 'undefined') {
 									/// empty set

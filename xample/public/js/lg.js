@@ -178,10 +178,10 @@ x.xlist = new function xlist() {
 
 				/* if empty, ignore saving this input */
 				if(current !== "") {
-					var pgRegEx = /p=([0-9]+)/;
+					var pgRegEx = /p=([a-zA-Z0-9]+)/;
 					var pg = pgRegEx.exec(current);
 
-					var aiRegEx = /a=([0-9]+)/;
+					var aiRegEx = /a=([a-zA-Z0-9]+)/;
 					var ai = aiRegEx.exec(current);
 
 					if(pg === null || ai === null) {

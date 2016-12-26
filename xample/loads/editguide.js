@@ -7,7 +7,7 @@
 var analytics = require('./../analytics.js');
 var helper = require('./../helper.js');
 var loader = require('./loader.js');
-var querydb = require('./../querydb.js');
+var querypagedb = require('./../querypagedb.js');
 
 /*
 	Function: editlg
@@ -66,14 +66,14 @@ exports.editguide = function(request,response) {
 				if(typeof gid === 'undefined') {
 					loader.loadLearningGuidePage(request,response,"<script>pageError('badquery');</script>");
 				} else {
-					var promise = querydb.getStatusFromXid(connection,prefix,uid,gid);
+					var promise = querypagedb.getStatusFromXid(connection,prefix,uid,gid);
 
 					promise.then(function(success) {
 						if(searchstatus && success === 0) {
 							/* load the edit page with the page data */
 							loader.loadLearningGuidePage(request,response,"<script>pageChoose('" + gid + "');</script>");
 						} else {
-							var promiseSettings = querydb.getPageSettings(connection,prefix,uid,gid);
+							var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,gid);
 
 							promiseSettings.then(function(guideSettings) {
 								if(guideSettings.err === 'notfound') {

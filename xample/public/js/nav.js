@@ -1493,7 +1493,7 @@ function pageExplore(logstatus,csct,data) {
 		var newBox = box.cloneNode(true);
 		newBox.setAttribute('id',index);
 
-		/// still need author name, user's bookmarks
+		/// still need user's bookmarks
 
 		/* page name */
 		var pageURL = createURL(prefixResource + "?a=" + data[index].uid + "&p=" + data[index].pid);
@@ -1503,7 +1503,7 @@ function pageExplore(logstatus,csct,data) {
 		newBox.querySelector(".box-title").appendChild(pageLink);
 
 		/* author */
-		newBox.querySelector(".box-author").innerHTML = ""; /// AUTHOR
+		newBox.querySelector(".box-author").innerHTML = data[index].author;
 
 		/* rating */
 		newBox.querySelector(".rating-bar").className += " w" + (data[index].rating - (data[index].rating % 10));
@@ -2040,6 +2040,9 @@ function saveProfileInfo(btn,fields) {
 					case 'profilesaved':
 						btn.style = "background-color: #00ffe1";
 						alertify.log("Saved!","success"); break;
+					case 'nomatch':
+						btn.style = "background-color: #e83e3e";
+						alertify.alert("The Current Value Did Not Match."); break;
 					case 'nosaveloggedout':
 						btn.style = "background-color: #e83e3e";
 						alertify.alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again."); break;

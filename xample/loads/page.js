@@ -7,7 +7,7 @@
 var analytics = require('./../analytics.js');
 var helper = require('./../helper.js');
 var loader = require('./loader.js');
-var querydb = require('./../querydb.js');
+var querypagedb = require('./../querypagedb.js');
 
 /*
 	Function: page
@@ -60,7 +60,7 @@ exports.page = function(request,response) {
             } else {
 				var prefix = helper.getTablePrefixFromPageType('page');
 
-				var promiseSettings = querydb.getPageSettings(connection,prefix,uid,pid);
+				var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,pid);
 
 				promiseSettings.then(function(pageSettings) {
 					if(pageSettings.err === 'notfound') {
