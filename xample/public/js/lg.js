@@ -21,10 +21,18 @@
 	global emptyDiv:true
 	global btnLink:true
 	global btnSubmit:true
+	global barLog:true
+	global barInfo:true
 	global barMenu:true
-	global barSubMenu:true
 	global barStatus:true
+	global barSubMenu:true
+	global formSignUp:true
+	global getCookies:true
+	global getSubjects:true
 	global getUserFields:true
+	global journalError:true
+	global setBookmark:true
+	global setView:true
 	global watermark:true
 */
 /* from bengine.js */

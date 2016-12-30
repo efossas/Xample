@@ -280,7 +280,7 @@ exports.searchPageResults = function(connection,content,subject,category,topic,s
 exports.getPageSettings = function(connection,prefix,uid,pid) {
 	var promise = new Promise(function(resolve,reject) {
 
-		var qry = "SELECT xid,xname,subject,category,topic,imageurl,blurb FROM " + prefix + "_" + uid + "_0 WHERE xid=" + pid;
+		var qry = "SELECT xid,xname,username,subject,category,topic,created,edited,ranks,views,rating,imageurl,blurb FROM " + prefix + "_" + uid + "_0 WHERE xid=" + pid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {

@@ -7,7 +7,7 @@
 var analytics = require('./../analytics.js');
 var helper = require('./../helper.js');
 var loader = require('./loader.js');
-var querypagedb = require('./../querypagedb.js');
+var queryPageDB = require('./../querypagedb.js');
 
 /*
 	Function: page
@@ -27,6 +27,7 @@ exports.page = function(request,response) {
 	var __function = "page";
 
     var pool = request.app.get("pool");
+	var cachedb = request.app.get("cachedb");
 
 	/* get the author's id & pid from the get request */
 	var aid = request.query.a;
@@ -34,85 +35,99 @@ exports.page = function(request,response) {
 	var menuToggle = request.query.m;
 
 	/* detect is the user is logged in for views */
-	var logstatus;
 	var uid;
+	var logstatus = false;
 	if(request.session.uid) {
-		logstatus = "true";
 		uid = request.session.uid;
+		logstatus = true;
 	} else {
-		logstatus = "false";
 		uid = 0;
-		/* look for cookie from previous visit */
-		/// CODE THIS
-
-		/* if no cookie, register ip address instead */
-		/// CODE THIS
 	}
+
+	var body = '';
+	request.on('data',function(data) {
+		body += data;
+
+		/* prevent overload attacks */
+		if (body.length > 1e6) {
+			request.connection.destroy();
+			var errmsg = {message:"Overload Attack!"};
+			analytics.journal(true,199,errmsg,0,global.__stack[1].getLineNumber(),__function,__filename);
+		}
+	});
 
 	/* redirect users if logged out or no page id provided */
 	if(typeof aid === 'undefined' || typeof pid === 'undefined') {
         loader.loadBlockPage(request,response,"<script>pageError('badquerystring');</script>");
     } else {
-        pool.getConnection(function(err,connection) {
-            if(err) {
-				loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
-                analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-            } else {
-				var prefix = helper.getTablePrefixFromPageType('page');
+		request.on('end',function() {
+			pool.getConnection(function(err,connection) {
+				if(err) {
+					loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+					analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+				} else {
+					var prefix = helper.getTablePrefixFromPageType('page');
 
-				var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,pid);
+					var promiseSettings = queryPageDB.getPageSettings(connection,prefix,aid,pid);
 
-				promiseSettings.then(function(pageSettings) {
-					if(pageSettings.err === 'notfound') {
-						loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
-						analytics.journal(true,201,{message:'getPageSettings()'},uid,global.__stack[1].getLineNumber(),__function,__filename);
-					} else {
-						/* change to generic names for front-end bar script */
-						pageSettings['id'] = pageSettings['xid'];
-						delete pageSettings['xid'];
-						pageSettings['name'] = pageSettings['xname'];
-						delete pageSettings['xname'];
+					promiseSettings.then(function(pageSettings) {
+						if(pageSettings.err === 'notfound') {
+							loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+							analytics.journal(true,201,{message:'getPageSettings()'},uid,global.__stack[1].getLineNumber(),__function,__filename);
+						} else {
+							/* change to generic names for front-end bar script */
+							pageSettings['id'] = pageSettings['xid'];
+							delete pageSettings['xid'];
+							pageSettings['name'] = pageSettings['xname'];
+							delete pageSettings['xname'];
+							pageSettings['author'] = pageSettings['username'];
+							delete pageSettings['username'];
 
-						var pageinfo = JSON.stringify(pageSettings);
+							pageSettings['aid'] = aid;
 
-						var qry = "SELECT type,content FROM " + prefix + "_" + aid + "_" + pid;
+							var pageinfo = JSON.stringify(pageSettings);
 
-						connection.query(qry,function(err,rows,fields) {
-							if(err) {
-								loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
-								analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-							} else {
-								var pagedata = "";
+							var qry = "SELECT type,content FROM " + prefix + "_" + aid + "_" + pid;
 
-								/* i is for accessing row array, j is for keeping track of rows left to parse */
-								var i = 0;
-								var j = rows.length;
+							connection.query(qry,function(err,rows,fields) {
+								if(err) {
+									loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
+									analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+								} else {
+									var pagedata = "";
 
-								/* append commas to each row except for the last one */
-								while(j > 1) {
-									pagedata += rows[i].type + "," + rows[i].content + ",";
-									i++;
-									j--;
+									/* i is for accessing row array, j is for keeping track of rows left to parse */
+									var i = 0;
+									var j = rows.length;
+
+									/* append commas to each row except for the last one */
+									while(j > 1) {
+										pagedata += rows[i].type + "," + rows[i].content + ",";
+										i++;
+										j--;
+									}
+									if(j === 1) {
+										pagedata += rows[i].type + "," + rows[i].content;
+									}
+
+									/* toggles the menu on or off */
+									var mToggle = 'true';
+									if(menuToggle === 'false') {
+										mToggle = 'false';
+									}
+
+									helper.determineView(request,response,'page',cachedb,uid,aid,pid);
+
+									/* load the edit page with the page data */
+									loader.loadBlockPage(request,response,"<script>pageShow(" + logstatus + "," + mToggle + ",'" + pagedata + "'," + pageinfo + ");</script>");
+									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 								}
-								if(j === 1) {
-									pagedata += rows[i].type + "," + rows[i].content;
-								}
-
-								/* toggles the menu on or off */
-								var mToggle = 'true';
-								if(menuToggle === 'false') {
-									mToggle = 'false';
-								}
-
-								/* load the edit page with the page data */
-								loader.loadBlockPage(request,response,"<script>pageShow(" + mToggle + ",'" + uid + "','" + pagedata + "'," + pageinfo + ");</script>");
-								analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-							}
-						});
-					}
-				});
-				connection.release();
-			}
+							});
+						}
+					});
+					connection.release();
+				}
+			});
         });
 	}
 };

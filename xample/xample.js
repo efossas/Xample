@@ -160,6 +160,7 @@ for (var rt in rts) {
 
 var express = require('express');
 var busboy = require('connect-busboy');
+var cookieParser = require('cookie-parser');
 
 // <<<fold>>>
 
@@ -193,6 +194,9 @@ app.use(express.static('public'));
 
 /* set up busboy */
 app.use(busboy());
+
+/* set up cookie parser */
+app.use(cookieParser());
 
 /* set up mysql */
 var mysql = require('mysql');
@@ -318,6 +322,7 @@ app.post('/deletepage',rts.deletepage);
 app.get('/editpage*',rts.editpage);
 app.get('/editguide*',rts.editguide);
 app.get('/explore*',rts.explore);
+app.post('/getbmdata',rts.getbmdata);
 app.post('/getpages*',rts.getpages);
 app.post('/getprofiledata',rts.getprofiledata);
 app.post('/getsubjects',rts.getsubjects);
@@ -332,7 +337,9 @@ app.post('/revertblocks',rts.revertblocks);
 app.post('/saveblocks',rts.saveblocks);
 app.post('/savepagesettings',rts.savepagesettings);
 app.post('/saveprofile',rts.saveprofile);
+app.post('/setbookmark',rts.setbookmark);
 app.post('/signup',rts.signup);
+app.post('/sv',rts.setview);
 app.post('/uploadmedia*',rts.uploadmedia);
 app.post('/uploadthumb*',rts.uploadthumb);
 
@@ -377,6 +384,9 @@ function slack(message) {
 process.on('uncaughtException',function(error) {
 	var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + ' ' + error + '\n';
 
+	/* print 666 error to console */
+	console.log(datedError);
+
 	/* slack message is disabled in testing */
 	if(host === 'remote') {
 		slack(datedError);
@@ -411,7 +421,6 @@ process.stdin.resume();
 		nothing - *
 */
 function exitHandler() {
-	userdb.close();
 	console.log('Clean up routine complete. Xample app terminated.');
     process.exit();
 }

@@ -116,6 +116,15 @@
 	background: $bar-alt-color;
 }
 
+.info-bar {
+	@extend .wrapper;
+}
+
+.info-bar::after {
+	@extend .bar::after;
+	background: $bar-alt-color;
+}
+
 .log-bar {
 	@extend .wrapper;
 }

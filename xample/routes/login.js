@@ -61,6 +61,9 @@ exports.login = function(request,response) {
 				/* set the user's session, this indicates logged in status */
 				request.session.uid = userdata[0]._id;
 
+				/* delete possible unneeded cookies */
+				response.clearCookie("id");
+
 				result.msg = 'loggedin';
 				response.end(JSON.stringify(result));
 				analytics.journal(false,0,"",userdata[0]._id,analytics.__line,__function,__filename);

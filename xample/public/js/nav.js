@@ -36,15 +36,24 @@ var globalScope = {};
 
 /* list any functions that will be joined to this file here from omni */
 /*
+	global autosaveTimer:true
 	global createURL:true
 	global emptyDiv:true
 	global btnLink:true
 	global btnSubmit:true
-	global getUserFields:true
 	global barLog:true
+	global barInfo:true
 	global barMenu:true
+	global barStatus:true
+	global barSubMenu:true
+	global formSignUp:true
+	global getCookies:true
 	global getSubjects:true
+	global getUserFields:true
 	global journalError:true
+	global setBookmark:true
+	global setView:true
+	global watermark:true
 */
 
 /* list any objects from other js files here */
@@ -65,122 +74,6 @@ var globalScope = {};
 ***/
 
 // <<<code>>>
-
-/*
-	Function: barLog
-
-	Creates the log in & sign up form.
-
-	Parameters:
-
-		* - none
-
-	Returns:
-
-		success - html node, log in sign up div
-*/
-function barLog() {
-
-	/* create parent <div> */
-	var logBar = document.createElement('div');
-	logBar.setAttribute('class','log-bar');
-	logBar.setAttribute('id','form-login');
-
-	/* create top row */
-	var rowTop = document.createElement('div');
-	rowTop.setAttribute('class','row');
-	rowTop.setAttribute('id','top-bar');
-
-	function expandLog() {
-		/* create empty col */
-		var colEmptyLog = document.createElement('div');
-		colEmptyLog.setAttribute('class','col col-50');
-
-		/* create username column */
-		var colUsername = document.createElement('div');
-		colUsername.setAttribute('class','col col-20');
-
-		/* create username text <input> */
-		var username = document.createElement('input');
-		username.setAttribute('class','log-input');
-		username.setAttribute('type','text');
-		username.setAttribute('name','username-login');
-		username.setAttribute('maxlength','50');
-		username.setAttribute('placeholder','User Name');
-		username.setAttribute('style','border-left-width:2px;');
-
-		colUsername.appendChild(username);
-
-		/* create password column */
-		var colPassword = document.createElement('div');
-		colPassword.setAttribute('class','col col-20');
-
-		/* create password <input> */
-		var password = document.createElement('input');
-		password.setAttribute('class','log-input');
-		password.setAttribute('type','password');
-		password.setAttribute('name','password-login');
-		password.setAttribute('maxlength','32');
-		password.setAttribute('placeholder','Password');
-
-		colPassword.appendChild(password);
-
-		/* create submit button column */
-		var colSubmit = document.createElement('div');
-		colSubmit.setAttribute('class','col col-10');
-
-		/* create form submit <button> */
-		var submit = btnSubmit('Log In','login()','green');
-		submit.setAttribute('style','border-color:black;border-left-width:1px;');
-
-		colSubmit.appendChild(submit);
-
-		emptyDiv(rowTop);
-		rowTop.appendChild(colEmptyLog);
-		rowTop.appendChild(colUsername);
-		rowTop.appendChild(colPassword);
-		rowTop.appendChild(colSubmit);
-	}
-
-	function expandSign() {
-		var sign = formSignUp();
-
-		emptyDiv(rowTop);
-		rowTop.appendChild(sign);
-	}
-
-	/* create expand buttons */
-	var explore = btnLink('Explore',createURL('/'),'none');
-	var logBtn = btnSubmit('Log In',expandLog,'none');
-	var signBtn = btnSubmit('Sign Up',expandSign,'none');
-
-	/* create columns */
-	var colExplore = document.createElement("div");
-	colExplore.setAttribute("class","col col-15");
-	colExplore.appendChild(explore);
-
-	var colEmpty = document.createElement('div');
-	colEmpty.setAttribute('class','col col-55');
-
-	var colLogBtn = document.createElement('div');
-	colLogBtn.setAttribute('class','col col-15');
-	colLogBtn.appendChild(logBtn);
-
-	var colSignBtn = document.createElement('div');
-	colSignBtn.setAttribute('class','col col-15');
-	colSignBtn.appendChild(signBtn);
-
-	/* add columns to top row */
-	rowTop.appendChild(colExplore);
-	rowTop.appendChild(colEmpty);
-	rowTop.appendChild(colLogBtn);
-	rowTop.appendChild(colSignBtn);
-
-	/* append the elements to the parent <div> */
-	logBar.appendChild(rowTop);
-
-	return logBar;
-}
 
 /*
 	Function: barSearch
@@ -302,10 +195,10 @@ function boxCreate() {
 	bookmark.setAttribute('class','box-bookmark');
 	colBookmark.appendChild(bookmark);
 
-	var star = document.createElement('input');
-	star.setAttribute('type','checkbox');
-	star.setAttribute('class','star');
-	bookmark.appendChild(star);
+	var bmark = document.createElement('input');
+	bmark.setAttribute('type','checkbox');
+	bmark.setAttribute('class','bmark');
+	bookmark.appendChild(bmark);
 
 	/* create expand */
 	var colExpand = document.createElement('div');
@@ -416,19 +309,20 @@ function boxCreate() {
 }
 
 /*
-	Function: dashBookmarks
+	Function: formDisplayPlaylist
 
-	Create dash for viewing users bookmarks.
+	Create dash for viewing list of content.
 
 	Parameters:
 
-		none
+		listheader - string, the name of the type of content page to create.
+		bmdata - array, of objects containing content info.
 
 	Returns:
 
 		success - html node, bookmarks dash
 */
-function dashBookmarks() {
+function formDisplayPlaylist(listheader,bmdata) {
 	/* create header */
 	var rowHeader = document.createElement('div');
 	rowHeader.setAttribute('class','row');
@@ -437,17 +331,102 @@ function dashBookmarks() {
 	colHeader.setAttribute('class','col col-100');
 
 	var dashHeader = document.createElement('h2');
-	dashHeader.innerHTML = "Bookmarks";
+	dashHeader.innerHTML = listheader;
 
 	colHeader.appendChild(dashHeader);
 	rowHeader.appendChild(colHeader);
 
 	/* append the page links to a form div */
-	var dashBookmarks = document.createElement('div');
-	dashBookmarks.setAttribute('class','bookmarks-box');
-	dashBookmarks.appendChild(rowHeader);
+	var dash = document.createElement('div');
+	dash.setAttribute('class','dash-box');
+	dash.appendChild(rowHeader);
 
-	return dashBookmarks;
+	/* create data box */
+	var dataselect = document.createElement('div');
+	dataselect.setAttribute('class','data-box');
+
+	function listSelect(evt) {
+		var aid = this.getAttribute('data-aid');
+		var xid = this.getAttribute('data-xid');
+
+		window.location = 'page?a=' + aid + '&p=' + xid;
+	}
+
+	function listHover(evt) {
+		this.style = 'background-color:rgba(58, 50, 200, 0.2)';
+	}
+
+	function listOff(evt) {
+		this.style = 'background-color:transparent';
+	}
+
+	var listCount = bmdata.length;
+	for(var i = 0; i < listCount; i++) {
+		var row = document.createElement('div');
+
+		switch(i) {
+			case 0:
+				row.setAttribute('class','row toprow'); break;
+			case listCount - 1:
+				row.setAttribute('class','row bottomrow'); break;
+			default:
+				row.setAttribute('class','row');
+		}
+
+		row.setAttribute('data-aid',bmdata[i].aid);
+		row.setAttribute('data-xid',bmdata[i].xid);
+
+		/* left buffer */
+		var colLeft = document.createElement('div');
+		colLeft.setAttribute('class','col col-2');
+
+		/* page position in list */
+		var colPgNum = document.createElement('div');
+		colPgNum.setAttribute('class','col col-3 padtop');
+		colPgNum.innerHTML = (i + 1);
+
+		/* page thumbnail */
+		var colImg = document.createElement('div');
+		colImg.setAttribute('class','col col-6');
+
+		var thumb = document.createElement('img');
+		thumb.src = bmdata[i].imageurl;
+
+		colImg.appendChild(thumb);
+
+		/* page name */
+		var colName = document.createElement('div');
+		colName.setAttribute('class','col col-67 padtop');
+		colName.innerHTML = bmdata[i].xname;
+
+		/* page author */
+		var colAuthor = document.createElement('div');
+		colAuthor.setAttribute('class','col col-20 padtop');
+		colAuthor.setAttribute('style','text-align:right');
+		colAuthor.innerHTML = bmdata[i].author;
+
+		/* right buffer */
+		var colRight = document.createElement('div');
+		colRight.setAttribute('class','col col-2');
+
+		/* append everything */
+		row.appendChild(colLeft);
+		row.appendChild(colPgNum);
+		row.appendChild(colImg);
+		row.appendChild(colName);
+		row.appendChild(colAuthor);
+		row.appendChild(colRight);
+
+		row.addEventListener('click',listSelect,true);
+		row.addEventListener('mouseover',listHover,true);
+		row.addEventListener('mouseout',listOff,true);
+
+		dataselect.appendChild(row);
+	}
+
+	dash.appendChild(dataselect);
+
+	return dash;
 }
 
 /*
@@ -1178,107 +1157,6 @@ function formGenerateUserContent(pagetype,data) {
 }
 
 /*
-	Function: formSignUp
-
-	Create a sign up form. This returns an html node containing the form. On submit, the form calls signup()
-
-	Parameters:
-
-		none
-
-	Form:
-
-		username-signup - the user name
-		email-signup - the user's email
-		phone-signup - the user's phone
-		password-signup - the password
-		password-signup-check - the password again
-
-	Returns:
-
-		success - html node, sign up form
-*/
-function formSignUp() {
-
-	/* create parent <div> */
-	var signup = document.createElement('div');
-	signup.setAttribute('class','form');
-	signup.setAttribute('id','form-signup');
-
-	/* username column */
-	var colUsername = document.createElement('div');
-	colUsername.setAttribute('class','col col-21');
-
-	/* create username text <input> */
-	var username = document.createElement('input');
-	username.setAttribute('class','log-input');
-	username.setAttribute('type','text');
-	username.setAttribute('name','username-signup');
-	username.setAttribute('maxlength','50');
-	username.setAttribute('placeholder','User Name');
-	username.setAttribute('style','border-left-width:0px;');
-	colUsername.appendChild(username);
-
-	/* email column */
-	var colEmail = document.createElement('div');
-	colEmail.setAttribute('class','col col-30');
-
-	/* create email text <input> */
-	var email = document.createElement('input');
-	email.setAttribute('class','log-input');
-	email.setAttribute('type','text');
-	email.setAttribute('name','email-signup');
-	email.setAttribute('maxlength','50');
-	email.setAttribute('placeholder','Email');
-	colEmail.appendChild(email);
-
-	/* password column */
-	var colPassword = document.createElement('div');
-	colPassword.setAttribute('class','col col-17');
-
-	/* create password <input> */
-	var password = document.createElement('input');
-	password.setAttribute('class','log-input');
-	password.setAttribute('type','password');
-	password.setAttribute('name','password-signup');
-	password.setAttribute('maxlength','32');
-	password.setAttribute('placeholder','Password');
-	colPassword.appendChild(password);
-
-	/* password check column */
-	var colPasswordc = document.createElement('div');
-	colPasswordc.setAttribute('class','col col-17');
-
-	/* create another password <input> */
-	var passwordc = document.createElement('input');
-	passwordc.setAttribute('class','log-input');
-	passwordc.setAttribute('type','password');
-	passwordc.setAttribute('name','password-signup-check');
-	passwordc.setAttribute('maxlength','32');
-	passwordc.setAttribute('placeholder','Repeat Password');
-	colPasswordc.appendChild(passwordc);
-
-	/* submit button column */
-	var colSubmit = document.createElement('div');
-	colSubmit.setAttribute('class','col col-15');
-
-	/* create form submit <button> */
-	var submit = btnSubmit('Sign Up','signup()','green');
-	submit.setAttribute('value','submit-signup');
-	submit.setAttribute('style','border-color:black;border-left-width:1px;');
-	colSubmit.appendChild(submit);
-
-	/* append the elements to the parent <div> */
-	signup.appendChild(colUsername);
-	signup.appendChild(colEmail);
-	signup.appendChild(colPassword);
-	signup.appendChild(colPasswordc);
-	signup.appendChild(colSubmit);
-
-	return signup;
-}
-
-/*
 	Function: rowProfileCheck
 
 	Creates a profile row div when input must be validated (like chaning a password, requires entering current & new password). The back end must have a check for accepting the check and field names. Probably in the route function that saves profile data.
@@ -1440,6 +1318,9 @@ function rowProfileSingle(field,description,data) {
 function pageExplore(logstatus,csct,data) {
 	var main = document.getElementById('content');
 
+	/* get user cookies for bookmarks */
+	var userObj = getCookies();
+
 	/* create and append menu based on log status */
 	var menu;
 	if(logstatus === true) {
@@ -1451,10 +1332,13 @@ function pageExplore(logstatus,csct,data) {
 
 	/* determine bp or lg */
 	var prefixResource;
+	var pagetype;
 	if(csct[0] === "bp") {
 		prefixResource = "/page";
+		pagetype = "page";
 	} else if(csct[0] === "lg") {
 		prefixResource = "/guide";
+		pagetype = "guide";
 	} else {
 		prefixResource = "/error";
 	}
@@ -1493,10 +1377,8 @@ function pageExplore(logstatus,csct,data) {
 		var newBox = box.cloneNode(true);
 		newBox.setAttribute('id',index);
 
-		/// still need user's bookmarks
-
 		/* page name */
-		var pageURL = createURL(prefixResource + "?a=" + data[index].uid + "&p=" + data[index].pid);
+		var pageURL = createURL(prefixResource + "?a=" + data[index].uid + "&p=" + data[index].xid);
 		var pageLink = document.createElement('a');
 		pageLink.setAttribute('href',pageURL);
 		pageLink.innerHTML = data[index].xname;
@@ -1510,7 +1392,24 @@ function pageExplore(logstatus,csct,data) {
 		newBox.querySelector(".rating-bar").style = "width:" + data[index].rating + "%";
 
 		/* bookmark */
-		newBox.querySelector(".star").checked = false; /// BOOKMARK
+		newBox.querySelector(".bmark").setAttribute('data-aid',data[index].uid);
+		newBox.querySelector(".bmark").setAttribute('data-pid',data[index].xid);
+
+		newBox.querySelector(".bmark").addEventListener('change',setBookmark);
+
+		if(userObj.hasOwnProperty('bm')) {
+			if(userObj.bm.hasOwnProperty(pagetype)) {
+				if(userObj.bm[pagetype].hasOwnProperty(data[index].uid)) {
+					if(userObj.bm[pagetype][data[index].uid].indexOf(data[index].xid) > -1) {
+						newBox.querySelector(".bmark").checked = true;
+					} else {
+						newBox.querySelector(".bmark").checked = false;
+					}
+				} else {
+					newBox.querySelector(".bmark").checked = false;
+				}
+			}
+		}
 
 		/* image */
 		var pageImage = document.createElement('img');
@@ -1557,16 +1456,14 @@ function pageExplore(logstatus,csct,data) {
 		nothing - *
 */
 function pageHome() {
-
-	var menu = barMenu();
+	var main = document.getElementById('content');
 
 	/* append the form to the main div */
-	var main = document.getElementById('content');
+	var menu = barMenu();
 	main.appendChild(menu);
 
-	/* create bookmarks dash */
-	var bookmarks = dashBookmarks();
-	main.appendChild(bookmarks);
+	/* fetch page data for user bookmarks */
+	var promiseBM = getBookmarkData("page");
 
 	/* fetch user pages */
 	var promiseBP = getPages("page");
@@ -1574,13 +1471,17 @@ function pageHome() {
 	/* fetch user learning guides */
 	var promiseLG = getPages("guide");
 
-	Promise.all([promiseBP,promiseLG]).then(function(values) {
+	Promise.all([promiseBM,promiseBP,promiseLG]).then(function(values) {
+		/* bookmark display form */
+		var row_Bookmark = formDisplayPlaylist('Bookmarks: Pages',values[0]);
+		main.appendChild(row_Bookmark);
+
 		/* block page create form */
-		var row_PageCreate = formGenerateUserContent('page',values[0]);
+		var row_PageCreate = formGenerateUserContent('page',values[1]);
 		main.appendChild(row_PageCreate);
 
 		/* learning guide create form */
-		var row_LgCreate = formGenerateUserContent('guide',values[1]);
+		var row_LgCreate = formGenerateUserContent('guide',values[2]);
 		main.appendChild(row_LgCreate);
 	},function(error) {
 		alertify.alert("There Was An Error Getting Your Pages.");
@@ -1940,6 +1841,58 @@ function deletePage(pagetype,xid) {
 	};
 
 	xmlhttp.send(params);
+}
+
+/*
+	Function: getBookmarkData
+
+	This function fetches page data for a user's bookmarks.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - promise, pagedata
+*/
+function getBookmarkData(pagetype) {
+	var promise = new Promise(function(resolve,reject) {
+
+		/* create the url destination for the ajax request */
+		var url = createURL("/getbmdata");
+
+		var params = "pagetype=" + pagetype;
+
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+
+		xmlhttp.open("POST",url,true);
+
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data.bmdata); break;
+						case 'err':
+						default:
+							reject('err');
+					}
+				} else {
+					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
+	});
+
+	return promise;
 }
 
 /*

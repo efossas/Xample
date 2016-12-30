@@ -86,6 +86,14 @@
     width: 25%;
 }
 
+.col-26 {
+    width: 26%;
+}
+
+.col-27 {
+    width: 27%;
+}
+
 .col-28 {
     width: 28%;
 }
@@ -176,7 +184,7 @@
 
 /* Mobile Size */
 @media screen and (max-width: $site-width) {
-	.col-2, .col-3, .col-4, .col-5, .col-6, .col-10, .col-12, .col-14, .col-15, .col-17, .col-19, .col-20, .col-21, .col-22, .col-23, .col-25, .col-28, .col-30, .col-33, .col-35, .col-40, .col-45, .col-50, .col-55, .col-60, .col-65, .col-66, .col-67, .col-70, .col-75, .col-80, .col-85, .col-90, .col-95, .col-100 {
+	.col-2, .col-3, .col-4, .col-5, .col-6, .col-10, .col-12, .col-14, .col-15, .col-17, .col-19, .col-20, .col-21, .col-22, .col-23, .col-25, .col-26, .col-27, .col-28, .col-30, .col-33, .col-35, .col-40, .col-45, .col-50, .col-55, .col-60, .col-65, .col-66, .col-67, .col-70, .col-75, .col-80, .col-85, .col-90, .col-95, .col-100 {
 		float: none;
 		min-height: 1px;
 		width: auto;

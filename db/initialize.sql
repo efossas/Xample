@@ -12,6 +12,8 @@ CREATE TABLE xerror (ekey BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, id TINYINT
 
 CREATE TABLE xdata (scriptName VARCHAR(32), functionName VARCHAR(32), lineNumber SMALLINT UNSIGNED, userID CHAR(24), eventTime DATETIME );
 
+CREATE TABLE xviews ( ptype CHAR(5), aid CHAR(24), xid SMALLINT UNSIGNED, viewtime TIMESTAMP NOT NULL, quality SMALLINT UNSIGNED NOT NULL, KEY(ptype,aid,xid) );
+
 CREATE DATABASE xsessionstore;
 USE xsessionstore;
 

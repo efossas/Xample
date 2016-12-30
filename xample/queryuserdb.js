@@ -43,11 +43,12 @@ exports.getDocByUsername = function(connection,username) {
 exports.createUser = function(connection,username,password,email) {
 
     var newUser = {
-        username:username,
-        password:password,
-        email:email,
         autosave:0,
-        defaulttext:1
+        bookmarks:{g:{},p:{}},
+        defaulttext:1,
+        email:email,
+        password:password,
+        username:username
     };
 
 	var promise = new Promise(function(resolve,reject) {

@@ -25,6 +25,7 @@ var l_start = require('./loads/start.js');
 /* route functions, for ajax requeset asking for data */
 var r_createpage = require('./routes/createpage.js');
 var r_deletepage = require('./routes/deletepage.js');
+var r_getbmdata = require('./routes/getbmdata.js');
 var r_getpages = require('./routes/getpages.js');
 var r_getprofiledata = require('./routes/getprofiledata.js');
 var r_getsubjects = require('./routes/getsubjects.js');
@@ -35,6 +36,8 @@ var r_revertblocks = require('./routes/revertblocks.js');
 var r_saveblocks = require('./routes/saveblocks.js');
 var r_savepagesettings = require('./routes/savepagesettings.js');
 var r_saveprofile = require('./routes/saveprofile.js');
+var r_setbookmark = require('./routes/setbookmark.js');
+var r_setview = require('./routes/setview.js');
 var r_signup = require('./routes/signup.js');
 var r_uploadmedia = require('./routes/uploadmedia.js');
 var r_uploadthumb = require('./routes/uploadthumb.js');
@@ -54,6 +57,7 @@ module.exports = {
     editpage: l_editpage.editpage,
     editguide: l_editguide.editguide,
     explore: l_explore.explore,
+    getbmdata: r_getbmdata.getbmdata,
     getpages: r_getpages.getpages,
     getprofiledata: r_getprofiledata.getprofiledata,
     getsubjects: r_getsubjects.getsubjects,
@@ -69,6 +73,8 @@ module.exports = {
     saveblocks: r_saveblocks.saveblocks,
     savepagesettings: r_savepagesettings.savepagesettings,
     saveprofile: r_saveprofile.saveprofile,
+    setbookmark: r_setbookmark.setbookmark,
+    setview: r_setview.setview,
     signup: r_signup.signup,
     start: l_start.start,
     uploadmedia: r_uploadmedia.uploadmedia,

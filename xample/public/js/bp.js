@@ -23,11 +23,18 @@ var globalScope = {};
 	global emptyDiv:true
 	global btnLink:true
 	global btnSubmit:true
+	global barLog:true
+	global barInfo:true
 	global barMenu:true
 	global barStatus:true
 	global barSubMenu:true
+	global formSignUp:true
+	global getCookies:true
 	global getSubjects:true
 	global getUserFields:true
+	global journalError:true
+	global setBookmark:true
+	global setView:true
 	global watermark:true
 */
 /* from bengine.js */
@@ -1079,8 +1086,8 @@ function pageEdit(aid,pagedata,pageinfo) {
 
 	Parameters:
 
+		logstatus - boolean, true if logged in or false otherwise.
 		mtoggle - boolean, true displays all & false displays only blocks
-		aid - number, the author id; which is the uid of the creator of the block page
 		pagedata - string, page data is received in the format "type,content,type,content,etc."
 		pageinfo - json string, page info is what goes into the settings
 
@@ -1088,7 +1095,7 @@ function pageEdit(aid,pagedata,pageinfo) {
 
 		nothing - *
 */
-function pageShow(mtoggle,aid,pagedata,pageinfo) {
+function pageShow(logstatus,mtoggle,pagedata,pageinfo) {
 	/* grab the main div */
 	var main = document.getElementById('content');
 
@@ -1103,13 +1110,19 @@ function pageShow(mtoggle,aid,pagedata,pageinfo) {
 
 		/*** MENU BAR ***/
 
-		/* create menu & status bar */
-		var menu = barMenu();
+		/* create menu & info bar */
+		var menu;
+		if(logstatus === true) {
+			menu = barMenu();
+		} else {
+			menu = barLog();
+		}
+		var info = barInfo('page',pageinfo);
 
 		/* append menu & status to main */
 		main.appendChild(menu);
+		main.appendChild(info);
 
-		/// UH... WHERE DOES THIS PAGE TITLE GO??
 		var spaceDiv = document.createElement('div');
 		spaceDiv.setAttribute('style','padding-bottom:20px;');
 		main.appendChild(spaceDiv);
@@ -1137,6 +1150,11 @@ function pageShow(mtoggle,aid,pagedata,pageinfo) {
 	}
 
 	blockContentShow('content',x,["page",pid],blockarray);
+
+	/* set time out to register view */
+	setTimeout(function() {
+		setView('page',pageinfo.aid,pageinfo.id);
+	},61000);
 }
 
 // <<<fold>>>

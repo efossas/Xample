@@ -83,7 +83,7 @@ function writeToErrorLog(datedError,isError,idNumber,message,userID,lineNumber,f
 
 		nothing - *
 */
-exports.journal = function(isError,idNumber,message,userID,lineNumber,functionName,scriptName) {
+function journal(isError,idNumber,message,userID,lineNumber,functionName,scriptName) {
     var fileName = scriptName.split("/").pop();
 
     /* check that nothing is undefined as that will break journaling to database */
@@ -91,7 +91,9 @@ exports.journal = function(isError,idNumber,message,userID,lineNumber,functionNa
     argCheck.forEach(function(item,index) {
         if(typeof item === 'undefined') {
             var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + 'undefined was passed to journal() function.';
-            var escapedMessage = message.replace(/['"`]+/g,'');
+            if(typeof message === 'string') {
+                var escapedMessage = message.replace(/['"`]+/g,'');
+            }
             writeToErrorLog(datedError,isError,idNumber,escapedMessage,userID,lineNumber,functionName,fileName);
         }
     });
@@ -126,4 +128,26 @@ exports.journal = function(isError,idNumber,message,userID,lineNumber,functionNa
 
 		connection.release();
 	});
+}
+
+exports.journal = journal;
+
+exports.saveViewData = function(uid,quality,pagetype,aid,xid) {
+    var __function = "saveViewData";
+
+    stats.getConnection(function(err,connection) {
+        if (err) {
+            journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+        } else {
+            var qryArray = ["INSERT INTO xviews (ptype,aid,xid,viewtime,quality) VALUES ('",pagetype,"','",aid,"',",xid,",NOW(),",quality,")"];
+
+            var qry = qryArray.join("");
+            connection.query(qry,function(err,rows,fields) {
+                if(err) {
+                    err.input = qry;
+                    journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+                }
+            });
+        }
+    });
 };
