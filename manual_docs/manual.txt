@@ -145,6 +145,10 @@ Install Imagemagick:
 
 Install MySQL:
 
+- if brew doesn't work on mac, go to the link below to download mysql's native installation package
+
+https://dev.mysql.com/doc/refman/5.6/en/osx-installation-pkg.html
+
 - (ubuntu) apt-get install mysql-server
 > (mac) brew install mysql
 
