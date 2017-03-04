@@ -30,6 +30,7 @@ var globalBlockEngine = {};
 	global progressUpdate:true
 	global getUserFields:true
 	global getSubjects:true
+	global journalError:true
 */
 /* list any objects js dependencies */
 /*
@@ -118,8 +119,8 @@ function blockContentShow(main,x,id,data) {
 	Parameters:
 
 		main - string, id of an html div that is already attached to the DOM.
-		x - object, containing all of the block objects, like x.myblock
-		id - array, [name of id,id number], like [bp,1] where 1 is pid
+		x - object, containing all of the objects for generating blocks, like x.myblock
+		id - array, [page type,xid,directory id], like ['page',1,'t'] where 1 is xid
 		data - array, array of the block data [type,content,type,content,etc.]
 
 	Returns:
@@ -224,13 +225,14 @@ function blockEngineStart(main,x,id,data) {
 	/* append the hidden file form to the blocksdiv */
 	enginediv.appendChild(fileform);
 
-	/*** HIDDEN ID & NAME INFO ***/
+	/*** HIDDEN PAGE TYPE, XID, & DID (directory id) ***/
 
 	/* add page id & name to hidden div */
 	var idDiv = document.createElement("input");
 	idDiv.setAttribute("id","x-id");
 	idDiv.setAttribute("name",id[0]);
 	idDiv.setAttribute("data-xid",id[1]);
+	idDiv.setAttribute("data-did",id[2]);
 	idDiv.style.visibility = 'hidden';
 	idDiv.style.display = 'none';
 	enginediv.appendChild(idDiv);
@@ -676,12 +678,13 @@ function parseBlock(blockType,blockText) {
 }
 
 /*
-	Function: formDropDownsSCT
+	Function: barPageSettings
 
-	Creates the form for selecting Subject, Category, Topic.
+	Creates bar for changing page settings
 
 	Parameters:
 
+		pagetype - string, used for links
 		aid - the author id
 		settings - object, with settings as properties
 
@@ -689,14 +692,14 @@ function parseBlock(blockType,blockText) {
 
 		success - html node, dropdowns.
 */
-function barPageSettings(aid,settings) {
+function barPageSettings(pagetype,aid,settings) {
 	var pageSettings = document.createElement('div');
 	pageSettings.setAttribute('class','settings-bar col-100');
 
 	/* show mode page link */
 	var showLink = document.createElement('div');
 	showLink.setAttribute('class','page-link');
-	var slink = createURL('/page?a=' + aid + '&p=' + settings.pid);
+	var slink = createURL('/' + pagetype + '?a=' + aid + '&p=' + settings.id);
 	showLink.innerHTML = "<a href='" + slink + "' target='_blank'>" + slink + "</a>";
 	pageSettings.appendChild(showLink);
 
@@ -707,15 +710,138 @@ function barPageSettings(aid,settings) {
 	title.setAttribute('id','pagetitle');
 	title.setAttribute('class','page-title');
 	title.setAttribute('maxlength','50');
-	title.setAttribute('value',settings.pagename);
+	title.setAttribute('value',settings.name);
 	pageSettings.appendChild(title);
 
 	/* drop downs for choosing page subj,cat,top */
 	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
 	pageSettings.appendChild(ddsct);
 
+	/* row for image and blurb */
+	var rowImgBlurb = document.createElement('div');
+	rowImgBlurb.setAttribute('class','row');
+
+	function uploadThumb() {
+		/* get the hidden file-select object that will store the user's file selection */
+		var fileSelect = document.getElementById('file-select');
+		fileSelect.setAttribute("accept",".bmp,.bmp2,.bmp3,.jpeg,.jpg,.pdf,.png,.svg");
+
+		fileSelect.click();
+
+		fileSelect.onchange = function() {
+			/* grab the selected file */
+			var file = fileSelect.files[0];
+
+			var notvalid = false;
+			var nofile = false;
+			var errorMsg;
+			if(fileSelect.files.length > 0) {
+				if(file.size > 4294967295) {
+					notvalid = true;
+					errorMsg = "Files Must Be Less Than 4.3 GB";
+				}
+			} else {
+				nofile = true;
+			}
+
+			if(nofile) {
+				/* do nothing, no file selected */
+			} else if(notvalid) {
+				alertify.alert(errorMsg);
+			} else {
+				/* wrap the ajax request in a promise */
+				var promise = new Promise(function(resolve,reject) {
+
+					/* create javascript FormData object and append the file */
+					var formData = new FormData();
+					formData.append('media',file,file.name);
+
+					/* get the directory id */
+					var id = document.getElementById('x-id').getAttribute('data-did');
+
+					/* grab the domain and create the url destination for the ajax request */
+					var url = createURL("/uploadthumb?id=" + id);
+
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.open('POST',url,true);
+
+					xmlhttp.onreadystatechange = function() {
+						if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+							if(xmlhttp.status === 200) {
+								var result = JSON.parse(xmlhttp.responseText);
+
+								switch(result.msg) {
+									case 'success':
+										resolve(result.data); break;
+									case 'nouploadloggedout':
+										alertify.alert("You Can't Upload A Thumbnail Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
+										reject("err"); break;
+									case 'convertmediaerr':
+										reject('convertmediaerr'); break;
+									case 'err':
+									default:
+										reject('err');
+								}
+							} else {
+								alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
+								reject("err");
+							}
+						}
+					};
+
+					xmlhttp.send(formData);
+				});
+
+				promise.then(function(imglink) {
+					var linkparts = imglink.split(",");
+					var thumbtag = document.getElementById('pageimg');
+					thumbtag.src = linkparts[1];
+				},function(error) {
+					if(error === "convertmediaerr") {
+						alertify.log("There was an error with that media format. Please try a different file type.");
+					} else {
+						alertify.log("There was an unknown error during thumbnail upload.");
+					}
+				});
+			}
+		};
+	}
+
+	/* page thumbnail img */
+	var colImg = document.createElement('div');
+	colImg.setAttribute('class','col col-33');
+
+	var thumbnail = document.createElement('img');
+	thumbnail.setAttribute('id','pageimg');
+	thumbnail.setAttribute('class','thumb-img');
+	thumbnail.onclick = uploadThumb;
+	if(settings.imageurl !== "") {
+		thumbnail.setAttribute('src',settings.imageurl);
+	}
+	colImg.appendChild(thumbnail);
+
+	/* page blurb input */
+	var colBlurb = document.createElement('div');
+	colBlurb.setAttribute('class','col col-66');
+
+	var blurb = document.createElement('textarea');
+	blurb.setAttribute('name','pageblurb');
+	blurb.setAttribute('id','pageblurb');
+	blurb.setAttribute('class','page-blurb');
+	blurb.setAttribute('rows','4');
+	blurb.setAttribute('maxlength','500');
+	blurb.setAttribute('placeholder','Explain this page here.');
+	blurb.value = settings.blurb;
+	colBlurb.appendChild(blurb);
+
+	/* append img and blurb */
+	rowImgBlurb.appendChild(colImg);
+	rowImgBlurb.appendChild(colBlurb);
+	pageSettings.appendChild(rowImgBlurb);
+
 	/* page settings save */
-	var btnSaveSettings = btnSubmit('Save Page Settings','savePageSettings()','none');
+	var capital = pagetype.charAt(0).toUpperCase() + pagetype.slice(1);
+	var btnSaveSettings = btnSubmit('Save ' + capital + ' Settings','savePageSettings("' + pagetype + '")','none');
 	pageSettings.appendChild(btnSaveSettings);
 
 	return pageSettings;
@@ -877,8 +1003,8 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 	/* get subjects for select topic list */
 	var subjectsPromise = getSubjects();
 
-	subjectsPromise.then(function(success) {
-		var subjectsData = JSON.parse(success);
+	subjectsPromise.then(function(data) {
+		var subjectsData = data;
 		globalBlockEngine.subjects = subjectsData;
 
 		/* first box - subject names */
@@ -905,6 +1031,7 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 
 		/* second box - category names */
 		var optionCategory = document.createElement('option');
+		optionCategory.setAttribute("value","");
 		optionCategory.innerHTML = "choose category";
 		listCategories.appendChild(optionCategory);
 
@@ -930,6 +1057,7 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 
 		/* third box - topic names */
 		var optionTopic = document.createElement('option');
+		optionTopic.setAttribute("value","");
 		optionTopic.innerHTML = "choose topic";
 		listTopics.appendChild(optionTopic);
 
@@ -953,7 +1081,10 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 		}
 
 	},function(error) {
-		///journal console.log("getSubjects promise error: " + error);
+		alertify.alert("There Was An Error Getting The Subjects");
+		if(error === "unknown") {
+			journalError("getSubjects() unknown result.msg","nav.js",new Error().lineNumber,"","");
+		}
 	});
 
 	/* append lists to columns */
@@ -997,7 +1128,7 @@ function revertBlocks() {
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "xid=" + xid + "&xname=" + xidName;
+	var params = "xid=" + xid + "&pagetype=" + xidName;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1006,18 +1137,23 @@ function revertBlocks() {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "noxid") {
-					alertify.alert("This Page Is Not Meant To Be Visited Directly.");
-				} else if (xmlhttp.responseText === "norevertloggedout") {
-					alertify.alert("Revert Error. You Are Not Logged In.");
-				} else if (xmlhttp.responseText === "err") {
-					alertify.alert("An Error Occured. Please Try Again Later");
-				} else {
-					var oldBengine = document.getElementById('x-bengine');
-					var main = oldBengine.parentNode;
-					main.removeChild(oldBengine);
-					blockEngineStart(main.getAttribute('id'),x,[xidName,xid],xmlhttp.responseText.split(","));
-					document.getElementById("savestatus").innerHTML = "Saved";
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'success':
+						var oldBengine = document.getElementById('x-bengine');
+						var main = oldBengine.parentNode;
+						main.removeChild(oldBengine);
+						blockEngineStart(main.getAttribute('id'),x,[xidName,xid],result.data.split(","));
+						document.getElementById("savestatus").innerHTML = "Saved";
+						break;
+					case 'noxid':
+						alertify.alert("This Page Is Not Meant To Be Visited Directly."); break;
+					case 'norevertloggedout':
+						alertify.alert("Revert Error. You Are Not Logged In."); break;
+					case 'err':
+					default:
+						alertify.alert("An Error Occured. Please Try Again Later");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1106,7 +1242,7 @@ function saveBlocks(which) {
 		};
 	}
 
-	var params = "mediaType=" + types + "&mediaContent=" + contents + "&xid=" + xid + "&xname=" + xidName + "&tabid=" + table;
+	var params = "mediaType=" + types + "&mediaContent=" + contents + "&xid=" + xid + "&pagetype=" + xidName + "&tabid=" + table;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1115,15 +1251,21 @@ function saveBlocks(which) {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "blockssaved") {
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'blocksaved':
 						if(table === 1) {
 							document.getElementById("savestatus").innerHTML = "Saved";
 						}
-					} else if (xmlhttp.responseText === "nosaveloggedout") {
+						break;
+					case 'nosaveloggedout':
 						alertify.alert("You Can't Save This Page Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
-					} else {
+						break;
+					case 'err':
+					default:
 						alertify.alert("An Unknown Save Error Occurred");
-					}
+				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}
@@ -1140,30 +1282,29 @@ function saveBlocks(which) {
 
 	Parameters:
 
-		none
+		pagetype - string, type of page being saved
 
 	Returns:
 
 		none
 */
-function savePageSettings() {
+function savePageSettings(pagetype) {
 	/* create the url destination for the ajax request */
-	var url = createURL("/savepagesettings");
+	var url = createURL('/savepagesettings');
 
 	/* get the pid & page name */
-	var pid = document.getElementById('x-id').getAttribute('data-xid');
-	var pagetitle = document.getElementById('pagetitle').value;
+	var id = document.getElementById('x-id').getAttribute('data-xid');
+	var title = document.getElementById('pagetitle').value;
 	var subject = document.getElementById('select-subject').value;
 	var category = document.getElementById('select-category').value;
 	var topic = document.getElementById('select-topic').value;
-	var tags = "";
-	var imageurl = "";
-	var blurb = "";
+	var imageurl = document.getElementById('pageimg').src.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
+	var blurb = document.getElementById('pageblurb').value;
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "pid=" + pid + "&p=" + pagetitle + "&s=" + subject + "&c=" + category + "&t=" + topic + "&g=" + tags + "&i=" + imageurl + "&b=" + blurb;
+	var params = "pt=" + pagetype + "&id=" + id + "&p=" + title + "&s=" + subject + "&c=" + category + "&t=" + topic + "&i=" + imageurl + "&b=" + blurb;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1172,14 +1313,18 @@ function savePageSettings() {
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "nosaveloggedout") {
-					alertify.alert("Save Settings Error. You Are Not Logged In.");
-				} else if(xmlhttp.responseText === "nosubjectnotsaved") {
-					alertify.alert("Save Settings Error. Please Enter At Least A Subject.");
-				} else if (xmlhttp.responseText === "settingssaved") {
-					alertify.log("Settings Saved!","success");
-				} else {
-					alertify.alert("An Error Occured. Please Try Again Later");
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'settingssaved':
+						alertify.log("Settings Saved!","success"); break;
+					case 'nosaveloggedout':
+						alertify.alert("Save Settings Error. You Are Not Logged In."); break;
+					case 'nosubjectnotsaved':
+						alertify.alert("Save Settings Error. Please Enter At Least A Subject."); break;
+					case 'err':
+					default:
+						alertify.alert("An Error Occured. Please Try Again Later");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1266,11 +1411,11 @@ function uploadMedia(bid,blockObj) {
 				var formData = new FormData();
 				formData.append('media',file,file.name);
 
-				/* get the page id */
-				var pid = document.getElementsByName('pageid')[0].value;
+				/* get the directory id */
+				var did = document.getElementById('x-id').getAttribute('data-did');
 
 				/* grab the domain and create the url destination for the ajax request */
-				var url = createURL("/uploadmedia?pid=" + pid + "&btype=" + blockObj.type);
+				var url = createURL("/uploadmedia?did=" + did + "&btype=" + blockObj.type);
 
 				var xmlhttp = new XMLHttpRequest();
 				xmlhttp.open('POST',url,true);

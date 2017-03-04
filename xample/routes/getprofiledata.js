@@ -5,6 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
+var queryUserDB = require('./../queryuserdb.js');
 
 /*
 	Function: getprofiledata
@@ -25,13 +26,17 @@ exports.getprofiledata = function(request,response) {
 
 	var qs = require('querystring');
 
-    var pool = request.app.get("pool");
+    var userdb = request.app.get("userdb");
+
+	/* create response object */
+	var result = {msg:"",data:{}};
 
 	/* grab the user's id */
 	var uid = request.session.uid;
 
 	if(typeof uid === 'undefined') {
-        response.end('noprofiledataloggedout');
+		result.msg = 'noprofiledataloggedout';
+        response.end(JSON.stringify(result));
     } else {
 
 		var body = '';
@@ -43,7 +48,8 @@ exports.getprofiledata = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,analytics.__line,__function,__filename);
+				var errmsg = {message:"Overload Attack!"};
+				analytics.journal(true,199,errmsg,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -52,25 +58,25 @@ exports.getprofiledata = function(request,response) {
 
             var POST = qs.parse(body);
 
-			var qry = "SELECT " + POST.fields + " FROM Users WHERE uid=" + uid;
+			var promiseUser = queryUserDB.getDocByUid(userdb,uid);
+			promiseUser.then(function(data) {
+				var fields = POST.fields.replace(/'/g,"").split(",");
 
-			pool.getConnection(function(err,connection) {
-                if(err) {
-                    analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
-                }
+				var profiledata = {};
 
-				connection.query(qry,function(err,rows,fields) {
-					if(err) {
-						response.end('err');
-						analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
-					} else {
-						var profiledata = JSON.stringify(rows[0]);
-
-						response.end(profiledata);
-						analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
-					}
+				fields.map(function(value) {
+					profiledata[value] = data[0][value];
 				});
-                connection.release();
+
+				result.data.profiledata = profiledata;
+
+				result.msg = 'success';
+				response.end(JSON.stringify(result));
+				analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+			},function(err) {
+				result.msg = 'err';
+				response.end(JSON.stringify(err));
+				analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			});
 		});
 	}

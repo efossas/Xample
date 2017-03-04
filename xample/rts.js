@@ -13,8 +13,9 @@
 
 /* load functions, for loading pages */
 var l_editpage = require('./loads/editpage.js');
-var l_editlg = require('./loads/editlg.js');
+var l_editguide = require('./loads/editguide.js');
 var l_explore = require('./loads/explore.js');
+var l_guide = require('./loads/guide.js');
 var l_home = require('./loads/home.js');
 var l_notfound = require('./loads/notfound.js');
 var l_page = require('./loads/page.js');
@@ -22,11 +23,9 @@ var l_profile = require('./loads/profile.js');
 var l_start = require('./loads/start.js');
 
 /* route functions, for ajax requeset asking for data */
-var r_createlg = require('./routes/createlg.js');
 var r_createpage = require('./routes/createpage.js');
-var r_deletelg = require('./routes/deletelg.js');
 var r_deletepage = require('./routes/deletepage.js');
-var r_getlgs = require('./routes/getlgs.js');
+var r_getbmdata = require('./routes/getbmdata.js');
 var r_getpages = require('./routes/getpages.js');
 var r_getprofiledata = require('./routes/getprofiledata.js');
 var r_getsubjects = require('./routes/getsubjects.js');
@@ -37,8 +36,11 @@ var r_revertblocks = require('./routes/revertblocks.js');
 var r_saveblocks = require('./routes/saveblocks.js');
 var r_savepagesettings = require('./routes/savepagesettings.js');
 var r_saveprofile = require('./routes/saveprofile.js');
+var r_setbookmark = require('./routes/setbookmark.js');
+var r_setview = require('./routes/setview.js');
 var r_signup = require('./routes/signup.js');
 var r_uploadmedia = require('./routes/uploadmedia.js');
+var r_uploadthumb = require('./routes/uploadthumb.js');
 
 // <<<fold>>>
 
@@ -50,17 +52,16 @@ var r_uploadmedia = require('./routes/uploadmedia.js');
 // <<<code>>>
 
 module.exports = {
-    createlg: r_createlg.createlg,
     createpage: r_createpage.createpage,
-    deletelg: r_deletelg.deletelg,
     deletepage: r_deletepage.deletepage,
     editpage: l_editpage.editpage,
-    editlg: l_editlg.editlg,
+    editguide: l_editguide.editguide,
     explore: l_explore.explore,
-    getlgs: r_getlgs.getlgs,
+    getbmdata: r_getbmdata.getbmdata,
     getpages: r_getpages.getpages,
     getprofiledata: r_getprofiledata.getprofiledata,
     getsubjects: r_getsubjects.getsubjects,
+    guide: l_guide.guide,
     home: l_home.home,
     journalerror: r_journalerror.journalerror,
     login: r_login.login,
@@ -72,9 +73,12 @@ module.exports = {
     saveblocks: r_saveblocks.saveblocks,
     savepagesettings: r_savepagesettings.savepagesettings,
     saveprofile: r_saveprofile.saveprofile,
+    setbookmark: r_setbookmark.setbookmark,
+    setview: r_setview.setview,
     signup: r_signup.signup,
     start: l_start.start,
-    uploadmedia: r_uploadmedia.uploadmedia
+    uploadmedia: r_uploadmedia.uploadmedia,
+    uploadthumb: r_uploadthumb.uploadthumb
 };
 
 // <<<fold>>>

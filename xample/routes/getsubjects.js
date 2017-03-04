@@ -25,16 +25,22 @@ exports.getsubjects = function(request,response) {
 
     var fs = require("fs");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* get the user's id */
 	var uid = request.session.uid;
 
     /* get the topics from the local json file */
     fs.readFile('data/topics.json',function(err,data) {
         if (err) {
-            response.end("err");
-            analytics.journal(1,120,err,uid,analytics.__line,__function,__filename);
+			result.msg = 'err';
+            response.end(JSON.stringify(result));
+            analytics.journal(1,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
         } else {
-            response.end(data.toString());
+			result.msg = 'success';
+			result.data = JSON.parse(data.toString());
+            response.end(JSON.stringify(result));
         }
     });
 };

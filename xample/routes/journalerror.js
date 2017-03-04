@@ -34,7 +34,7 @@ exports.journalerror = function(request,response) {
         /* prevent overload attacks */
         if (body.length > 1e6) {
 			request.connection.destroy();
-			analytics.journal(true,199,"Overload Attack!",0,analytics.__line,__function,__filename);
+			analytics.journal(true,199,"Overload Attack!",0,global.__stack[1].getLineNumber(),__function,__filename);
 		}
     });
 
@@ -53,7 +53,7 @@ exports.journalerror = function(request,response) {
 		/* this connection is purely for using the escape() function, could be eliminated */
 		pool.getConnection(function(err,connection) {
 			if(err) {
-				analytics.journal(true,220,err,uid,analytics.__line,__function,__filename);
+				analytics.journal(true,220,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
 			var POST = qs.parse(body);
 
@@ -61,6 +61,8 @@ exports.journalerror = function(request,response) {
 			var message = connection.escape(POST.message);
 			var linenum = connection.escape(POST.linenum);
 			var script = connection.escape(POST.urlsource);
+
+			response.end("");
 
 			/* journal the frontend error, don't have function where error occurred though */
 			analytics.journal(true,150,message,uid,linenum,'',script);

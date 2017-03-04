@@ -29,7 +29,11 @@ exports.logout = function(request,response) {
 	/* easy enough, regardless of whether the user was logged in or not, destroying the session will ensure log out */
 	request.session.destroy();
 
-	response.end('loggedout');
-	analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+	/* create response object */
+	var result = {msg:"",data:{}};
+
+	result.msg = 'loggedout';
+	response.end(JSON.stringify(result));
+	analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 	uid = "";
 };

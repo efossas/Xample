@@ -36,14 +36,24 @@ var globalScope = {};
 
 /* list any functions that will be joined to this file here from omni */
 /*
+	global autosaveTimer:true
 	global createURL:true
 	global emptyDiv:true
 	global btnLink:true
 	global btnSubmit:true
-	global getUserFields:true
 	global barLog:true
+	global barInfo:true
 	global barMenu:true
+	global barStatus:true
+	global barSubMenu:true
+	global formSignUp:true
+	global getCookies:true
 	global getSubjects:true
+	global getUserFields:true
+	global journalError:true
+	global setBookmark:true
+	global setView:true
+	global watermark:true
 */
 
 /* list any objects from other js files here */
@@ -66,129 +76,20 @@ var globalScope = {};
 // <<<code>>>
 
 /*
-	Function: barLog
-
-	Creates the log in & sign up form.
-
-	Parameters:
-
-		* - none
-
-	Returns:
-
-		success - html node, log in sign up div
-*/
-function barLog() {
-
-	/* create parent <div> */
-	var logBar = document.createElement('div');
-	logBar.setAttribute('class','log-bar');
-	logBar.setAttribute('id','form-login');
-
-	/* create top row */
-	var rowTop = document.createElement('div');
-	rowTop.setAttribute('class','row');
-	rowTop.setAttribute('id','top-bar');
-
-	function expandLog() {
-		/* create empty col */
-		var colEmptyLog = document.createElement('div');
-		colEmptyLog.setAttribute('class','col col-50');
-
-		/* create username column */
-		var colUsername = document.createElement('div');
-		colUsername.setAttribute('class','col col-20');
-
-		/* create username text <input> */
-		var username = document.createElement('input');
-		username.setAttribute('class','log-input');
-		username.setAttribute('type','text');
-		username.setAttribute('name','username-login');
-		username.setAttribute('maxlength','50');
-		username.setAttribute('placeholder','User Name');
-		username.setAttribute('style','border-left-width:2px;');
-
-		colUsername.appendChild(username);
-
-		/* create password column */
-		var colPassword = document.createElement('div');
-		colPassword.setAttribute('class','col col-20');
-
-		/* create password <input> */
-		var password = document.createElement('input');
-		password.setAttribute('class','log-input');
-		password.setAttribute('type','password');
-		password.setAttribute('name','password-login');
-		password.setAttribute('maxlength','32');
-		password.setAttribute('placeholder','Password');
-
-		colPassword.appendChild(password);
-
-		/* create submit button column */
-		var colSubmit = document.createElement('div');
-		colSubmit.setAttribute('class','col col-10');
-
-		/* create form submit <button> */
-		var submit = btnSubmit('Log In','login()','green');
-		submit.setAttribute('style','border-color:black;border-left-width:1px;');
-
-		colSubmit.appendChild(submit);
-
-		emptyDiv(rowTop);
-		rowTop.appendChild(colEmptyLog);
-		rowTop.appendChild(colUsername);
-		rowTop.appendChild(colPassword);
-		rowTop.appendChild(colSubmit);
-	}
-
-	function expandSign() {
-		var sign = formSignUp();
-
-		emptyDiv(rowTop);
-		rowTop.appendChild(sign);
-	}
-
-	/* create expand buttons */
-	var logBtn = btnSubmit('Log In',expandLog,'none');
-	var signBtn = btnSubmit('Sign Up',expandSign,'none');
-
-	/* create columns */
-	var colEmpty = document.createElement('div');
-	colEmpty.setAttribute('class','col col-70');
-
-	var colLogBtn = document.createElement('div');
-	colLogBtn.setAttribute('class','col col-15');
-	colLogBtn.appendChild(logBtn);
-
-	var colSignBtn = document.createElement('div');
-	colSignBtn.setAttribute('class','col col-15');
-	colSignBtn.appendChild(signBtn);
-
-	/* add columns to top row */
-	rowTop.appendChild(colEmpty);
-	rowTop.appendChild(colLogBtn);
-	rowTop.appendChild(colSignBtn);
-
-	/* append the elements to the parent <div> */
-	logBar.appendChild(rowTop);
-
-	return logBar;
-}
-
-/*
 	Function: barSearch
 
 	Creates the search bar.
 
 	Parameters:
 
-		* - none
+		idname - the id that will be attached to the search div.
+		keywords - existing words to be placed in as value.
 
 	Returns:
 
 		success - html node, search div
 */
-function barSearch() {
+function barSearch(idname,keywords) {
 	/* create the search input */
 	var searchDiv = document.createElement('div');
 	searchDiv.setAttribute('class','search-bar');
@@ -200,9 +101,18 @@ function barSearch() {
 	searchCol.setAttribute('class','col col-100');
 
 	var searchBar = document.createElement('input');
+	searchBar.setAttribute('id',idname);
 	searchBar.setAttribute('class','text-input');
 	searchBar.setAttribute('type','search');
 	searchBar.setAttribute('placeholder','Search');
+
+	/* add existing words to search input */
+	var words = keywords;
+	if(!keywords) {
+		words = '';
+	}
+
+	searchBar.setAttribute('value',words);
 
 	searchCol.appendChild(searchBar);
 	searchRow.appendChild(searchCol);
@@ -285,10 +195,10 @@ function boxCreate() {
 	bookmark.setAttribute('class','box-bookmark');
 	colBookmark.appendChild(bookmark);
 
-	var star = document.createElement('input');
-	star.setAttribute('type','checkbox');
-	star.setAttribute('class','star');
-	bookmark.appendChild(star);
+	var bmark = document.createElement('input');
+	bmark.setAttribute('type','checkbox');
+	bmark.setAttribute('class','bmark');
+	bookmark.appendChild(bmark);
 
 	/* create expand */
 	var colExpand = document.createElement('div');
@@ -399,19 +309,20 @@ function boxCreate() {
 }
 
 /*
-	Function: dashBookmarks
+	Function: formDisplayPlaylist
 
-	Create dash for viewing users bookmarks.
+	Create dash for viewing list of content.
 
 	Parameters:
 
-		none
+		listheader - string, the name of the type of content page to create.
+		bmdata - array, of objects containing content info.
 
 	Returns:
 
 		success - html node, bookmarks dash
 */
-function dashBookmarks() {
+function formDisplayPlaylist(listheader,bmdata) {
 	/* create header */
 	var rowHeader = document.createElement('div');
 	rowHeader.setAttribute('class','row');
@@ -420,17 +331,102 @@ function dashBookmarks() {
 	colHeader.setAttribute('class','col col-100');
 
 	var dashHeader = document.createElement('h2');
-	dashHeader.innerHTML = "Bookmarks";
+	dashHeader.innerHTML = listheader;
 
 	colHeader.appendChild(dashHeader);
 	rowHeader.appendChild(colHeader);
 
 	/* append the page links to a form div */
-	var dashBookmarks = document.createElement('div');
-	dashBookmarks.setAttribute('class','bookmarks-box');
-	dashBookmarks.appendChild(rowHeader);
+	var dash = document.createElement('div');
+	dash.setAttribute('class','dash-box');
+	dash.appendChild(rowHeader);
 
-	return dashBookmarks;
+	/* create data box */
+	var dataselect = document.createElement('div');
+	dataselect.setAttribute('class','data-box');
+
+	function listSelect(evt) {
+		var aid = this.getAttribute('data-aid');
+		var xid = this.getAttribute('data-xid');
+
+		window.location = 'page?a=' + aid + '&p=' + xid;
+	}
+
+	function listHover(evt) {
+		this.style = 'background-color:rgba(58, 50, 200, 0.2)';
+	}
+
+	function listOff(evt) {
+		this.style = 'background-color:transparent';
+	}
+
+	var listCount = bmdata.length;
+	for(var i = 0; i < listCount; i++) {
+		var row = document.createElement('div');
+
+		switch(i) {
+			case 0:
+				row.setAttribute('class','row toprow'); break;
+			case listCount - 1:
+				row.setAttribute('class','row bottomrow'); break;
+			default:
+				row.setAttribute('class','row');
+		}
+
+		row.setAttribute('data-aid',bmdata[i].aid);
+		row.setAttribute('data-xid',bmdata[i].xid);
+
+		/* left buffer */
+		var colLeft = document.createElement('div');
+		colLeft.setAttribute('class','col col-2');
+
+		/* page position in list */
+		var colPgNum = document.createElement('div');
+		colPgNum.setAttribute('class','col col-3 padtop');
+		colPgNum.innerHTML = (i + 1);
+
+		/* page thumbnail */
+		var colImg = document.createElement('div');
+		colImg.setAttribute('class','col col-6');
+
+		var thumb = document.createElement('img');
+		thumb.src = bmdata[i].imageurl;
+
+		colImg.appendChild(thumb);
+
+		/* page name */
+		var colName = document.createElement('div');
+		colName.setAttribute('class','col col-67 padtop');
+		colName.innerHTML = bmdata[i].xname;
+
+		/* page author */
+		var colAuthor = document.createElement('div');
+		colAuthor.setAttribute('class','col col-20 padtop');
+		colAuthor.setAttribute('style','text-align:right');
+		colAuthor.innerHTML = bmdata[i].author;
+
+		/* right buffer */
+		var colRight = document.createElement('div');
+		colRight.setAttribute('class','col col-2');
+
+		/* append everything */
+		row.appendChild(colLeft);
+		row.appendChild(colPgNum);
+		row.appendChild(colImg);
+		row.appendChild(colName);
+		row.appendChild(colAuthor);
+		row.appendChild(colRight);
+
+		row.addEventListener('click',listSelect,true);
+		row.addEventListener('mouseover',listHover,true);
+		row.addEventListener('mouseout',listOff,true);
+
+		dataselect.appendChild(row);
+	}
+
+	dash.appendChild(dataselect);
+
+	return dash;
 }
 
 /*
@@ -475,8 +471,8 @@ function dashExplore(exploreHeader,linkRoute) {
 	/* get subjects for select topic list */
 	var subjectsPromise = getSubjects();
 
-	subjectsPromise.then(function(success) {
-		var subjectsData = JSON.parse(success);
+	subjectsPromise.then(function(data) {
+		var subjectsData = data;
 		globalScope.subjects = subjectsData;
 
 		function showTop() {
@@ -674,7 +670,10 @@ function dashExplore(exploreHeader,linkRoute) {
 			explore.appendChild(categoryRow);
 		}
 	},function(error) {
-		/// handle error
+		alertify.alert("There Was An Error Getting The Subjects");
+		if(error === "unknown") {
+			journalError("getSubjects() unknown result.msg","nav.js",new Error().lineNumber,"","");
+		}
 	});
 
 	return exploreDash;
@@ -687,77 +686,224 @@ function dashExplore(exploreHeader,linkRoute) {
 
 	Parameters:
 
-		none
+		sort - string, the type of sort already applied
+		tags - string, the tags already applied
 
 	Returns:
 
 		success - html node, filter form
 */
-function barFilter() {
+function barFilter(sort,tags,keywords) {
 	var row = document.createElement('div');
 	row.setAttribute('class','row');
 
-	var colRating = document.createElement('div');
-	colRating.setAttribute('class','col col-15');
+	var formDiv = document.createElement('form');
+	formDiv.setAttribute('id','filterForm');
+	formDiv.setAttribute('class','col col-70');
+	formDiv.setAttribute('action','');
 
-	var minRating = document.createElement('input');
-	minRating.setAttribute('id','min-rating');
-	minRating.setAttribute('placeholder','min rating');
+	/* start top row */
+	var topRow = document.createElement('div');
+	topRow.setAttribute('class','row');
 
-	var maxRating = document.createElement('input');
-	maxRating.setAttribute('id','max-rating');
-	maxRating.setAttribute('placeholder','max rating');
+	/* create category tag section */
+	var colSort = document.createElement('div');
+	colSort.setAttribute('class','col col-28');
 
-	colRating.appendChild(minRating);
-	colRating.appendChild(maxRating);
+	var SortSelect = document.createElement('select');
+	SortSelect.setAttribute('id','sort');
 
-	var colRanks = document.createElement('div');
-	colRanks.setAttribute('class','col col-20');
+	var options = ["rating","ranks","views","edited","created"];
 
-	var minRanks = document.createElement('input');
-	minRanks.setAttribute('id','min-ranks');
-	minRanks.setAttribute('placeholder','min ranks');
+	var sortIndex = 0;
+	options.forEach(function(item,index) {
+		var currentOption = document.createElement('option');
+		currentOption.setAttribute('value',item);
+		currentOption.innerHTML = item;
+		SortSelect.appendChild(currentOption);
 
-	var maxRanks = document.createElement('input');
-	maxRanks.setAttribute('id','max-ranks');
-	maxRanks.setAttribute('placeholder','max ranks');
+		if(item === sort) {
+			sortIndex = index;
+		}
+	});
 
-	colRanks.appendChild(minRanks);
-	colRanks.appendChild(maxRanks);
+	colSort.appendChild(SortSelect);
 
-	var colViews = document.createElement('div');
-	colViews.setAttribute('class','col col-20');
+	SortSelect.selectedIndex = sortIndex;
 
-	var minViews = document.createElement('input');
-	minViews.setAttribute('id','min-views');
-	minViews.setAttribute('placeholder','min views');
+	/* get convert tag binary to decimal number */
+	var tagTypes = parseInt(tags,2);
 
-	var maxViews = document.createElement('input');
-	maxViews.setAttribute('id','max-views');
-	maxViews.setAttribute('placeholder','max views');
+	/* set tag keys */
+	globalScope.tagKeys = new Map([["none",0],["video",1],["audio",2],["image",4],["text",8],["math",16],["topic",32],["",64],["",128]]);
 
-	colViews.appendChild(minViews);
-	colViews.appendChild(maxViews);
+	/* create content type buttons */
+	var colTypeVideo = document.createElement('div');
+	colTypeVideo.setAttribute('class','col col-12');
 
-	var colDate = document.createElement('div');
-	colDate.setAttribute('class','col col-15');
+	var checkVideo = document.createElement('button');
+	checkVideo.setAttribute('class','checkbtn');
+	checkVideo.setAttribute('type','button');
+	checkVideo.setAttribute('name','checkType');
+	checkVideo.setAttribute('value','video');
+	checkVideo.setAttribute('onclick','toggleCheck(this);');
+	checkVideo.innerHTML = "video";
 
-	var minDate = document.createElement('input');
-	minDate.setAttribute('id','min-date');
-	minDate.setAttribute('placeholder','min date');
+	if(tagTypes & 1) {
+		checkVideo.setAttribute('data-checked','true');
+		checkVideo.style["color"] = "white";
+		checkVideo.style["background-color"] = "blue";
+	}
 
-	var maxDate = document.createElement('input');
-	maxDate.setAttribute('id','max-date');
-	maxDate.setAttribute('placeholder','max date');
+	colTypeVideo.appendChild(checkVideo);
 
-	colDate.appendChild(minDate);
-	colDate.appendChild(maxDate);
+	var colTypeAudio = document.createElement('div');
+	colTypeAudio.setAttribute('class','col col-12');
 
+	var checkAudio = document.createElement('button');
+	checkAudio.setAttribute('class','checkbtn');
+	checkAudio.setAttribute('type','button');
+	checkAudio.setAttribute('name','checkType');
+	checkAudio.setAttribute('value','audio');
+	checkAudio.setAttribute('onclick','toggleCheck(this);');
+	checkAudio.innerHTML = "audio";
+
+	if(tagTypes & 2) {
+		checkAudio.setAttribute('data-checked','true');
+		checkAudio.style["color"] = "white";
+		checkAudio.style["background-color"] = "blue";
+	}
+
+	colTypeAudio.appendChild(checkAudio);
+
+	var colTypeImage = document.createElement('div');
+	colTypeImage.setAttribute('class','col col-12');
+
+	var checkImage = document.createElement('button');
+	checkImage.setAttribute('class','checkbtn');
+	checkImage.setAttribute('type','button');
+	checkImage.setAttribute('name','checkType');
+	checkImage.setAttribute('value','image');
+	checkImage.setAttribute('onclick','toggleCheck(this);');
+	checkImage.innerHTML = "image";
+
+	if(tagTypes & 4) {
+		checkImage.setAttribute('data-checked','true');
+		checkImage.style["color"] = "white";
+		checkImage.style["background-color"] = "blue";
+	}
+
+	colTypeImage.appendChild(checkImage);
+
+	var colTypeText = document.createElement('div');
+	colTypeText.setAttribute('class','col col-12');
+
+	var checkText = document.createElement('button');
+	checkText.setAttribute('class','checkbtn');
+	checkText.setAttribute('type','button');
+	checkText.setAttribute('name','checkType');
+	checkText.setAttribute('value','text');
+	checkText.setAttribute('onclick','toggleCheck(this);');
+	checkText.innerHTML = "text";
+
+	if(tagTypes & 8) {
+		checkText.setAttribute('data-checked','true');
+		checkText.style["color"] = "white";
+		checkText.style["background-color"] = "blue";
+	}
+
+	colTypeText.appendChild(checkText);
+
+	var colTypeMath = document.createElement('div');
+	colTypeMath.setAttribute('class','col col-12');
+
+	var checkMath = document.createElement('button');
+	checkMath.setAttribute('class','checkbtn');
+	checkMath.setAttribute('type','button');
+	checkMath.setAttribute('name','checkType');
+	checkMath.setAttribute('value','math');
+	checkMath.setAttribute('onclick','toggleCheck(this);');
+	checkMath.innerHTML = "math";
+
+	if(tagTypes & 16) {
+		checkMath.setAttribute('data-checked','true');
+		checkMath.style["color"] = "white";
+		checkMath.style["background-color"] = "blue";
+	}
+
+	colTypeMath.appendChild(checkMath);
+
+	var colTypeCustom = document.createElement('div');
+	colTypeCustom.setAttribute('class','col col-12');
+
+	var checkCustom = document.createElement('button');
+	checkCustom.setAttribute('class','checkbtn');
+	checkCustom.setAttribute('type','button');
+	checkCustom.setAttribute('name','checkType');
+	checkCustom.setAttribute('value','topic');
+	checkCustom.setAttribute('onclick','toggleCheck(this);');
+	checkCustom.innerHTML = "topic";
+
+	if(tagTypes & 32) {
+		checkCustom.setAttribute('data-checked','true');
+		checkCustom.style["color"] = "white";
+		checkCustom.style["background-color"] = "blue";
+	}
+
+	colTypeCustom.appendChild(checkCustom);
+
+	/* start bottom row */
+	var bottomRow = document.createElement('div');
+	bottomRow.setAttribute('class','row');
+
+	/* only search bar goes in bottom row */
+	var colSearch = barSearch('keywords',keywords);
+
+	/* buttons for filter bar */
 	var colFilterBtn = document.createElement('div');
 	colFilterBtn.setAttribute('class','col col-15');
 
-	var btnFilterApply = btnSubmit('Apply Filter','','none');
-	btnFilterApply.className += " savebar";
+	function exploreWithFilter() {
+		var form = document.getElementById('filterForm');
+
+		/* get sort value */
+		var sortValue = form.elements['sort'].options[form.elements['sort'].selectedIndex].value;
+
+		/* get array of block types selected */
+		var typeValue = [];
+		var checkBtnLength = form.elements['checkType'].length;
+		for(var k = 0; k < checkBtnLength; k++) {
+			if(form.elements['checkType'][k].getAttribute('data-checked') === "true") {
+				typeValue.push(form.elements['checkType'][k].value);
+			}
+		}
+
+		/* create binary value of block types selected */
+		var typeResult = 0;
+		typeValue.forEach(function(item,index) {
+			typeResult += globalScope.tagKeys.get(item);
+		});
+
+		/* create final binary tag of block types selected & tag category */
+		var tagResult = ((typeResult) >>> 0).toString(2);
+
+		/* get keywords */
+		var keyWords = document.getElementById('keywords').value;
+		keyWords.replace(/ /g,"_").replace(/[^a-zA-Z ]/g,"");
+
+		/* set these into hidden divs for retrieval */
+		var content = document.getElementById('queryContent').value;
+		var subject = document.getElementById('querySubject').value;
+		var category = document.getElementById('queryCategory').value;
+		var topic = document.getElementById('queryTopic').value;
+
+		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&tags=",tagResult,"&keywords=",keyWords];
+
+		window.location = createURL(queryStringArray.join(""));
+	}
+
+	var btnFilterApply = btnSubmit('Apply Filter',exploreWithFilter,'none');
+	btnFilterApply.className += " filterbarbtn";
 	colFilterBtn.appendChild(btnFilterApply);
 
 	var colExpand = document.createElement('div');
@@ -780,13 +926,24 @@ function barFilter() {
 	}
 
 	var btnExpandAll = btnSubmit('Expand All',expandAll,'none');
-	btnExpandAll.className += " savebar";
+	btnExpandAll.className += " filterbarbtn";
 	colExpand.appendChild(btnExpandAll);
 
-	row.appendChild(colRating);
-	row.appendChild(colRanks);
-	row.appendChild(colViews);
-	row.appendChild(colDate);
+	/* set some row styles */
+	topRow.style["margin-left"] = "8px;";
+	bottomRow.style["margin-left"] = "8px;";
+
+	topRow.appendChild(colSort);
+	topRow.appendChild(colTypeVideo);
+	topRow.appendChild(colTypeAudio);
+	topRow.appendChild(colTypeImage);
+	topRow.appendChild(colTypeText);
+	topRow.appendChild(colTypeMath);
+	topRow.appendChild(colTypeCustom);
+	bottomRow.appendChild(colSearch);
+	formDiv.appendChild(topRow);
+	formDiv.appendChild(bottomRow);
+	row.appendChild(formDiv);
 	row.appendChild(colFilterBtn);
 	row.appendChild(colExpand);
 
@@ -804,28 +961,22 @@ function barFilter() {
 
 	Parameters:
 
-		type - string, the name of the type of content page to create.
+		pagetype - string, the name of the type of content page to create.
 		data - string, comma-separated like so: id,name,id,name etc.
 
 	Returns:
 
 		success - html node, user content creation form
 */
-function formGenerateUserContent(type,data) {
+function formGenerateUserContent(pagetype,data) {
 	var fullCapital;
 	var capital;
-	var lower;
-	var deleteFunc;
-	if(type === 'blockpage') {
+	if(pagetype === 'page') {
 		fullCapital = 'Pages';
 		capital = 'Page';
-		lower = 'page';
-		deleteFunc = deletePage;
-	} else if(type === 'lg') {
+	} else if(pagetype === 'guide') {
 		fullCapital = 'Learning Guides';
 		capital = 'LG';
-		lower = 'lg';
-		deleteFunc = deleteLG;
 	}
 
 	/* create header */
@@ -858,13 +1009,13 @@ function formGenerateUserContent(type,data) {
 	var title = document.createElement('input');
 	title.setAttribute('type','text');
 	title.setAttribute('class','log-input');
-	title.setAttribute('name',lower + 'name-create');
+	title.setAttribute('name',pagetype + 'name-create');
 	title.setAttribute('maxlength','50');
 	title.setAttribute('placeholder','New ' + capital + ' Name');
 	title.setAttribute('style','border-left-width:0px;');
 
 	/* submit button that calls createpage() */
-	var submit = btnSubmit("Create " + capital,"create" + lower + "()","green");
+	var submit = btnSubmit("Create " + capital,"createpage('" + pagetype + "')","green");
 
 	/* append elements to row */
 	colLeft_Content.appendChild(title);
@@ -879,7 +1030,7 @@ function formGenerateUserContent(type,data) {
 
 	/* create a div to hold the page links */
 	var datadiv = document.createElement('div');
-	datadiv.setAttribute('class',lower + 'list');
+	datadiv.setAttribute('class',pagetype + 'list');
 
 	/* append elements to row 3 */
 	row_dataBox.appendChild(datadiv);
@@ -887,7 +1038,7 @@ function formGenerateUserContent(type,data) {
 	/* create select multiple box for page names */
 	var selectBox = document.createElement('select');
 	selectBox.setAttribute('multiple','true');
-	selectBox.setAttribute('id',lower + '-select');
+	selectBox.setAttribute('id',pagetype + '-select');
 
 	/* append elements to datadiv */
 	datadiv.appendChild(selectBox);
@@ -917,9 +1068,9 @@ function formGenerateUserContent(type,data) {
 	}
 
 	idNameArray.sort(function(a,b) {
-		if(a['name'] < b['name']) {
+		if(a['name'].toUpperCase() < b['name'].toUpperCase()) {
 			return -1;
-		} else if(a['name'] > b['name']) {
+		} else if(a['name'].toUpperCase() > b['name'].toUpperCase()) {
 			return 1;
 		} else {
 			return 0;
@@ -954,13 +1105,13 @@ function formGenerateUserContent(type,data) {
 
 	/* this function is called when a block page link is clicked on */
 	function goToPage() {
-		var selectBox = document.getElementById(lower + "-select");
+		var selectBox = document.getElementById(pagetype + "-select");
 		var dataop = selectBox.value;
 
 		if(dataop === "") {
 			alertify.alert("Please Select A " + capital);
 		} else {
-			var link = createURL("/edit" + lower + "?" + lower + "=" + dataop);
+			var link = createURL("/edit" + pagetype + "?" + pagetype + "=" + dataop);
 			window.open(link,"_self");
 		}
 	}
@@ -970,7 +1121,7 @@ function formGenerateUserContent(type,data) {
 
 	/* this function is called to double check deleting a block page */
 	function deletePageConfirm() {
-		var selectBox = document.getElementById(lower + "-select");
+		var selectBox = document.getElementById(pagetype + "-select");
 		var datapage = selectBox.value;
 
 		if(datapage === "") {
@@ -978,7 +1129,7 @@ function formGenerateUserContent(type,data) {
 		} else {
 			alertify.confirm("Are You Sure You Want To Delete This? This Is Permanent.",function(accepted) {
 				if (accepted) {
-					deleteFunc(datapage);
+					deletePage(pagetype,datapage);
 				} else {
 					// user clicked "cancel"
 				}
@@ -996,128 +1147,13 @@ function formGenerateUserContent(type,data) {
 	/* append the page links to a form div */
 	var generateUserContentDiv = document.createElement('div');
 	generateUserContentDiv.setAttribute('class','page-gen');
-	generateUserContentDiv.setAttribute('id',type + '-gen');
+	generateUserContentDiv.setAttribute('id',pagetype + '-gen');
 	generateUserContentDiv.appendChild(rowHeader);
 	generateUserContentDiv.appendChild(row_Content);
 	generateUserContentDiv.appendChild(row_dataBox);
 	generateUserContentDiv.appendChild(row_dataSubmitButtons);
 
 	return generateUserContentDiv;
-}
-
-/*
-	Function: formSignUp
-
-	Create a sign up form. This returns an html node containing the form. On submit, the form calls signup()
-
-	Parameters:
-
-		none
-
-	Form:
-
-		username-signup - the user name
-		email-signup - the user's email
-		phone-signup - the user's phone
-		password-signup - the password
-		password-signup-check - the password again
-
-	Returns:
-
-		success - html node, sign up form
-*/
-function formSignUp() {
-
-	/* create parent <div> */
-	var signup = document.createElement('div');
-	signup.setAttribute('class','form');
-	signup.setAttribute('id','form-signup');
-
-	/* username column */
-	var colUsername = document.createElement('div');
-	colUsername.setAttribute('class','col col-17');
-
-	/* create username text <input> */
-	var username = document.createElement('input');
-	username.setAttribute('class','log-input');
-	username.setAttribute('type','text');
-	username.setAttribute('name','username-signup');
-	username.setAttribute('maxlength','50');
-	username.setAttribute('placeholder','User Name');
-	username.setAttribute('style','border-left-width:0px;');
-	colUsername.appendChild(username);
-
-	/* email column */
-	var colEmail = document.createElement('div');
-	colEmail.setAttribute('class','col col-17');
-
-	/* create email text <input> */
-	var email = document.createElement('input');
-	email.setAttribute('class','log-input');
-	email.setAttribute('type','text');
-	email.setAttribute('name','email-signup');
-	email.setAttribute('maxlength','50');
-	email.setAttribute('placeholder','Email - optional');
-	colEmail.appendChild(email);
-
-	/* phone column */
-	var colPhone = document.createElement('div');
-	colPhone.setAttribute('class','col col-17');
-
-	/* create phone text <input> */
-	var phone = document.createElement('input');
-	phone.setAttribute('class','log-input');
-	phone.setAttribute('type','text');
-	phone.setAttribute('name','phone-signup');
-	phone.setAttribute('maxlength','17');
-	phone.setAttribute('placeholder','Phone - optional');
-	colPhone.appendChild(phone);
-
-	/* password column */
-	var colPassword = document.createElement('div');
-	colPassword.setAttribute('class','col col-17');
-
-	/* create password <input> */
-	var password = document.createElement('input');
-	password.setAttribute('class','log-input');
-	password.setAttribute('type','password');
-	password.setAttribute('name','password-signup');
-	password.setAttribute('maxlength','32');
-	password.setAttribute('placeholder','Password');
-	colPassword.appendChild(password);
-
-	/* password check column */
-	var colPasswordc = document.createElement('div');
-	colPasswordc.setAttribute('class','col col-17');
-
-	/* create another password <input> */
-	var passwordc = document.createElement('input');
-	passwordc.setAttribute('class','log-input');
-	passwordc.setAttribute('type','password');
-	passwordc.setAttribute('name','password-signup-check');
-	passwordc.setAttribute('maxlength','32');
-	passwordc.setAttribute('placeholder','Repeat Password');
-	colPasswordc.appendChild(passwordc);
-
-	/* submit button column */
-	var colSubmit = document.createElement('div');
-	colSubmit.setAttribute('class','col col-15');
-
-	/* create form submit <button> */
-	var submit = btnSubmit('Sign Up','signup()','green');
-	submit.setAttribute('value','submit-signup');
-	submit.setAttribute('style','border-color:black;border-left-width:1px;');
-	colSubmit.appendChild(submit);
-
-	/* append the elements to the parent <div> */
-	signup.appendChild(colUsername);
-	signup.appendChild(colEmail);
-	signup.appendChild(colPhone);
-	signup.appendChild(colPassword);
-	signup.appendChild(colPasswordc);
-	signup.appendChild(colSubmit);
-
-	return signup;
 }
 
 /*
@@ -1271,14 +1307,19 @@ function rowProfileSingle(field,description,data) {
 
 	Parameters:
 
-		none
+		logstatus - boolean, whether the user is logged in or out
+		csct - array, content subject category topic sort tags keywords
+		data - string, @@ delineated search data
 
 	Returns:
 
 		nothing - *
 */
-function pageExplore(logstatus,data) {
+function pageExplore(logstatus,csct,data) {
 	var main = document.getElementById('content');
+
+	/* get user cookies for bookmarks */
+	var userObj = getCookies();
 
 	/* create and append menu based on log status */
 	var menu;
@@ -1289,8 +1330,41 @@ function pageExplore(logstatus,data) {
 	}
 	main.appendChild(menu);
 
+	/* determine bp or lg */
+	var prefixResource;
+	var pagetype;
+	if(csct[0] === "bp") {
+		prefixResource = "/page";
+		pagetype = "page";
+	} else if(csct[0] === "lg") {
+		prefixResource = "/guide";
+		pagetype = "guide";
+	} else {
+		prefixResource = "/error";
+	}
+
+	/* append content subject category topic to hidden divs */
+	var contentHidden = document.createElement('input');
+	contentHidden.setAttribute('type','hidden');
+	contentHidden.setAttribute('value',csct[0]);
+	contentHidden.setAttribute('id','queryContent');
+	var subjectHidden = document.createElement('input');
+	subjectHidden.setAttribute('type','hidden');
+	subjectHidden.setAttribute('value',csct[1]);
+	subjectHidden.setAttribute('id','querySubject');
+	var categoryHidden = document.createElement('input');
+	categoryHidden.setAttribute('type','hidden');
+	categoryHidden.setAttribute('value',csct[2]);
+	categoryHidden.setAttribute('id','queryCategory');
+	var topicHidden = document.createElement('input');
+	topicHidden.setAttribute('type','hidden');
+	topicHidden.setAttribute('value',csct[3]);
+	topicHidden.setAttribute('id','queryTopic');
+
+	main.appendChild(contentHidden).appendChild(subjectHidden).appendChild(categoryHidden).appendChild(topicHidden);
+
 	/* create filter menu */
-	var filter = barFilter();
+	var filter = barFilter(csct[4],csct[5],csct[6]);
 	main.appendChild(filter);
 
 	/* create box template */
@@ -1298,22 +1372,71 @@ function pageExplore(logstatus,data) {
 
 	/* loop through links & insert data into boxes */
 	var index = 0;
-	while(index < 10) {
+	var searchCount = data.length;
+	while(index < searchCount) {
 		var newBox = box.cloneNode(true);
 		newBox.setAttribute('id',index);
 
-		newBox.querySelector(".box-title").innerHTML = "<a href=''>Metric Modulation In Early 90's Heavy Metal</a>";
-		newBox.querySelector(".box-author").innerHTML = "<a href=''>author</a>";
-		var percentage = 65;
-		newBox.querySelector(".rating-bar").className += " w" + (percentage - (percentage % 10));
-		newBox.querySelector(".rating-bar").style = "width:" + percentage + "%";
-		newBox.querySelector(".star").checked = false;
-		newBox.querySelector(".box-image").innerHTML = "Image";
-		newBox.querySelector(".box-blurb").innerHTML = "Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest! Here is some blurb information to convince you to click on my awesome resource. You should totally check it out. It's the coolest!";
-		newBox.querySelector(".box-created").innerHTML = "created: 00/00/00";
-		newBox.querySelector(".box-edited").innerHTML = "edited: 00/00/00";
-		newBox.querySelector(".box-ranks").innerHTML = "ranks: #########";
-		newBox.querySelector(".box-views").innerHTML = "views: #########";
+		/* page name */
+		var pageURL = createURL(prefixResource + "?a=" + data[index].uid + "&p=" + data[index].xid);
+		var pageLink = document.createElement('a');
+		pageLink.setAttribute('href',pageURL);
+		pageLink.innerHTML = data[index].xname;
+		newBox.querySelector(".box-title").appendChild(pageLink);
+
+		/* author */
+		newBox.querySelector(".box-author").innerHTML = data[index].author;
+
+		/* rating */
+		newBox.querySelector(".rating-bar").className += " w" + (data[index].rating - (data[index].rating % 10));
+		newBox.querySelector(".rating-bar").style = "width:" + data[index].rating + "%";
+
+		/* bookmark */
+		newBox.querySelector(".bmark").setAttribute('data-aid',data[index].uid);
+		newBox.querySelector(".bmark").setAttribute('data-pid',data[index].xid);
+
+		newBox.querySelector(".bmark").addEventListener('change',setBookmark);
+
+		if(userObj.hasOwnProperty('bm')) {
+			if(userObj.bm.hasOwnProperty(pagetype)) {
+				if(userObj.bm[pagetype].hasOwnProperty(data[index].uid)) {
+					if(userObj.bm[pagetype][data[index].uid].indexOf(data[index].xid) > -1) {
+						newBox.querySelector(".bmark").checked = true;
+					} else {
+						newBox.querySelector(".bmark").checked = false;
+					}
+				} else {
+					newBox.querySelector(".bmark").checked = false;
+				}
+			}
+		}
+
+		/* image */
+		var pageImage = document.createElement('img');
+		pageImage.setAttribute('class','explore-img');
+		pageImage.setAttribute('src',data[index].imageurl);
+		newBox.querySelector(".box-image").appendChild(pageImage);
+
+		/* blurb */
+		newBox.querySelector(".box-blurb").innerHTML = data[index].blurb;
+
+		/* created date */
+		var cDateArray = data[index].created.split(/[- :T]/);
+		var createdDate = cDateArray[1] + "/" + cDateArray[2] + "/" + cDateArray[0];
+		newBox.querySelector(".box-created").innerHTML = "created: " + createdDate;
+
+		/* edited date */
+		var eDateArray = data[index].edited.split(/[- :T]/);
+		var editedDate = eDateArray[1] + "/" + eDateArray[2] + "/" + eDateArray[0];
+		newBox.querySelector(".box-edited").innerHTML = "edited: " + editedDate;
+
+		/* ranks */
+		newBox.querySelector(".box-ranks").innerHTML = "ranks: " + data[index].ranks;
+
+		/* views */
+		newBox.querySelector(".box-views").innerHTML = "views: " + data[index].views;
+
+		/* append the new box */
 		main.appendChild(newBox);
 		index++;
 	}
@@ -1333,33 +1456,35 @@ function pageExplore(logstatus,data) {
 		nothing - *
 */
 function pageHome() {
-
-	var menu = barMenu();
+	var main = document.getElementById('content');
 
 	/* append the form to the main div */
-	var main = document.getElementById('content');
+	var menu = barMenu();
 	main.appendChild(menu);
 
-	/* create bookmarks dash */
-	var bookmarks = dashBookmarks();
-	main.appendChild(bookmarks);
+	/* fetch page data for user bookmarks */
+	var promiseBM = getBookmarkData("page");
 
 	/* fetch user pages */
-	var promiseBP = getPages();
+	var promiseBP = getPages("page");
 
 	/* fetch user learning guides */
-	var promiseLG = getLearningGuides();
+	var promiseLG = getPages("guide");
 
-	Promise.all([promiseBP,promiseLG]).then(function(values) {
+	Promise.all([promiseBM,promiseBP,promiseLG]).then(function(values) {
+		/* bookmark display form */
+		var row_Bookmark = formDisplayPlaylist('Bookmarks: Pages',values[0]);
+		main.appendChild(row_Bookmark);
+
 		/* block page create form */
-		var row_PageCreate = formGenerateUserContent('blockpage',values[0]);
+		var row_PageCreate = formGenerateUserContent('page',values[1]);
 		main.appendChild(row_PageCreate);
 
 		/* learning guide create form */
-		var row_LgCreate = formGenerateUserContent('lg',values[1]);
+		var row_LgCreate = formGenerateUserContent('guide',values[2]);
 		main.appendChild(row_LgCreate);
 	},function(error) {
-		console.log(error);
+		alertify.alert("There Was An Error Getting Your Pages.");
 	});
 }
 
@@ -1390,7 +1515,8 @@ function pageLanding(logstatus) {
 	main.appendChild(menu);
 
 	/* search bar */
-	var search = barSearch();
+	var search = barSearch('fullsearch','');
+	search.setAttribute('style','margin-top: 8px;');
 	main.appendChild(search);
 
 	/* pages div */
@@ -1416,15 +1542,6 @@ function pageLanding(logstatus) {
 		nothing - *
 */
 function pageProfile(profiledata) {
-
-	/// if profiledata == "err" handle this
-	/// if profiledata == "noprofileloggedout" handle this
-	if(profiledata === "err") {
-		console.log("profile error");
-	} else if (profiledata === "noprofileloggedout") {
-		console.log("profile logged out");
-	}
-
 	var profileinfo = JSON.parse(profiledata);
 
 	/* MENU */
@@ -1463,7 +1580,6 @@ function pageProfile(profiledata) {
 	/* grab the main div and append all of these elements */
 	var main = document.getElementById('content');
 	main.appendChild(menu);
-	main.appendChild(document.createElement('hr')); /// REMOVE THIS AFTER STYLING
 	main.appendChild(profilediv);
 }
 
@@ -1512,14 +1628,18 @@ function login() {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "loggedin") {
-					window.location = createURL("/home");
-				} else if(xmlhttp.responseText === "incorrect") {
-					alertify.alert("The Passowrd Was Incorrect");
-				} else if(xmlhttp.responseText === "notfound") {
-					alertify.alert("The Username Could Not Be Found");
-				} else {
-					alertify.alert("An Unknown Error Occurred");
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'loggedin':
+						window.location = createURL("/home"); break;
+					case 'incorrect':
+						alertify.alert("The Passowrd Was Incorrect"); break;
+					case 'notfound':
+						alertify.alert("The Username Could Not Be Found"); break;
+					case 'err':
+					default:
+						alertify.alert("An Unknown Error Occurred");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1551,19 +1671,19 @@ function signup() {
 	/* get the user information */
 	var username = document.getElementsByName('username-signup')[0].value;
 	var email = document.getElementsByName('email-signup')[0].value;
-	var phone = document.getElementsByName('phone-signup')[0].value;
 	var password = document.getElementsByName('password-signup')[0].value;
 	var passwordcheck = document.getElementsByName('password-signup-check')[0].value;
 
-	/// todo: instant validation needed
+	/* check that the passwords match */
 	if(password !== passwordcheck) {
-		/// oh fuck
+		alertify.alert("The Passwords You Entered Do Not Match.");
+		return;
 	}
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "username=" + username + "&email=" + email + "&phone=" + phone + "&password=" + password;
+	var params = "username=" + username + "&email=" + email + "&password=" + password;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1572,12 +1692,16 @@ function signup() {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "success") {
-					window.location = createURL("/home");
-				} else if(xmlhttp.responseText === "exists") {
-					alertify.alert("That Username Already Exists.\nPlease Choose A Different One.");
-				} else {
-					alertify.alert("An Unknown Error Occurred");
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'success':
+						window.location = createURL("/home"); break;
+					case 'exists':
+						alertify.alert("That Username Already Exists.\nPlease Choose A Different One."); break;
+					case 'err':
+					default:
+						alertify.alert("An Unknown Error Occurred");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1589,88 +1713,33 @@ function signup() {
 }
 
 /*
-	Function: createlg
-
-	This function creates a user learning guide.
-
-	Parameters:
-
-		none
-
-	Returns:
-
-		nothing - *
-*/
-function createlg() {
-
-	/* create the url destination for the ajax request */
-	var url = createURL("/createlg");
-
-	/* get the page name */
-	var guidename = document.getElementsByName('lgname-create')[0].value;
-
-	if(guidename === "") {
-		alertify.alert("Please Enter A Guide Name.");
-	} else {
-		var xmlhttp;
-		xmlhttp = new XMLHttpRequest();
-
-		var params = "guidename=" + guidename;
-
-		xmlhttp.open("POST",url,true);
-
-		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-		xmlhttp.onreadystatechange = function() {
-			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "pageexists") {
-						alertify.alert("You Already Have A Guide With That Name.");
-					} else if (xmlhttp.responseText === "nocreateloggedout") {
-						alertify.alert("Unable To Create Page. You Are Logged Out.");
-					} else if (xmlhttp.responseText === "err") {
-						alertify.alert("An Error Occured. Please Try Again Later.");
-					} else {
-						window.location = createURL("/editlg?lg=" + xmlhttp.responseText);
-					}
-				} else {
-					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-				}
-			}
-		};
-
-		xmlhttp.send(params);
-	}
-}
-
-/*
 	Function: createpage
 
 	This function creates a user page.
 
 	Parameters:
 
-		none
+		pagetype - string, ["page","guide"]
 
 	Returns:
 
 		nothing - *
 */
-function createpage() {
+function createpage(pagetype) {
 
 	/* create the url destination for the ajax request */
 	var url = createURL("/createpage");
 
 	/* get the page name */
-	var pagename = document.getElementsByName('pagename-create')[0].value;
+	var xname = document.getElementsByName(pagetype + 'name-create')[0].value;
 
-	if(pagename === "") {
-		alertify.alert("Please Enter A Page Name.");
+	if(xname === "") {
+		alertify.alert("Please Enter A Name.");
 	} else {
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();
 
-		var params = "pagename=" + pagename;
+		var params = "xname=" + xname + "&pt=" + pagetype;
 
 		xmlhttp.open("POST",url,true);
 
@@ -1679,14 +1748,32 @@ function createpage() {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "pageexists") {
-						alertify.alert("You Already Have A Page With That Name.");
-					} else if (xmlhttp.responseText === "nocreateloggedout") {
-						alertify.alert("Unable To Create Page. You Are Logged Out.");
-					} else if (xmlhttp.responseText === "err") {
-						alertify.alert("An Error Occured. Please Try Again Later.");
-					} else {
-						window.location = createURL("/editpage?page=" + xmlhttp.responseText);
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case "success":
+							/* insert page into select box */
+							var selectBox = document.getElementById(pagetype + '-select');
+							var optLength = selectBox.length;
+
+							var option = document.createElement("option");
+							option.text = xname;
+							option.value = result.data.xid;
+
+							for(var i = 0; i < optLength + 1; i++) {
+								if(i === optLength || selectBox.options[i].text.toUpperCase() > xname.toUpperCase()) {
+									selectBox.add(option,i);
+									break;
+								}
+							}
+							break;
+						case "pageexists":
+							alertify.alert("You Already Have A Page With That Name."); break;
+						case "nocreateloggedout":
+							alertify.alert("Unable To Create Page. You Are Logged Out."); break;
+						case "err":
+						default:
+							alertify.alert("An Error Occured. Please Try Again Later."); break;
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1696,59 +1783,6 @@ function createpage() {
 
 		xmlhttp.send(params);
 	}
-}
-
-/*
-	Function: deleteLG
-
-	This function deletes the selected user learning guide.
-
-	Parameters:
-
-		gid - guide id
-
-	Returns:
-
-		none - *
-*/
-function deleteLG(gid) {
-	/* create the url destination for the ajax request */
-	var url = createURL("/deletelg");
-
-	var xmlhttp;
-	xmlhttp = new XMLHttpRequest();
-
-	var params = "gid=" + gid;
-
-	xmlhttp.open("POST",url,true);
-
-	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "success") {
-					var selectBox = document.getElementById('lg-select');
-					var count = selectBox.length;
-					var optionToRemove;
-					for(var i = 0; i < count; i++) {
-						if(selectBox.options[i].value === gid) {
-							optionToRemove = selectBox.options[i];
-						}
-					}
-					selectBox.removeChild(optionToRemove);
-				} else if(xmlhttp.responseText === "nodeleteloggedout") {
-					alertify.alert("Could Not Delete Guide. You Are Logged Out.");
-				} else {
-					alertify.alert("There Was A Problem Deleting The Guide.");
-				}
-			} else {
-				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-			}
-		}
-	};
-
-	xmlhttp.send(params);
 }
 
 /*
@@ -1758,20 +1792,20 @@ function deleteLG(gid) {
 
 	Parameters:
 
-		pid - page id
+		xid - page id
 
 	Returns:
 
 		none - *
 */
-function deletePage(pid) {
+function deletePage(pagetype,xid) {
 	/* create the url destination for the ajax request */
 	var url = createURL("/deletepage");
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "pid=" + pid;
+	var params = "xid=" + xid + "&pt=" + pagetype;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1780,20 +1814,25 @@ function deletePage(pid) {
 	xmlhttp.onreadystatechange = function() {
 		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "success") {
-					var selectBox = document.getElementById('page-select');
-					var count = selectBox.length;
-					var optionToRemove;
-					for(var i = 0; i < count; i++) {
-						if(selectBox.options[i].value === pid) {
-							optionToRemove = selectBox.options[i];
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'success':
+						var selectBox = document.getElementById(pagetype + '-select');
+						var count = selectBox.length;
+						var optionToRemove;
+						for(var i = 0; i < count; i++) {
+							if(selectBox.options[i].value === xid) {
+								optionToRemove = selectBox.options[i];
+							}
 						}
-					}
-					selectBox.removeChild(optionToRemove);
-				} else if(xmlhttp.responseText === "nodeleteloggedout") {
-					alertify.alert("Could Not Delete Page. You Are Logged Out.");
-				} else {
-					alertify.alert("There Was A Problem Deleting The Page.");
+						selectBox.removeChild(optionToRemove);
+						break;
+					case 'nodeleteloggedout':
+						alertify.alert("Could Not Delete Page. You Are Logged Out."); break;
+					case 'err':
+					default:
+						alertify.alert("There Was A Problem Deleting The Page.");
 				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1805,9 +1844,9 @@ function deletePage(pid) {
 }
 
 /*
-	Function: getLearningGuides
+	Function: getBookmarkData
 
-	This function fetches a user's learning guides. It returns a promise containing learning guide data in the following format (lid,lgname,)
+	This function fetches page data for a user's bookmarks.
 
 	Parameters:
 
@@ -1817,11 +1856,13 @@ function deletePage(pid) {
 
 		success - promise, pagedata
 */
-function getLearningGuides() {
+function getBookmarkData(pagetype) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* create the url destination for the ajax request */
-		var url = createURL("/getlgs");
+		var url = createURL("/getbmdata");
+
+		var params = "pagetype=" + pagetype;
 
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();
@@ -1833,10 +1874,14 @@ function getLearningGuides() {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "err") {
-						reject("err");
-					} else {
-						resolve(xmlhttp.responseText);
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data.bmdata); break;
+						case 'err':
+						default:
+							reject('err');
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1844,7 +1889,7 @@ function getLearningGuides() {
 			}
 		};
 
-		xmlhttp.send();
+		xmlhttp.send(params);
 	});
 
 	return promise;
@@ -1853,21 +1898,21 @@ function getLearningGuides() {
 /*
 	Function: getPages
 
-	This function fetches a user's pages. It returns a promise containing page data in the following format (pid,pagename,)
+	This function fetches a user's pages. It returns a promise containing page data in the following format (xid,xname,)
 
 	Parameters:
 
-		none
+		pagetype - string, ["guide","page"]
 
 	Returns:
 
 		success - promise, pagedata
 */
-function getPages() {
+function getPages(pagetype) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* create the url destination for the ajax request */
-		var url = createURL("/getpages");
+		var url = createURL("/getpages?pt=" + pagetype);
 
 		var xmlhttp;
 		xmlhttp = new XMLHttpRequest();
@@ -1879,10 +1924,14 @@ function getPages() {
 		xmlhttp.onreadystatechange = function() {
 			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 				if(xmlhttp.status === 200) {
-					if(xmlhttp.responseText === "err") {
-						reject("err");
-					} else {
-						resolve(xmlhttp.responseText);
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data.pages); break;
+						case 'err':
+						default:
+							reject('err');
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
@@ -1938,16 +1987,23 @@ function saveProfileInfo(btn,fields) {
 	xmlhttp.onreadystatechange = function() {
         if (xmlhttp.readyState === XMLHttpRequest.DONE) {
 			if(xmlhttp.status === 200) {
-				if(xmlhttp.responseText === "profilesaved") {
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'profilesaved':
 						btn.style = "background-color: #00ffe1";
-						alertify.log("Saved!","success");
-					} else if (xmlhttp.responseText === "nosaveloggedout") {
+						alertify.log("Saved!","success"); break;
+					case 'nomatch':
 						btn.style = "background-color: #e83e3e";
-						alertify.alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again.");
-					} else {
+						alertify.alert("The Current Value Did Not Match."); break;
+					case 'nosaveloggedout':
+						btn.style = "background-color: #e83e3e";
+						alertify.alert("You Can't Save Because You Are Logged Out. Log In On A Separate Page, Then Return Here & Try Again."); break;
+					case 'err':
+					default:
 						btn.style = "background-color: #e83e3e";
 						alertify.alert("An Unknown Error Occurred");
-					}
+				}
 			} else {
 				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
 			}

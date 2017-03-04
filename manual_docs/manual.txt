@@ -98,7 +98,7 @@ Add the absolute paths to your Git folder & Test folder (you need to create your
 > REPO=(<ABSOLUTE-PATH-TO-GIT-FOLDER>)
 > TEST=(<ABSOLUTE-PATH-TO-TEST-FOLDER>)
 
-Topic: Install Atom From
+Topic: Install Atom
 
 Atom is the preferred IDE for this project.
 
@@ -132,24 +132,41 @@ Topic: Install Xample Dependencies In Test Folder
 
 These OS & Node dependencies are required for Xample to work.
 
+Install Node Dependencies:
+
 > cd (<TEST-FOLDER>)/xample
 
 > npm install
 
+Install Imagemagick:
+
 > (ubuntu) apt-get install imagemagick
 > (mac) brew install imagemagick
 
-- Use "mysql-server", if you're on Ubuntu.
-> brew install mysql
+Install MySQL:
 
-Install Libre Office 4.3.7.2 From:
+- if brew doesn't work on mac, go to the link below to download mysql's native installation package
+
+https://dev.mysql.com/doc/refman/5.6/en/osx-installation-pkg.html
+
+- (ubuntu) apt-get install mysql-server
+> (mac) brew install mysql
+
+Install Redis:
+
+> (ubuntu) ???
+> (mac) brew install redis
+
+Install Libre Office 4.3.7.2:
 
 https://downloadarchive.documentfoundation.org/libreoffice/old/
+
+Install Unoconv:
 
 > (ubuntu) apt-get install unoconv
 > (mac) brew install unoconv
 
-Download Static Build FFMPEG From:
+Download Static Build FFMPEG:
 
 https://ffmpeg.org/download.html
 
@@ -159,8 +176,8 @@ Topic: Configure MySQL
 
 MySQL is the database software. It requires configuring. Getting it to work in Mac OS X is kind of a pain in the ass. Try using Homebrew, but you may need to crate an alias (it's often installed in /usr/local/mysql/bin/mysql). With Ubuntu, it's fairly easy. Just use apt-get.
 
-> (ubuntu) sudo services start mysql
-> (mac) sudo brew services start mysql
+> (ubuntu) services start mysql
+> (mac) brew services start mysql
 
 > cd (<GIT-FOLDER>)/db
 
@@ -168,6 +185,22 @@ MySQL is the database software. It requires configuring. Getting it to work in M
 
 > mysql -uroot
 > source (<GIT-FOLDER>)/db/initialize.sql
+
+Topic: Configure Redis
+
+Redis is in-memory database software used for cacheing frequently used database queries.
+
+> (ubuntu) apt-get
+> (mac) brew install redis
+
+Edit this file (ubuntu) '/etc/redis.conf' (mac) '/usr/local/etc/redis.conf'
+
+> #requiredpass foobared -> requirepass a1bc60f3ee230db84e6e584700ac277f0aab5f6b3f4c7dec2173371c32ef00d4
+
+Start Redis
+
+> (ubuntu) ???
+> (mac) brew services start redis
 
 Topic: Testing
 

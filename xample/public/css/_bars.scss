@@ -13,16 +13,81 @@
 }
 
 /* Bars */
+.guide-bar {
+	@extend .wrapper;
+
+    .guide-box {
+        font-family: "Courier New", Courier, monospace;
+        vertical-align: middle;
+
+        height: 128px;
+        overflow-y:auto;
+
+        background-color: white;
+        border-width: 1px;
+        border-radius: 2px;
+
+        box-sizing: border-box;
+
+        img {
+            height: 18px;
+            width: 32px;
+            vertical-align: middle;
+            margin: 2px 0px;
+        }
+
+        .padtop {
+            padding-top: 3px;
+        }
+
+        .row {
+            height: 22px;
+            cursor:pointer;
+        }
+
+        .toprow {
+            height: 26px;
+            padding-top: 4px;
+        }
+
+        .bottomrow {
+            height: 26px;
+            padding-bottom: 4px;
+        }
+    }
+}
+
+.guide-bar::after {
+	@extend .bar::after;
+	background: $bar-alt-color;
+}
+
 .filter-bar {
 	@extend .wrapper;
 
-	height: 60px;
 	margin-bottom: 8px;
 
+    select {
+        display: flex;
+        width: 100%;
+        margin-top: 8px;
+        margin-bottom: 0px;
+        margin-left: 0px;
+        height: 28px;
+    }
+
+    label {
+        display: flex;
+        width: 100%;
+        padding: 12px;
+
+        vertical-align: middle;
+        display: inline-block;
+        white-space: nowrap;
+    }
+
 	input {
-		display: inline-block;
-		width: 100%;
-		height: 30px;
+        flex: 1;
 
 		padding: 0px;
 		margin: 0px;
@@ -33,9 +98,29 @@
 		font-weight: 300;
 		color: black;
 	}
+
+    span {
+        flex: 1;
+
+        margin: 0px;
+        padding-left: 6px;
+        padding-right: 6px;
+        vertical-align: middle;
+        display: inline-block;
+        white-space: nowrap;
+    }
 }
 
 .filter-bar::after {
+	@extend .bar::after;
+	background: $bar-alt-color;
+}
+
+.info-bar {
+	@extend .wrapper;
+}
+
+.info-bar::after {
 	@extend .bar::after;
 	background: $bar-alt-color;
 }
@@ -61,6 +146,7 @@
 .settings-bar {
 	@extend .wrapper;
 	height: 100%;
+    width: 100%;
 }
 
 .settings-bar::after {
@@ -79,10 +165,14 @@
 
 .status-bar {
 	@extend .wrapper;
-	height: 60px;
 }
 
 .status-bar::after {
   @extend .bar::after;
   background: $bar-alt-color;
+}
+
+/* Mobile Size */
+@media screen and (max-width: $site-width) {
+    .filter-bar { select { margin-top: 0px; } }
 }

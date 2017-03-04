@@ -1,7 +1,20 @@
 /*** General Box Type Divs ***/
 
-/* Bookmarks Box - Home Page */
-.bookmarks-box {
+/* Error Box - All Pages */
+.errmsg {
+	@extend .wrapper;
+
+	margin-top: 16px;
+	margin-bottom: 16px;
+	box-shadow: 1px 1px 1px $shadow;
+
+	p {
+		padding: 6px;
+	}
+}
+
+/* Dash Box - Home Page */
+.dash-box {
 	@extend .wrapper;
 
 	margin-top: 16px;
@@ -29,6 +42,46 @@
 	}
 }
 
+.data-box {
+	font-family: "Courier New", Courier, monospace;
+	vertical-align: middle;
+
+	height: 128px;
+	overflow-y:auto;
+
+	background-color: white;
+	border-width: 1px;
+	border-radius: 2px;
+
+	box-sizing: border-box;
+
+	img {
+		height: 18px;
+		width: 32px;
+		vertical-align: middle;
+		margin: 2px 0px;
+	}
+
+	.padtop {
+		padding-top: 3px;
+	}
+
+	.row {
+		height: 22px;
+		cursor:pointer;
+	}
+
+	.toprow {
+		height: 26px;
+		padding-top: 4px;
+	}
+
+	.bottomrow {
+		height: 26px;
+		padding-bottom: 4px;
+	}
+}
+
 /* Content Search Box - Landing Page */
 .explore {
 	@extend .wrapper;
@@ -36,6 +89,16 @@
 	border-radius: 2px;
 	background-color: white;
 	box-shadow: 1px 1px 1px $shadow;
+}
+
+/* Block Display Box - Learning Guide Page */
+.block-display {
+	@extend .wrapper;
+
+	iframe {
+		width: 100%;
+		box-sizing: border-box;
+	}
 }
 
 /* Link Box - Explore Page */
@@ -151,22 +214,45 @@
 	line-height: 20px;
 
 	input.star {
-		margin: 6px;
+		margin: 6px 5px;
 		padding: 0px;
 	    visibility: hidden;
 	    font-size: 1.2em;
 	    cursor: pointer;
 	}
 	input.star:before {
-	   content: "\2606";
+	   content: "\2729";
 	   position: absolute;
 	   visibility: visible;
 	   color: black;
 	}
 	input.star:checked:before {
-	   content: "\2605";
+	   content: "\272D";
 	   position: absolute;
 	}
+
+	input.bmark {
+		margin: 7px;
+		padding: 0px;
+	    visibility: hidden;
+	    font-size: 1.2em;
+	    cursor: pointer;
+	}
+	input.bmark:before {
+	   content: "\25A1";
+	   position: absolute;
+	   visibility: visible;
+	   color: black;
+	}
+	input.bmark:checked:before {
+	   content: "\25A3";
+	   position: absolute;
+	}
+}
+
+.box-rankit {
+	@extend .box-bookmark;
+	display: inline-flex;
 }
 
 .box-expand {
@@ -215,6 +301,18 @@
 	font-size: 0.8em;
 }
 
+.box-views-row {
+	@extend .box-link;
+	height: 20px;
+	padding: 9px 6px 0px 6px;
+	text-align: right;
+
+	a {
+		font-size: 1em;
+		text-decoration: none;
+	}
+}
+
 /* Profile Box - Profile Page */
 .profile-list {
 	max-width: $site-width;
@@ -233,7 +331,7 @@
 .profile-title {
 	background-color: $bar-color;
 
-	padding-left: 4px;
+	padding-left: 8px;
 	padding-top: 8px;
 	padding-bottom: 8px;
 

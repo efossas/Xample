@@ -1,48 +1,51 @@
 1.52
 JavaScript
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/loader.js	1479669914	1	Loader
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getlgs.js	1476642312	1	Get Learning Guides
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/omni.js	1479702996	1	Omni
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/lg.js	1478883946	1	Learning Guide
 /Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/error/667.txt	1476390852	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/error/667.txt
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/alertify.min.js	1381321258	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/alertify.min.js
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/editlg.js	1477437888	1	Edit Learning Guide
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/analytics.js	1476408578	1	Stats
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/signup.js	1479858356	1	Sign Up
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getprofiledata.js	1476389908	1	Get Profile Data
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/initialize.sql	1479875314	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/initialize.sql
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/error/666.txt	1476390852	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/error/666.txt
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/saveprofile.js	1476389936	1	Save Profile
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/rts.js	1483055580	1	Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/explore.js	1482788534	1	Edit Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/saveblocks.js	1482784630	1	Save Blocks
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/bp.js	1483072726	1	Block Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/editpage.js	1482723842	1	Edit Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/signup.js	1482783784	1	Sign Up
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/manual_docs/manual.txt	1488604532	1	Xample Overview
 /Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/notfound.js	1476389976	1	Not Found
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/xample.js	1479757434	1	Xample
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/manual_docs/manual.txt	1479875522	1	Xample Overview
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/start.js	1476490908	1	Start
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/bp.js	1479757716	1	Block Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/revertblocks.js	1477439938	1	Revert
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/bengine.js	1478640970	1	Block Engine
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getpages.js	1476597798	1	Get Pages
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/logout.js	1476389924	1	Log Out
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/editpage.js	1479704882	1	Edit Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/uploadmedia.js	1476412234	1	Upload Media
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/helper.js	1476340948	1	Helper
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/home.js	1476504278	1	Home
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/journalerror.js	1476591986	1	journalerror
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/login.js	1476389920	1	Log In
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/sqlGenerator.js	1479873132	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/sqlGenerator.js
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/createpage.js	1479858580	1	Create Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/deletelg.js	1476644252	1	Delete Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/createlg.js	1479858576	1	Create Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/filemedia.js	1476412232	1	File Media
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/deletepage.js	1476597792	1	Delete Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/querydb.js	1476644070	1	QueryDB
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/rts.js	1479757658	1	Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/profile.js	1476389988	1	Profile
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/destroy.sql	1469986364	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/destroy.sql
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/page.js	1478579806	1	Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/explore.js	1479663414	1	Edit Page
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/setup.sql	1479875278	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/setup.sql
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/nav.js	1479857626	1	Navigation
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/initialize.sql	1483062190	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/initialize.sql
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/start.js	1482879114	1	Start
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/uploadmedia.js	1482101794	1	Upload Media
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/lg.js	1483053728	1	Learning Guide
 /Users/ericfossas/Documents/NaturalDocs-1.52/Xample/libs/alertify/alertify.js	1381321258	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/libs/alertify/alertify.js
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getsubjects.js	1476389916	1	Get Subjects
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/savepagesettings.js	1479757468	1	Save Page Settings
-/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/saveblocks.js	1477446544	1	Save Blocks
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/revertblocks.js	1482726508	1	Revert
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/queryuserdb.js	1483078824	1	UserDB
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/nav.js	1483080736	1	Navigation
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/querypagedb.js	1482793862	1	QueryPageDB
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/editguide.js	1482643578	1	Edit Learning Guide
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/guide.js	1482782204	1	Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getsubjects.js	1482018164	1	Get Subjects
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/filemedia.js	1482101900	1	File Media
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/uploadthumb.js	1482101936	1	Upload Media
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getbmdata.js	1483080258	1	Create Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/destroy.sql	1482609942	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/destroy.sql
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/helper.js	1483059940	1	Helper
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/profile.js	1482641904	1	Profile
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/alertify.min.js	1381321258	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/alertify.min.js
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/sqlGenerator.js	1482783754	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/sqlGenerator.js
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/xample.js	1483059076	1	Xample
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/savepagesettings.js	1482779166	1	Save Page Settings
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/setview.js	1483056998	1	Create Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/setup.sql	1482783858	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/db/setup.sql
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/logout.js	1482020176	1	Log Out
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/login.js	1483074464	1	Log In
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/home.js	1482467736	1	Home
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/saveprofile.js	1482732374	1	Save Profile
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/createpage.js	1482783798	1	Create Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getpages.js	1482638150	1	Get Pages
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/bengine.js	1482721454	1	Block Engine
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/loader.js	1480185462	1	Loader
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/analytics.js	1483076220	1	Stats
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/journalerror.js	1482019014	1	journalerror
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/setbookmark.js	1483079970	1	Create Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/loads/page.js	1483040936	1	Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/getprofiledata.js	1482643218	1	Get Profile Data
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/routes/deletepage.js	1482774496	1	Delete Page
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/error/666.txt	1476390852	0	/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/error/666.txt
+/Users/ericfossas/Documents/NaturalDocs-1.52/Xample/xample/public/js/omni.js	1483079734	1	Omni

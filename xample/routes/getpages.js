@@ -5,11 +5,16 @@
 */
 
 var analytics = require('./../analytics.js');
+var helper = require('./../helper.js');
 
 /*
 	Function: getpages
 
 	Ajax, used to get a list of the user's xample pages. The data given to the http response is a comma-separate string in the following format. pid,pagename, If the user has no pages, an empty string is returned.
+
+	1 - Get the form data
+	2 - Get the page data
+	3 - Format the page data
 
 	Parameters:
 
@@ -25,20 +30,30 @@ exports.getpages = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* get the user's id */
 	var uid = request.session.uid;
 
-    var qry = "SELECT pid,pagename FROM p_" + uid;
-
     pool.getConnection(function(err,connection) {
         if(err) {
-            analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
+            analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
         }
 
+		/* get the page type */
+		var pagetype = connection.escape(request.query.pt).replace(/'/g,"");
+
+		var prefix = helper.getTablePrefixFromPageType(pagetype);
+
+		/* retrieve page data */
+		var qry = "SELECT xid,xname FROM " + prefix + "_" + uid + "_0";
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
-				response.end('err');
-				analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
+				result.msg = 'err';
+				response.end(JSON.stringify((result)));
+				err.input = qry;
+				analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			} else {
 				var pages = "";
 
@@ -48,16 +63,18 @@ exports.getpages = function(request,response) {
 
 				/* append commas to each row except for the last one */
 				while(j > 1) {
-					pages += rows[i].pid + "," + rows[i].pagename + ",";
+					pages += rows[i].xid + "," + rows[i].xname + ",";
 					i++;
 					j--;
 				}
 				if(j === 1) {
-					pages += rows[i].pid + "," + rows[i].pagename;
+					pages += rows[i].xid + "," + rows[i].xname;
 				}
 
-				response.end(pages);
-				analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+				result.msg = 'success';
+				result.data.pages = pages;
+				response.end(JSON.stringify(result));
+				analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
 		});
         connection.release();

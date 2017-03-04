@@ -7,6 +7,32 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
         throw err;
     }
 
+    /* grab first two letters of each word */
+    function reduceName(str) {
+        var reduced = str.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,"");
+        return reduced;
+    }
+
+    /* check for duplicate table names function */
+    var tableNamesArray = [];
+    function check(tableName) {
+        var duplicates = tableNamesArray.filter(function(element) {
+            if(element === tableName) {
+                return true;
+            } else {
+                return false;
+            }
+        });
+
+        if(duplicates.length > 0) {
+            console.log(tableName);
+        }
+
+        tableNamesArray.push(tableName);
+    }
+
+    console.log("If any duplicates are printed below, initialize.sql will fail:");
+
     var sqlFile = "";
     var tree = JSON.parse(data);
 
@@ -18,18 +44,24 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
         var categoriesCount = categories.length;
 
         /* subject */
-        var prefixSub = ["qp_","lg_"];
+        var prefixSub = ["red_bp_","red_lg_"];
         prefixSub.forEach(function(prefix,index) {
-            var sqlSubjectArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );\n"];
+            var tableName = prefix + reduceName(subjects[i]);
+            check(tableName);
+
+            var sqlSubjectArray = ["CREATE TABLE ",tableName," (uid CHAR(24), xid SMALLINT UNSIGNED, username VARCHAR(50) NOT NULL, xname VARCHAR(50), tags BIGINT UNSIGNED DEFAULT 0 NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, rankpoints INT UNSIGNED DEFAULT 0 NOT NULL, ranks INT UNSIGNED DEFAULT 0 NOT NULL, views INT UNSIGNED DEFAULT 0 NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
             sqlFile += sqlSubjectArray.join("");
         });
 
         for(var j = 0; j < categoriesCount; j++) {
             /* subject_category */
-            var prefixCat = ["qp_","lg_"];
+            var prefixCat = ["red_bp_","red_lg_"];
             prefixCat.forEach(function(prefix,index) {
-                var sqlCategoryArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,""),"_",categories[j].replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );\n"];
+                var tableName = prefix + reduceName(subjects[i]) + "_" + reduceName(categories[j]);
+                check(tableName);
+
+                var sqlCategoryArray = ["CREATE TABLE ",tableName," (uid CHAR(24), xid SMALLINT UNSIGNED, username VARCHAR(50) NOT NULL, xname VARCHAR(50), tags BIGINT UNSIGNED DEFAULT 0 NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, rankpoints INT UNSIGNED DEFAULT 0 NOT NULL, ranks INT UNSIGNED DEFAULT 0 NOT NULL, views INT UNSIGNED DEFAULT 0 NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
                 sqlFile += sqlCategoryArray.join("");
             });
@@ -37,9 +69,12 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
             var topics = tree[subjects[i]][categories[j]];
             topics.forEach(function(item,index) {
                 /* subject_category_topic */
-                var prefixTop = ["qp_","lg_"];
+                var prefixTop = ["red_bp_","red_lg_"];
                 prefixTop.forEach(function(prefix,index) {
-                    var sqlTopicArray = ["CREATE TABLE ",prefix,subjects[i].replace(/ /g,""),"_",categories[j].replace(/ /g,""),"_",item.replace(/ /g,"")," (uid INT UNSIGNED, pid SMALLINT UNSIGNED, pagename VARCHAR(50), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, ranks INT UNSIGNED NOT NULL, views INT UNSIGNED NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,pid), KEY(created), KEY(edited), KEY(ranks), KEY(views) );\n"];
+                    var tableName = prefix + reduceName(subjects[i]) + "_" + reduceName(categories[j]) + "_" + reduceName(item);
+                    check(tableName);
+
+                    var sqlTopicArray = ["CREATE TABLE ",tableName," (uid CHAR(24), xid SMALLINT UNSIGNED, username VARCHAR(50) NOT NULL, xname VARCHAR(50), tags BIGINT UNSIGNED DEFAULT 0 NOT NULL, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, rankpoints INT UNSIGNED DEFAULT 0 NOT NULL, ranks INT UNSIGNED DEFAULT 0 NOT NULL, views INT UNSIGNED DEFAULT 0 NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
                     sqlFile += sqlTopicArray.join("");
                 });

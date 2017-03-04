@@ -5,7 +5,8 @@
 */
 
 var analytics = require('./../analytics.js');
-var querydb = require('./../querydb.js');
+var helper = require('./../helper.js');
+var queryUserDB = require('./../queryuserdb.js');
 
 /*
 	Function: signup
@@ -29,6 +30,10 @@ exports.signup = function(request,response) {
 	var fs = require('fs');
 
     var pool = request.app.get("pool");
+	var userdb = request.app.get("userdb");
+
+	/* create response object */
+	var result = {msg:"",data:{}};
 
 	var body = '';
 
@@ -39,98 +44,110 @@ exports.signup = function(request,response) {
         /* prevent overload attacks */
         if (body.length > 1e6) {
 			request.connection.destroy();
-			analytics.journal(true,199,"Overload Attack!",0,analytics.__line,__function,__filename);
+			var errmsg = {message: "Overload Attack!"};
+			analytics.journal(true,199,errmsg,0,global.__stack[1].getLineNumber(),__function,__filename);
 		}
     });
 
-    /* when the request ends, parse the POST data, & process the sql queries */
+    /* when the request ends, parse the POST data, & process the queries */
     request.on('end',function() {
-        pool.getConnection(function(err,connection) {
-            if(err) {
-                analytics.journal(true,221,err,0,analytics.__line,__function,__filename);
-            }
+		var POST = qs.parse(body);
 
-            var POST = qs.parse(body);
+        /* get the data */
+        var hash = ps.generate(POST.password);
+        var username = POST.username;
+        var email = POST.email;
 
-            /* change info as needed */
-            var hash = ps.generate(POST.password);
+		/* ensure username is not taken */
+		var promiseCheckUsername = queryUserDB.getDocByUsername(userdb,username);
+		promiseCheckUsername.then(function(users) {
+			if(users.length > 0) {
+				result.msg = 'exists';
+                response.end(JSON.stringify(result));
+				return;
+			}
 
-            /* get only numbers from the phone number */
-            var phone = POST.phone;
-            phone = phone.replace(/\D/g,'');
+			/* add the user to db */
+			var promiseCreateUser = queryUserDB.createUser(userdb,username,hash,email);
+			promiseCreateUser.then(function(res) {
+				/* log the user in */
+				var uid = res.ops[0]._id;
+				request.session.uid = uid;
 
-            /* escape these to prevent MySQL injection */
-            var username = connection.escape(POST.username);
-            var email = connection.escape(POST.email);
+				pool.getConnection(function(err,connection) {
+					if(err) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+						return;
+					}
 
-            /* check if username already exists */
-            var promise = querydb.searchUid(connection,username);
+					var prefixPage = helper.getTablePrefixFromPageType("page");
 
-            promise.then(function(success) {
+					/* create the user's page table */
+					var qryBlockPageTable = "CREATE TABLE " + prefixPage + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
 
-                    if(success !== -1) {
-                        response.end('exists');
-                    } else {
-                            var qryUser = "INSERT INTO Users (username,password,email,phone,autosave,defaulttext) VALUES (" + username + ",'" + hash + "'," + email + ",'" + phone + "',0,1)";
-
-					/* create the user in the Users table */
-					connection.query(qryUser,function(err,rows,fields) {
-
+					connection.query(qryBlockPageTable,function(err,rows,fields) {
 						if (err) {
-							response.end('err');
-							analytics.journal(true,201,err,0,analytics.__line,__function,__filename);
+							result.msg = 'err';
+							response.end(JSON.stringify(result));
+							err.input = qryBlockPageTable;
+							analytics.journal(true,203,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
-                            var qryUid = "SELECT uid FROM Users WHERE username = " + username;
+							var prefixGuide = helper.getTablePrefixFromPageType("guide");
 
-                            /* retrieve the user's new uid */
-                            connection.query(qryUid,function(err,rows,fields) {
+							/* create the user's guide table */
+							var qryLearningGuideTable = "CREATE TABLE " + prefixGuide + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
+
+							connection.query(qryLearningGuideTable,function(err,rows,fields) {
 								if (err) {
-									response.end('err');
-									analytics.journal(true,202,err,0,analytics.__line,__function,__filename);
+									result.msg = 'err';
+									response.end(JSON.stringify(result));
+									err.input = qryLearningGuideTable;
+									analytics.journal(true,204,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
-									var uid = rows[0].uid;
+									/* make the user's directory to store pages in later */
+									request.session.uid = uid;
 
-									var qryBlockPageTable = "CREATE TABLE p_" + uid + " (pid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, pagename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500))";
-
-									/* create the user's page table */
-									connection.query(qryBlockPageTable,function(err,rows,fields) {
-										if (err) {
-											response.end('err');
-											analytics.journal(true,203,err,0,analytics.__line,__function,__filename);
-										} else {
-											var qryLearningGuideTable = "CREATE TABLE g_" + uid + " (gid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, guidename VARCHAR(50), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, ranks INT UNSIGNED, views INT UNSIGNED, imageurl VARCHAR(128), blurb VARCHAR(500))";
-
-											/* create the user's page table */
-											connection.query(qryLearningGuideTable,function(err,rows,fields) {
-												if (err) {
-													response.end('err');
-													analytics.journal(true,204,err,0,analytics.__line,__function,__filename);
-												} else {
-													/* make the user's directory to store pages in later */
-													request.session.uid = uid;
-													fs.mkdir(request.app.get('fileRoute') + "xm/" + uid,function(err) {
-														/* don't consider existing folders as a mkdir error */
-														if(err && err.code !== "EEXIST") {
-															analytics.journal(true,120,err,0,analytics.__line,__function,__filename);
-														}
-													});
-													response.end('success');
-													analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
-												}
-											});
+									var dirPath = request.app.get('fileRoute') + "xm/" + uid;
+									fs.mkdir(dirPath,function(err) {
+										/* don't consider existing folders as a mkdir error */
+										if(err && err.code !== "EEXIST") {
+											err.input = dirPath;
+											analytics.journal(true,120,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 										}
+
+										var thumbPath = dirPath + "/t";
+										fs.mkdir(thumbPath,function(err) {
+											/* don't consider existing folders as a mkdir error */
+											if(err && err.code !== "EEXIST") {
+												err.input = thumbPath;
+												analytics.journal(true,121,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+											}
+										});
 									});
+
+									result.msg = 'success';
+									response.end(JSON.stringify(result));
+									analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
 								}
 							});
 						}
 					});
-				}
 
-			},function(error) {
-				response.end('err');
-				analytics.journal(true,200,error,0,analytics.__line,__function,__filename);
+					result.msg = 'success';
+					response.end(JSON.stringify(result));
+					analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+				});
+			},function(err) {
+				result.msg = 'err';
+				response.end(JSON.stringify(result));
+				analytics.journal(true,202,err,0,global.__stack[1].getLineNumber(),__function,__filename);
 			});
-            connection.release();
-        });
+		},function(err) {
+			result.msg = 'err';
+			response.end(JSON.stringify(result));
+			analytics.journal(true,201,err,0,global.__stack[1].getLineNumber(),__function,__filename);
+		});
     });
 };

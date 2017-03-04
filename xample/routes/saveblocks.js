@@ -5,8 +5,9 @@
 */
 
 var analytics = require('./../analytics.js');
-var querydb = require('./../querydb.js');
 var filemedia = require('./../filemedia.js');
+var helper = require('./../helper.js');
+var querypagedb = require('./../querypagedb.js');
 
 /*
 	Function: saveblocks
@@ -29,12 +30,16 @@ exports.saveblocks = function(request,response) {
 
     var pool = request.app.get("pool");
 
+	/* create response object */
+	var result = {msg:"",data:{}};
+
 	/* get the user's id */
 	var uid = request.session.uid;
 
 	/* if the user is not logged in, respond with 'nosaveloggedout' */
     if(typeof uid === 'undefined') {
-        response.end('nosaveloggedout');
+		result.msg = 'nosaveloggedout';
+		response.end(JSON.stringify(result));
     } else {
 
 		var body = '';
@@ -46,7 +51,8 @@ exports.saveblocks = function(request,response) {
             /* prevent overload attacks */
             if (body.length > 1e6) {
 				request.connection.destroy();
-				analytics.journal(true,199,"Overload Attack!",uid,analytics.__line,__function,__filename);
+				var errmsg = {message:"Overload Attack!"};
+				analytics.journal(true,199,errmsg,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
         });
 
@@ -54,106 +60,148 @@ exports.saveblocks = function(request,response) {
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
                 if(err) {
-                    analytics.journal(true,221,err,uid,analytics.__line,__function,__filename);
-                }
+					result.msg = 'err';
+					response.end(JSON.stringify(result));
+                    analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+                } else {
+					var POST = qs.parse(body);
 
-                var POST = qs.parse(body);
+					/* change info as needed */
+					var xid = POST.xid;
+					var pagetype = POST.pagetype;
+					var mediaType = POST.mediaType;
+					var mediaContent = POST.mediaContent;
+					var tabid = Number(POST.tabid);
 
-                /* change info as needed */
-                var xid = POST.xid;
-				var xname = POST.xname;
-                var mediaType = POST.mediaType;
-                var mediaContent = POST.mediaContent;
+					var prefix = helper.getTablePrefixFromPageType(pagetype);
 
-				var tid;
-				var qryStatus;
-				/* 1 -> perm, 0 -> temp */
-				if(xname === "bp") {
-					switch(POST.tabid) {
-						case '0':
-							tid = "t_";
-							break;
-						default:
-							tid = "p_";
-							break;
-					}
-					qryStatus = "UPDATE p_" + uid + " SET status=1 WHERE pid=" + xid;
-				} else if(xname === "lg") {
-					switch(POST.tabid) {
-						case '0':
-							tid = "c_";
-							break;
-						default:
-							tid = "g_";
-							break;
-					}
-					qryStatus = "UPDATE g_" + uid + " SET status=1 WHERE gid=" + xid;
-				} else {
-					/// else throw invalid parameter error!!
-				}
+					var uTable = prefix + "_" + uid + "_0";
+					var bTable = prefix + "_" + uid + "_" + xid;
+					var qryStatus;
 
-				/* this is changing the temp || perm save status */
-                connection.query(qryStatus,function(err,rows,fields) {
-                    if(err) {
-                        response.end('err');
-                        analytics.journal(true,200,err,uid,analytics.__line,__function,__filename);
-                    }
-                });
-
-                /* get arrays of the media types and content */
-                var types = mediaType.split(',');
-                var contents = mediaContent.split(',');
-
-                /* truncate (remove all rows) from the table */
-				var qryTruncate = "TRUNCATE TABLE " + tid + uid + "_" + xid;
-
-				connection.query(qryTruncate,function(err,rows,fields) {
-					if(err) {
-						response.end('err');
-						analytics.journal(true,202,err,uid,analytics.__line,__function,__filename);
+					var tid;
+					if(tabid) {
+						tid = "p";
+						qryStatus = "UPDATE " + uTable + " SET status=1 WHERE xid=" + xid;
 					} else {
+						tid = "t";
+						qryStatus = "UPDATE " + uTable + " SET status=0 WHERE xid=" + xid;
+					}
 
-						/* check that blocks exist to be saved */
-						if(types[0] !== 'undefined') {
+					/* this is changing the temp || perm save status */
+					connection.query(qryStatus,function(err,rows,fields) {
+						if(err) {
+							result.msg = 'err';
+							response.end(JSON.stringify(result));
+							err.input = qryStatus;
+							analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						}
+					});
 
-							/* create the query and remove unused media from user's page folder as well */
-							var qryInsert = "INSERT INTO " + tid + uid + "_" + xid + " (bid,type,content) VALUES ";
+					/* get arrays of the media types and content */
+					var types = mediaType.split(',');
+					var contents = mediaContent.split(',');
 
-                            var i = 0;
-                            var stop = types.length - 1;
+					/* this is saving the tags, only on permanent saves & block pages */
+					if(tabid && pagetype === "page") {
+						var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,xid);
+						promiseSettings.then(function(data) {
+							var tagTypes = new Map([["slide",0],["video",1],["audio",2],["image",4],["slide",4],["xtext",8],["xmath",16],["latex",16],["xcode",32]]);
 
-                            while(i < stop) {
-                                qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + "),";
-                                i++;
-                            }
-                            qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ")";
+							var tags = 0;
+							types.forEach(function(element,index) {
+								tags = tagTypes.get(element) | tags;
+							});
 
-                            /* save the blocks */
-                            connection.query(qryInsert,function(err,rows,fields) {
+							var qryTag = "UPDATE " + uTable + " SET tags=" + tags + ",edited=NOW() WHERE xid=" + xid;
+
+							connection.query(qryTag,function(err,rows,fields) {
 								if(err) {
-									response.end('err');
-									analytics.journal(true,203,err,uid,analytics.__line,__function,__filename);
+									err.input = qryTag;
+									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
-									/* only delete unused files on permanent table saves */
-									if(tid === "p_") {
-										filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
-									}
-									response.end('blockssaved');
-									analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+									/* copy tags to redundant table */
+									var cRed = querypagedb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
+
+									var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.tags = xample.${uTable}.tags WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
+
+									connection.query(qryCopy,function(err,rows,fields) {
+										if(err) {
+											err.input = qryCopy;
+											analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										}
+									});
 								}
 							});
-						} else {
-							/* in this case, only page save, since no blocks */
-							response.end('blockssaved');
-                            /* there could have been blocks deleted though, so delete if perm save */
-                            if(tid === "p_") {
-                                filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
-                            }
-							analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
-						}
+						},function(error) {
+							analytics.journal(true,203,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						});
 					}
-				});
-                connection.release();
+
+					/* remove all rows from the table if perm, if temp remove just temp rows */
+					var qryTruncate;
+					if(tid === 'p') {
+						qryTruncate = "TRUNCATE TABLE " + bTable;
+					} else {
+						qryTruncate = "DELETE FROM " + bTable + " WHERE bt='" + tid
+						+ "'";
+					}
+
+					connection.query(qryTruncate,function(err,rows,fields) {
+						if(err) {
+							result.msg = 'err';
+							response.end(JSON.stringify(result));
+							err.input = qryTruncate;
+							analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						} else {
+							/* check that blocks exist to be saved */
+							if(types[0] !== 'undefined') {
+
+								/* create the query and remove unused media from user's page folder as well */
+								var qryInsert = "INSERT INTO " + bTable + " (bid,type,content,bt) VALUES ";
+
+								var i = 0;
+								var stop = types.length - 1;
+
+								while(i < stop) {
+									qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ",'" + tid + "'),";
+									i++;
+								}
+								qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ",'" + tid + "')";
+
+								/* save the blocks */
+								connection.query(qryInsert,function(err,rows,fields) {
+									if(err) {
+										result.msg = 'err';
+										response.end(JSON.stringify(result));
+										err.input = qryInsert;
+										analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									} else {
+										/* only delete unused files on permanent table saves */
+										if(tid === 'p') {
+											filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
+										}
+
+										result.msg = 'blocksaved';
+										response.end(JSON.stringify(result));
+										analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+									}
+								});
+							} else {
+								/* in this case, only page save, since no blocks */
+								result.msg = 'blocksaved';
+								response.end(JSON.stringify(result));
+
+								/* there could have been blocks deleted though, so delete if perm save */
+								if(tid === 'p') {
+									filemedia.deleteMedia(connection,request.app.get('fileRoute'),uid,xid);
+								}
+								analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+							}
+						}
+					});
+					connection.release();
+				}
             });
 		});
 	}

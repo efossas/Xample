@@ -1,6 +1,6 @@
 /* eslint-env node, es6 */
 /*
-	Title: QueryDB
+	Title: QueryPageDB
 	Contains functions for querying the database.
 */
 
@@ -24,11 +24,12 @@ exports.searchGid = function(connection,uid,guidename) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT gid FROM g_" + uid + " WHERE guidename=" + guidename;
+		var qry = "SELECT gid FROM lg_" + uid + "_0 WHERE guidename=" + guidename;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
@@ -63,11 +64,12 @@ exports.searchGuidename = function(connection,uid,guidename) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT guidename FROM g_" + uid + " WHERE guidename=" + guidename;
+		var qry = "SELECT guidename FROM lg_" + uid + "_0 WHERE guidename=" + guidename;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
@@ -83,7 +85,7 @@ exports.searchGuidename = function(connection,uid,guidename) {
 };
 
 /*
-	Function: searchUid
+	Function: getUidFromUsername
 
 	This finds a the uid for a username.
 
@@ -94,10 +96,10 @@ exports.searchGuidename = function(connection,uid,guidename) {
 
 	Returns:
 
-		success - promise, uid
-		error - promise, -1
+		success - promise(string), uid or empty if not found
+		error - promise(object), error information
 */
-exports.searchUid = function(connection,username) {
+exports.getUidFromUsername = function(connection,username) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
@@ -106,12 +108,13 @@ exports.searchUid = function(connection,username) {
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
 					resolve(rows[0].uid);
 				} else {
-					resolve(-1);
+					resolve("");
 				}
 			}
 		});
@@ -121,37 +124,135 @@ exports.searchUid = function(connection,username) {
 };
 
 /*
-	Function: searchPagename
+	Function: searchXnameMatch
 
-	This searches a user's table to see if a pagename exists. This is used to ensure that user's don't create two or more pages with the same name.
+	This searches a user's table to see if a page name exists. This is used to ensure that user's don't create two or more pages with the same name.
 
 	Parameters:
 
 		connection - a MySQL connection
+		prefix - the prefix for the database table
 		uid - the user's id
 		pagename - the page name to search for
 
 	Returns:
 
-		success - promise, the page name
-		error - promise, -1
+		success - promise(int), 1 match or 0 no match
+		error - promise(object), error information
 */
-exports.searchPagename = function(connection,uid,pagename) {
+exports.searchXnameMatch = function(connection,prefix,uid,xname) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT pagename FROM p_" + uid + " WHERE pagename=" + pagename;
+		var qry = "SELECT xname FROM " + prefix + "_" + uid + "_0 WHERE xname=" + xname;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
-					resolve(rows[0].pagename);
+					resolve(1);
 				} else {
-					resolve(-1);
+					resolve(0);
 				}
+			}
+		});
+	});
+
+	return promise;
+};
+
+/*
+	Function: createRedundantTableName
+
+	Create database table name from content, subject, category, topic
+
+	Parameters:
+
+		content - string, "bp" or "lg"
+		subject - string, the subject
+		category - string, the category
+		topic - string, the topic
+
+	Returns:
+
+		success - string, table name
+		error - string, empty
+*/
+exports.createRedundantTableName = function(content,subject,category,topic) {
+
+	/* ensure spaces are removed & create redundant table name */
+	var tableArray = [];
+	if(content) {
+		tableArray.push("red");
+		tableArray.push(content);
+		/* table names use first two letters of each word */
+		if(subject) {
+			/* remove possible escape quotes */
+			var sub = subject.replace(/[']/g,"");
+			tableArray.push(sub.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
+			if(category) {
+				var cat = category.replace(/[']/g,"");
+				tableArray.push(cat.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
+				if(topic) {
+					var top = topic.replace(/[']/g,"");
+					tableArray.push(top.match(/^([a-zA-Z]){2}| ([a-zA-Z]){2}/g).join("").replace(/ /g,""));
+				}
+			}
+		} else {
+			return "";
+		}
+	} else {
+		return "";
+	}
+	var tableName = tableArray.join("_");
+	return tableName;
+};
+
+/*
+	Function: searchPageResults
+
+	This the main explore search and retrieves matching result
+
+	Parameters:
+
+		connection - a MySQL connection
+		content - string, "bp" or "lg"
+		subject - string, the subject
+		category - string, the category
+		topic - string, the topic
+		sort - string, what column to sort the data by
+		tags - string, binary number as string for block types
+		keywords - string, used to search blurbs
+
+	Returns:
+
+		success - promise, array of page objects
+		error - promise, string of error
+*/
+exports.searchPageResults = function(connection,content,subject,category,topic,sort,tags,keywords) {
+	var promise = new Promise(function(resolve,reject) {
+		var tableName = exports.createRedundantTableName(content,subject,category,topic);
+
+		/// ADD KEYWORD SEARCH IN BLURB
+
+		/* convert binary string tags to decimal number */
+		var tagDec = parseInt(tags,2);
+
+		/* create the qry */
+		var qryArray = ["SELECT uid,xid,xname,username AS author,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tagDec," = tags & ",tagDec," ORDER BY ",sort," ASC LIMIT 50"];
+
+		var qry = qryArray.join("");
+
+		/* query the database */
+		connection.query(qry,function(err,rows,fields) {
+			if(err) {
+				err.input = qry;
+				reject(err);
+			} else {
+				resolve(rows);
 			}
 		});
 	});
@@ -167,28 +268,30 @@ exports.searchPagename = function(connection,uid,pagename) {
 	Parameters:
 
 		connection - a MySQL connection
+		prefix - the prefix for the database table
 		uid - the user's id
 		pid - the page id
 
 	Returns:
 
-		success - promise, json object
-		error - promise, empty array
+		success - promise(object), page settings or err property with 'notfound'
+		error - promise(object), error information
 */
-exports.getPageSettings = function(connection,uid,pid) {
+exports.getPageSettings = function(connection,prefix,uid,pid) {
 	var promise = new Promise(function(resolve,reject) {
 
-		var qry = "SELECT pid,pagename,subject,category,topic,tags,imageurl,blurb FROM p_" + uid + " WHERE pid=" + pid;
+		var qry = "SELECT xid,xname,username,subject,category,topic,created,edited,ranks,views,rating,imageurl,blurb FROM " + prefix + "_" + uid + "_0 WHERE xid=" + pid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
 					resolve(rows[0]);
 				} else {
-					resolve(-1);
+					resolve({err:'notfound'});
 				}
 			}
 		});
@@ -205,6 +308,7 @@ exports.getPageSettings = function(connection,uid,pid) {
 	Parameters:
 
 		connection - a MySQL connection
+		prefix - the prefix for the database table
 		uid - the user's id
 		pid - the page id
 
@@ -213,17 +317,28 @@ exports.getPageSettings = function(connection,uid,pid) {
 		success - promise, array [subject,category,topic]
 		error - promise, empty array
 */
-exports.getPageSubjectCategoryTopic = function(connection,uid,pid) {
+exports.getPageSubjectCategoryTopic = function(connection,prefix,uid,xid) {
 	var promise = new Promise(function(resolve,reject) {
 
-		var qry = "SELECT subject,category,topic FROM p_" + uid + " WHERE pid=" + pid;
+		var qry = "SELECT subject,category,topic FROM " + prefix + "_" + uid + "_0 WHERE xid=" + xid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
+					if(rows[0].subject === null) {
+						rows[0].subject = '';
+						rows[0].category = '';
+						rows[0].topic = '';
+					} else if (rows[0].category === null) {
+						rows[0].category = '';
+						rows[0].topic = '';
+					} else if (rows[0].topic === null) {
+						rows[0].topic = '';
+					}
 					resolve([rows[0].subject,rows[0].category,rows[0].topic]);
 				} else {
 					resolve([]);
@@ -236,36 +351,38 @@ exports.getPageSubjectCategoryTopic = function(connection,uid,pid) {
 };
 
 /*
-	Function: searchPid
+	Function: getXidFromXname
 
 	This finds a the pid for a user's page.
 
 	Parameters:
 
 		connection - a MySQL connection
+		prefix - the prefix for the database table
 		uid - the user's id
 		pagename - the pagename to search for
 
 	Returns:
 
-		success - promise, pid
-		error - promise, -1
+	success - promise(string), xid or empty if not found
+	error - promise(object), error information
 */
-exports.searchPid = function(connection,uid,pagename) {
+exports.getXidFromXname = function(connection,prefix,uid,xname) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT pid FROM p_" + uid + " WHERE pagename=" + pagename;
+		var qry = "SELECT xid FROM " + prefix + "_" + uid + "_0 WHERE xname=" + xname;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
-					resolve(rows[0].pid);
+					resolve(rows[0].xid);
 				} else {
-					resolve(-1);
+					resolve("");
 				}
 			}
 		});
@@ -275,32 +392,31 @@ exports.searchPid = function(connection,uid,pagename) {
 };
 
 /*
-	Function: searchPageStatus
+	Function: getStatusFromXid
 
 	This finds the save status of a user's page.
 
 	Parameters:
 
 		connection - a MySQL connection
+		prefix - the prefix for the database table
 		uid - the user's id
-		pid - the page id
+		xid - the page id
 
 	Returns:
 
-		promise - number
-
-	Return Values:
-		success - 0 temp || 1 perm
-		error - -1
+		success - promise(int), status [1,0] or -1 for not found
+		error - promise(object), error information
 */
-exports.searchPageStatus = function(connection,uid,pid) {
+exports.getStatusFromXid = function(connection,prefix,uid,xid) {
 	var promise = new Promise(function(resolve,reject) {
 
-		var qry = "SELECT status FROM p_" + uid + " WHERE pid=" + pid;
+		var qry = "SELECT status FROM " + prefix + "_" + uid + "_0 WHERE xid=" + xid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
@@ -338,11 +454,12 @@ exports.searchPageStatus = function(connection,uid,pid) {
 exports.searchRedundantTable = function(connection,uid,pid,redTable) {
 	var promise = new Promise(function(resolve,reject) {
 
-		var qry = "SELECT * FROM " + redTable + " WHERE uid=" + uid + " AND pid=" + pid;
+		var qry = "SELECT * FROM " + redTable + " WHERE uid=" + uid + " AND xid=" + pid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				if(typeof rows[0] !== 'undefined') {
@@ -378,11 +495,12 @@ exports.changePagename = function(connection,uid,pid,pagename) {
 	var promise = new Promise(function(resolve,reject) {
 
 		/* pagename must have connection.escape() already applied, which adds '' */
-		var qry = "UPDATE p_" + uid + " SET pagename=" + pagename + " WHERE pid=" + pid;
+		var qry = "UPDATE bp_" + uid + "_0 SET pagename=" + pagename + " WHERE pid=" + pid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
 			if(err) {
+				err.input = qry;
 				reject(err);
 			} else {
 				resolve(1);

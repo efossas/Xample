@@ -1,0 +1,476 @@
+{
+	"computer science":
+		{
+			"algorithm types":
+				["mathematical","search / optimization / patterns","sort"]
+			,"algorithm analysis":
+				["asymptotic notation","amortized analysis"]
+			,"algorithm strategies":
+				["backtracking / branch and bound","divide and conquer","dynamic programming","greedy","heuristic"]
+			,"data structures":
+				["arrays","graphs","linked lists","stacks-queues","trees"]
+			,"programming compilers":
+				["code optimization","intermediate code / three address code","lexical analysis","semantic analysis","syntax analysis / parsing"]
+			,"programming languages":
+				["astract syntax trees","backus naur form","judgements,inference rules,derviations","lambda calculus","environment"]
+			,"programming paradigms":
+				["declarative-miscellaneous","declarative-functional","imperative-object oriented","imperative-miscellanous"]
+			,"systems":
+				["assembly","binary","concurrency","file systems","linking","memory hierarchy","networks","optimization","processes","scheduling","virtual memory"]
+				
+	"music":
+		{
+			"pitch":
+				{
+					"notes":
+						[
+							"intro",
+							"pitch numbers",
+							"ledger lines",
+							"octave or fifteenth markings"
+						],
+					"staff":
+						[
+							"intro",
+							"treble",
+							"bass",
+							"alto",
+							"neutral"
+						],
+					"tab":
+						[
+							"intro"
+						]
+					"accidentals":
+						[
+							"intro",
+							"cautionary",
+							"enharmonic",
+							"double"
+						],
+					"intervals":
+						[
+							"intro",
+							"steps",
+							"minor major tritone",
+							"diminished or augmented"
+						],
+					"scales":
+						[
+							"intro",
+							"modes",
+							"key signatures",
+							"octatonic or diminished",
+							"hexatonic or augmented",
+							"whole"
+						],
+					"natural scale":
+						[
+							"ionian",
+							"dorian",
+							"phrygian",
+							"lydian",
+							"mixolydian",
+							"aeolian",
+							"locrian"
+						],
+					"melodic scale":
+						[
+							"intro",
+							"ionian",
+							"dorian",
+							"phrygian",
+							"lydian",
+							"mixolydian",
+							"aeolian",
+							"locrian"
+						],
+					"harmonic scale":
+						[
+							"intro",
+							"ionian",
+							"dorian",
+							"phrygian",
+							"lydian",
+							"mixolydian",
+							"aeolian",
+							"locrian"
+						],
+					"hybrid scale":
+						[
+							"intro",
+							"ionian",
+							"dorian",
+							"phrygian",
+							"lydian",
+							"mixolydian",
+							"aeolian",
+							"locrian"
+						],
+					"instructued scales":
+						[
+							"intro",
+							"major pentatonic",
+							"minor pentatonic",
+							"blues",
+							"major blues",
+							"minor blues",
+							"hungarian minor",
+							"double harmonic",
+							"japanese",
+							"enigmatic",
+							"other"
+						],
+					"triads":
+						[
+							"intro",
+							"diminished",
+							"minor",
+							"major",
+							"augmented"
+						],
+					"sevenths":
+						[
+							"intro",
+							"fully diminished",
+							"half diminished",
+							"quarter diminished",
+							"minor seventh",
+							"dominant seventh",
+							"major seventh",
+							"augmented seventh",
+							"harmonic seventh"
+						],
+					"dyads":
+						[
+							"intro",
+							"diminished",
+							"minor",
+							"major"
+						],
+					"fourth chords":
+						[
+							"intro",
+							"diminished",
+							"minor",
+							"major",
+							"augmented"
+						],
+					"tesserads":
+						[
+							"intro",
+							"perfect",
+							"mixed",
+							"raised"
+						],
+					"tenths",
+						[
+							"intro",
+							"double perfect",
+							"perfect mixed",
+							"mixed raised",
+							"raised perfect",
+							"raised mixed"
+						],
+					"migmads":
+						[
+							"intro",
+							"two flat negative",
+							"two flat positive",
+							"two negative",
+							"two positive",
+							"three flat negative",
+							"three flat positive",
+							"three negative",
+							"three positive",
+						],
+					"synthetics":
+						[
+							"half augmented",
+							"fully augmented",
+							"three flat quarter",
+							"five flat quarter"
+						],
+					"split chords":
+						[
+							"intro",
+							"diminished split third",
+							"minor split third",
+							"minor split fifth",
+							"major split fifth",
+							"split third fifth",
+							"fully diminisheds split third",
+							"half diminished split third",
+							"quarter diminished split third",
+							"minor seventh split third",
+							"dominant seventh split third",
+							"major seventh split third",
+							"augmented seventh split third",
+							"fully diminished split fifth",
+							"harmonic seventh split fifth",
+							"minor seventh split fifth",
+							"dominant seventh split fifth",
+							"major seventh split fifth"
+						],
+					"inversions":
+						[
+							"intro",
+							"first",
+							"second",
+							"third"
+						],
+					"clusters":
+						[
+							"tone cluster",
+							"separated cluster"
+						],
+					"roman numerals":
+						[
+							"intro"
+						]
+				},
+			"rhythm":
+				{
+					"tempo":
+						[
+							"intro",
+							"accelerando",
+							"ritardando"
+						],
+					"notes":
+						[
+							"intro",
+							"64th notes",
+							"32nd notes",
+							"16th notes",
+							"8th notes",
+							"quarter notes",
+							"half notes",
+							"whole notes",
+							"breves"
+						],
+					"time signatures":
+						[
+							"intro",
+							"five eight",
+							"six eight",
+							"seven eight",
+							"nine eight",
+							"two four",
+							"three four",
+							"four four",
+							"five four",
+							"six four",
+							"seven four",
+							"two two",
+							"four two",
+							"other"
+						],
+					"dots and ties":
+						[
+							"intro",
+							"single dotted",
+							"double dotted",
+							"tied"
+						],
+					"tuplets":
+						[
+							"intro",
+							"duplets",
+							"triplets",
+							"quadruplets",
+							"quintuplets",
+							"sextuplets",
+							"septuplets",
+							"octuplets",
+							"nontuplets",
+							"other"
+						],
+					"meters":
+						[
+							"simple",
+							"compound",
+							"composite",
+							"asymmetric",
+							"changing"
+						],
+					"syncopation":
+						[
+							"intro",
+							"up beats",
+							"off beats",
+							"truncated value",
+							"added value"
+						],
+					"polyrhythm":
+						[
+							"hemiola",
+							"rational",
+							"irrational"
+						],
+					"metric modulation":
+						[
+							"intro"
+						]
+				}
+}
+
+{
+	"arts":
+		{
+			"architecture":
+				[]
+			,"dance":
+				[]
+			,"film":
+				[]
+			,"literature":
+				[]
+			,"visual":
+				[]
+		},
+	"biology":
+		{
+			"anatomy":
+				[]
+			,"biochemistry":
+				[]
+			,"cellular":
+				[]
+			,"embryology":
+				[]
+			,"genetics":
+				[]
+			,"immunology-pathology":
+				[]
+			,"microbiology":
+				[]
+			,"neuro science":
+				[]
+			,"nutrition":
+				[]
+			,"physiology":
+				[]
+			,"taxonomy":
+				[]
+		},
+	"chemistry":
+		{
+
+		}
+	"computer science":
+		{
+			"algorithm types":
+				["mathematical","search / optimization / patterns","sort"]
+			,"algorithm analysis":
+				["asymptotic notation","amortized analysis"]
+			,"algorithm strategies":
+				["backtracking / branch and bound","divide and conquer","dynamic programming","greedy","heuristic"]
+			,"data structures":
+				["arrays","graphs","linked lists","stacks-queues","trees"]
+			,"programming compilers":
+				["code optimization","intermediate code / three address code","lexical analysis","semantic analysis","syntax analysis / parsing"]
+			,"programming languages":
+				["astract syntax trees","backus naur form","judgements,inference rules,derviations","lambda calculus","environment"]
+			,"programming paradigms":
+				["declarative-miscellaneous","declarative-functional","imperative-object oriented","imperative-miscellanous"]
+			,"systems":
+				["assembly","binary","concurrency","file systems","linking","memory hierarchy","networks","optimization","processes","scheduling","virtual memory"]
+		},
+	"humanities and social science":
+		{
+			"archaeology-history":
+				[]
+			,"anthropology":
+				[]
+			,"economics":
+				[]
+			,"law":
+				[]
+			,"language":
+				[]
+			,"philosophy":
+				[]
+			,"psychology":
+				[]
+			,"sociology":
+				[]
+		},
+	"mathematics":
+		{
+			"algebra":
+				[
+					"complex numbers",
+					"exponents-radicals",
+					"functions",
+					"linear equations",
+					"logarithms","polynomials",
+					"quadratic equations",
+					"vector algebra"
+				]
+			,"arithmetic":
+				[
+					"addition",
+					"division",
+					"multiplication",
+					"subtraction",
+					"modular"
+				]
+			,"calculus":
+				{
+					"limits"
+				}
+					"antiderivatives",
+					"differential equations",
+					"derivatives",
+					"integrals",
+					"limits",
+					"multiple integrals",
+					"partial derivatives",
+					"series",
+					"vector calculus"
+				]
+			,"discrete math":
+				[
+					"combinatorics",
+					"graphs-trees",
+					"logic-booleans",
+					"probability",
+					"sequences-summation-products",
+					"sets-relations"
+				]
+			,"geometry":
+				[
+					...
+				]
+			,"linear algebra":
+				[
+					"determinants",
+					"LU factorization",
+					"matrix operations",
+					"row reduction"
+				]
+			,"statistics":
+				[
+					"discrete distributions",
+					"continuous distributions",
+					...
+				]
+			,"trigonometry":
+				[
+					...
+				]
+		},
+	"physics":
+		{
+
+		}
+}
+
+
+
+environment:
+	scope
+	lazy vs eager
+	mutability
+	higher-order functions

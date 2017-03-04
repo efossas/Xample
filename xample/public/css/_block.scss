@@ -1,10 +1,6 @@
 /*** Xample Page & Bengine ***/
 
 /* Save Bar */
-.savebar {
-	padding: 20px 0px 20px 0px;
-}
-
 #savebar {
 	text-align: center;
 	height: 60px;
@@ -39,6 +35,25 @@
 }
 
 /* Page Info */
+.page-blurb {
+	display: block;
+	width: 100%;
+	height: 135px;
+	border: 1px solid black;
+	border-radius: 2px;
+
+	padding: 4px;
+	margin: 0px;
+	box-sizing: border-box;
+
+	resize: none;
+
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	font-weight: 300;
+	color: black;
+}
+
 .page-link {
 	display: inline-block;
 	width: 100%;
@@ -73,6 +88,17 @@
 	font-size: 1em;
 	font-weight: 300;
 	color: black;
+}
+
+.explore-img {
+	width: 240px;
+	height: 135px;
+}
+
+.thumb-img {
+	@extend .explore-img;
+	cursor: pointer;
+	vertical-align:top;
 }
 
 /* Blocks */

@@ -33,8 +33,8 @@ exports.uploadmedia = function(request,response) {
         response.end('nouploadloggedout');
     } else {
 
-		/* grab the pid and block type from the get query */
-		var pid = request.query.pid;
+		/* grab the did and block type from the get query */
+		var did = request.query.did;
 		var btype = request.query.btype;
 
 		/* pipe the incoming request to the busboy app */
@@ -43,7 +43,7 @@ exports.uploadmedia = function(request,response) {
 
         request.busboy.on('file',function(fieldname,file,filename) {
             /* set path to save the file, then pipe/save the file to that path */
-			var reldir = "xm/" + uid + "/" + pid + "/";
+			var reldir = "xm/" + uid + "/" + did + "/";
             var absdir = request.app.get('fileRoute') + reldir;
 
             /* replace spaces with underscores, fixes issues with shell commands */
@@ -56,16 +56,16 @@ exports.uploadmedia = function(request,response) {
 
             fstream.on('close',function() {
                 /* media conversion */
-                var promise = filemedia.convertMedia(response,oldfile,absdir,reldir,btype,uid,pid);
+                var promise = filemedia.convertMedia(response,oldfile,absdir,reldir,btype,uid,did);
 
                 promise.then(function(success) {
                     /* respond with the absolute url to the uploaded file */
                     response.end(request.root + success);
-                    analytics.journal(false,0,"",uid,analytics.__line,__function,__filename);
+                    analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
                 },function(error) {
                     response.end('convertmediaerr');
                     /// remove bad media
-                    analytics.journal(true,110,error,uid,analytics.__line,__function,__filename);
+                    analytics.journal(true,110,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
                 });
             });
         });
