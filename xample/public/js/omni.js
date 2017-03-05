@@ -9,6 +9,8 @@
 	global alertify:true
 */
 
+var globalScope = {};
+
 /***
 	Section: Helper Functions
 	These are helper functions.
@@ -454,7 +456,7 @@ function btnSubmit(text,funcName,color) {
 */
 function dashAutoSave() {
 	var autosave = document.createElement("div");
-	autosave.setAttribute("id","autosave");
+	autosave.setAttribute("id","bengine-autosave");
 
 	return autosave;
 }
@@ -474,7 +476,7 @@ function dashAutoSave() {
 */
 function dashSaveStatus() {
 	var savestatus = document.createElement("div");
-	savestatus.setAttribute("id","savestatus");
+	savestatus.setAttribute("id","bengine-savestatus");
 	savestatus.innerHTML = "Saved";
 
 	return savestatus;
@@ -498,7 +500,7 @@ function dashSaveProgress() {
 	saveprogress.setAttribute("id","saveprogress");
 
 	var progressbar = document.createElement("progress");
-	progressbar.setAttribute("id","progressbar");
+	progressbar.setAttribute("id","bengine-progressbar");
 	progressbar.setAttribute("value",100);
 	progressbar.setAttribute("max",100);
 	progressbar.style.visibility = 'hidden';
@@ -896,14 +898,14 @@ function barStatus(pid) {
 	rowOne.setAttribute("class","row");
 
 	/* revert button */
-	var revert = btnSubmit('Revert',"revertBlocks()",'none');
+	var revert = btnSubmit('Revert',"wiseEngine.revertBlocks()",'none');
 	revert.className += " savebarbtn";
 	var colRevert = document.createElement("div");
 	colRevert.setAttribute("class","col col-15");
 	colRevert.appendChild(revert);
 
 	/* save button */
-	var save = btnSubmit("Save","saveBlocks(true)","none");
+	var save = btnSubmit("Save","wiseEngine.saveBlocks(true)","none");
 	save.className += " savebarbtn";
 	var colSave = document.createElement("div");
 	colSave.setAttribute("class","col col-15");
@@ -945,66 +947,479 @@ function barStatus(pid) {
 }
 
 /*
-	Function: progressFinalize
+	Function: barPageSettings
+
+	Creates bar for changing page settings
 
 	Parameters:
 
-		msg - string, for displaying what is being progressed
-		max - int, the value representing a completed progress load
+		pagetype - string, used for links
+		aid - the author id
+		settings - object, with settings as properties
 
 	Returns:
 
-		none - *
+		success - html node, dropdowns.
 */
-function progressFinalize(msg,max) {
-	document.getElementById("progressbar").setAttribute("value",max);
-	document.getElementById("progressbar").style.visibility = "hidden";
-	document.getElementById("progressbar").style.display = "none";
+function barPageSettings(pagetype,aid,settings) {
+	var pageSettings = document.createElement('div');
+	pageSettings.setAttribute('class','settings-bar col-100');
 
-	document.getElementById("autosave").style.visibility = "visible";
-	document.getElementById("autosave").style.display = "block";
+	/* show mode page link */
+	var showLink = document.createElement('div');
+	showLink.setAttribute('class','page-link');
+	var slink = createURL('/' + pagetype + '?a=' + aid + '&p=' + settings.id);
+	showLink.innerHTML = "<a href='" + slink + "' target='_blank'>" + slink + "</a>";
+	pageSettings.appendChild(showLink);
 
-	document.getElementById("savestatus").innerHTML = msg;
+	/* page title input */
+	var title = document.createElement('input');
+	title.setAttribute('type','text');
+	title.setAttribute('name','pagename');
+	title.setAttribute('id','pagetitle');
+	title.setAttribute('class','page-title');
+	title.setAttribute('maxlength','50');
+	title.setAttribute('value',settings.name);
+	pageSettings.appendChild(title);
+
+	/* drop downs for choosing page subj,cat,top */
+	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
+	pageSettings.appendChild(ddsct);
+
+	/* row for image and blurb */
+	var rowImgBlurb = document.createElement('div');
+	rowImgBlurb.setAttribute('class','row');
+
+	function uploadThumb() {
+		/* get the hidden file-select object that will store the user's file selection */
+		var fileSelect = document.getElementById('bengine-file-select');
+		fileSelect.setAttribute("accept",".bmp,.bmp2,.bmp3,.jpeg,.jpg,.pdf,.png,.svg");
+
+		fileSelect.click();
+
+		fileSelect.onchange = function() {
+			/* grab the selected file */
+			var file = fileSelect.files[0];
+
+			var notvalid = false;
+			var nofile = false;
+			var errorMsg;
+			if(fileSelect.files.length > 0) {
+				if(file.size > 4294967295) {
+					notvalid = true;
+					errorMsg = "Files Must Be Less Than 4.3 GB";
+				}
+			} else {
+				nofile = true;
+			}
+
+			if(nofile) {
+				/* do nothing, no file selected */
+			} else if(notvalid) {
+				alertify.alert(errorMsg);
+			} else {
+				/* wrap the ajax request in a promise */
+				var promise = new Promise(function(resolve,reject) {
+
+					/* create javascript FormData object and append the file */
+					var formData = new FormData();
+					formData.append('media',file,file.name);
+
+					/* get the directory id */
+					var id = document.getElementById('bengine-x-id').getAttribute('data-did');
+
+					/* grab the domain and create the url destination for the ajax request */
+					var url = createURL("/uploadthumb?id=" + id);
+
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.open('POST',url,true);
+
+					xmlhttp.onreadystatechange = function() {
+						if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+							if(xmlhttp.status === 200) {
+								var result = JSON.parse(xmlhttp.responseText);
+
+								switch(result.msg) {
+									case 'success':
+										resolve(result.data); break;
+									case 'nouploadloggedout':
+										alertify.alert("You Can't Upload A Thumbnail Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
+										reject("err"); break;
+									case 'convertmediaerr':
+										reject('convertmediaerr'); break;
+									case 'err':
+									default:
+										reject('err');
+								}
+							} else {
+								alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
+								reject("err");
+							}
+						}
+					};
+
+					xmlhttp.send(formData);
+				});
+
+				promise.then(function(imglink) {
+					var linkparts = imglink.split(",");
+					var thumbtag = document.getElementById('pageimg');
+					thumbtag.src = linkparts[1];
+				},function(error) {
+					if(error === "convertmediaerr") {
+						alertify.log("There was an error with that media format. Please try a different file type.");
+					} else {
+						alertify.log("There was an unknown error during thumbnail upload.");
+					}
+				});
+			}
+		};
+	}
+
+	/* page thumbnail img */
+	var colImg = document.createElement('div');
+	colImg.setAttribute('class','col col-33');
+
+	var thumbnail = document.createElement('img');
+	thumbnail.setAttribute('id','pageimg');
+	thumbnail.setAttribute('class','thumb-img');
+	thumbnail.onclick = uploadThumb;
+	if(settings.imageurl !== "") {
+		thumbnail.setAttribute('src',settings.imageurl);
+	}
+	colImg.appendChild(thumbnail);
+
+	/* page blurb input */
+	var colBlurb = document.createElement('div');
+	colBlurb.setAttribute('class','col col-66');
+
+	var blurb = document.createElement('textarea');
+	blurb.setAttribute('name','pageblurb');
+	blurb.setAttribute('id','pageblurb');
+	blurb.setAttribute('class','page-blurb');
+	blurb.setAttribute('rows','4');
+	blurb.setAttribute('maxlength','500');
+	blurb.setAttribute('placeholder','Explain this page here.');
+	blurb.value = settings.blurb;
+	colBlurb.appendChild(blurb);
+
+	/* append img and blurb */
+	rowImgBlurb.appendChild(colImg);
+	rowImgBlurb.appendChild(colBlurb);
+	pageSettings.appendChild(rowImgBlurb);
+
+	/* page settings save */
+	var capital = pagetype.charAt(0).toUpperCase() + pagetype.slice(1);
+	var btnSaveSettings = btnSubmit('Save ' + capital + ' Settings','savePageSettings("' + pagetype + '")','none');
+	pageSettings.appendChild(btnSaveSettings);
+
+	return pageSettings;
 }
 
 /*
-	Function: progressInitialize
+	Function: formDropDownsSCT
+
+	Creates the form for selecting Subject, Category, Topic.
 
 	Parameters:
 
-		msg - string, for displaying what is being progressed
-		max - int, the value representing a completed progress load
+		defSub - string, default subject; leave empty otherwise
+		defCat - string, default category; leave empty otherwise
+		defTop - string, default topic; leave empty otherwise
 
 	Returns:
 
-		none - *
+		success - html node, dropdowns.
 */
-function progressInitialize(msg,max) {
-	document.getElementById("autosave").style.visibility = "hidden";
-	document.getElementById("autosave").style.display = "none";
+function formDropDownsSCT(defSub,defCat,defTop) {
+	/* used for making the default first selection grey in the dropdowns */
+	function greyFirstSelect(selectTag) {
+		if(selectTag.selectedIndex === 0) {
+			selectTag.style = "color: grey";
+		} else {
+			selectTag.style = "color: black";
+		}
+	}
 
-	document.getElementById("progressbar").setAttribute("value",0);
-	document.getElementById("progressbar").setAttribute("max",max);
-	document.getElementById("progressbar").style.visibility = "visible";
-	document.getElementById("progressbar").style.display = "block";
+	/* this function will be called onchange of subject drop down */
+	function loadCategories() {
 
-	document.getElementById("savestatus").innerHTML = msg;
+		/* get the selected subject */
+		var subject = this.options[this.selectedIndex].value;
+
+		/* get & empty the category selection element */
+		var listCategories = document.getElementById("select-category");
+		emptyDiv(listCategories);
+
+		/* create the default first selection */
+		var optionCategory = document.createElement('option');
+		optionCategory.setAttribute("value","");
+		optionCategory.innerHTML = "choose category";
+		listCategories.appendChild(optionCategory);
+
+		/* get & empty the topic selection element */
+		var listTopics = document.getElementById("select-topic");
+		emptyDiv(listTopics);
+
+		/* create the default first selection */
+		var optionTopic = document.createElement('option');
+		optionTopic.setAttribute("value","");
+		optionTopic.innerHTML = "choose topic";
+		listTopics.appendChild(optionTopic);
+
+		if(subject !== "") {
+
+			/* get the categories for that subject */
+			var categories = Object.keys(globalScope.subjects[subject]);
+			var count = categories.length;
+
+			/* fill the selection element with categories */
+			for(var i = 0; i < count; i++) {
+				optionCategory = document.createElement('option');
+				optionCategory.setAttribute('value',categories[i]);
+				optionCategory.innerHTML = categories[i];
+				listCategories.appendChild(optionCategory);
+			}
+
+			/* reset the selection to "choose category" */
+			listCategories.selectedIndex = 0;
+		}
+
+		/* grey the first selected */
+		greyFirstSelect(this);
+		greyFirstSelect(listCategories);
+		greyFirstSelect(listTopics);
+	}
+
+	/* this function will be called onchange of categories dropdown */
+	function loadTopics() {
+
+		/* get the selected category */
+		var category = this.options[this.selectedIndex].value;
+
+		/* get the selected subject using id */
+		var selectSubject = document.getElementById("select-subject");
+		var subject = selectSubject.options[selectSubject.selectedIndex].value;
+
+		/* get & empty the topic selection element */
+		var listTopics = document.getElementById("select-topic");
+		emptyDiv(listTopics);
+
+		/* create the default first option */
+		var optionTopic = document.createElement('option');
+		optionTopic.innerHTML = "choose topic";
+		optionTopic.setAttribute("value","");
+		listTopics.appendChild(optionTopic);
+
+		/* just in case subject hasn't been selected */
+		if(subject !== "" && category !== "") {
+
+			/* get the topics for the category */
+			var topics = globalScope.subjects[subject][category];
+			var count = topics.length;
+
+			/* fill the selection element with topics */
+			for(var i = 0; i < count; i++) {
+				optionTopic = document.createElement('option');
+				optionTopic.setAttribute('value',topics[i]);
+				optionTopic.innerHTML = topics[i];
+				listTopics.appendChild(optionTopic);
+			}
+
+			/* reset the selection to "choose topic" */
+			listTopics.selectedIndex = 0;
+		}
+
+		/* grey the first selected */
+		greyFirstSelect(this);
+		greyFirstSelect(listTopics);
+	}
+
+	var row_SubjectSelect = document.createElement("div");
+	row_SubjectSelect.setAttribute("class","row");
+
+	var colLeft_SubjectSelect = document.createElement("div");
+	colLeft_SubjectSelect.setAttribute("class","col col-33");
+
+	var colMiddle_SubjectSelect = document.createElement("div");
+	colMiddle_SubjectSelect.setAttribute("class","col col-33");
+
+	var colRight_SubjectSelect = document.createElement("div");
+	colRight_SubjectSelect.setAttribute("class","col col-33");
+
+	row_SubjectSelect.appendChild(colLeft_SubjectSelect);
+	row_SubjectSelect.appendChild(colMiddle_SubjectSelect);
+	row_SubjectSelect.appendChild(colRight_SubjectSelect);
+
+	/* create select tags */
+	var listSubjects = document.createElement('select');
+	listSubjects.setAttribute("id","select-subject");
+	listSubjects.onchange = loadCategories;
+	listSubjects.style = "color: grey";
+
+	var listCategories = document.createElement('select');
+	listCategories.setAttribute("id","select-category");
+	listCategories.onchange = loadTopics;
+	listCategories.style = "color: grey";
+
+	var listTopics = document.createElement('select');
+	listTopics.setAttribute("id","select-topic");
+	listTopics.onchange = function() {
+		greyFirstSelect(listTopics);
+	};
+	listTopics.style = "color: grey";
+
+	/* get subjects for select topic list */
+	var subjectsPromise = getSubjects();
+
+	subjectsPromise.then(function(data) {
+		var subjectsData = data;
+		globalScope.subjects = subjectsData;
+
+		/* first box - subject names */
+		var subjectsNames = Object.keys(subjectsData);
+		var subjectsCount = subjectsNames.length;
+
+		var optionSubject = document.createElement('option');
+		optionSubject.innerHTML = "choose subject";
+		optionSubject.setAttribute("value","");
+		listSubjects.appendChild(optionSubject);
+
+		/* loop through and add subjects. */
+		var foundSubject = false;
+		for(var i = 0; i < subjectsCount; i++) {
+			optionSubject = document.createElement('option');
+			optionSubject.setAttribute('value',subjectsNames[i]);
+			optionSubject.innerHTML = subjectsNames[i];
+			listSubjects.appendChild(optionSubject);
+			if(subjectsNames[i] === defSub) {
+				optionSubject.setAttribute('selected','selected');
+				foundSubject = true;
+			}
+		}
+
+		/* second box - category names */
+		var optionCategory = document.createElement('option');
+		optionCategory.setAttribute("value","");
+		optionCategory.innerHTML = "choose category";
+		listCategories.appendChild(optionCategory);
+
+		/* add categories if this page has saved subject */
+		var foundCategory = false;
+		if(foundSubject) {
+			/* get the categories for that subject */
+			var categories = Object.keys(globalScope.subjects[defSub]);
+			var countCat = categories.length;
+
+			/* fill the selection element with categories */
+			for(var j = 0; j < countCat; j++) {
+				optionCategory = document.createElement('option');
+				optionCategory.setAttribute('value',categories[j]);
+				optionCategory.innerHTML = categories[j];
+				listCategories.appendChild(optionCategory);
+				if(categories[j] === defCat) {
+					optionCategory.setAttribute('selected','selected');
+					foundCategory = true;
+				}
+			}
+		}
+
+		/* third box - topic names */
+		var optionTopic = document.createElement('option');
+		optionTopic.setAttribute("value","");
+		optionTopic.innerHTML = "choose topic";
+		listTopics.appendChild(optionTopic);
+
+		/* add topics if this page has saved category */
+		if(foundCategory) {
+			/* get the topics for the category */
+			var topics = globalScope.subjects[defSub][defCat];
+			var countTop = topics.length;
+
+			/* fill the selection element with topics */
+			for(var k = 0; k < countTop; k++) {
+				optionTopic = document.createElement('option');
+				optionTopic.setAttribute('value',topics[k]);
+				optionTopic.innerHTML = topics[k];
+				listTopics.appendChild(optionTopic);
+				if(topics[k] === defTop) {
+					optionTopic.setAttribute('selected','selected');
+				}
+			}
+
+		}
+
+	},function(error) {
+		alertify.alert("There Was An Error Getting The Subjects");
+	});
+
+	/* append lists to columns */
+	colLeft_SubjectSelect.appendChild(listSubjects);
+	colMiddle_SubjectSelect.appendChild(listCategories);
+	colRight_SubjectSelect.appendChild(listTopics);
+
+	return row_SubjectSelect;
 }
 
 /*
-	Function: progressUpdate
+	Function: savePageSettings
+
+	This function makes an ajax request to save the page settings.
 
 	Parameters:
 
-		value - int, represent current progress
+		pagetype - string, type of page being saved
 
 	Returns:
 
-		none - *
+		none
 */
-function progressUpdate(value) {
-	document.getElementById("progressbar").setAttribute("value",value);
-}
+var savePageSettings = function(pagetype) {
+	/* create the url destination for the ajax request */
+	var url = createURL('/savepagesettings');
+
+	/* get the pid & page name */
+	var id = document.getElementById('bengine-x-id').getAttribute('data-xid');
+	var title = document.getElementById('pagetitle').value;
+	var subject = document.getElementById('select-subject').value;
+	var category = document.getElementById('select-category').value;
+	var topic = document.getElementById('select-topic').value;
+	var imageurl = document.getElementById('pageimg').src.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
+	var blurb = document.getElementById('pageblurb').value;
+
+	var xmlhttp;
+	xmlhttp = new XMLHttpRequest();
+
+	var params = "pt=" + pagetype + "&id=" + id + "&p=" + title + "&s=" + subject + "&c=" + category + "&t=" + topic + "&i=" + imageurl + "&b=" + blurb;
+
+	xmlhttp.open("POST",url,true);
+
+	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+	xmlhttp.onreadystatechange = function() {
+		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+			if(xmlhttp.status === 200) {
+				var result = JSON.parse(xmlhttp.responseText);
+
+				switch(result.msg) {
+					case 'settingssaved':
+						alertify.log("Settings Saved!","success"); break;
+					case 'nosaveloggedout':
+						alertify.alert("Save Settings Error. You Are Not Logged In."); break;
+					case 'nosubjectnotsaved':
+						alertify.alert("Save Settings Error. Please Enter At Least A Subject."); break;
+					case 'err':
+					default:
+						alertify.alert("An Error Occured. Please Try Again Later");
+				}
+			} else {
+				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+			}
+		}
+	};
+
+	xmlhttp.send(params);
+};
 
 // <<<fold>>>
 

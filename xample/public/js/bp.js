@@ -7,20 +7,16 @@
 /***
 	Section: Globals
 	These are the global variables xample uses
-
-	pdfObjects - pdf.js generates pdf objects that can be used to render individual pages to <canvas>
-	globalScope - attach needed global variables as properties to this object
 ***/
 
 // <<<code>>>
-
-var globalScope = {};
 
 /* from omni.js */
 /*
 	global autosaveTimer:true
 	global createURL:true
 	global emptyDiv:true
+	global barPageSettings:true
 	global btnLink:true
 	global btnSubmit:true
 	global barLog:true
@@ -32,27 +28,14 @@ var globalScope = {};
 	global getCookies:true
 	global getSubjects:true
 	global getUserFields:true
+	global globalScope:true
 	global journalError:true
 	global setBookmark:true
 	global setView:true
 	global watermark:true
 */
-/* from bengine.js */
 /*
-	global x:true
-	global globalBlockEngine:true
-	global blockButtons:true
-	global blockContentShow:true
-	global blockEngineStart:true
-	global generateBlock: true
-	global countBlocks: true
-	global saveBlocks: true
-	global parseBlock: true
-	global deparseBlock: true
-	global barPageSettings: true
-*/
-/* list any objects js dependencies */
-/*
+	global Bengine:true
 	global MathJax:true
 	global PDFJS:true
 	global hljs:true
@@ -68,10 +51,23 @@ var globalScope = {};
 
 // <<<code>>
 
+var x = {};
+var globalBlockEngine = {};
+
 x.xtext = new function xtext() {
 	this.type = "xtext";
 	this.name = "text";
 	this.upload = false;
+
+	var parseBlock = function(blockText) {
+		var element = document.createElement('div');
+		element.innerHTML = blockText.replace(/</g,"@@LT").replace(/>/g,"@@RT").replace(/<br>/g,"@@BR");
+		return encodeURIComponent(element.textContent).replace(/'/g,"%27");
+	};
+
+	var deparseBlock = function(blockText) {
+		return decodeURIComponent(blockText).replace(/@@LT/g,"<").replace(/@@RT/g,">").replace(/@@BR/g,"<br>").replace(/%27/g,"'");
+	};
 
 	this.insertContent = function(block,content) {
 		/* WYSIWIG uses iframe */
@@ -101,7 +97,7 @@ x.xtext = new function xtext() {
 			if(globalScope.defaulttext && content === "") {
 				iframe.write("You can turn this default text off on your Profile Page.<br><br>Press&nbsp;<kbd>shift</kbd>&nbsp;and&nbsp;<kbd>ctrl</kbd>&nbsp;with the following keys to style text:<br><br><kbd>p</kbd>&nbsp;plain<br><kbd>b</kbd>&nbsp;<b>bold</b><br><kbd>i</kbd>&nbsp;<i>italics</i><br><kbd>h</kbd>&nbsp;<span style='background-color: yellow;'>highlight</span><br><kbd>+</kbd>&nbsp;<sup>superscript</sup><br><kbd>-</kbd>&nbsp;<sub>subscript</sub><br><kbd>a</kbd>&nbsp;<a href='http://abaganon.com/'>anchor link</a><ul><li><kbd>l</kbd>&nbsp;list</li></ul><kbd>j</kbd>&nbsp;justify left<br><i>For the things we have to learn before we can do them, we learn by doing them</i>. -Aristotle &nbsp;<i>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i>. &nbsp;-? &nbsp;<i>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i>-? &nbsp;<i>If you can't explain it simply, you don't understand it well enough.&nbsp;</i>-Einstein &nbsp;<i>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i>&nbsp;-Twain<br><br><kbd>f</kbd>&nbsp;justify full<div style='text-align: justify;'><i style='text-align: start;'>For the things we have to learn before we can do them, we learn by doing them</i><span style='text-align: start;'>. -Aristotle &nbsp;</span><i style='text-align: start;'>I hear and I forget.&nbsp;I&nbsp;see and I remember. I do and I understand</i><span style='text-align: start;'>. &nbsp;-? &nbsp;</span><i style='text-align: start;'>If you want to go fast, go it alone. If you want to go far, go together.&nbsp;</i><span style='text-align: start;'>-? &nbsp;</span><i style='text-align: start;'>If you can't explain it simply, you don't understand it well enough.&nbsp;</i><span style='text-align: start;'>-Einstein &nbsp;</span><i style='text-align: start;'>Age is an issue of mind over matter. If you don't mind, it doesn't matter.</i><span style='text-align: start;'>&nbsp;-Twain</span>");
 			} else {
-				iframe.write(deparseBlock(objCopy.type,content));
+				iframe.write(deparseBlock(content));
 			}
 			iframe.close();
 
@@ -123,7 +119,7 @@ x.xtext = new function xtext() {
 
 	this.afterDOMinsert = function(bid,data) {
 		/* grab the block iframe that was just made */
-		var blocki = document.getElementById("a" + bid).childNodes[0];
+		var blocki = document.getElementById("bengine-a" + bid).childNodes[0];
 		var blockDoc = blocki.contentDocument;
 
 		/* make iframe editable */
@@ -132,18 +128,23 @@ x.xtext = new function xtext() {
 
 	this.saveContent = function(bid) {
 		/* execCommand() applies style tags to <body> tag inside <iframe>, hence .getElementsByTagName('body')[0] */
-		var blockContent = document.getElementById('a' + bid).children[0].contentDocument.getElementsByTagName('body')[0].innerHTML;
-		return parseBlock(this.type,blockContent);
+		var blockContent = document.getElementById('bengine-a' + bid).children[0].contentDocument.getElementsByTagName('body')[0].innerHTML;
+		return parseBlock(blockContent);
 	};
 
 	this.showContent = function(block,content) {
 		var textBlock = document.createElement("div");
 		textBlock.setAttribute("class","xTex-show");
-		textBlock.innerHTML = deparseBlock(this.type,content);
+		textBlock.innerHTML = deparseBlock(content);
 
 		block.appendChild(textBlock);
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 
 	this.f = {
@@ -252,6 +253,16 @@ x.xcode = new function xcode() {
 	this.name = "code";
 	this.upload = false;
 
+	var parseBlock = function(blockText) {
+		var element = document.createElement('div');
+		element.innerHTML = blockText.replace(/<span[^>]*>/g,"").replace(/<\/span>/g,"").replace(/</g,"@@LT").replace(/>/g,"@@RT").replace(/<br>/g,"@@BR");
+		return encodeURIComponent(element.textContent).replace(/'/g,"%27");
+	};
+
+	var deparseBlock = function(blockText) {
+		return decodeURIComponent(blockText).replace(/@@LT/g,"<").replace(/@@RT/g,">").replace(/@@BR/g,"<br>").replace(/%27/g,"'");
+	};
+
 	this.insertContent = function(block,content) {
 		var codeBlock = document.createElement("code");
 		codeBlock.setAttribute("class","xCde");
@@ -262,7 +273,7 @@ x.xcode = new function xcode() {
 		if(globalScope.defaulttext && content === "") {
 			codeBlock.innerHTML = "var description = 'Programming languages are auto-detected.';<br>function default(parameter) {<br>&nbsp;&nbsp;&nbsp;&nbsp;var instructions = 'When you click outside the block syntax is highlighted.';<br>&nbsp;&nbsp;&nbsp;&nbsp;alert(parameter + instructions);<br>}<br>default(description);";
 		} else {
-			codeBlock.innerHTML = deparseBlock(this.type,content);
+			codeBlock.innerHTML = deparseBlock(content);
 		}
 
 		block.appendChild(codeBlock);
@@ -280,24 +291,29 @@ x.xcode = new function xcode() {
 	};
 
 	this.afterDOMinsert = function(bid,data) {
-		var codeBlock = document.getElementById('a' + bid).childNodes[0];
+		var codeBlock = document.getElementById('bengine-a' + bid).childNodes[0];
 		this.f.renderCode(codeBlock);
 	};
 
 	this.saveContent = function(bid) {
-		var blockContent = document.getElementById('a' + bid).children[0].innerHTML;
-		return parseBlock(this.type,blockContent);
+		var blockContent = document.getElementById('bengine-a' + bid).children[0].innerHTML;
+		return parseBlock(blockContent);
 	};
 
 	this.showContent = function(block,content) {
 		var codeBlock = document.createElement("div");
 		codeBlock.setAttribute("class","xCde-show");
-		codeBlock.innerHTML = deparseBlock(this.type,content);
+		codeBlock.innerHTML = deparseBlock(content);
 
 		block.appendChild(codeBlock);
 		this.f.renderCode(codeBlock);
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 
 	this.f = {
@@ -368,6 +384,16 @@ x.xmath = new function xmath() {
 	this.name = "math";
 	this.upload = false;
 
+	var parseBlock = function(blockText) {
+		var element = document.createElement('div');
+		element.innerHTML = blockText.replace(/\\/g,"\\\\").replace(/</g,"@@LT").replace(/>/g,"@@RT").replace(/<br>/g,"@@BR");
+		return encodeURIComponent(element.textContent).replace(/'/g,"%27");
+	};
+
+	var deparseBlock = function(blockText) {
+		return decodeURIComponent(blockText).replace(/\\\\/g,'\\').replace(/@@LT/g,"<").replace(/@@RT/g,">").replace(/@@BR/g,"<br>").replace(/%27/g,"'");
+	};
+
 	this.insertContent = function(block,content) {
 		var mathpreview = document.createElement('div');
 		mathpreview.setAttribute('class','mathImage');
@@ -380,7 +406,7 @@ x.xmath = new function xmath() {
 		if(globalScope.defaulttext && content === "") {
 			mathBlock.innerHTML = 'AsciiMath \\ Mark \\ Up: \\ \\ \\ sum_(i=1)^n i^3=((n(n+1))/2)^2';
 		} else {
-			mathBlock.innerHTML = deparseBlock(this.type,content);
+			mathBlock.innerHTML = deparseBlock(content);
 		}
 
 		block.appendChild(mathpreview);
@@ -390,13 +416,13 @@ x.xmath = new function xmath() {
 	};
 
 	this.afterDOMinsert = function(bid,data) {
-		this.f.renderMath(document.getElementById('a' + bid).childNodes[1]);
+		this.f.renderMath(document.getElementById('bengine-a' + bid).childNodes[1]);
 	};
 
 	this.saveContent = function(bid) {
 		/* replace() is for escaping backslashes */
-		var blockContent = document.getElementById('a' + bid).children[1].innerHTML;
-		return parseBlock(this.type,blockContent);
+		var blockContent = document.getElementById('bengine-a' + bid).children[1].innerHTML;
+		return parseBlock(blockContent);
 	};
 
 	this.showContent = function(block,content) {
@@ -406,7 +432,7 @@ x.xmath = new function xmath() {
 		var mathBlock = document.createElement('div');
 		mathBlock.setAttribute('class','xMat');
 		mathBlock.setAttribute('style','display:none;visibility:hidden;');
-		mathBlock.innerHTML = deparseBlock(this.type,content);
+		mathBlock.innerHTML = deparseBlock(content);
 
 		block.appendChild(mathpreview);
 		block.appendChild(mathBlock);
@@ -414,6 +440,11 @@ x.xmath = new function xmath() {
 		this.f.renderMath(mathBlock);
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 
 	this.f = {
@@ -436,6 +467,16 @@ x.latex = new function latex() {
 	this.name = "latex";
 	this.upload = false;
 
+	var parseBlock = function(blockText) {
+		var element = document.createElement('div');
+		element.innerHTML = blockText.replace(/\\/g,"\\\\").replace(/</g,"@@LT").replace(/>/g,"@@RT").replace(/<br>/g,"@@BR");
+		return encodeURIComponent(element.textContent).replace(/'/g,"%27");
+	};
+
+	var deparseBlock = function(blockText) {
+		return decodeURIComponent(blockText).replace(/\\\\/g,'\\').replace(/@@LT/g,"<").replace(/@@RT/g,">").replace(/@@BR/g,"<br>").replace(/%27/g,"'");
+	};
+
 	this.insertContent = function(block,content) {
 		var latexpreview = document.createElement('div');
 		latexpreview.setAttribute('class','latexImage');
@@ -448,7 +489,7 @@ x.latex = new function latex() {
 		if(globalScope.defaulttext && content === "") {
 			latexBlock.innerHTML = 'LaTeX \\ Mark \\ Up: \\quad \\frac{d}{dx}\\left( \\int_{0}^{x} f(u)\\,du\\right)=f(x)';
 		} else {
-			latexBlock.innerHTML = deparseBlock(this.type,content);
+			latexBlock.innerHTML = deparseBlock(content);
 		}
 
 		block.appendChild(latexpreview);
@@ -458,13 +499,13 @@ x.latex = new function latex() {
 	};
 
 	this.afterDOMinsert = function(bid,data) {
-		this.f.renderLatex(document.getElementById('a' + bid).childNodes[1]);
+		this.f.renderLatex(document.getElementById('bengine-a' + bid).childNodes[1]);
 	};
 
 	this.saveContent = function(bid) {
 		/* replace() is for escaping backslashes */
-		var blockContent = document.getElementById('a' + bid).children[1].innerHTML;
-		return parseBlock(this.type,blockContent);
+		var blockContent = document.getElementById('bengine-a' + bid).children[1].innerHTML;
+		return parseBlock(blockContent);
 	};
 
 	this.showContent = function(block,content) {
@@ -474,7 +515,7 @@ x.latex = new function latex() {
 		var latexBlock = document.createElement('div');
 		latexBlock.setAttribute('class','xLtx');
 		latexBlock.setAttribute('style','display:none;visibility:hidden;');
-		latexBlock.innerHTML = deparseBlock(this.type,content);
+		latexBlock.innerHTML = deparseBlock(content);
 
 		block.appendChild(latexpreview);
 		block.appendChild(latexBlock);
@@ -482,6 +523,11 @@ x.latex = new function latex() {
 		this.f.renderLatex(latexBlock);
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 
 	this.f = {
@@ -516,14 +562,14 @@ x.image = new function image() {
 
 	this.afterDOMinsert = function(bid,data) {
 		if(data !== null) {
-			var imagetag = document.getElementById('a' + bid).childNodes[0];
+			var imagetag = document.getElementById('bengine-a' + bid).childNodes[0];
 			imagetag.src = data;
 		}
 	};
 
 	this.saveContent = function(bid) {
 		/* replace() is for escaping backslashes and making relative path */
-		var imagestr = document.getElementById('a' + bid).children[0].src;
+		var imagestr = document.getElementById('bengine-a' + bid).children[0].src;
 		return imagestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
 
@@ -535,6 +581,11 @@ x.image = new function image() {
 		block.appendChild(ximg);
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 };
 
@@ -562,14 +613,14 @@ x.audio = new function audio() {
 	this.afterDOMinsert = function(bid,data) {
 		if(data !== null) {
 			/* audio & video divs have their src set in an extra child node */
-			var mediatag = document.getElementById('a' + bid).childNodes[0].childNodes[0];
+			var mediatag = document.getElementById('bengine-a' + bid).childNodes[0].childNodes[0];
 			mediatag.src = data;
 			mediatag.parentNode.load();
 		}
 	};
 
 	this.saveContent = function(bid) {
-		var mediastr = document.getElementById('a' + bid).children[0].children[0].src;
+		var mediastr = document.getElementById('bengine-a' + bid).children[0].children[0].src;
 		return mediastr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
 
@@ -587,6 +638,11 @@ x.audio = new function audio() {
 		block.appendChild(audio);
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 };
 
@@ -614,14 +670,14 @@ x.video = new function video() {
 	this.afterDOMinsert = function(bid,data) {
 		if(data !== null) {
 			/* audio & video divs have their src set in an extra child node */
-			var mediatag = document.getElementById('a' + bid).childNodes[0].childNodes[0];
+			var mediatag = document.getElementById('bengine-a' + bid).childNodes[0].childNodes[0];
 			mediatag.src = data;
 			mediatag.parentNode.load();
 		}
 	};
 
 	this.saveContent = function(bid) {
-		var mediastr = document.getElementById('a' + bid).children[0].children[0].src;
+		var mediastr = document.getElementById('bengine-a' + bid).children[0].children[0].src;
 		return mediastr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
 
@@ -639,6 +695,11 @@ x.video = new function video() {
 		block.appendChild(video);
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 };
 
@@ -709,7 +770,7 @@ x.slide = new function slide() {
 
 				globalBlockEngine.pdfObjects[data] = pdfObj;
 
-				var slidetag = document.getElementById('a' + bid).childNodes[0];
+				var slidetag = document.getElementById('bengine-a' + bid).childNodes[0];
 				slidetag.setAttribute("id",data);
 
 				objCopy.f.renderPDF(pdfObj,1,slidetag);
@@ -718,7 +779,7 @@ x.slide = new function slide() {
 	};
 
 	this.saveContent = function(bid) {
-		var slidestr = document.getElementById('a' + bid).children[0].id;
+		var slidestr = document.getElementById('bengine-a' + bid).children[0].id;
 		return slidestr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
 
@@ -770,6 +831,11 @@ x.slide = new function slide() {
 		};
 
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 
 	this.f = {
@@ -829,20 +895,24 @@ x.xsvgs = new function xsvgs() {
 	};
 
 	this.afterDOMinsert = function(bid,data) {
-		/// var svgtag = document.getElementById('a' + bid).childNodes[0];
+		/// var svgtag = document.getElementById('bengine-a' + bid).childNodes[0];
 		/// replace below with svgtag.innrHTML = success;
 		/// svgtag.setAttribute("data-link",success);
 	};
 
 	this.saveContent = function(bid) {
-		var svgstr = document.getElementById('a' + bid).childNodes[0].getAttribute("data-link");
+		var svgstr = document.getElementById('bengine-a' + bid).childNodes[0].getAttribute("data-link");
 		return svgstr.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	};
 
 	this.showContent = function(block,content) {
-		///block.innerHTML = deparseBlock(this.type,content);
-
+		block.innerHTML = content;
 		return block;
+	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
 	};
 };
 */
@@ -852,8 +922,18 @@ x.title = new function title() {
 	this.name = "title";
 	this.upload = false;
 
+	var parseBlock = function(blockText) {
+		var element = document.createElement('div');
+		element.innerHTML = blockText.replace(/</g,"@@LT").replace(/>/g,"@@RT").replace(/<br>/g,"@@BR");
+		return encodeURIComponent(element.textContent).replace(/'/g,"%27");
+	};
+
+	var deparseBlock = function(blockText) {
+		return decodeURIComponent(blockText).replace(/@@LT/g,"<").replace(/@@RT/g,">").replace(/@@BR/g,"<br>").replace(/%27/g,"'");
+	};
+
 	this.insertContent = function(block,content) {
-		var str = '<input type="text" class="xTit" maxlength="64" value="' + deparseBlock(this.type,content) + '">';
+		var str = '<input type="text" class="xTit" maxlength="64" value="' + deparseBlock(content) + '">';
 		block.innerHTML = str;
 
 		return block;
@@ -864,17 +944,24 @@ x.title = new function title() {
 	};
 
 	this.saveContent = function(bid) {
-		var blockContent = document.getElementById('a' + bid).children[0].value;
-		return parseBlock(this.type,blockContent);
+		var blockContent = document.getElementById('bengine-a' + bid).children[0].value;
+		return parseBlock(blockContent);
 	};
 
 	this.showContent = function(block,content) {
-		var str = '<div class="xTit-show">' + deparseBlock(this.type,content) + '</div>';
+		var str = '<div class="xTit-show">' + deparseBlock(content) + '</div>';
 		block.innerHTML = str;
 
 		return block;
 	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
+	};
 };
+
+var wiseEngine = new Bengine(x,globalBlockEngine,{},{});
 
 // <<<fold>>>
 
@@ -1045,13 +1132,13 @@ function pageEdit(aid,pagedata,pageinfo) {
 		blockarray = [];
 	}
 
-	blockEngineStart('content',x,["page",pid,pid],blockarray);
+	wiseEngine.blockEngineStart('content',["page",pid,pid],blockarray);
 
 	/*** AFTER STUFF ***/
 
 	/* start auto save timer */
-	autosaveTimer(document.getElementById("autosave"),function() {
-		return saveBlocks(true);
+	autosaveTimer(document.getElementById("bengine-autosave"),function() {
+		return wiseEngine.saveBlocks(true);
 	});
 
 	/* set defaulttext in globals */
@@ -1070,7 +1157,7 @@ function pageEdit(aid,pagedata,pageinfo) {
 
 	/* prevent user from exiting page if Revert or Save has not been clicked */
 	window.onbeforeunload = function() {
-		var status = document.getElementById("statusid").value;
+		var status = document.getElementById("bengine-statusid").value;
 		if(status === '0') {
 			/// this text isn't being displayed... some default is instead
 			return "Please click Revert or Save before exiting.";
@@ -1149,7 +1236,7 @@ function pageShow(logstatus,mtoggle,pagedata,pageinfo) {
 		blockarray = [];
 	}
 
-	blockContentShow('content',x,["page",pid],blockarray);
+	wiseEngine.blockContentShow('content',["page",pid],blockarray);
 
 	/* set time out to register view */
 	setTimeout(function() {

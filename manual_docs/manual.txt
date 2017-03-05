@@ -149,8 +149,10 @@ Install MySQL:
 
 https://dev.mysql.com/doc/refman/5.6/en/osx-installation-pkg.html
 
-- (ubuntu) apt-get install mysql-server
+> (ubuntu) apt-get install mysql-server
 > (mac) brew install mysql
+
+You can open the mysql shell with /usr/local/mysql/bin/mysql -uroot
 
 Install Redis:
 
@@ -184,6 +186,11 @@ MySQL is the database software. It requires configuring. Getting it to work in M
 > node sqlGenerator.js
 
 > mysql -uroot
+> source (<GIT-FOLDER>)/db/initialize.sql
+
+- if using the native package installation on mac
+
+> /usr/local/mysql/bin/mysql -uroot
 > source (<GIT-FOLDER>)/db/initialize.sql
 
 Topic: Configure Redis

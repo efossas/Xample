@@ -168,3 +168,50 @@ exports.loadPage = function(request,response,script) {
 	/* close tags & send the http response */
 	response.end("</body></html>");
 };
+
+/*
+	Function: loadPlayPage
+
+	This is used to load the play page. It writes the <head> to the response which includes all library links. Then it writes the parameter "script" which is a javascript function on the front-end that should create the page. It finally writes some ending tags using response.end() to send the response.
+
+	Parameters:
+
+		request - the http request
+		response - the http response
+		script - the front-end javascript function, it needs to have <script> tags
+
+	Returns:
+
+		nothing - *
+*/
+exports.loadPlayPage = function(request,response,script) {
+
+    /* use minified code unless running from localhost */
+    var minified = ".min";
+    if(request.root.indexOf("localhost") > 0) {
+        minified = "";
+    }
+
+	/* define the library & style links here */
+	var headstart = "<!DOCTYPE html><html><head><meta charset='utf-8'>";
+	var viewport = "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
+
+	var alertifycorestyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.core.css'>";
+	var alertifydefaultstyle = "<link rel='stylesheet' href='" + request.root + "css/alertify.default.css'>";
+	var wisestyle = "<link rel='stylesheet' href='" + request.root + "css/wisepool" + minified + ".css'>";
+
+	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
+	var xamplejs = "<script src='" + request.root + "js/pl" + minified + ".js'></script>";
+
+	var headend = "<title>Wisepool</title></head>";
+	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
+
+	/* write the <head> */
+	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + wisestyle + alertifyjs + xamplejs + headend + body);
+
+	/* write the <script> */
+	response.write(script);
+
+	/* close tags & send the http response */
+	response.end("</body></html>");
+};

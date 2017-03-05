@@ -7,9 +7,6 @@
 /***
 	Section: Globals
 	These are the global variables xample uses
-
-	pdfObjects - pdf.js generates pdf objects that can be used to render individual pages to <canvas>
-	globalScope - attach needed global variables as properties to this object
 ***/
 
 // <<<code>>>
@@ -19,6 +16,7 @@
 	global autosaveTimer:true
 	global createURL:true
 	global emptyDiv:true
+	global barPageSettings:true
 	global btnLink:true
 	global btnSubmit:true
 	global barLog:true
@@ -30,27 +28,15 @@
 	global getCookies:true
 	global getSubjects:true
 	global getUserFields:true
+	global globalScope:true
 	global journalError:true
 	global setBookmark:true
 	global setView:true
 	global watermark:true
 */
-/* from bengine.js */
-/*
-	global x:true
-	global globalBlockEngine:true
-	global blockButtons:true
-	global blockContentShow:true
-	global blockEngineStart:true
-	global generateBlock: true
-	global countBlocks: true
-	global saveBlocks: true
-	global parseBlock: true
-	global deparseBlock: true
-	global barPageSettings: true
-*/
 /* list any objects js dependencies */
 /*
+	global Bengine:true
 	global MathJax:true
 	global PDFJS:true
 	global hljs:true
@@ -66,10 +52,23 @@
 
 // <<<code>>
 
+var x = {};
+var globalBlockEngine = {};
+
 x.xlist = new function xlist() {
 	this.type = "xlist";
 	this.name = "list";
 	this.upload = false;
+
+	var parseBlock = function(blockText) {
+		var element = document.createElement('div');
+		element.innerHTML = blockText.replace(/</g,"@@LT").replace(/>/g,"@@RT").replace(/<br>/g,"@@BR");
+		return encodeURIComponent(element.textContent).replace(/'/g,"%27");
+	};
+
+	var deparseBlock = function(blockText) {
+		return decodeURIComponent(blockText).replace(/@@LT/g,"<").replace(/@@RT/g,">").replace(/@@BR/g,"<br>");
+	};
 
 	this.insertContent = function(block,content) {
 		var rows = content.split('@@');
@@ -178,7 +177,7 @@ x.xlist = new function xlist() {
 	this.saveContent = function(bid) {
 		var linkContent = [];
 
-		var rows = document.getElementById('a' + bid).children[0].children;
+		var rows = document.getElementById('bengine-a' + bid).children[0].children;
 		var count = rows.length;
 		for(var i = 0; i < count; i++) {
 			if(rows[i].getAttribute('class') === 'row') {
@@ -204,7 +203,14 @@ x.xlist = new function xlist() {
 
 		return parseBlock(this.type,blockContent);
 	};
+
+	this.styleBlock = function() {
+		/// add styles
+		return "";
+	};
 };
+
+var wiseEngine = new Bengine(x,globalBlockEngine,{},{});
 
 // <<<fold>>>
 
@@ -355,18 +361,18 @@ function pageEditLG(aid,guidedata,guideinfo) {
 		blockarray = [];
 	}
 
-	blockEngineStart('content',x,["guide",gid,'t'],blockarray);
+	wiseEngine.blockEngineStart('content',["guide",gid,'t'],blockarray);
 
 	/*** AFTER STUFF ***/
 
 	/* start auto save timer */
-	autosaveTimer(document.getElementById("autosave"),function() {
-		return saveBlocks(true);
+	autosaveTimer(document.getElementById("bengine-autosave"),function() {
+		return wiseEngine.saveBlocks(true);
 	});
 
 	/* prevent user from exiting page if Revert or Save has not been clicked */
 	window.onbeforeunload = function() {
-		var status = document.getElementById("statusid").value;
+		var status = document.getElementById("bengine-statusid").value;
 		if(status === '0') {
 			/// this text isn't being displayed... some default is instead
 			return "Please click Revert or Save before exiting.";

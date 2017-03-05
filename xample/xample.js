@@ -332,6 +332,7 @@ app.post('/journalerror',rts.journalerror);
 app.post('/login',rts.login);
 app.post('/logout',rts.logout);
 app.get('/page*',rts.page);
+app.get('/play',rts.play);
 app.get('/profile',rts.profile);
 app.post('/revertblocks',rts.revertblocks);
 app.post('/saveblocks',rts.saveblocks);

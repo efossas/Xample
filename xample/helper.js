@@ -123,6 +123,13 @@ exports.determineView = function(request,response,pagetype,cachedb,uid,aid,xid) 
 	});
 };
 
+function escapeForDB(text) {
+	var str = text.replace(/<script[^>]*>/g,"").replace(/<\/script>/g,"").replace(/</g,"@@LT").replace(/>/g,"@@RT").replace(/<br>/g,"@@BR").replace(/'/g,"%27");
+	return encodeURIComponent(str);
+}
+
+exports.escapeForDB = escapeForDB;
+
 function registerView(connection,uid,quality,pagetype,aid,xid) {
     var __function = "registerView";
 

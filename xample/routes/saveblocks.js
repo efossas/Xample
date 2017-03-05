@@ -164,10 +164,10 @@ exports.saveblocks = function(request,response) {
 								var stop = types.length - 1;
 
 								while(i < stop) {
-									qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ",'" + tid + "'),";
+									qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(helper.escapeForDB(contents[i])) + ",'" + tid + "'),";
 									i++;
 								}
-								qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(contents[i]) + ",'" + tid + "')";
+								qryInsert += "(" + i + "," + connection.escape(types[i]) + "," + connection.escape(helper.escapeForDB(contents[i])) + ",'" + tid + "')";
 
 								/* save the blocks */
 								connection.query(qryInsert,function(err,rows,fields) {
