@@ -41,7 +41,7 @@
         "no-ex-assign": ["error"],
         "no-extra-boolean-cast": ["error"],
         "no-extra-semi": ["error"],
-        "no-eval": ["error"],
+        "no-eval": ["warn"],
         "no-fallthrough": ["warn"],
         "no-floating-decimal": ["error"],
         "no-implicit-coercion": ["error"],

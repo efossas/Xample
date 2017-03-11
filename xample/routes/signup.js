@@ -58,6 +58,13 @@ exports.signup = function(request,response) {
         var username = POST.username;
         var email = POST.email;
 
+		/// closing off sign ups
+		if(email !== "applegate") {
+			result.msg = 'closed';
+			response.end(JSON.stringify(result));
+			return;
+		}
+
 		/* ensure username is not taken */
 		var promiseCheckUsername = queryUserDB.getDocByUsername(userdb,username);
 		promiseCheckUsername.then(function(users) {

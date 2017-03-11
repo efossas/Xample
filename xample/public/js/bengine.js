@@ -441,7 +441,7 @@ var countBlocks = function() {
 */
 var generateBlock = function(bid,btype) {
 	var block = document.createElement('div');
-	block.setAttribute('class',btype);
+	block.setAttribute('class','bengine-block-wrapper');
 	block.setAttribute('id','bengine-a' + bid);
 
 	return block;

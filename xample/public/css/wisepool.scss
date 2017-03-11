@@ -10,7 +10,7 @@
 @import 'block';
 
 #content {
-	max-width: 800px;
+	max-width: $site-width;
 	margin: 0 auto 0 auto;
 	position: relative;
 }

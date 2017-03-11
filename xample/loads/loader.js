@@ -203,11 +203,15 @@ exports.loadPlayPage = function(request,response,script) {
 	var alertifyjs = "<script src='" + request.root + "js/alertify.min.js'></script>";
 	var xamplejs = "<script src='" + request.root + "js/pl" + minified + ".js'></script>";
 
+	var codemirrorjs = "<script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/codemirror.js'></script>";
+	var codemirrorcss = "<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/codemirror.css'>";
+	var codemirrormode = "<script src='https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.2/mode/javascript/javascript.min.js'></script>";
+
 	var headend = "<title>Wisepool</title></head>";
 	var body = "<body class='xample'><div id='content'></div><footer class='footer'></footer>";
 
 	/* write the <head> */
-	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + wisestyle + alertifyjs + xamplejs + headend + body);
+	response.write(headstart + viewport + alertifycorestyle + alertifydefaultstyle + wisestyle + alertifyjs + xamplejs + codemirrorjs + codemirrorcss + codemirrormode + headend + body);
 
 	/* write the <script> */
 	response.write(script);

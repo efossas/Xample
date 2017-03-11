@@ -1699,6 +1699,8 @@ function signup() {
 						window.location = createURL("/home"); break;
 					case 'exists':
 						alertify.alert("That Username Already Exists.\nPlease Choose A Different One."); break;
+					case 'closed':
+						alertify.alert("Signing Up Is Currently By Invitation Only."); break;
 					case 'err':
 					default:
 						alertify.alert("An Unknown Error Occurred");

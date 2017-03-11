@@ -205,8 +205,37 @@ x.xlist = new function xlist() {
 	};
 
 	this.styleBlock = function() {
-		/// add styles
-		return "";
+		var stylestr = `.xLrg {
+			display: inline-block;
+			width: 100%;
+			height: 100%;
+			border: 0px solid black;
+			border-radius: 2px;
+
+			padding: 0px;
+			margin: 0px;
+			box-sizing: border-box;
+		}
+
+		input.xLrg {
+			display: inline-block;
+			width: 100%;
+			height: 32px;
+			border: 1px solid black;
+			border-radius: 2px;
+
+			padding: 0px;
+			margin: 0px;
+			box-sizing: border-box;
+
+			text-align: center;
+
+			font-family: Arial, Helvetica, sans-serif;
+			font-size: 1em;
+			font-weight: 300;
+			color: black;
+		}`;
+		return stylestr;
 	};
 };
 
