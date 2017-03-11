@@ -225,6 +225,7 @@ pool.getConnection(function(error,connection) {
 		connection.release();
 		process.send({code:'fatal'});
 	} else {
+		console.log('main mysql db established');
 		connection.release();
 	}
 });
@@ -236,6 +237,7 @@ red.getConnection(function(error,connection) {
 		connection.release();
 		process.send({code:'fatal'});
 	} else {
+		console.log('red mysql db established');
 		connection.release();
 	}
 });
@@ -255,6 +257,7 @@ MongoClient.connect('mongodb://localhost:27017/xuser',function(err,db) {
 		console.log(' ');
 		process.send({code:'fatal'});
 	} else {
+		console.log('mongo db established');
 		/* pass userdb into request object, request.app.get("userdb") */
 		app.set("userdb",db);
 	}
@@ -266,6 +269,10 @@ var redis = require("redis");
 var cachedb = redis.createClient();
 cachedb.auth('a1bc60f3ee230db84e6e584700ac277f0aab5f6b3f4c7dec2173371c32ef00d4');
 cachedb.select(1,function() { /* ... */ });
+
+cachedb.on('error',function(err) {
+	console.log(err);
+});
 
 /* pass pool into request object, request.app.get("pool") */
 app.set("cachedb",cachedb);
@@ -332,6 +339,7 @@ app.post('/journalerror',rts.journalerror);
 app.post('/login',rts.login);
 app.post('/logout',rts.logout);
 app.get('/page*',rts.page);
+app.get('/play',rts.play);
 app.get('/profile',rts.profile);
 app.post('/revertblocks',rts.revertblocks);
 app.post('/saveblocks',rts.saveblocks);
@@ -347,7 +355,7 @@ app.all('*',rts.notfound);
 
 /* activate the server */
 app.listen(port,function() {
-	console.log("listening...");
+	console.log("server activated on port " + port);
 });
 
 // <<<fold>>>

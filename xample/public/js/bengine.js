@@ -4,41 +4,163 @@
 	This is the front-end for the Block Engine.
 ******/
 
+/* list any objects js dependencies */
+/*
+	global alertify:true
+*/
+
+function Bengine(extensibles,globals,funcs,options) {
+
 /***
 	Section: Globals
 	These are the global variables xample uses
 
-	x - used to store extensible blocks. hence, x.newBlock should be an object that contains all of the necessary methods for block execution.
-	globalBlockEngine - used to store any globals that blocks need. block objects should call a self executing anonymous function that appends a property to this global, such as globalBlockEngine.newProperty = {};
+	extensibles - used to store extensible blocks. hence, extensibles.newBlock should be an object that contains all of the necessary methods for block execution.
+	globals - used to store any globals that blocks need. block objects should call a self executing anonymous function that appends a property to this global, such as globals.newProperty = {};
 
 ***/
 
-var x = {};
-var globalBlockEngine = {};
+this.extensibles = extensibles;
+this.globals = globals;
 
-/* from omni.js */
+/***
+	Section: Replaceable Functions
+	These functions are essentially helper functions that can be replaced by custom functions passed into Bengine.
+***/
+
+// <<<code>>>
+
 /*
-	global autosaveTimer:true
-	global createURL:true
-	global emptyDiv:true
-	global btnLink:true
-	global btnSubmit:true
-	global barMenu:true
-	global barStatus:true
-	global progressInitialize:true
-	global progressFinalize:true
-	global progressUpdate:true
-	global getUserFields:true
-	global getSubjects:true
-	global journalError:true
+	Function: emptyDiv
+
+	Remove div contents.
+
+	Parameters:
+
+		node - The element whose contents will be cleared
+
+	Returns:
+
+		nothing - *
 */
-/* list any objects js dependencies */
+var emptyDiv = function(node) {
+	if (typeof node === "object") {
+		while (node.hasChildNodes()) {
+			node.removeChild(node.lastChild);
+		}
+	}
+};
+
 /*
-	global MathJax:true
-	global PDFJS:true
-	global hljs:true
-	global alertify:true
+	Function: createURL
+
+	Detects local or remote host and constructs desired url.
+
+	Parameters:
+
+		path - The path or the url after the host, like http://localhost:80 + path
+
+	Returns:
+
+		nothing - *
 */
+var createURL;
+if(funcs.hasOwnProperty('createURL') && typeof funcs.createURL === 'function') {
+	createURL = funcs.createURL;
+} else {
+	createURL = function(path) {
+		var url = window.location.href;
+		var splitUrl = url.split("/");
+
+		/* detect local or remote routes */
+		if(splitUrl[2].match(/localhost.*/)) {
+			url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
+		} else {
+			url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + encodeURI(path);
+		}
+
+		return url;
+	};
+}
+
+/*
+	Function: progressFinalize
+
+	Parameters:
+
+		msg - string, for displaying what is being progressed
+		max - int, the value representing a completed progress load
+
+	Returns:
+
+		none - *
+*/
+var progressFinalize;
+if(funcs.hasOwnProperty('progressFinalize') && typeof funcs.progressFinalize === 'function') {
+	progressFinalize = funcs.progressFinalize;
+} else {
+	progressFinalize = function(msg,max) {
+		document.getElementById("bengine-progressbar").setAttribute("value",max);
+		document.getElementById("bengine-progressbar").style.visibility = "hidden";
+		document.getElementById("bengine-progressbar").style.display = "none";
+
+		document.getElementById("bengine-autosave").style.visibility = "visible";
+		document.getElementById("bengine-autosave").style.display = "block";
+
+		document.getElementById("bengine-savestatus").innerHTML = msg;
+	};
+}
+
+/*
+	Function: progressInitialize
+
+	Parameters:
+
+		msg - string, for displaying what is being progressed
+		max - int, the value representing a completed progress load
+
+	Returns:
+
+		none - *
+*/
+var progressInitialize;
+if(funcs.hasOwnProperty('progressInitialize') && typeof funcs.progressInitialize === 'function') {
+	progressInitialize = funcs.progressInitialize;
+} else {
+	progressInitialize = function(msg,max) {
+		document.getElementById("bengine-autosave").style.visibility = "hidden";
+		document.getElementById("bengine-autosave").style.display = "none";
+
+		document.getElementById("bengine-progressbar").setAttribute("value",0);
+		document.getElementById("bengine-progressbar").setAttribute("max",max);
+		document.getElementById("bengine-progressbar").style.visibility = "visible";
+		document.getElementById("bengine-progressbar").style.display = "block";
+
+		document.getElementById("bengine-savestatus").innerHTML = msg;
+	};
+}
+
+/*
+	Function: progressUpdate
+
+	Parameters:
+
+		value - int, represent current progress
+
+	Returns:
+
+		none - *
+*/
+var progressUpdate;
+if(funcs.hasOwnProperty('progressUpdate') && typeof funcs.progressUpdate === 'function') {
+	progressUpdate = funcs.progressUpdate;
+} else {
+	progressUpdate = function(value) {
+		document.getElementById("bengine-progressbar").setAttribute("value",value);
+	};
+}
+
+// <<<fold>>>
 
 /***
 	Section: StartUp Functions
@@ -55,7 +177,6 @@ var globalBlockEngine = {};
 	Parameters:
 
 	main - string, id of an html div that is already attached to the DOM.
-	x - object, containing all of the block objects, like x.myblock
 	id - array, [name of id,id number], like [bp,1] where 1 is pid
 	data - array, array of the block data [type,content,type,content,etc.]
 
@@ -63,7 +184,7 @@ var globalBlockEngine = {};
 
 		success - number, block count
 */
-function blockContentShow(main,x,id,data) {
+this.blockContentShow = function(main,id,data) {
 	/* main div */
 	var mainDiv = document.getElementById(main);
 
@@ -74,17 +195,20 @@ function blockContentShow(main,x,id,data) {
 	/* engine div */
 	var enginediv;
 	enginediv = document.createElement('div');
-	enginediv.setAttribute('class','x-bengine');
-	enginediv.setAttribute('id','x-bengine');
+	enginediv.setAttribute('class','bengine-instance');
+	enginediv.setAttribute('id','bengine-instance');
 	mainDiv.appendChild(enginediv);
 
 	/* blocks */
 	var blocksdiv = document.createElement('div');
-	blocksdiv.setAttribute('class','x-blocks');
-	blocksdiv.setAttribute('id','x-blocks');
+	blocksdiv.setAttribute('class','bengine-x-blocks');
+	blocksdiv.setAttribute('id','bengine-x-blocks');
 
 	/* append blocks div to engine div */
 	enginediv.appendChild(blocksdiv);
+
+	/* append block styles */
+	blockStyle();
 
 	var count = 0;
 	var i = 1;
@@ -93,12 +217,12 @@ function blockContentShow(main,x,id,data) {
 	while(count < doubleBlockCount) {
 		/* create the block */
 		var block = generateBlock(i,data[count]);
-		var retblock = x[data[count]].showContent(block,data[count + 1]);
+		var retblock = extensibles[data[count]].showContent(block,data[count + 1]);
 
 		/* create the block div */
 		var group = document.createElement('div');
 		group.setAttribute('class','block');
-		group.setAttribute('id',i);
+		group.setAttribute('id','bengine-' + i);
 
 		/* append group to blocks div */
 		group.appendChild(retblock);
@@ -109,7 +233,7 @@ function blockContentShow(main,x,id,data) {
 	}
 
 	return i;
-}
+};
 
 /*
 	Function: blockEngineStart
@@ -119,7 +243,6 @@ function blockContentShow(main,x,id,data) {
 	Parameters:
 
 		main - string, id of an html div that is already attached to the DOM.
-		x - object, containing all of the objects for generating blocks, like x.myblock
 		id - array, [page type,xid,directory id], like ['page',1,'t'] where 1 is xid
 		data - array, array of the block data [type,content,type,content,etc.]
 
@@ -127,7 +250,7 @@ function blockContentShow(main,x,id,data) {
 
 		success - number, block count
 */
-function blockEngineStart(main,x,id,data) {
+var blockEngineStart = function(main,id,data) {
 	/* main div */
 	var mainDiv = document.getElementById(main);
 
@@ -138,17 +261,20 @@ function blockEngineStart(main,x,id,data) {
 	/* engine div */
 	var enginediv;
 	enginediv = document.createElement('div');
-	enginediv.setAttribute('class','x-bengine');
-	enginediv.setAttribute('id','x-bengine');
+	enginediv.setAttribute('class','bengine-instance');
+	enginediv.setAttribute('id','bengine-instance');
 	mainDiv.appendChild(enginediv);
 
 	/* blocks */
 	var blocksdiv = document.createElement('div');
-	blocksdiv.setAttribute('class','x-blocks');
-	blocksdiv.setAttribute('id','x-blocks');
+	blocksdiv.setAttribute('class','bengine-x-blocks');
+	blocksdiv.setAttribute('id','bengine-x-blocks');
 
 	/* append blocks div to engine div */
 	enginediv.appendChild(blocksdiv);
+
+	/* append block styles */
+	blockStyle();
 
 	/* initial first block buttons, get count for style requirement below */
 	var buttons = blockButtons(0);
@@ -169,7 +295,7 @@ function blockEngineStart(main,x,id,data) {
 	while(count < doubleBlockCount) {
 		/* create the block */
 		var block = generateBlock(i,data[count]);
-		var retblock = x[data[count]].insertContent(block,data[count + 1]);
+		var retblock = extensibles[data[count]].insertContent(block,data[count + 1]);
 
 		/* create the block buttons */
 		buttons = blockButtons(i);
@@ -185,7 +311,7 @@ function blockEngineStart(main,x,id,data) {
 		/* create block + button div */
 		var group = document.createElement('div');
 		group.setAttribute('class','block');
-		group.setAttribute('id',i);
+		group.setAttribute('id','bengine-' + i);
 
 		group.appendChild(retblock);
 		group.appendChild(buttons);
@@ -194,7 +320,7 @@ function blockEngineStart(main,x,id,data) {
 		blocksdiv.appendChild(group);
 
 		/* do any rendering the block needs */
-		x[data[count]].afterDOMinsert(i,null);
+		extensibles[data[count]].afterDOMinsert(i,null);
 
 		count += 2;
 		i++;
@@ -205,7 +331,7 @@ function blockEngineStart(main,x,id,data) {
 	/* hidden form for media uploads */
 	var fileinput = document.createElement('input');
 	fileinput.setAttribute('type','file');
-	fileinput.setAttribute('id','file-select');
+	fileinput.setAttribute('id','bengine-file-select');
 
 	var filebtn = document.createElement('button');
 	filebtn.setAttribute('type','submit');
@@ -229,7 +355,7 @@ function blockEngineStart(main,x,id,data) {
 
 	/* add page id & name to hidden div */
 	var idDiv = document.createElement("input");
-	idDiv.setAttribute("id","x-id");
+	idDiv.setAttribute("id","bengine-x-id");
 	idDiv.setAttribute("name",id[0]);
 	idDiv.setAttribute("data-xid",id[1]);
 	idDiv.setAttribute("data-did",id[2]);
@@ -243,7 +369,7 @@ function blockEngineStart(main,x,id,data) {
 	/* it is checked when exiting a window to notify the user that the page hasn't been saved */
 	var statusid = document.createElement('input');
 	statusid.setAttribute('type','hidden');
-	statusid.setAttribute('id','statusid');
+	statusid.setAttribute('id','bengine-statusid');
 	statusid.setAttribute('value','1');
 	enginediv.appendChild(statusid);
 
@@ -255,7 +381,11 @@ function blockEngineStart(main,x,id,data) {
 	enginediv.appendChild(mainid);
 
 	return i;
-}
+};
+
+this.blockEngineStart = function(main,id,data) {
+	blockEngineStart(main,id,data);
+};
 
 // <<<fold>>>
 
@@ -279,7 +409,7 @@ function blockEngineStart(main,x,id,data) {
 
 		success - number, block count
 */
-function countBlocks() {
+var countBlocks = function() {
 
 	/* block IDs are just numbers, so count the number of IDs */
 	var num = 0;
@@ -288,41 +418,12 @@ function countBlocks() {
 		num++;
 
 		/* undefined is double banged to false, and node is double banged to true */
-		miss = Boolean(document.getElementById(num));
+		miss = Boolean(document.getElementById('bengine-' + num));
 	}
 
 	/* decrement num, since the check for id happens after increment */
 	return --num;
-}
-
-/*
-	Function: deparseBlock
-
-	Block data must be passed through this to replace any encodings back to their original values.
-
-	Parameters:
-
-		blockType - string, the block's type
-		blockText - string, the block's data
-
-	Returns:
-
-		success - string, the deparsed block's data.
-*/
-function deparseBlock(blockType,blockText) {
-	var deparsed = blockText.replace(/@SP@/g," ").replace(/@HS@/g,"&nbsp;").replace(/@AM@/g,"&").replace(/@DQ@/g,"\"").replace(/@SQ@/g,"'").replace(/@CO@/g,",").replace(/@PL@/g,"+").replace(/@BR@/g,"<br>").replace(/@BC@/g,"</br>");
-	if(blockType === "xtext") {
-		//deparsed = "";
-	} else if (blockType === "xcode") {
-		//deparsed = "";
-	} else if (blockType === "xmath" || blockType === "latex") {
-		deparsed = deparsed.replace(/\\\\/g,'\\');
-	} else {
-		//deparsed = "";
-	}
-
-	return deparsed;
-}
+};
 
 /*
 	Function: generateBlock
@@ -338,13 +439,38 @@ function deparseBlock(blockType,blockText) {
 
 		success - html node, block
 */
-function generateBlock(bid,btype) {
+var generateBlock = function(bid,btype) {
 	var block = document.createElement('div');
-	block.setAttribute('class',btype);
-	block.setAttribute('id','a' + bid);
+	block.setAttribute('class','bengine-block-wrapper');
+	block.setAttribute('id','bengine-a' + bid);
 
 	return block;
-}
+};
+
+/*
+	Function: blockStyle
+
+	Appends custom block css styles to dom.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		none
+*/
+var blockStyle = function() {
+	for(var prop in extensibles)(function(prop) {
+		if(extensibles.hasOwnProperty(prop)) {
+			/* attach the blocks styline */
+			var style = document.createElement('style');
+			style.type = 'text/css';
+			style.innerHTML = extensibles[prop].styleBlock();
+			document.getElementsByTagName('head')[0].appendChild(style);
+		}
+	})(prop);
+};
 
 /*
 	Function: blockButtons
@@ -359,41 +485,45 @@ function generateBlock(bid,btype) {
 
 		success - html node, button div
 */
-function blockButtons(bid) {
+var blockButtons = function(bid) {
 
 	/* this div will hold the buttons inside of it */
 	var buttonDiv = document.createElement('div');
 	buttonDiv.setAttribute('class','blockbtns row');
-	buttonDiv.setAttribute('id','b' + bid);
+	buttonDiv.setAttribute('id','bengine-b' + bid);
 
 	/// there should prob be better styling than this
 	/// if greater than 10, buttons won't fit...
-	var percentageWidth = 100 / (Object.keys(x).length + 1);
+	var percentageWidth = 100 / (Object.keys(extensibles).length + 1);
 
 	/* the following are all of the buttons */
-	for(var prop in x) {
-		if(x.hasOwnProperty(prop)) {
+	for(var prop in extensibles)(function(prop) {
+		if(extensibles.hasOwnProperty(prop)) {
 			var colDiv = document.createElement('div');
 			colDiv.setAttribute('class','col col-' + percentageWidth);
 
 			var btn = document.createElement('button');
-			btn.setAttribute("onclick","addBlock(" + bid + ",x." + x[prop].type + ")");
+			btn.onclick = function() {
+				addBlock(bid,extensibles[prop].type);
+			};
 			btn.setAttribute("class","blockbtn addbtn");
-			btn.innerHTML = x[prop].name;
+			btn.innerHTML = extensibles[prop].name;
 
 			colDiv.appendChild(btn);
 			buttonDiv.appendChild(colDiv);
 		}
-	}
+	})(prop);
 
 	/* add the delete button */
 	var delDiv = document.createElement('div');
 	delDiv.setAttribute('class','col col-' + percentageWidth);
 
 	var delBtn = document.createElement('button');
-	delBtn.setAttribute('id','d' + bid);
-	delBtn.setAttribute('onclick','deleteBlock(' + bid + ')');
+	delBtn.setAttribute('id','bengine-d' + bid);
 	delBtn.setAttribute("class","blockbtn delbtn");
+	delBtn.onclick = function() {
+		deleteBlock(bid);
+	};
 	delBtn.style.visibility = 'hidden';
 	delBtn.innerHTML = "&darr;";
 
@@ -401,7 +531,7 @@ function blockButtons(bid) {
 	buttonDiv.appendChild(delDiv);
 
 	return buttonDiv;
-}
+};
 
 /*
 	Function: makeSpace
@@ -417,7 +547,7 @@ function blockButtons(bid) {
 
 		none
 */
-function makeSpace(bid,count) {
+var makeSpace = function(bid,count) {
 	var track = count;
 	while(bid < track) {
 		/* change blocks to this value */
@@ -425,18 +555,18 @@ function makeSpace(bid,count) {
 
 		/* replace the button IDs */
 		var buttons = blockButtons(next);
-		document.getElementById('b' + track).parentNode.replaceChild(buttons,document.getElementById('b' + track));
+		document.getElementById('bengine-b' + track).parentNode.replaceChild(buttons,document.getElementById('bengine-b' + track));
 
 		/* replace the content block id */
-		document.getElementById('a' + track).setAttribute('id','a' + next);
+		document.getElementById('bengine-a' + track).setAttribute('id','bengine-a' + next);
 
 		/* replace the block id */
-		document.getElementById(track).setAttribute('id',next);
+		document.getElementById('bengine-' + track).setAttribute('id','bengine-' + next);
 
 		/* update the count */
 		track--;
 	}
-}
+};
 
 /*
 	Function: insertBlock
@@ -454,15 +584,15 @@ function makeSpace(bid,count) {
 
 		none
 */
-function insertBlock(block,buttons,bid,count) {
+var insertBlock = function(block,buttons,bid,count) {
 
 	/* grab the blocks container */
-	var blocksdiv = document.getElementById('x-blocks');
+	var blocksdiv = document.getElementById('bengine-x-blocks');
 
 	/* create the block div */
 	var group = document.createElement('div');
 	group.setAttribute('class','block');
-	group.setAttribute('id',bid);
+	group.setAttribute('id','bengine-' + bid);
 
 	/* append the content block & buttons div to the block div */
 	group.appendChild(block);
@@ -476,7 +606,7 @@ function insertBlock(block,buttons,bid,count) {
 		/* you do this if the block goes at the end, it's the last block */
 		blocksdiv.appendChild(group);
 	}
-}
+};
 
 /*
 	Function: createBlock
@@ -492,7 +622,7 @@ function insertBlock(block,buttons,bid,count) {
 
 		none
 */
-function createBlock(cbid,blockObj) {
+var createBlock = function(cbid,blockObj) {
 
 	var blockCount = countBlocks();
 
@@ -515,10 +645,10 @@ function createBlock(cbid,blockObj) {
 	/* make delete buttons visible */
 	var i = 0;
 	while(i <= blockCount) {
-		document.getElementById('d' + i).style.visibility = 'visible';
+		document.getElementById('bengine-d' + i).style.visibility = 'visible';
 		i++;
 	}
-}
+};
 
 /*
 	Function: addBlock
@@ -534,7 +664,9 @@ function createBlock(cbid,blockObj) {
 
 		none
 */
-function addBlock(bid,blockObj) {
+var addBlock = function(bid,blockTypeName) {
+
+	var blockObj = extensibles[blockTypeName];
 
 	/* media blocks only allowed in-house, all other block (text-based) route to regular process */
 	if (blockObj.upload) {
@@ -546,7 +678,7 @@ function addBlock(bid,blockObj) {
 		/* save blocks to temp table, indicated by false */
 		saveBlocks(false);
 	}
-}
+};
 
 /*
 	Function: closeSpace
@@ -562,7 +694,7 @@ function addBlock(bid,blockObj) {
 
 		none
 */
-function closeSpace(cbid,count) {
+var closeSpace = function(cbid,count) {
 	var bid = cbid;
 	while(bid < count) {
 		/* change blocks to this value */
@@ -570,18 +702,18 @@ function closeSpace(cbid,count) {
 
 		/* replace the button IDs */
 		var buttons = blockButtons(bid);
-		document.getElementById('b' + next).parentNode.replaceChild(buttons,document.getElementById('b' + next));
+		document.getElementById('bengine-b' + next).parentNode.replaceChild(buttons,document.getElementById('bengine-b' + next));
 
 		/* replace the content block id */
-		document.getElementById('a' + next).setAttribute('id','a' + bid);
+		document.getElementById('bengine-a' + next).setAttribute('id','bengine-a' + bid);
 
 		/* replace the block id */
-		document.getElementById(next).setAttribute('id',bid);
+		document.getElementById('bengine-' + next).setAttribute('id','bengine-' + bid);
 
 		/* update the bid */
 		bid++;
 	}
-}
+};
 
 /*
 	Function: removeBlock
@@ -596,10 +728,10 @@ function closeSpace(cbid,count) {
 
 		nothing - *
 */
-function removeBlock(bid) {
-	var element = document.getElementById(bid);
+var removeBlock = function(bid) {
+	var element = document.getElementById('bengine-' + bid);
 	element.parentNode.removeChild(element);
-}
+};
 
 /*
 	Function: deleteBlock
@@ -614,7 +746,7 @@ function removeBlock(bid) {
 
 		nothing - *
 */
-function deleteBlock(cbid) {
+var deleteBlock = function(cbid) {
 	var blockCount = countBlocks();
 
 	var bid = cbid + 1;
@@ -631,469 +763,14 @@ function deleteBlock(cbid) {
 	var i = 0;
 	blockCount = countBlocks();
 	while(i < blockCount) {
-		document.getElementById('d' + i).style.visibility = 'visible';
+		document.getElementById('bengine-d' + i).style.visibility = 'visible';
 		i++;
 	}
-	document.getElementById('d' + i).style.visibility = 'hidden';
+	document.getElementById('bengine-d' + i).style.visibility = 'hidden';
 
 	/* save blocks to temp table, indicated by false */
 	saveBlocks(false);
-}
-
-/*
-	Function: parseBlock
-
-	Block data must be passed through this to replace any chars that can break functionality with encodings.
-
-	spaces -  ajax urls
-	&nbsp; - ajax delimiters
-	& - ajax delimiters
-	" - ajax strings
-	' - ajax strings
-	, - array delimiters
-	+ - interpreted as spaces in urls
-	<br> - maintaini new lines
-
-	Parameters:
-
-		blockType - string, the block's type
-		blockText - string, the block's data
-
-	Returns:
-
-		success - string, the parsed block's data.
-*/
-function parseBlock(blockType,blockText) {
-	var parsed = blockText.replace(/ /g,"@SP@").replace(/&nbsp;/g,"@HS@").replace(/&/g,"@AM@").replace(/"/g,"@DQ@").replace(/'/g,"@SQ@").replace(/,/g,"@CO@").replace(/\+/g,"@PL@").replace(/<br>/g,"@BR@").replace(/<\/br>/g,"@BC@");
-	if(blockType === "xtext") {
-		//parsed = "";
-	} else if (blockType === "xcode") {
-		parsed = parsed.replace(/<span[^>]*>/g,"").replace(/<\/span>/g,"");
-	} else if (blockType === "xmath" || blockType === "latex") {
-		parsed = parsed.replace(/\\/g,"\\\\");
-	} else {
-		//parsed = "";
-	}
-	return parsed;
-}
-
-/*
-	Function: barPageSettings
-
-	Creates bar for changing page settings
-
-	Parameters:
-
-		pagetype - string, used for links
-		aid - the author id
-		settings - object, with settings as properties
-
-	Returns:
-
-		success - html node, dropdowns.
-*/
-function barPageSettings(pagetype,aid,settings) {
-	var pageSettings = document.createElement('div');
-	pageSettings.setAttribute('class','settings-bar col-100');
-
-	/* show mode page link */
-	var showLink = document.createElement('div');
-	showLink.setAttribute('class','page-link');
-	var slink = createURL('/' + pagetype + '?a=' + aid + '&p=' + settings.id);
-	showLink.innerHTML = "<a href='" + slink + "' target='_blank'>" + slink + "</a>";
-	pageSettings.appendChild(showLink);
-
-	/* page title input */
-	var title = document.createElement('input');
-	title.setAttribute('type','text');
-	title.setAttribute('name','pagename');
-	title.setAttribute('id','pagetitle');
-	title.setAttribute('class','page-title');
-	title.setAttribute('maxlength','50');
-	title.setAttribute('value',settings.name);
-	pageSettings.appendChild(title);
-
-	/* drop downs for choosing page subj,cat,top */
-	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
-	pageSettings.appendChild(ddsct);
-
-	/* row for image and blurb */
-	var rowImgBlurb = document.createElement('div');
-	rowImgBlurb.setAttribute('class','row');
-
-	function uploadThumb() {
-		/* get the hidden file-select object that will store the user's file selection */
-		var fileSelect = document.getElementById('file-select');
-		fileSelect.setAttribute("accept",".bmp,.bmp2,.bmp3,.jpeg,.jpg,.pdf,.png,.svg");
-
-		fileSelect.click();
-
-		fileSelect.onchange = function() {
-			/* grab the selected file */
-			var file = fileSelect.files[0];
-
-			var notvalid = false;
-			var nofile = false;
-			var errorMsg;
-			if(fileSelect.files.length > 0) {
-				if(file.size > 4294967295) {
-					notvalid = true;
-					errorMsg = "Files Must Be Less Than 4.3 GB";
-				}
-			} else {
-				nofile = true;
-			}
-
-			if(nofile) {
-				/* do nothing, no file selected */
-			} else if(notvalid) {
-				alertify.alert(errorMsg);
-			} else {
-				/* wrap the ajax request in a promise */
-				var promise = new Promise(function(resolve,reject) {
-
-					/* create javascript FormData object and append the file */
-					var formData = new FormData();
-					formData.append('media',file,file.name);
-
-					/* get the directory id */
-					var id = document.getElementById('x-id').getAttribute('data-did');
-
-					/* grab the domain and create the url destination for the ajax request */
-					var url = createURL("/uploadthumb?id=" + id);
-
-					var xmlhttp = new XMLHttpRequest();
-					xmlhttp.open('POST',url,true);
-
-					xmlhttp.onreadystatechange = function() {
-						if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-							if(xmlhttp.status === 200) {
-								var result = JSON.parse(xmlhttp.responseText);
-
-								switch(result.msg) {
-									case 'success':
-										resolve(result.data); break;
-									case 'nouploadloggedout':
-										alertify.alert("You Can't Upload A Thumbnail Because You Are Logged Out. Log Back In On A Separate Page, Then Return Here & Try Again.");
-										reject("err"); break;
-									case 'convertmediaerr':
-										reject('convertmediaerr'); break;
-									case 'err':
-									default:
-										reject('err');
-								}
-							} else {
-								alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
-								reject("err");
-							}
-						}
-					};
-
-					xmlhttp.send(formData);
-				});
-
-				promise.then(function(imglink) {
-					var linkparts = imglink.split(",");
-					var thumbtag = document.getElementById('pageimg');
-					thumbtag.src = linkparts[1];
-				},function(error) {
-					if(error === "convertmediaerr") {
-						alertify.log("There was an error with that media format. Please try a different file type.");
-					} else {
-						alertify.log("There was an unknown error during thumbnail upload.");
-					}
-				});
-			}
-		};
-	}
-
-	/* page thumbnail img */
-	var colImg = document.createElement('div');
-	colImg.setAttribute('class','col col-33');
-
-	var thumbnail = document.createElement('img');
-	thumbnail.setAttribute('id','pageimg');
-	thumbnail.setAttribute('class','thumb-img');
-	thumbnail.onclick = uploadThumb;
-	if(settings.imageurl !== "") {
-		thumbnail.setAttribute('src',settings.imageurl);
-	}
-	colImg.appendChild(thumbnail);
-
-	/* page blurb input */
-	var colBlurb = document.createElement('div');
-	colBlurb.setAttribute('class','col col-66');
-
-	var blurb = document.createElement('textarea');
-	blurb.setAttribute('name','pageblurb');
-	blurb.setAttribute('id','pageblurb');
-	blurb.setAttribute('class','page-blurb');
-	blurb.setAttribute('rows','4');
-	blurb.setAttribute('maxlength','500');
-	blurb.setAttribute('placeholder','Explain this page here.');
-	blurb.value = settings.blurb;
-	colBlurb.appendChild(blurb);
-
-	/* append img and blurb */
-	rowImgBlurb.appendChild(colImg);
-	rowImgBlurb.appendChild(colBlurb);
-	pageSettings.appendChild(rowImgBlurb);
-
-	/* page settings save */
-	var capital = pagetype.charAt(0).toUpperCase() + pagetype.slice(1);
-	var btnSaveSettings = btnSubmit('Save ' + capital + ' Settings','savePageSettings("' + pagetype + '")','none');
-	pageSettings.appendChild(btnSaveSettings);
-
-	return pageSettings;
-}
-
-/*
-	Function: formDropDownsSCT
-
-	Creates the form for selecting Subject, Category, Topic.
-
-	Parameters:
-
-		defSub - string, default subject; leave empty otherwise
-		defCat - string, default category; leave empty otherwise
-		defTop - string, default topic; leave empty otherwise
-
-	Returns:
-
-		success - html node, dropdowns.
-*/
-function formDropDownsSCT(defSub,defCat,defTop) {
-	/* used for making the default first selection grey in the dropdowns */
-	function greyFirstSelect(selectTag) {
-		if(selectTag.selectedIndex === 0) {
-			selectTag.style = "color: grey";
-		} else {
-			selectTag.style = "color: black";
-		}
-	}
-
-	/* this function will be called onchange of subject drop down */
-	function loadCategories() {
-
-		/* get the selected subject */
-		var subject = this.options[this.selectedIndex].value;
-
-		/* get & empty the category selection element */
-		var listCategories = document.getElementById("select-category");
-		emptyDiv(listCategories);
-
-		/* create the default first selection */
-		var optionCategory = document.createElement('option');
-		optionCategory.setAttribute("value","");
-		optionCategory.innerHTML = "choose category";
-		listCategories.appendChild(optionCategory);
-
-		/* get & empty the topic selection element */
-		var listTopics = document.getElementById("select-topic");
-		emptyDiv(listTopics);
-
-		/* create the default first selection */
-		var optionTopic = document.createElement('option');
-		optionTopic.setAttribute("value","");
-		optionTopic.innerHTML = "choose topic";
-		listTopics.appendChild(optionTopic);
-
-		if(subject !== "") {
-
-			/* get the categories for that subject */
-			var categories = Object.keys(globalBlockEngine.subjects[subject]);
-			var count = categories.length;
-
-			/* fill the selection element with categories */
-			for(var i = 0; i < count; i++) {
-				optionCategory = document.createElement('option');
-				optionCategory.setAttribute('value',categories[i]);
-				optionCategory.innerHTML = categories[i];
-				listCategories.appendChild(optionCategory);
-			}
-
-			/* reset the selection to "choose category" */
-			listCategories.selectedIndex = 0;
-		}
-
-		/* grey the first selected */
-		greyFirstSelect(this);
-		greyFirstSelect(listCategories);
-		greyFirstSelect(listTopics);
-	}
-
-	/* this function will be called onchange of categories dropdown */
-	function loadTopics() {
-
-		/* get the selected category */
-		var category = this.options[this.selectedIndex].value;
-
-		/* get the selected subject using id */
-		var selectSubject = document.getElementById("select-subject");
-		var subject = selectSubject.options[selectSubject.selectedIndex].value;
-
-		/* get & empty the topic selection element */
-		var listTopics = document.getElementById("select-topic");
-		emptyDiv(listTopics);
-
-		/* create the default first option */
-		var optionTopic = document.createElement('option');
-		optionTopic.innerHTML = "choose topic";
-		optionTopic.setAttribute("value","");
-		listTopics.appendChild(optionTopic);
-
-		/* just in case subject hasn't been selected */
-		if(subject !== "" && category !== "") {
-
-			/* get the topics for the category */
-			var topics = globalBlockEngine.subjects[subject][category];
-			var count = topics.length;
-
-			/* fill the selection element with topics */
-			for(var i = 0; i < count; i++) {
-				optionTopic = document.createElement('option');
-				optionTopic.setAttribute('value',topics[i]);
-				optionTopic.innerHTML = topics[i];
-				listTopics.appendChild(optionTopic);
-			}
-
-			/* reset the selection to "choose topic" */
-			listTopics.selectedIndex = 0;
-		}
-
-		/* grey the first selected */
-		greyFirstSelect(this);
-		greyFirstSelect(listTopics);
-	}
-
-	var row_SubjectSelect = document.createElement("div");
-	row_SubjectSelect.setAttribute("class","row");
-
-	var colLeft_SubjectSelect = document.createElement("div");
-	colLeft_SubjectSelect.setAttribute("class","col col-33");
-
-	var colMiddle_SubjectSelect = document.createElement("div");
-	colMiddle_SubjectSelect.setAttribute("class","col col-33");
-
-	var colRight_SubjectSelect = document.createElement("div");
-	colRight_SubjectSelect.setAttribute("class","col col-33");
-
-	row_SubjectSelect.appendChild(colLeft_SubjectSelect);
-	row_SubjectSelect.appendChild(colMiddle_SubjectSelect);
-	row_SubjectSelect.appendChild(colRight_SubjectSelect);
-
-	/* create select tags */
-	var listSubjects = document.createElement('select');
-	listSubjects.setAttribute("id","select-subject");
-	listSubjects.onchange = loadCategories;
-	listSubjects.style = "color: grey";
-
-	var listCategories = document.createElement('select');
-	listCategories.setAttribute("id","select-category");
-	listCategories.onchange = loadTopics;
-	listCategories.style = "color: grey";
-
-	var listTopics = document.createElement('select');
-	listTopics.setAttribute("id","select-topic");
-	listTopics.onchange = function() {
-		greyFirstSelect(listTopics);
-	};
-	listTopics.style = "color: grey";
-
-	/* get subjects for select topic list */
-	var subjectsPromise = getSubjects();
-
-	subjectsPromise.then(function(data) {
-		var subjectsData = data;
-		globalBlockEngine.subjects = subjectsData;
-
-		/* first box - subject names */
-		var subjectsNames = Object.keys(subjectsData);
-		var subjectsCount = subjectsNames.length;
-
-		var optionSubject = document.createElement('option');
-		optionSubject.innerHTML = "choose subject";
-		optionSubject.setAttribute("value","");
-		listSubjects.appendChild(optionSubject);
-
-		/* loop through and add subjects. */
-		var foundSubject = false;
-		for(var i = 0; i < subjectsCount; i++) {
-			optionSubject = document.createElement('option');
-			optionSubject.setAttribute('value',subjectsNames[i]);
-			optionSubject.innerHTML = subjectsNames[i];
-			listSubjects.appendChild(optionSubject);
-			if(subjectsNames[i] === defSub) {
-				optionSubject.setAttribute('selected','selected');
-				foundSubject = true;
-			}
-		}
-
-		/* second box - category names */
-		var optionCategory = document.createElement('option');
-		optionCategory.setAttribute("value","");
-		optionCategory.innerHTML = "choose category";
-		listCategories.appendChild(optionCategory);
-
-		/* add categories if this page has saved subject */
-		var foundCategory = false;
-		if(foundSubject) {
-			/* get the categories for that subject */
-			var categories = Object.keys(globalBlockEngine.subjects[defSub]);
-			var countCat = categories.length;
-
-			/* fill the selection element with categories */
-			for(var j = 0; j < countCat; j++) {
-				optionCategory = document.createElement('option');
-				optionCategory.setAttribute('value',categories[j]);
-				optionCategory.innerHTML = categories[j];
-				listCategories.appendChild(optionCategory);
-				if(categories[j] === defCat) {
-					optionCategory.setAttribute('selected','selected');
-					foundCategory = true;
-				}
-			}
-		}
-
-		/* third box - topic names */
-		var optionTopic = document.createElement('option');
-		optionTopic.setAttribute("value","");
-		optionTopic.innerHTML = "choose topic";
-		listTopics.appendChild(optionTopic);
-
-		/* add topics if this page has saved category */
-		if(foundCategory) {
-			/* get the topics for the category */
-			var topics = globalBlockEngine.subjects[defSub][defCat];
-			var countTop = topics.length;
-
-			/* fill the selection element with topics */
-			for(var k = 0; k < countTop; k++) {
-				optionTopic = document.createElement('option');
-				optionTopic.setAttribute('value',topics[k]);
-				optionTopic.innerHTML = topics[k];
-				listTopics.appendChild(optionTopic);
-				if(topics[k] === defTop) {
-					optionTopic.setAttribute('selected','selected');
-				}
-			}
-
-		}
-
-	},function(error) {
-		alertify.alert("There Was An Error Getting The Subjects");
-		if(error === "unknown") {
-			journalError("getSubjects() unknown result.msg","nav.js",new Error().lineNumber,"","");
-		}
-	});
-
-	/* append lists to columns */
-	colLeft_SubjectSelect.appendChild(listSubjects);
-	colMiddle_SubjectSelect.appendChild(listCategories);
-	colRight_SubjectSelect.appendChild(listTopics);
-
-	return row_SubjectSelect;
-}
+};
 
 // <<<fold>>>
 
@@ -1117,13 +794,13 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 
 		nothing - *
 */
-function revertBlocks() {
+this.revertBlocks = function() {
 	/* create the url destination for the ajax request */
 	var url = createURL("/revertblocks");
 
 	/* get the pid & page name */
-	var xid = document.getElementById('x-id').getAttribute('data-xid');
-	var xidName = document.getElementById('x-id').getAttribute('name');
+	var xid = document.getElementById('bengine-x-id').getAttribute('data-xid');
+	var xidName = document.getElementById('bengine-x-id').getAttribute('name');
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
@@ -1141,11 +818,11 @@ function revertBlocks() {
 
 				switch(result.msg) {
 					case 'success':
-						var oldBengine = document.getElementById('x-bengine');
+						var oldBengine = document.getElementById('bengine-instance');
 						var main = oldBengine.parentNode;
 						main.removeChild(oldBengine);
-						blockEngineStart(main.getAttribute('id'),x,[xidName,xid],result.data.split(","));
-						document.getElementById("savestatus").innerHTML = "Saved";
+						blockEngineStart(main.getAttribute('id'),[xidName,xid],result.data.split(","));
+						document.getElementById("bengine-savestatus").innerHTML = "Saved";
 						break;
 					case 'noxid':
 						alertify.alert("This Page Is Not Meant To Be Visited Directly."); break;
@@ -1162,7 +839,7 @@ function revertBlocks() {
     };
 
 	xmlhttp.send(params);
-}
+};
 
 /*
 	Function: saveBlocks
@@ -1177,18 +854,21 @@ function revertBlocks() {
 
 		nothing - *
 */
-function saveBlocks(which) {
+if(options.hasOwnProperty('enableSave') && options.enableSave === false) {
+	saveBlocks = function(which) { /* do nothing */ };
+} else {
+var saveBlocks = function(which) {
 
 	/* set parameter to be sent to back-end that determines which table to save to, temp or perm, & set save status display */
 	var table;
 	if(which === false) {
 		table = 0;
-		document.getElementById("savestatus").innerHTML = "Not Saved";
+		document.getElementById("bengine-savestatus").innerHTML = "Not Saved";
 	} else {
 		table = 1;
 	}
 
-	document.getElementById('statusid').setAttribute('value',table);
+	document.getElementById('bengine-statusid').setAttribute('value',table);
 
 	/* variables for storing block data */
 	var blockType = [];
@@ -1202,11 +882,11 @@ function saveBlocks(which) {
 		var i = 0;
 		while(blockCount >= bid) {
 			/* get the block type */
-			var btype = document.getElementById('a' + bid).className;
+			var btype = document.getElementById('bengine-a' + bid).className;
 			blockType[i] = btype;
 
 			/* get the block content */
-			blockContent[i] = x[btype].saveContent(bid);
+			blockContent[i] = extensibles[btype].saveContent(bid);
 
 			i++;
 			bid++;
@@ -1221,8 +901,8 @@ function saveBlocks(which) {
 	var url = createURL("/saveblocks");
 
 	/* get the pid & page name */
-	var xid = document.getElementById('x-id').getAttribute('data-xid');
-	var xidName = document.getElementById('x-id').getAttribute('name');
+	var xid = document.getElementById('bengine-x-id').getAttribute('data-xid');
+	var xidName = document.getElementById('bengine-x-id').getAttribute('name');
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
@@ -1256,7 +936,7 @@ function saveBlocks(which) {
 				switch(result.msg) {
 					case 'blocksaved':
 						if(table === 1) {
-							document.getElementById("savestatus").innerHTML = "Saved";
+							document.getElementById("bengine-savestatus").innerHTML = "Saved";
 						}
 						break;
 					case 'nosaveloggedout':
@@ -1273,67 +953,12 @@ function saveBlocks(which) {
     };
 
 	xmlhttp.send(params);
+};
 }
 
-/*
-	Function: savePageSettings
-
-	This function makes an ajax request to save the page settings.
-
-	Parameters:
-
-		pagetype - string, type of page being saved
-
-	Returns:
-
-		none
-*/
-function savePageSettings(pagetype) {
-	/* create the url destination for the ajax request */
-	var url = createURL('/savepagesettings');
-
-	/* get the pid & page name */
-	var id = document.getElementById('x-id').getAttribute('data-xid');
-	var title = document.getElementById('pagetitle').value;
-	var subject = document.getElementById('select-subject').value;
-	var category = document.getElementById('select-category').value;
-	var topic = document.getElementById('select-topic').value;
-	var imageurl = document.getElementById('pageimg').src.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
-	var blurb = document.getElementById('pageblurb').value;
-
-	var xmlhttp;
-	xmlhttp = new XMLHttpRequest();
-
-	var params = "pt=" + pagetype + "&id=" + id + "&p=" + title + "&s=" + subject + "&c=" + category + "&t=" + topic + "&i=" + imageurl + "&b=" + blurb;
-
-	xmlhttp.open("POST",url,true);
-
-	xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
-
-	xmlhttp.onreadystatechange = function() {
-		if (xmlhttp.readyState === XMLHttpRequest.DONE) {
-			if(xmlhttp.status === 200) {
-				var result = JSON.parse(xmlhttp.responseText);
-
-				switch(result.msg) {
-					case 'settingssaved':
-						alertify.log("Settings Saved!","success"); break;
-					case 'nosaveloggedout':
-						alertify.alert("Save Settings Error. You Are Not Logged In."); break;
-					case 'nosubjectnotsaved':
-						alertify.alert("Save Settings Error. Please Enter At Least A Subject."); break;
-					case 'err':
-					default:
-						alertify.alert("An Error Occured. Please Try Again Later");
-				}
-			} else {
-				alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
-			}
-		}
-	};
-
-	xmlhttp.send(params);
-}
+this.saveBlocks = function(which) {
+	saveBlocks(which);
+};
 
 /*
 	Function: uploadMedia
@@ -1349,10 +974,10 @@ function savePageSettings(pagetype) {
 
 		none
 */
-function uploadMedia(bid,blockObj) {
+var uploadMedia = function(bid,blockObj) {
 
 	/* get the hidden file-select object that will store the user's file selection */
-	var fileSelect = document.getElementById('file-select');
+	var fileSelect = document.getElementById('bengine-file-select');
 
 	/* change file-select to only accept files based on btype */
 	switch(blockObj.type) {
@@ -1412,7 +1037,7 @@ function uploadMedia(bid,blockObj) {
 				formData.append('media',file,file.name);
 
 				/* get the directory id */
-				var did = document.getElementById('x-id').getAttribute('data-did');
+				var did = document.getElementById('bengine-x-id').getAttribute('data-did');
 
 				/* grab the domain and create the url destination for the ajax request */
 				var url = createURL("/uploadmedia?did=" + did + "&btype=" + blockObj.type);
@@ -1521,6 +1146,8 @@ function uploadMedia(bid,blockObj) {
 		/* this resets the selection to nothing, in case the user decides to upload the same file, onchange will still fire */
 		this.value = null;
 	};
-}
+};
 
 // <<<fold>>>
+
+} // end of Bengine

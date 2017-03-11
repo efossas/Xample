@@ -32,10 +32,14 @@ mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/bp.js
 cat $TEST/xample/public/js/bengine.js $TEST/xample/public/js/omni.js $TEST/xample/public/js/lg.js > $TEST/xample/public/js/temp.js
 mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/lg.js
 
+cat $TEST/xample/public/js/bengine.js $TEST/xample/public/js/omni.js $TEST/xample/public/js/pl.js > $TEST/xample/public/js/temp.js
+mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/pl.js
+
 cat $TEST/xample/public/js/omni.js $TEST/xample/public/js/nav.js > $TEST/xample/public/js/temp.js
 mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/nav.js
 
 # create minified versions of frontend js files
 $TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/bp.min.js $TEST/xample/public/js/bp.js
 $TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/lg.min.js $TEST/xample/public/js/lg.js
+$TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/pl.min.js $TEST/xample/public/js/pl.js
 $TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/nav.min.js $TEST/xample/public/js/nav.js

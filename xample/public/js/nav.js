@@ -1558,7 +1558,7 @@ function pageProfile(profiledata) {
 	/* make mandatory profile rows */
 	var row_Username = rowProfileSingle("username","Username:",profileinfo.username);
 	var row_Password = rowProfileCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
-	var row_Autosave = rowProfileSingle("autosave","Auto Save:",profileinfo.autosave);
+	var row_Autosave = rowProfileSingle("bengine-autosave","Auto Save:",profileinfo.autosave);
 	var row_DefaultText = rowProfileSingle("defaulttext","Default Text:",profileinfo.defaulttext);
 
 	/* make recovery profile rows */
@@ -1699,6 +1699,8 @@ function signup() {
 						window.location = createURL("/home"); break;
 					case 'exists':
 						alertify.alert("That Username Already Exists.\nPlease Choose A Different One."); break;
+					case 'closed':
+						alertify.alert("Signing Up Is Currently By Invitation Only."); break;
 					case 'err':
 					default:
 						alertify.alert("An Unknown Error Occurred");

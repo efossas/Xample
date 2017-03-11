@@ -19,6 +19,7 @@ var l_guide = require('./loads/guide.js');
 var l_home = require('./loads/home.js');
 var l_notfound = require('./loads/notfound.js');
 var l_page = require('./loads/page.js');
+var l_play = require('./loads/play.js');
 var l_profile = require('./loads/profile.js');
 var l_start = require('./loads/start.js');
 
@@ -67,6 +68,7 @@ module.exports = {
     login: r_login.login,
     logout: r_logout.logout,
     notfound: l_notfound.notfound,
+    play: l_play.play,
     page: l_page.page,
     profile: l_profile.profile,
     revertblocks: r_revertblocks.revertblocks,
