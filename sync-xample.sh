@@ -7,9 +7,14 @@ TEST=
 mkdir -p $TEST/xample/data
 mkdir -p $TEST/xample/error
 mkdir -p $TEST/xample/loads
-mkdir -p $TEST/xample/routes
 mkdir -p $TEST/xample/public/css
 mkdir -p $TEST/xample/public/js
+mkdir -p $TEST/xample/routes
+mkdir -p $TEST/xample/tests
+
+# convert sass to css & make minified version
+sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$TEST/xample/public/css/wisepool.css
+sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$TEST/xample/public/css/wisepool.min.css --style compressed
 
 # copy backend files
 rsync -a -v $REPO/xample/*.js $TEST/xample/
@@ -17,9 +22,7 @@ rsync -a -v $REPO/xample/data/* $TEST/xample/data/
 rsync -a -v $REPO/xample/error/* $TEST/xample/error/
 rsync -a -v $REPO/xample/loads/* $TEST/xample/loads/
 rsync -a -v $REPO/xample/routes/* $TEST/xample/routes/
-
-# convert sass to css
-sass --no-cache --sourcemap=none --update $REPO/xample/public/css/:$TEST/xample/public/css/
+rsync -a -v $REPO/xample/tests/* $TEST/xample/tests/
 
 # copy frontend files
 rsync -a -v $REPO/xample/public/css/*.css $TEST/xample/public/css/

@@ -61,6 +61,7 @@ exports.signup = function(request,response) {
 		/// closing off sign ups
 		if(email !== "applegate") {
 			result.msg = 'closed';
+			response.setHeader('content-type','application/json');
 			response.end(JSON.stringify(result));
 			return;
 		}

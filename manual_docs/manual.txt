@@ -51,7 +51,15 @@ Topic: Install SASS
 
 Sass is a preprocessor that converts .scss files to .css.
 
-> (ubuntu) sudo su -c "gem install sass"
+> (ubuntu) git clone https://github.com/rbenv/rbenv.git ~/.rbenv
+> (ubuntu) cd ~/.rbenv && src/configure && make -C src
+> (ubuntu) echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bash_profile
+> (ubuntu) echo 'eval "$(rbenv init -)"' >> ~/.bash_profile
+> (ubuntu) source ~/.bash_profile
+> (ubuntu) git clone https://github.com/rbenv/ruby-build.git ~/.rbenv/plugins/ruby-build
+> (ubuntu) rbenv install --verbose 2.4.0
+> (ubuntu) rbenv global 2.4.0
+> (ubuntu) gem install sass
 > (mac) gem install sass
 
 Topic: Install NVM
@@ -59,6 +67,8 @@ Topic: Install NVM
 NVM is Node Version Manager. Keeps track of node installations.
 
 > (ubuntu) curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash
+> (ubuntu) echo 'export NVM_DIR="$HOME/.nvm"' >> ~/.bash_profile
+> (ubuntu) echo '[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"' >> ~/.bash_profile
 > (mac) curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.32.1/install.sh | bash
 
 Topic: Install Node
@@ -156,8 +166,32 @@ You can open the mysql shell with /usr/local/mysql/bin/mysql -uroot
 
 Install Redis:
 
-> (ubuntu) ???
+> (ubuntu) apt-get install build-essential
+> (ubuntu) apt-get install tcl8.5
+> (ubuntu) wget http://download.redis.io/releases/redis-3.2.8.tar.gz
+> (ubuntu) tar xzf redis-3.2.8.tar.gz
+> (ubuntu) cd redis-3.2.8
+> (ubuntu) make
+> (ubuntu) make install
+> (ubuntu) utils/install_server.sh
 > (mac) brew install redis
+
+Secure Redis:
+
+> (ubuntu) vim /etc/redis/6379.conf
+> (mac) vim /usr/local/etc/redis.conf
+
+uncomment "bind 127.0.0.1 ::1"
+uncomment and change "requirepass a1bc60f3ee230db84e6e584700ac277f0aab5f6b3f4c7dec2173371c32ef00d4"
+
+Install Mongo:
+
+https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/
+
+> (ubuntu) apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 0C49F3730359A14518585931BC711F9BA15703C6
+> (ubuntu) echo "deb [ arch=amd64 ] http://repo.mongodb.org/apt/ubuntu trusty/mongodb-org/3.4 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list
+> (ubuntu) apt-get update
+> (ubuntu) apt-get install -y mongodb-org
 
 Install Libre Office 4.3.7.2:
 

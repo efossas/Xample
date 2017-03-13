@@ -69,7 +69,7 @@ function autosaveTimer(asdiv,saveFunction) {
 /*
 	Function: createURL
 
-	Detects local or remote host and constructs desired url.
+	Detects local or remote host and constructs desired url. Make sure path contains leading forward slash "/".
 
 	Parameters:
 
@@ -87,7 +87,7 @@ function createURL(path) {
 	if(splitUrl[2].match(/localhost.*/)) {
 		url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
 	} else {
-		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + encodeURI(path);
+		url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
 	}
 
 	return url;
@@ -427,6 +427,7 @@ function btnLink(text,url,color) {
 function btnSubmit(text,funcName,color) {
 	var submit = document.createElement('button');
 	submit.setAttribute('type','');
+	submit.setAttribute('id',text.replace(' ','-'));
 	submit.setAttribute('class','menubtn ' + color + '-btn');
 	submit.setAttribute('value','submit');
 
