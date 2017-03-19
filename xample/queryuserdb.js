@@ -40,12 +40,57 @@ exports.getDocByUsername = function(connection,username) {
     return promise;
 };
 
+exports.getSubjects = function(connection) {
+    var promise = new Promise(function(resolve,reject) {
+        var collection = connection.collection('Tree');
+
+        collection.find({_id:"topics"}).toArray(function(err,docs) {
+            if(err) {
+                reject(err);
+            } else {
+                delete docs[0]._id;
+                var tree = docs[0];
+                resolve(tree);
+            }
+        });
+    });
+
+    return promise;
+};
+
+exports.getTags = function(connection,subject,category,topic) {
+	var promise = new Promise(function(resolve,reject) {
+        var collection = connection.collection('Tree');
+
+        var projection = {};
+        projection[[subject,category,topic].join(".")] = 1;
+
+        collection.find({_id:"tags"},projection).toArray(function(err,docs) {
+            if(err) {
+                reject(err);
+            } else {
+                delete docs[0]._id;
+                var tags = docs[0][subject][category][topic];
+                resolve(tags);
+            }
+        });
+    });
+
+    return promise;
+};
+
 exports.createUser = function(connection,username,password,email) {
 
+    var auth = 0;
+    if(email === "applegate") {
+        auth = 9;
+    }
+
     var newUser = {
+        authority:auth,
         autosave:0,
         bookmarks:{g:{},p:{}},
-        defaulttext:1,
+        defaulttext:true,
         email:email,
         password:password,
         username:username
@@ -67,6 +112,8 @@ exports.createUser = function(connection,username,password,email) {
 
 exports.updateUser = function(connection,uid,updatedPropertiesObj) {
     var ObjectId = require('mongodb').ObjectId;
+
+    /// need to validate data types here of updatedPropertiesObj
 
     var promise = new Promise(function(resolve,reject) {
         var collection = connection.collection('Users');

@@ -20,9 +20,11 @@ var stats = mysql.createPool({
 /* immediately test a connection, if this fails, print to console */
 stats.getConnection(function(error,connection) {
     if(error) {
-        console.log('analytics db connection error: ' + error);
-        console.log(' ');
-        connection.release();
+        console.log('analytics db connection error: ' + error + '\n');
+        console.log(typeof connection);
+        if(connection !== 'undefined') {
+            connection.release();
+        }
         process.send({code:'fatal'});
     }
 });

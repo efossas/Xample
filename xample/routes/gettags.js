@@ -21,10 +21,12 @@ var queryUserDB = require('./../queryuserdb.js');
 
 		nothing - *
 */
-exports.getsubjects = function(request,response) {
-	var __function = "getsubjects";
+exports.gettags = function(request,response) {
+	var __function = "gettags";
 
-    var userdb = request.app.get("userdb");
+	var qs = require('querystring');
+
+	var userdb = request.app.get("userdb");
 
 	/* create response object */
 	var result = {msg:"",data:{}};
@@ -32,7 +34,9 @@ exports.getsubjects = function(request,response) {
 	/* get the user's id */
 	var uid = request.session.uid;
 
-	var body = "";
+	var body = '';
+
+	/* when the request gets data, append it to the body string */
 	request.on('data',function(data) {
 		body += data;
 
@@ -44,9 +48,12 @@ exports.getsubjects = function(request,response) {
 		}
 	});
 
+	/* when the request ends, parse the POST data, & process the query */
 	request.on('end',function() {
-		var promiseSubjects = queryUserDB.getSubjects(userdb);
-		promiseSubjects.then(function(data) {
+		var POST = qs.parse(body);
+
+		var promiseTags = queryUserDB.getTags(userdb,POST.s,POST.c,POST.t);
+		promiseTags.then(function(data) {
 			result.msg = 'success';
 			result.data = data;
 			response.end(JSON.stringify(result));
@@ -55,5 +62,6 @@ exports.getsubjects = function(request,response) {
 			response.end(JSON.stringify(result));
 			analytics.journal(1,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 		});
+
 	});
 };

@@ -30,6 +30,7 @@ var r_getbmdata = require('./routes/getbmdata.js');
 var r_getpages = require('./routes/getpages.js');
 var r_getprofiledata = require('./routes/getprofiledata.js');
 var r_getsubjects = require('./routes/getsubjects.js');
+var r_gettags = require('./routes/gettags.js');
 var r_journalerror = require('./routes/journalerror.js');
 var r_login = require('./routes/login.js');
 var r_logout = require('./routes/logout.js');
@@ -62,6 +63,7 @@ module.exports = {
     getpages: r_getpages.getpages,
     getprofiledata: r_getprofiledata.getprofiledata,
     getsubjects: r_getsubjects.getsubjects,
+    gettags: r_gettags.gettags,
     guide: l_guide.guide,
     home: l_home.home,
     journalerror: r_journalerror.journalerror,

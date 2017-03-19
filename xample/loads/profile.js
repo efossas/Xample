@@ -37,11 +37,12 @@ exports.profile = function(request,response) {
 		promiseUser.then(function(userdata) {
 			var data = {};
 
-			data["username"] = userdata[0].username;
-			data["email"] = typeof userdata[0].email === 'undefined' ? '' : userdata[0].email;
-			data["phone"] = typeof userdata[0].phone === 'undefined' ? '' : userdata[0].phone;
+			data["authority"] = userdata[0].authority;
 			data["autosave"] = userdata[0].autosave;
             data["defaulttext"] = userdata[0].defaulttext;
+			data["email"] = typeof userdata[0].email === 'undefined' ? '' : userdata[0].email;
+			data["phone"] = typeof userdata[0].phone === 'undefined' ? '' : userdata[0].phone;
+			data["username"] = userdata[0].username;
 
 			var profiledata = JSON.stringify(data);
 

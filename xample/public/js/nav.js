@@ -475,6 +475,187 @@ function dashExplore(exploreHeader,linkRoute) {
 		var subjectsData = data;
 		globalScope.subjects = subjectsData;
 
+		/* function for showing topic's tags in explore div */
+		function showTags() {
+			var params = "s=" + this.getAttribute('data-subject') + "&c=" + this.getAttribute('data-category') + "&t=" + this.getAttribute('data-topic');
+
+			var promiseTag = new Promise(function(resolve,reject) {
+				var url = createURL("/gettags");
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.open("POST",url,true);
+				xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+						if(xmlhttp.status === 200) {
+							var result = JSON.parse(xmlhttp.responseText);
+
+							switch(result.msg) {
+								case 'success':
+									resolve(result.data); break;
+								case 'err':
+								default:
+									alertify.alert("Unable To Retrieve Tags");
+									reject('err');
+							}
+						} else {
+							alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+						}
+					}
+				};
+
+				xmlhttp.send(params);
+			});
+
+			var tagsRow = document.createElement('div');
+			tagsRow.setAttribute('class','row');
+
+			/* make back btn & col */
+			var backTopic = document.createElement('div');
+			backTopic.setAttribute('class','col col-10');
+			backTopic.setAttribute('style','position:absolute;z-index:2;');
+
+			var backBtn = btnSubmit('Back',showCategory,'red');
+			backBtn.setAttribute('data-subject',this.getAttribute('data-subject'));
+			backBtn.setAttribute('data-category',this.getAttribute('data-category'));
+			backTopic.appendChild(backBtn);
+
+			/* create header for link section */
+			var h3row = document.createElement('div');
+			h3row.setAttribute('class','row');
+
+			var h3col = document.createElement('div');
+			h3col.setAttribute('class','col col-100');
+
+			var h3 = document.createElement('h3');
+			h3.innerHTML = 'Tags';
+
+			h3row.appendChild(backTopic);
+			h3col.appendChild(h3);
+			h3row.appendChild(h3col);
+			tagsRow.appendChild(h3row);
+
+			/* make tag row & col */
+			var tagRow = document.createElement('div');
+			tagRow.setAttribute('class','row');
+
+			var tagCol = document.createElement('div');
+			tagCol.setAttribute('class','col col-100');
+
+			/* append back & tag columns */
+			tagRow.appendChild(tagCol);
+			tagsRow.appendChild(tagRow);
+
+			/* add topic row to tag col */
+			var topicRow = document.createElement('div');
+			topicRow.setAttribute('class','row');
+
+			var topicCol = document.createElement('div');
+			topicCol.setAttribute('class','col col-100');
+
+			var topicBtn = btnLink('<b>' + this.getAttribute('data-topic') + '</b>','','none');
+
+			topicCol.appendChild(topicBtn);
+
+			topicRow.appendChild(topicCol);
+			tagCol.appendChild(topicRow);
+
+			function listHover(evt) {
+				this.style = 'background-color:rgba(58, 50, 200, 0.2)';
+			}
+
+			function listOff(evt) {
+				this.style = 'background-color:transparent';
+			}
+
+			promiseTag.then(function(data) {
+				var tagsBox = document.createElement('div');
+				tagsBox.setAttribute('class','data-box');
+				tagsBox.setAttribute('style','border:0px solid black;border-bottom-width:1px');
+
+				var tagLength = data.length - 1;
+				data.forEach(function(value,i) {
+					var row = document.createElement('div');
+
+					switch(i) {
+						case 0:
+							row.setAttribute('class','row toprow'); break;
+						case tagLength:
+							row.setAttribute('class','row bottomrow'); break;
+						default:
+							row.setAttribute('class','row');
+					}
+
+					/* left buffer */
+					var colLeft = document.createElement('div');
+					colLeft.setAttribute('class','col col-2');
+
+					/* page position in list */
+					var colPgNum = document.createElement('div');
+					colPgNum.setAttribute('class','col col-3 padtop');
+					colPgNum.innerHTML = (i + 1);
+
+					/* page name */
+					var colName = document.createElement('div');
+					colName.setAttribute('class','col col-93 padtop');
+					colName.innerHTML = value;
+
+					/* right buffer */
+					var colRight = document.createElement('div');
+					colRight.setAttribute('class','col col-2');
+
+					/* append everything */
+					row.appendChild(colLeft);
+					row.appendChild(colPgNum);
+					row.appendChild(colName);
+					row.appendChild(colRight);
+
+					row.addEventListener('mouseover',listHover,true);
+					row.addEventListener('mouseout',listOff,true);
+
+					tagsBox.appendChild(row);
+				});
+
+				tagsRow.appendChild(tagsBox);
+
+				/* add input for suggested tag */
+				var rowSuggestTag = document.createElement('div');
+				rowSuggestTag.setAttribute('class','row');
+
+				var colSuggestTagInput = document.createElement('div');
+				colSuggestTagInput.setAttribute('class','col col-85');
+
+				var suggestTagInput = document.createElement('input');
+				suggestTagInput.setAttribute('class','log-input');
+				suggestTagInput.setAttribute('style','border-left-width:0px');
+				suggestTagInput.setAttribute('placeholder','Suggest A New Tag');
+
+				colSuggestTagInput.appendChild(suggestTagInput);
+
+				var colSuggestTagBtn = document.createElement('div');
+				colSuggestTagBtn.setAttribute('class','col col-15');
+
+				var suggestTagBtn = btnSubmit("Suggest Tag","","green");
+
+				colSuggestTagBtn.appendChild(suggestTagBtn);
+
+				rowSuggestTag.appendChild(colSuggestTagInput);
+				rowSuggestTag.appendChild(colSuggestTagBtn);
+
+				tagsRow.appendChild(rowSuggestTag);
+
+				/* empty the div and refill it */
+				emptyDiv(explore);
+
+				explore.appendChild(tagsRow);
+			},function(err) {
+				explore.appendChild(tagRow);
+				alertify.alert("There Was An Error Retrieving The Tags");
+				if(err === "unknown") {
+					journalError("getTags() unknown result.msg","nav.js",new Error().lineNumber,"","");
+				}
+			});
+		}
+
 		function showTop() {
 			/* first box - subject names */
 			var subjectsNames = Object.keys(subjectsData);
@@ -557,8 +738,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			var categoryCol = document.createElement('div');
 			categoryCol.setAttribute('class','col col-100');
 
-			var categoryUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category'));
-			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>',categoryUrl,'none');
+			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>','','none');
 
 			categoryCol.appendChild(categoryBtn);
 
@@ -578,9 +758,17 @@ function dashExplore(exploreHeader,linkRoute) {
 				var currentTopicCol = document.createElement('div');
 				currentTopicCol.setAttribute('class','col col-100');
 
-				var topicUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
+				var currentTopicBtn;
+				if(linkRoute === 'tags') {
+					currentTopicBtn = btnSubmit(currentTopic,showTags,'none');
+					currentTopicBtn.setAttribute('data-subject',this.getAttribute('data-subject'));
+					currentTopicBtn.setAttribute('data-category',this.getAttribute('data-category'));
+					currentTopicBtn.setAttribute('data-topic',currentTopic);
+				} else {
+					var topicUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
 
-				var currentTopicBtn = btnLink(currentTopic,topicUrl,'none');
+					currentTopicBtn = btnLink(currentTopic,topicUrl,'none');
+				}
 
 				currentTopicCol.appendChild(currentTopicBtn);
 				currentTopicRow.appendChild(currentTopicCol);
@@ -592,7 +780,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			explore.appendChild(topicRow);
 		}
 
-		/* function for showing subject's categoris in explore div */
+		/* function for showing subject's categories in explore div */
 		function showSubject() {
 			var categoryRow = document.createElement('div');
 			categoryRow.setAttribute('class','row');
@@ -635,8 +823,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			subjectCol.setAttribute('class','col col-100');
 			subjectCol.setAttribute('style','border-bottom-color:black;border-bottom-width:1px;');
 
-			var subjectUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject'));
-			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>',subjectUrl,'none');
+			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>','','none');
 			subjectCol.appendChild(subjectBtn);
 
 			subjectRow.appendChild(subjectCol);
@@ -955,6 +1142,25 @@ function barFilter(sort,tags,keywords) {
 }
 
 /*
+	Function: formGenerateTags
+
+	Make a create tag form.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, tag creation form
+*/
+function formGenerateTags() {
+	var exploreTags = dashExplore('Tags','tags');
+
+	return exploreTags;
+}
+
+/*
 	Function: formGenerateUserContent
 
 	Make a user content form.
@@ -1240,12 +1446,13 @@ function rowProfileCheck(check,field,placeholders,description) {
 		field - string, the name of the field, must match the column name in MySQL database
 		description - string, short description shown on the left of input tag
 		data - the current profile data for that field, will populate the input tag
+		editFlag - boolean, if true, user can edit data
 
 	Returns:
 
 		success - html node, profile row div
 */
-function rowProfileSingle(field,description,data) {
+function rowProfileSingle(field,description,data,editFlag) {
 
 	var row = document.createElement("div");
 	row.setAttribute("class","row profile-row");
@@ -1270,15 +1477,30 @@ function rowProfileSingle(field,description,data) {
 	fieldInput.setAttribute('name',field);
 	fieldInput.setAttribute('class','text-input');
 	fieldInput.setAttribute('maxlength','50');
-	fieldInput.setAttribute('value',data);
 
-	/* save username btn */
-	var saveBtn = document.createElement('button');
-	saveBtn.setAttribute('type','button');
-	saveBtn.setAttribute('name','save-' + field);
-	saveBtn.setAttribute('class','menubtn green-btn');
-	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
-	saveBtn.innerHTML = "Save";
+	if(editFlag) {
+		fieldInput.setAttribute('value',data);
+	} else {
+		fieldInput.setAttribute('placeholder',data);
+		fieldInput.setAttribute('readonly','true');
+	}
+
+		/* save username btn */
+		var saveBtn = document.createElement('button');
+	if(editFlag) {
+		saveBtn.setAttribute('type','button');
+		saveBtn.setAttribute('name','save-' + field);
+		saveBtn.setAttribute('class','menubtn green-btn');
+		saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
+		saveBtn.innerHTML = "Save";
+	} else {
+		saveBtn.setAttribute('type','button');
+		saveBtn.setAttribute('name','save-' + field);
+		saveBtn.setAttribute('class','menubtn black-btn');
+		saveBtn.setAttribute('disabled','true');
+		saveBtn.setAttribute('style','cursor:default');
+		saveBtn.innerHTML = "Immutable";
+	}
 
 	colLeft.appendChild(profileTitle);
 	colMiddle.appendChild(fieldInput);
@@ -1449,13 +1671,13 @@ function pageExplore(logstatus,csct,data) {
 
 	Parameters:
 
-		none
+	auth - the users authority level
 
 	Returns:
 
 		nothing - *
 */
-function pageHome() {
+function pageHome(auth) {
 	var main = document.getElementById('content');
 
 	/* append the form to the main div */
@@ -1483,6 +1705,17 @@ function pageHome() {
 		/* learning guide create form */
 		var row_LgCreate = formGenerateUserContent('guide',values[2]);
 		main.appendChild(row_LgCreate);
+
+		/* create tags form */
+		switch(auth) {
+			case 9:
+				var row_TaCreate = formGenerateTags();
+				main.appendChild(row_TaCreate);
+				break;
+			case 0:
+			default:
+				// do nothing
+		}
 	},function(error) {
 		alertify.alert("There Was An Error Getting Your Pages.");
 	});
@@ -1556,20 +1789,22 @@ function pageProfile(profiledata) {
 	profilediv.setAttribute('class','profile-list');
 
 	/* make mandatory profile rows */
-	var row_Username = rowProfileSingle("username","Username:",profileinfo.username);
+	var row_Username = rowProfileSingle("username","Username:",profileinfo.username,true);
 	var row_Password = rowProfileCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
-	var row_Autosave = rowProfileSingle("bengine-autosave","Auto Save:",profileinfo.autosave);
-	var row_DefaultText = rowProfileSingle("defaulttext","Default Text:",profileinfo.defaulttext);
+	var row_Authority = rowProfileSingle("authority","Authority:",profileinfo.authority,false);
+	var row_Autosave = rowProfileSingle("bengine-autosave","Auto Save:",profileinfo.autosave,true);
+	var row_DefaultText = rowProfileSingle("defaulttext","Default Text:",profileinfo.defaulttext,true);
 
 	/* make recovery profile rows */
-	var row_Email = rowProfileSingle("email","Email:",profileinfo.email);
-	var row_Phone = rowProfileSingle("phone","Phone:",profileinfo.phone);
+	var row_Email = rowProfileSingle("email","Email:",profileinfo.email,true);
+	var row_Phone = rowProfileSingle("phone","Phone:",profileinfo.phone,true);
 
 	/* make optional profile rows */
 
 	/* append rows to profilediv */
 	profilediv.appendChild(row_Username);
 	profilediv.appendChild(row_Password);
+	profilediv.appendChild(row_Authority);
 	profilediv.appendChild(row_Autosave);
 	profilediv.appendChild(row_DefaultText);
 	profilediv.appendChild(row_Email);

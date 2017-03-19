@@ -401,10 +401,13 @@ function logout() {
 function btnLink(text,url,color) {
 	var linkbtn = document.createElement('a');
 	linkbtn.setAttribute('class','btn ' + color + '-btn');
-	linkbtn.setAttribute('href',url);
-	linkbtn.setAttribute('target','_self');
 	linkbtn.setAttribute('value',text);
 	linkbtn.innerHTML = text;
+
+	if(url !== '') {
+		linkbtn.setAttribute('href',url);
+		linkbtn.setAttribute('target','_self');
+	}
 
 	return linkbtn;
 }

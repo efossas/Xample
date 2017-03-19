@@ -257,6 +257,27 @@ or you can specify a different one if needed.
 
 Now go to your web browser and type: http://localhost:2020
 
+Section: Database CLI
+
+Viewing MySql, Mongo, & Redis
+
+Topic: MySQL
+
+You might need to create an alias in your ~/.bash_profile on Mac. alias mysql='/usr/local/mysql/bin/mysql'
+
+> mysql -uroot
+
+Topic: Mongo
+
+> mongo
+
+Topic: Redis
+
+You can find the password in server.js
+
+> redis-cli
+> AUTH (<password>)
+
 Section: Tools
 
 These are work flow tools used for communication.

@@ -64,6 +64,9 @@ exports.saveprofile = function(request,response) {
 
 				var POST = qs.parse(body);
 
+				/* remove any fields that users should not be allowed to edit */
+				delete POST.authority;
+
 				/* profile data that requires checks should be queried here and deleted */
 				if(Object.prototype.hasOwnProperty.call(POST,'newPass')) {
 					var currentPassword = POST.currentPass;

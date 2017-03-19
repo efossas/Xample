@@ -46,7 +46,8 @@
 	font-family: "Courier New", Courier, monospace;
 	vertical-align: middle;
 
-	height: 128px;
+	height: 100%;
+	min-height: 64px;
 	overflow-y:auto;
 
 	background-color: white;

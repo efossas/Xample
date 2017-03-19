@@ -144,7 +144,9 @@ var red = mysql.createPool({
 pool.getConnection(function(error,connection) {
 	if(error) {
 		console.log('xample main db connection error: ' + error + '\n');
-		connection.release();
+		if(connection !== 'undefined') {
+            connection.release();
+        }
 		process.send({code:'fatal'});
 	} else {
 		connection.release();
@@ -154,7 +156,9 @@ pool.getConnection(function(error,connection) {
 red.getConnection(function(error,connection) {
 	if(error) {
 		console.log('xample redundant db connection error: ' + error + '\n');
-		connection.release();
+		if(connection !== 'undefined') {
+            connection.release();
+        }
 		process.send({code:'fatal'});
 	} else {
 		connection.release();
@@ -250,6 +254,7 @@ app.post('/getbmdata',rts.getbmdata);
 app.post('/getpages*',rts.getpages);
 app.post('/getprofiledata',rts.getprofiledata);
 app.post('/getsubjects',rts.getsubjects);
+app.post('/gettags',rts.gettags);
 app.get('/guide*',rts.guide);
 app.get('/home',rts.home);
 app.post('/journalerror',rts.journalerror);

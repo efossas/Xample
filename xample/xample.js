@@ -83,6 +83,7 @@ if (cluster.isMaster) {
 		/* receive message from worker to master */
 		worker.on('message',function(msg) {
 			if(msg.code === 'fatal') {
+				console.log('fatal message received');
 				process.exit();
 			}
 		});

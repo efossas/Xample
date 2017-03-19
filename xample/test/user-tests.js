@@ -8,7 +8,6 @@ chai.use(chaihttp);
 
 var server = require('../server.js')('local','2020');
 
-var assert = require('assert');
 describe('Users',function() {
 
     before(function() {
