@@ -269,6 +269,7 @@ app.post('/savepagesettings',rts.savepagesettings);
 app.post('/saveprofile',rts.saveprofile);
 app.post('/setbookmark',rts.setbookmark);
 app.post('/signup',rts.signup);
+app.post('/suggesttag',rts.suggesttag);
 app.post('/sv',rts.setview);
 app.post('/uploadmedia*',rts.uploadmedia);
 app.post('/uploadthumb*',rts.uploadthumb);

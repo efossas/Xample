@@ -477,7 +477,11 @@ function dashExplore(exploreHeader,linkRoute) {
 
 		/* function for showing topic's tags in explore div */
 		function showTags() {
-			var params = "s=" + this.getAttribute('data-subject') + "&c=" + this.getAttribute('data-category') + "&t=" + this.getAttribute('data-topic');
+			var tagSubject = this.getAttribute('data-subject');
+			var tagCategory = this.getAttribute('data-category');
+			var tagTopic = this.getAttribute('data-topic');
+
+			var params = "s=" + tagSubject + "&c=" + tagCategory + "&t=" + tagTopic;
 
 			var promiseTag = new Promise(function(resolve,reject) {
 				var url = createURL("/gettags");
@@ -626,6 +630,7 @@ function dashExplore(exploreHeader,linkRoute) {
 
 				var suggestTagInput = document.createElement('input');
 				suggestTagInput.setAttribute('class','log-input');
+				suggestTagInput.setAttribute('id','suggest-tag');
 				suggestTagInput.setAttribute('style','border-left-width:0px');
 				suggestTagInput.setAttribute('placeholder','Suggest A New Tag');
 
@@ -634,7 +639,52 @@ function dashExplore(exploreHeader,linkRoute) {
 				var colSuggestTagBtn = document.createElement('div');
 				colSuggestTagBtn.setAttribute('class','col col-15');
 
-				var suggestTagBtn = btnSubmit("Suggest Tag","","green");
+				function suggestTag() {
+					var url = createURL("/suggesttag");
+
+					var newtag = document.getElementById('suggest-tag').value;
+					var params = "s=" + tagSubject + "&c=" + tagCategory + "&t=" + tagTopic + "&nt=" + newtag;
+
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.open("POST",url,true);
+					xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+					xmlhttp.onreadystatechange = function() {
+						if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+							if(xmlhttp.status === 200) {
+								var result = JSON.parse(xmlhttp.responseText);
+
+								switch(result.msg) {
+									case 'success':
+										var btn = document.createElement('button');
+										btn.setAttribute('data-subject',tagSubject);
+										btn.setAttribute('data-category',tagCategory);
+										btn.setAttribute('data-topic',tagTopic);
+										btn.onclick = showTags;
+										btn.click();
+										break;
+									case 'exists':
+										alertify.alert("That Tag Already Exists");
+										break;
+									case 'nosaveloggedout':
+										alertify.alert("You Are Currently Logged Out");
+										break;
+									case 'nosavenoauthority':
+										alertify.alert("You Do Not Have The Authority To Add Tags");
+										break;
+									case 'err':
+									default:
+										alertify.alert("Unable To Update Tags");
+								}
+							} else {
+								alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+							}
+						}
+					};
+
+					xmlhttp.send(params);
+				}
+
+				var suggestTagBtn = btnSubmit("Suggest Tag",suggestTag,"green");
 
 				colSuggestTagBtn.appendChild(suggestTagBtn);
 
@@ -1709,9 +1759,16 @@ function pageHome(auth) {
 		/* create tags form */
 		switch(auth) {
 			case 9:
+			case 8:
+			case 7:
+			case 6:
 				var row_TaCreate = formGenerateTags();
 				main.appendChild(row_TaCreate);
-				break;
+			case 5:
+			case 4:
+			case 3:
+			case 2:
+			case 1:
 			case 0:
 			default:
 				// do nothing

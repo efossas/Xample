@@ -4,6 +4,58 @@
 	Contains functions for querying the user nosql database.
 */
 
+exports.addTag = function(connection,subject,category,topic,newtag,uid) {
+    var ObjectId = require('mongodb').ObjectId;
+
+    var tag = {
+        tag:newtag,
+        subject:subject,
+        category:category,
+        topic:topic,
+        upvotes:[],
+        downvotes:[],
+        comments:[],
+        suggestor:uid
+    };
+
+    var treeBranch = [subject,category,topic,newtag].join(".");
+
+    var promise = new Promise(function(resolve,reject) {
+        var collection = connection.collection('Tree');
+
+        var checkIfExistsObj = {_id:"tags"};
+        checkIfExistsObj[treeBranch] = {$exists:true};
+
+        collection.find(checkIfExistsObj).toArray(function(err,docs) {
+            if(err) {
+                reject(err);
+            } else {
+                if(docs.length > 0) {
+                    resolve('exists');
+                } else {
+                    collection.insert(tag,function(err,result) {
+                        if(err) {
+                            reject(err);
+                        } else {
+                            var tagObj = {};
+                            tagObj[treeBranch] = String(result.insertedIds[0]);
+                            collection.update({_id:"tags"},{$set:tagObj},function(err,r) {
+                                if(err) {
+                                    reject(err);
+                                } else {
+                                    resolve('added');
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+    return promise;
+};
+
 exports.getDocByUid = function(connection,uid) {
     var ObjectId = require('mongodb').ObjectId;
 
@@ -70,7 +122,7 @@ exports.getTags = function(connection,subject,category,topic) {
                 reject(err);
             } else {
                 delete docs[0]._id;
-                var tags = docs[0][subject][category][topic];
+                var tags = Object.keys(docs[0][subject][category][topic]);
                 resolve(tags);
             }
         });

@@ -22,7 +22,7 @@ var helper = require('./../helper.js');
 		nothing - *
 */
 exports.setview = function(request,response) {
-	var __function = "setbookmark";
+	var __function = "setview";
 
 	var qs = require('querystring');
 

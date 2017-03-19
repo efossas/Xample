@@ -84,15 +84,18 @@ if (cluster.isMaster) {
 		worker.on('message',function(msg) {
 			if(msg.code === 'fatal') {
 				console.log('fatal message received');
-				process.exit();
+				cluster.disconnect();
 			}
 		});
 	}
 
-	/* if a cluster dies, fork a new one */
+	/* report dead forks */
 	cluster.on('exit',function(worker,code,signal) {
 		console.log(`Worker Died > process-pid: ${worker.process.pid}, code: ${code}, signal: ${signal}`);
-		cluster.fork();
+		/* 0 is clean exit, like process.exit(0), so we can fork a replacement */
+		if(code === 0) {
+			cluster.fork();
+		}
 	});
 } else {
 	var server = require('./server.js')(host,port);

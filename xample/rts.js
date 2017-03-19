@@ -41,6 +41,7 @@ var r_saveprofile = require('./routes/saveprofile.js');
 var r_setbookmark = require('./routes/setbookmark.js');
 var r_setview = require('./routes/setview.js');
 var r_signup = require('./routes/signup.js');
+var r_suggesttag = require('./routes/suggesttag.js');
 var r_uploadmedia = require('./routes/uploadmedia.js');
 var r_uploadthumb = require('./routes/uploadthumb.js');
 
@@ -81,6 +82,7 @@ module.exports = {
     setview: r_setview.setview,
     signup: r_signup.signup,
     start: l_start.start,
+    suggesttag: r_suggesttag.suggesttag,
     uploadmedia: r_uploadmedia.uploadmedia,
     uploadthumb: r_uploadthumb.uploadthumb
 };
