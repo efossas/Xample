@@ -76,6 +76,7 @@ exports.savepagesettings = function(request,response) {
 				var subject = connection.escape(POST.s);
 				var category = connection.escape(POST.c);
 				var topic = connection.escape(POST.t);
+				var tags = connection.escape(POST.tags);
 				var imageurl = connection.escape(POST.i);
 				var blurb = connection.escape(POST.b);
 

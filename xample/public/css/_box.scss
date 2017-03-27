@@ -13,6 +13,49 @@
 	}
 }
 
+.autocomplete-dropdown {
+	box-sizing: border-box;
+	font-family: "Open Sans", "Helvetica Neue",Helvetica,Arial,sans-serif;
+	position: absolute;
+	width: 100%;
+	z-index: 2;
+}
+
+.autocomplete-dropdown ul {
+    border-radius: 6px;
+    border-width: 0;
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.autocomplete-dropdown ul li {
+	background: #000000;
+	box-sizing: border-box;
+	color: #ffffff;
+	display: block;
+	font-weight: normal;
+	padding: 4px 6px;
+	transition: all 0.2s ease 0s;
+    word-break: break-all;
+}
+
+.autocomplete-dropdown ul li:first-child {
+	border-radius: 6px 6px 0 0;
+}
+
+.autocomplete-dropdown ul li:last-child {
+	border-radius: 0 0 6px 6px;
+}
+
+.autocomplete-dropdown ul li:only-child {
+	border-radius: 6px;
+}
+
+.ac-dd-selected {
+	background:	#3271fb !important;
+}
+
 /* Dash Box - Home Page */
 .dash-box {
 	@extend .wrapper;

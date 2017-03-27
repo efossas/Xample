@@ -18,6 +18,42 @@ var globalScope = {};
 
 // <<<code>>>
 
+function autoMatch(text,array) {
+	/* split text by whitespace */
+	var tarr = text.match(/\S+/g) || [];
+
+	if(tarr.length < 1) return [];
+
+	/* only autocomplete on last word & only match alphanumeric chars */
+	var current = tarr[tarr.length - 1].replace(/\W/g,'');
+
+	/* create regexp to match word */
+	var re = new RegExp("\\b" + current + "\\S+","i");
+
+	/* assemble any matches into an array */
+	var matches = [];
+
+	array.forEach(function(value,index) {
+		if(re.test(value)) {
+			matches.push(value);
+		}
+	});
+
+	return matches;
+}
+
+function autoComplete(dropdiv,matches) {
+	var list = "<ul>";
+	matches.forEach(function(value) {
+		list += "<li>" + value + "</li>";
+	});
+	list += "</ul>";
+
+	emptyDiv(dropdiv);
+
+	dropdiv.innerHTML = list;
+}
+
 /*
    Function: autosaveTimer
 
@@ -269,7 +305,7 @@ function getCookies() {
 			// discard
 		}
 	});
-	console.log(userObj);
+
 	return userObj;
 }
 
@@ -990,6 +1026,93 @@ function barPageSettings(pagetype,aid,settings) {
 	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
 	pageSettings.appendChild(ddsct);
 
+	/* div for tag input & autcomplete box */
+	var tagAutoDiv = document.createElement('div');
+
+	/* tag input */
+	var tagInput = document.createElement('input');
+	tagInput.setAttribute('id','page-tags');
+	tagInput.setAttribute('class','text-input');
+	tagInput.setAttribute('placeholder','enter tags');
+	tagInput.onkeyup = function(event) {
+		var dropdown = document.getElementById('tag-autocomplete-dropdown');
+		if(globalScope.tags && this.value !== "") {
+			var suggestions = [];
+			if(dropdown.children.length > 0) {
+				suggestions = dropdown.children[0].getElementsByTagName("li");
+			}
+			/* down key, up key, tab key, any other key */
+			var selected;
+			if(event.keyCode === 40 && suggestions.length > 0) {
+				var i = 0;
+				while (i < suggestions.length) {
+					if(suggestions[i].className === 'ac-dd-selected') {
+						selected = suggestions[i]; i++; break;
+					}
+					i++;
+				}
+				if(typeof selected === 'undefined') {
+					suggestions[0].className = "ac-dd-selected";
+				} else if (i < suggestions.length) {
+					selected.className = "";
+					selected.nextSibling.className = "ac-dd-selected";
+				}
+			} else if (event.keyCode === 38 && suggestions.length > 0) {
+				for (var j = 0; j < suggestions.length; j++) {
+					if(suggestions[j].className === 'ac-dd-selected') {
+						selected = suggestions[j]; break;
+					}
+				}
+				if(typeof selected !== 'undefined') {
+					if (j === 0) {
+						suggestions[0].className = "";
+					} else {
+						selected.className = "";
+						selected.previousSibling.className = "ac-dd-selected";
+					}
+				}
+			} else if ((event.keyCode === 9 || event.keyCode === 39 || event.keyCode === 13) && suggestions.length > 0) {
+				for (let i = 0; i < suggestions.length; i++) {
+					if(suggestions[i].className === 'ac-dd-selected') {
+						tagInput.value = tagInput.value.replace(/\w+$/,"");
+						tagInput.value += suggestions[i].innerHTML;
+						dropdown.style = "display:none;visibility:hidden";
+						break;
+					}
+				}
+			} else {
+				var matches = autoMatch(this.value,globalScope.tags);
+				if(matches.length > 0) {
+					autoComplete(dropdown,matches);
+					dropdown.style = "display:block;visibility:visible";
+				} else {
+					dropdown.style = "display:none;visibility:hidden";
+				}
+			}
+		} else if (this.value === "") {
+			dropdown.style = "display:none;visibility:hidden";
+		}
+	};
+
+	/* prevent tab, up, down default behaviour */
+	document.onkeydown = function(event) {
+		if(event.keyCode === 9 || event.keyCode === 40 || event.keyCode === 38) {
+			event.preventDefault();
+		}
+	};
+
+	/* autcomplete box */
+	var autoCompleteBox = document.createElement('div');
+	autoCompleteBox.setAttribute('id','tag-autocomplete-dropdown');
+	autoCompleteBox.setAttribute('class','autocomplete-dropdown');
+	autoCompleteBox.setAttribute('style','display:none;visibility:hidden');
+
+	/* append all tag & autocomplete stuff */
+	tagAutoDiv.appendChild(tagInput);
+	tagAutoDiv.appendChild(autoCompleteBox);
+
+	pageSettings.appendChild(tagAutoDiv);
+
 	/* row for image and blurb */
 	var rowImgBlurb = document.createElement('div');
 	rowImgBlurb.setAttribute('class','row');
@@ -1082,7 +1205,7 @@ function barPageSettings(pagetype,aid,settings) {
 
 	/* page thumbnail img */
 	var colImg = document.createElement('div');
-	colImg.setAttribute('class','col col-33');
+	colImg.setAttribute('class','col col-26');
 
 	var thumbnail = document.createElement('img');
 	thumbnail.setAttribute('id','pageimg');
@@ -1095,7 +1218,7 @@ function barPageSettings(pagetype,aid,settings) {
 
 	/* page blurb input */
 	var colBlurb = document.createElement('div');
-	colBlurb.setAttribute('class','col col-66');
+	colBlurb.setAttribute('class','col col-74');
 
 	var blurb = document.createElement('textarea');
 	blurb.setAttribute('name','pageblurb');
@@ -1270,6 +1393,14 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 	listTopics.setAttribute("id","select-topic");
 	listTopics.onchange = function() {
 		greyFirstSelect(listTopics);
+
+		var ss = document.getElementById('select-subject');
+		var sc = document.getElementById('select-category');
+		var st = document.getElementById('select-topic');
+
+		getTags(ss.options[ss.selectedIndex].value,sc.options[sc.selectedIndex].value,st.options[st.selectedIndex].value).then(function(data) {
+			globalScope.tags = data;
+		});
 	};
 	listTopics.style = "color: grey";
 
@@ -1388,13 +1519,14 @@ var savePageSettings = function(pagetype) {
 	var subject = document.getElementById('select-subject').value;
 	var category = document.getElementById('select-category').value;
 	var topic = document.getElementById('select-topic').value;
+	var tags = document.getElementById('page-tags').value;
 	var imageurl = document.getElementById('pageimg').src.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	var blurb = document.getElementById('pageblurb').value;
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "pt=" + pagetype + "&id=" + id + "&p=" + title + "&s=" + subject + "&c=" + category + "&t=" + topic + "&i=" + imageurl + "&b=" + blurb;
+	var params = "pt=" + pagetype + "&id=" + id + "&p=" + title + "&s=" + subject + "&c=" + category + "&t=" + topic + "&tags=" + encodeURIComponent(tags) + "&i=" + imageurl + "&b=" + blurb;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1512,6 +1644,61 @@ function getSubjects() {
 		};
 
 		xmlhttp.send();
+	});
+
+	return promise;
+}
+
+/*
+	Function: getTags
+
+	This function retrieves json with tags for a subjects,categories,topics.
+
+	Parameters:
+
+		subject - string,
+		category - string,
+		topic - string,
+
+	Returns:
+
+		success - promise
+*/
+function getTags(subject,category,topic) {
+	var promise = new Promise(function(resolve,reject) {
+
+		/* create the url destination for the ajax request */
+		var url = createURL("/gettags");
+
+		var params = "s=" + subject + "&c=" + category + "&t=" + topic;
+
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+
+		xmlhttp.open("POST",url,true);
+
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data); break;
+						case 'err':
+							reject('err'); break;
+						default:
+							reject('unknown');
+					}
+				} else {
+					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
 	});
 
 	return promise;

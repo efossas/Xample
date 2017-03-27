@@ -483,6 +483,8 @@ function dashExplore(exploreHeader,linkRoute) {
 
 			var params = "s=" + tagSubject + "&c=" + tagCategory + "&t=" + tagTopic;
 
+			/// you can probably replace this with getTags() in omni.js
+
 			var promiseTag = new Promise(function(resolve,reject) {
 				var url = createURL("/gettags");
 				var xmlhttp = new XMLHttpRequest();
