@@ -76,7 +76,7 @@ exports.savepagesettings = function(request,response) {
 				var subject = connection.escape(POST.s);
 				var category = connection.escape(POST.c);
 				var topic = connection.escape(POST.t);
-				var tags = connection.escape(POST.tags);
+				var tags = connection.escape(POST.tags).replace(/'/g,"");
 				var imageurl = connection.escape(POST.i);
 				var blurb = connection.escape(POST.b);
 
@@ -100,16 +100,79 @@ exports.savepagesettings = function(request,response) {
 				/* get username from user db */
 				var promiseUsername = queryUserDB.getDocByUid(userdb,uid);
 
-				Promise.all([promiseSubCatTop,promiseUsername]).then(function(values) {
+				/* ensure tags */
+				var promiseTags = queryUserDB.getTags(userdb,subject,category,topic);
+
+				Promise.all([promiseSubCatTop,promiseUsername,promiseTags]).then(function(values) {
 					var prev_subcattop = values[0];
 					var username = values[1][0].username;
+					var validTags = values[2];
 
+					/* unable to retrieve previous subject, category, topic */
 					if(prev_subcattop.length < 1) {
 						result.msg = 'err';
 						response.end(JSON.stringify(result));
 						analytics.journal(true,200,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						return;
 					}
+
+					/* get tags as array, remove spaces & commas, remove undefined and empty strings */
+					var tagArray = tags.split(/\s*,\s*/).filter(function(n) {
+						return n !== "undefined" && n !== "";
+					});
+
+					/* only up to 3 tags allowed */
+					if(tagArray.length > 3) {
+						result.msg = 'excesstags';
+						response.end(JSON.stringify(result));
+						return;
+					}
+
+					/* alphabetisize tags */
+					tagArray = tagArray.sort();
+
+					/* check tag exists */
+					tagArray.forEach(function(value,index) {
+						if(validTags.indexOf(value) === -1) {
+							result.msg = 'invalidtags';
+							response.end(JSON.stringify(result));
+							return;
+						}
+					});
+
+					/* create update tags string */
+					var updateTagsSQLArr = [];
+					var current;
+					for(let i = 0; i < 3; i++) {
+						if(tagArray.length >= i) {
+							current = tagArray[i];
+						} else {
+							current = "";
+						}
+						switch(i) {
+							case 0:
+								updateTagsSQLArr.push(",tagone='");
+								updateTagsSQLArr.push(current);
+								updateTagsSQLArr.push("'");
+								break;
+							case 1:
+								updateTagsSQLArr.push(",tagtwo='");
+								updateTagsSQLArr.push(current);
+								updateTagsSQLArr.push("'");
+								break;
+							case 2:
+								updateTagsSQLArr.push(",tagthree='");
+								updateTagsSQLArr.push(current);
+								updateTagsSQLArr.push("'");
+								break;
+							default:
+								result.msg = 'err';
+								response.end(JSON.stringify(result));
+								return;
+						}
+					}
+
+					var updateTagsSQLStr = updateTagsSQLArr.join("");
 
 					/* get previous redundant table name, if it exists */
 					var pRed = queryPageDB.createRedundantTableName(prefix,prev_subcattop[0],prev_subcattop[1],prev_subcattop[2]);
@@ -118,7 +181,7 @@ exports.savepagesettings = function(request,response) {
 					var uTable = prefix + "_" + uid + "_0";
 
 					/* update user's table */
-					var qryUpdateArray = ["UPDATE ",uTable," SET ","xname=",pagetitle,",subject=",subject,",category=",category,",topic=",topic,",imageurl=",imageurl,",blurb=",blurb,",edited=NOW() WHERE ","xid=",pid];
+					var qryUpdateArray = ["UPDATE ",uTable," SET ","xname=",pagetitle,",subject=",subject,",category=",category,",topic=",topic,updateTagsSQLStr,",imageurl=",imageurl,",blurb=",blurb,",edited=NOW() WHERE ","xid=",pid];
 
 					var qryUpdate = qryUpdateArray.join("");
 					connection.query(qryUpdate,function(err,rows,fields) {
@@ -144,7 +207,7 @@ exports.savepagesettings = function(request,response) {
 
 							if(cRed !== pRed) {
 								/* insert into red */
-								var qryInsertRed = `INSERT INTO xred.${cRed} (uid,xid,username,xname,created,edited,imageurl,blurb) SELECT '${uid}',${pid},'${username}',xname,created,edited,imageurl,blurb FROM xample.${uTable} WHERE xid=${pid}`;
+								var qryInsertRed = `INSERT INTO xred.${cRed} (uid,xid,username,xname,tagone,tagtwo,tagthree,created,edited,imageurl,blurb) SELECT '${uid}',${pid},'${username}',xname,tagone,tagtwo,tagthree,created,edited,imageurl,blurb FROM xample.${uTable} WHERE xid=${pid}`;
 								connred.query(qryInsertRed,function(err,rows,fields) {
 									if(err) {
 										result.msg = 'err';
@@ -166,7 +229,7 @@ exports.savepagesettings = function(request,response) {
 								}
 							} else {
 								/* update red */
-								var qryUpdateRed = `UPDATE xred.${cRed},xample.${uTable} SET xred.${cRed}.xname = xample.${uTable}.xname , xred.${cRed}.username = '${username}' , xred.${cRed}.created = xample.${uTable}.created , xred.${cRed}.edited = xample.${uTable}.edited , xred.${cRed}.imageurl = xample.${uTable}.imageurl , xred.${cRed}.blurb = xample.${uTable}.blurb WHERE xred.${cRed}.xid = ${pid} AND xred.${cRed}.uid = '${uid}'`;
+								var qryUpdateRed = `UPDATE xred.${cRed},xample.${uTable} SET xred.${cRed}.xname = xample.${uTable}.xname , xred.${cRed}.username = '${username}' , xred.${cRed}.tagone = xample.${uTable}.tagone , xred.${cRed}.tagtwo = xample.${uTable}.tagtwo , xred.${cRed}.tagthree = xample.${uTable}.tagthree , xred.${cRed}.created = xample.${uTable}.created , xred.${cRed}.edited = xample.${uTable}.edited , xred.${cRed}.imageurl = xample.${uTable}.imageurl , xred.${cRed}.blurb = xample.${uTable}.blurb WHERE xred.${cRed}.xid = ${pid} AND xred.${cRed}.uid = '${uid}'`;
 								connred.query(qryUpdateRed,function(err,rows,fields) {
 									if(err) {
 										result.msg = 'err';

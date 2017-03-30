@@ -30,18 +30,20 @@ switch(process.argv.length) {
 		host = process.argv[2];
 		break;
 	default:
-		console.log("Wrong number of arguments. Usage: node xample.js [local|remote] [port] [processes]");
+		console.log("Wrong number of arguments. Usage: node xample.js [dev|stage|prod] [port] [processes]");
 		process.exit();
 }
 
 /* check that valid host option was given */
 switch(host) {
-	case "local":
+	case "dev":
 		break;
-	case "remote":
+	case "stage":
+		break;
+	case "prod":
 		break;
 	default:
-		console.log("Incorrect value for arg 1. Usage: node xample.js [local|remote] [port] [processes]");
+		console.log("Incorrect value for arg 1. Usage: node xample.js [dev|stage|prod] [port] [processes]");
 		process.exit();
 }
 

@@ -224,25 +224,35 @@ exports.createRedundantTableName = function(content,subject,category,topic) {
 		category - string, the category
 		topic - string, the topic
 		sort - string, what column to sort the data by
-		tags - string, binary number as string for block types
-		keywords - string, used to search blurbs
+		btypes - string, binary flags to search block types
+		tags - string, comma-separated tags
 
 	Returns:
 
 		success - promise, array of page objects
 		error - promise, string of error
 */
-exports.searchPageResults = function(connection,content,subject,category,topic,sort,tags,keywords) {
+exports.searchPageResults = function(connection,content,subject,category,topic,sort,btypes,tags) {
 	var promise = new Promise(function(resolve,reject) {
 		var tableName = exports.createRedundantTableName(content,subject,category,topic);
 
-		/// ADD KEYWORD SEARCH IN BLURB
+		/* convert binary string btypes to decimal number */
+		var btypeDec = parseInt(btypes,2);
 
-		/* convert binary string tags to decimal number */
-		var tagDec = parseInt(tags,2);
+		/* get array of tags */
+		var tagArray = tags.split(",");
+
+		var qryTag;
+		if(tagArray.length === 3) {
+			qryTag = [" AND '",tagArray[0],"' IN(tagone, tagtwo, tagthree) "," AND '",tagArray[1],"' IN(tagone, tagtwo, tagthree) "," AND '",tagArray[2],"' IN(tagone, tagtwo, tagthree)"].join("");
+		} else if(tagArray.length === 2) {
+			qryTag = [" AND '",tagArray[0],"' IN(tagone, tagtwo, tagthree) "," AND '",tagArray[1],"' IN(tagone, tagtwo, tagthree)"].join("");
+		} else if(tagArray.length === 1 && tagArray[0] !== "") {
+			qryTag = [" AND '",tagArray[0],"' IN(tagone, tagtwo, tagthree)"].join("");
+		}
 
 		/* create the qry */
-		var qryArray = ["SELECT uid,xid,xname,username AS author,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",tagDec," = tags & ",tagDec," ORDER BY ",sort," ASC LIMIT 50"];
+		var qryArray = ["SELECT uid,xid,xname,username AS author,created,edited,ranks,views,rating,imageurl,blurb FROM ",tableName," WHERE ",btypeDec," = btypes & ",btypeDec,qryTag," ORDER BY ",sort," ASC LIMIT 50"];
 
 		var qry = qryArray.join("");
 
@@ -280,7 +290,7 @@ exports.searchPageResults = function(connection,content,subject,category,topic,s
 exports.getPageSettings = function(connection,prefix,uid,pid) {
 	var promise = new Promise(function(resolve,reject) {
 
-		var qry = "SELECT xid,xname,username,subject,category,topic,created,edited,ranks,views,rating,imageurl,blurb FROM " + prefix + "_" + uid + "_0 WHERE xid=" + pid;
+		var qry = "SELECT xid,xname,username,subject,category,topic,tagone,tagtwo,tagthree,created,edited,ranks,views,rating,imageurl,blurb FROM " + prefix + "_" + uid + "_0 WHERE xid=" + pid;
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {

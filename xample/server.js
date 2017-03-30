@@ -11,15 +11,22 @@ module.exports = function(host,port) {
 
 /* check that valid host option was given */
 var root;
+var testing;
 switch(host) {
-	case "local":
+	case "dev":
 		root = "http://localhost:" + port + "/";
+		testing = true;
 		break;
-	case "remote":
+	case "stage":
 		root = "http://wisepool.io/";
+		testing = true;
+		break;
+	case "prod":
+		root = "http://wisepool.io/";
+		testing = false;
 		break;
 	default:
-		console.log("Incorrect value for arg 1. Usage: node xample.js [local|remote] [port]");
+		console.log("Incorrect value for arg 1. Usage: node xample.js [dev|stage|prod] [port]");
 		return 'err';
 }
 
@@ -94,8 +101,9 @@ var cookieParser = require('cookie-parser');
 
 // <<<code>>>
 
-/* express requests will have root which is the http path to this server */
+/* express requests will have root, http path to this server & testing, indicates if testing scripts are loaded */
 express.request.root = root;
+express.request.testing = testing;
 
 // <<<fold>>>
 
@@ -247,15 +255,17 @@ app.set("fileRoute",__dirname + "/public/");
 app.get('/',rts.start);
 app.post('/createpage',rts.createpage);
 app.post('/deletepage',rts.deletepage);
+//app.post('/deletetag',rts.deletetag);
 app.get('/editpage*',rts.editpage);
-app.get('/editguide*',rts.editguide);
+//app.get('/editguide*',rts.editguide);
+app.get('/embed*',rts.embed);
 app.get('/explore*',rts.explore);
 app.post('/getbmdata',rts.getbmdata);
 app.post('/getpages*',rts.getpages);
 app.post('/getprofiledata',rts.getprofiledata);
 app.post('/getsubjects',rts.getsubjects);
 app.post('/gettags',rts.gettags);
-app.get('/guide*',rts.guide);
+//app.get('/guide*',rts.guide);
 app.get('/home',rts.home);
 app.post('/journalerror',rts.journalerror);
 app.post('/login',rts.login);

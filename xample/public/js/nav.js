@@ -36,6 +36,7 @@ var globalScope = {};
 
 /* list any functions that will be joined to this file here from omni */
 /*
+	global addAutoComplete:true
 	global autosaveTimer:true
 	global createURL:true
 	global emptyDiv:true
@@ -50,6 +51,7 @@ var globalScope = {};
 	global getCookies:true
 	global getSubjects:true
 	global getUserFields:true
+	global getTags:true
 	global journalError:true
 	global setBookmark:true
 	global setView:true
@@ -226,7 +228,7 @@ function boxCreate() {
 
 	/* create image */
 	var colImage = document.createElement('div');
-	colImage.setAttribute('class','col col-35');
+	colImage.setAttribute('class','col col-28');
 
 	var image = document.createElement('div');
 	image.setAttribute('class','box-image');
@@ -291,7 +293,7 @@ function boxCreate() {
 
 	/* column for upper and lower rows */
 	var colRightSection = document.createElement('div');
-	colRightSection.setAttribute('class','col col-65');
+	colRightSection.setAttribute('class','col col-72');
 
 	/* append upper and lower rows to right section */
 	colRightSection.appendChild(upperRow);
@@ -667,6 +669,9 @@ function dashExplore(exploreHeader,linkRoute) {
 									case 'exists':
 										alertify.alert("That Tag Already Exists");
 										break;
+									case 'excess':
+										alertify.alert("Tags Must Be Less Than 32 Characters.");
+										break;
 									case 'nosaveloggedout':
 										alertify.alert("You Are Currently Logged Out");
 										break;
@@ -925,14 +930,18 @@ function dashExplore(exploreHeader,linkRoute) {
 
 	Parameters:
 
+		subject - string, the subject
+		category - string, the category
+		topic - string, the topic
 		sort - string, the type of sort already applied
-		tags - string, the tags already applied
+		curbtypes - string, the current btypes already applied
+		keywords - string, comma-separated tags
 
 	Returns:
 
 		success - html node, filter form
 */
-function barFilter(sort,tags,keywords) {
+function barFilter(subject,category,topic,sort,curbtypes,tags) {
 	var row = document.createElement('div');
 	row.setAttribute('class','row');
 
@@ -971,7 +980,7 @@ function barFilter(sort,tags,keywords) {
 	SortSelect.selectedIndex = sortIndex;
 
 	/* get convert tag binary to decimal number */
-	var tagTypes = parseInt(tags,2);
+	var btypes = parseInt(curbtypes,2);
 
 	/* set tag keys */
 	globalScope.tagKeys = new Map([["none",0],["video",1],["audio",2],["image",4],["text",8],["math",16],["topic",32],["",64],["",128]]);
@@ -988,7 +997,7 @@ function barFilter(sort,tags,keywords) {
 	checkVideo.setAttribute('onclick','toggleCheck(this);');
 	checkVideo.innerHTML = "video";
 
-	if(tagTypes & 1) {
+	if(btypes & 1) {
 		checkVideo.setAttribute('data-checked','true');
 		checkVideo.style["color"] = "white";
 		checkVideo.style["background-color"] = "blue";
@@ -1007,7 +1016,7 @@ function barFilter(sort,tags,keywords) {
 	checkAudio.setAttribute('onclick','toggleCheck(this);');
 	checkAudio.innerHTML = "audio";
 
-	if(tagTypes & 2) {
+	if(btypes & 2) {
 		checkAudio.setAttribute('data-checked','true');
 		checkAudio.style["color"] = "white";
 		checkAudio.style["background-color"] = "blue";
@@ -1026,7 +1035,7 @@ function barFilter(sort,tags,keywords) {
 	checkImage.setAttribute('onclick','toggleCheck(this);');
 	checkImage.innerHTML = "image";
 
-	if(tagTypes & 4) {
+	if(btypes & 4) {
 		checkImage.setAttribute('data-checked','true');
 		checkImage.style["color"] = "white";
 		checkImage.style["background-color"] = "blue";
@@ -1045,7 +1054,7 @@ function barFilter(sort,tags,keywords) {
 	checkText.setAttribute('onclick','toggleCheck(this);');
 	checkText.innerHTML = "text";
 
-	if(tagTypes & 8) {
+	if(btypes & 8) {
 		checkText.setAttribute('data-checked','true');
 		checkText.style["color"] = "white";
 		checkText.style["background-color"] = "blue";
@@ -1064,7 +1073,7 @@ function barFilter(sort,tags,keywords) {
 	checkMath.setAttribute('onclick','toggleCheck(this);');
 	checkMath.innerHTML = "math";
 
-	if(tagTypes & 16) {
+	if(btypes & 16) {
 		checkMath.setAttribute('data-checked','true');
 		checkMath.style["color"] = "white";
 		checkMath.style["background-color"] = "blue";
@@ -1083,7 +1092,7 @@ function barFilter(sort,tags,keywords) {
 	checkCustom.setAttribute('onclick','toggleCheck(this);');
 	checkCustom.innerHTML = "topic";
 
-	if(tagTypes & 32) {
+	if(btypes & 32) {
 		checkCustom.setAttribute('data-checked','true');
 		checkCustom.style["color"] = "white";
 		checkCustom.style["background-color"] = "blue";
@@ -1095,8 +1104,47 @@ function barFilter(sort,tags,keywords) {
 	var bottomRow = document.createElement('div');
 	bottomRow.setAttribute('class','row');
 
+	/* tag search & autocomplete div */
+	var tagAutoDiv = document.createElement('div');
+
 	/* only search bar goes in bottom row */
-	var colSearch = barSearch('keywords',keywords);
+	var colSearch = document.createElement('input');
+	colSearch.setAttribute('id','search-tags');
+	colSearch.setAttribute('class','text-input');
+	colSearch.setAttribute('placeholder','Search Tags Comma-Separated');
+	colSearch.setAttribute('value',tags);
+
+	/* grab autocomplete for tags */
+	if(topic !== "") {
+		getTags(subject,category,topic).then(function(data) {
+			globalScope.tags = data;
+			/* attach autocomplete to colsearch */
+			colSearch.onkeyup = function(event) {
+				addAutoComplete('tag-autocomplete-dropdown',colSearch,globalScope.tags);
+			};
+		},function(err) {
+			if(err === 'unset') {
+				alertify.alert("Missing Subject Category Or Topic.");
+			}
+		});
+	}
+
+	/* prevent tab, up, down default behaviour */
+	document.onkeydown = function(event) {
+		if(event.keyCode === 9 || event.keyCode === 40 || event.keyCode === 38) {
+			event.preventDefault();
+		}
+	};
+
+	/* autcomplete box */
+	var autoCompleteBox = document.createElement('div');
+	autoCompleteBox.setAttribute('id','tag-autocomplete-dropdown');
+	autoCompleteBox.setAttribute('class','autocomplete-dropdown');
+	autoCompleteBox.setAttribute('style','display:none;visibility:hidden');
+
+	/* append all tag & autocomplete stuff */
+	tagAutoDiv.appendChild(colSearch);
+	tagAutoDiv.appendChild(autoCompleteBox);
 
 	/* buttons for filter bar */
 	var colFilterBtn = document.createElement('div');
@@ -1124,11 +1172,11 @@ function barFilter(sort,tags,keywords) {
 		});
 
 		/* create final binary tag of block types selected & tag category */
-		var tagResult = ((typeResult) >>> 0).toString(2);
+		var btypeResult = ((typeResult) >>> 0).toString(2);
 
 		/* get keywords */
-		var keyWords = document.getElementById('keywords').value;
-		keyWords.replace(/ /g,"_").replace(/[^a-zA-Z ]/g,"");
+		var searchTags = document.getElementById('search-tags').value;
+		searchTags.replace(/ /g,"_").replace(/[^a-zA-Z ]/g,"");
 
 		/* set these into hidden divs for retrieval */
 		var content = document.getElementById('queryContent').value;
@@ -1136,7 +1184,7 @@ function barFilter(sort,tags,keywords) {
 		var category = document.getElementById('queryCategory').value;
 		var topic = document.getElementById('queryTopic').value;
 
-		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&tags=",tagResult,"&keywords=",keyWords];
+		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&btypes=",btypeResult,"&tags=",searchTags];
 
 		window.location = createURL(queryStringArray.join(""));
 	}
@@ -1179,7 +1227,7 @@ function barFilter(sort,tags,keywords) {
 	topRow.appendChild(colTypeText);
 	topRow.appendChild(colTypeMath);
 	topRow.appendChild(colTypeCustom);
-	bottomRow.appendChild(colSearch);
+	bottomRow.appendChild(tagAutoDiv);
 	formDiv.appendChild(topRow);
 	formDiv.appendChild(bottomRow);
 	row.appendChild(formDiv);
@@ -1638,7 +1686,7 @@ function pageExplore(logstatus,csct,data) {
 	main.appendChild(contentHidden).appendChild(subjectHidden).appendChild(categoryHidden).appendChild(topicHidden);
 
 	/* create filter menu */
-	var filter = barFilter(csct[4],csct[5],csct[6]);
+	var filter = barFilter(csct[1],csct[2],csct[3],csct[4],csct[5],csct[6]);
 	main.appendChild(filter);
 
 	/* create box template */
@@ -1743,9 +1791,9 @@ function pageHome(auth) {
 	var promiseBP = getPages("page");
 
 	/* fetch user learning guides */
-	var promiseLG = getPages("guide");
+	//var promiseLG = getPages("guide");
 
-	Promise.all([promiseBM,promiseBP,promiseLG]).then(function(values) {
+	Promise.all([promiseBM,promiseBP]).then(function(values) {
 		/* bookmark display form */
 		var row_Bookmark = formDisplayPlaylist('Bookmarks: Pages',values[0]);
 		main.appendChild(row_Bookmark);
@@ -1755,8 +1803,8 @@ function pageHome(auth) {
 		main.appendChild(row_PageCreate);
 
 		/* learning guide create form */
-		var row_LgCreate = formGenerateUserContent('guide',values[2]);
-		main.appendChild(row_LgCreate);
+		//var row_LgCreate = formGenerateUserContent('guide',values[2]);
+		//main.appendChild(row_LgCreate);
 
 		/* create tags form */
 		switch(auth) {
@@ -1816,8 +1864,8 @@ function pageLanding(logstatus) {
 	main.appendChild(explorePages);
 
 	/* learning guide div */
-	var exploreLGs = dashExplore('Learning Guides','explore?content=lg');
-	main.appendChild(exploreLGs);
+	//var exploreLGs = dashExplore('Learning Guides','explore?content=lg');
+	//main.appendChild(exploreLGs);
 }
 
 /*

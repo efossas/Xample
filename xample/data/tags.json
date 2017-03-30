@@ -1,63 +1,63 @@
-'mathematics':
+"mathematics":
     {
-        'algebra':
+        "algebra":
             {
-                'complex numbers':{},
-                'exponents $ radicals':{},
-                'functions':{},
-                'linear equations':{},
-                'logarithms':{},
-                'polynomials':{},
-                'quadratic equations':{},
-                'vector algebra':{}
+                "complex numbers":{},
+                "exponents $ radicals":{},
+                "functions":{},
+                "linear equations":{},
+                "logarithms":{},
+                "polynomials":{},
+                "quadratic equations":{},
+                "vector algebra":{}
             }
-        ,'arithmetic':
+        ,"arithmetic":
             {
-                'addition':{},
-                'division':{},
-                'multiplication':{},
-                'subtraction':{},
-                'modular':{}
+                "addition":{},
+                "division":{},
+                "multiplication":{},
+                "subtraction":{},
+                "modular":{}
             }
-        ,'calculus':
+        ,"calculus":
             {
-                'antiderivatives':{},
-                'differential equations':{},
-                'derivatives':{},
-                'integrals':{},
-                'limits':{},
-                'multiple integrals':{},
-                'partial derivatives':{},
-                'series':{},
-                'vector calculus':{}
+                "antiderivatives":{},
+                "differential equations":{},
+                "derivatives":{},
+                "integrals":{},
+                "limits":{},
+                "multiple integrals":{},
+                "partial derivatives":{},
+                "series":{},
+                "vector calculus":{}
             }
-        ,'discrete math':
+        ,"discrete math":
             {
-                'combinatorics':{},
-                'graphs $ trees':{},
-                'logic $ booleans':{},
-                'probability':{},
-                'sequences $ summation $ products':{},
-                'sets $ relations':{}
+                "combinatorics":{},
+                "graphs $ trees":{},
+                "logic $ booleans":{},
+                "probability":{},
+                "sequences $ summation $ products":{},
+                "sets $ relations":{}
             }
-        ,'geometry':
+        ,"geometry":
             {
-                'none':{}
+                "none":{}
             }
-        ,'linear algebra':
+        ,"linear algebra":
             {
-                'determinants':{},
-                'LU factorization':{},
-                'matrix operations':{},
-                'row reduction':{}
+                "determinants":{},
+                "LU factorization":{},
+                "matrix operations":{},
+                "row reduction":{}
             }
-        ,'statistics':
+        ,"statistics":
             {
-                'discrete distributions':{},
-                'continuous distributions':{}
+                "discrete distributions":{},
+                "continuous distributions":{}
             }
-        ,'trigonometry':
+        ,"trigonometry":
             {
-                'none':{}
+                "none":{}
             }
     }

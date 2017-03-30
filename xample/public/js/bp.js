@@ -51,10 +51,11 @@
 
 // <<<code>>
 
-var x = {};
-var globalBlockEngine = {};
+var wiseEngine;
+var blockExtensibles = {};
+var blockGlobals = {};
 
-x.xtext = new function xtext() {
+blockExtensibles.xtext = new function xtext() {
 	this.type = "xtext";
 	this.name = "text";
 	this.upload = false;
@@ -270,7 +271,7 @@ x.xtext = new function xtext() {
 	};
 };
 
-x.xcode = new function xcode() {
+blockExtensibles.xcode = new function xcode() {
 	this.type = "xcode";
 	this.name = "code";
 	this.upload = false;
@@ -424,7 +425,7 @@ x.xcode = new function xcode() {
 	};
 };
 
-x.xmath = new function xmath() {
+blockExtensibles.xmath = new function xmath() {
 	this.type = "xmath";
 	this.name = "math";
 	this.upload = false;
@@ -533,7 +534,7 @@ x.xmath = new function xmath() {
 	};
 };
 
-x.latex = new function latex() {
+blockExtensibles.latex = new function latex() {
 	this.type = "latex";
 	this.name = "latex";
 	this.upload = false;
@@ -640,7 +641,7 @@ x.latex = new function latex() {
 	};
 };
 
-x.image = new function image() {
+blockExtensibles.image = new function image() {
 	this.type = "image";
 	this.name = "image";
 	this.upload = true;
@@ -694,7 +695,7 @@ x.image = new function image() {
 	};
 };
 
-x.audio = new function audio() {
+blockExtensibles.audio = new function audio() {
 	this.type = "audio";
 	this.name = "audio";
 	this.upload = true;
@@ -758,7 +759,7 @@ x.audio = new function audio() {
 	};
 };
 
-x.video = new function video() {
+blockExtensibles.video = new function video() {
 	this.type = "video";
 	this.name = "video";
 	this.upload = true;
@@ -825,9 +826,9 @@ x.video = new function video() {
 	};
 };
 
-x.slide = new function slide() {
+blockExtensibles.slide = new function slide() {
 	(function() {
-		globalBlockEngine.pdfObjects = {};
+		blockGlobals.pdfObjects = {};
 	})();
 
 	this.type = "slide";
@@ -846,11 +847,11 @@ x.slide = new function slide() {
 		/* if block was just made, don't try to load pdf */
 		if (content !== "") {
 			PDFJS.getDocument(content).then(function(pdfObj) {
-				globalBlockEngine.pdfObjects[content] = pdfObj;
+				blockGlobals.pdfObjects[content] = pdfObj;
 
 				var tag = block.childNodes[0];
 
-				x.slide.f.renderPDF(pdfObj,1,tag);
+				blockExtensibles.slide.f.renderPDF(pdfObj,1,tag);
 			});
 		}
 
@@ -863,20 +864,20 @@ x.slide = new function slide() {
 			var canvas = this.childNodes[0];
 			var pageNum = canvas.getAttribute("data-page");
 			var pdfID = canvas.getAttribute("id");
-			var pageCount = globalBlockEngine.pdfObjects[pdfID].numPages;
+			var pageCount = blockGlobals.pdfObjects[pdfID].numPages;
 
 			/* determine whether left or right side was clicked, then render prev or next page */
 			if(X > this.offsetWidth / 1.7) {
 				if(pageNum < pageCount) {
 					pageNum++;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			} else {
 				if(pageNum > 1) {
 					pageNum--;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			}
 		};
@@ -890,7 +891,7 @@ x.slide = new function slide() {
 			/* add the pdf to the pdfObjects array and render the first page */
 			PDFJS.getDocument(data).then(function(pdfObj) {
 
-				globalBlockEngine.pdfObjects[data] = pdfObj;
+				blockGlobals.pdfObjects[data] = pdfObj;
 
 				var slidetag = document.getElementById('bengine-a' + bid).childNodes[0];
 				slidetag.setAttribute("id",data);
@@ -917,11 +918,11 @@ x.slide = new function slide() {
 		/* if block was just made, don't try to load pdf */
 		if (content !== "") {
 			PDFJS.getDocument(content).then(function(pdfObj) {
-				globalBlockEngine.pdfObjects[content] = pdfObj;
+				blockGlobals.pdfObjects[content] = pdfObj;
 
 				var tag = block.childNodes[0];
 
-				x.slide.f.renderPDF(pdfObj,1,tag);
+				blockExtensibles.slide.f.renderPDF(pdfObj,1,tag);
 			});
 		}
 
@@ -934,20 +935,20 @@ x.slide = new function slide() {
 			var canvas = this.childNodes[0];
 			var pageNum = canvas.getAttribute("data-page");
 			var pdfID = canvas.getAttribute("id");
-			var pageCount = globalBlockEngine.pdfObjects[pdfID].numPages;
+			var pageCount = blockGlobals.pdfObjects[pdfID].numPages;
 
 			/* determine whether left or right side was clicked, then render prev or next page */
 			if(X > this.offsetWidth / 1.7) {
 				if(pageNum < pageCount) {
 					pageNum++;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			} else {
 				if(pageNum > 1) {
 					pageNum--;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			}
 		};
@@ -1007,7 +1008,7 @@ x.slide = new function slide() {
 };
 
 /*
-x.xsvgs = new function xsvgs() {
+blockExtensibles.xsvgs = new function xsvgs() {
 	this.type = "xsvgs";
 	this.name = "svg";
 	this.upload = false;
@@ -1059,7 +1060,7 @@ x.xsvgs = new function xsvgs() {
 };
 */
 
-x.title = new function title() {
+blockExtensibles.title = new function title() {
 	this.type = "title";
 	this.name = "title";
 	this.upload = false;
@@ -1141,8 +1142,6 @@ x.title = new function title() {
 		return stylestr;
 	};
 };
-
-var wiseEngine = new Bengine(x,globalBlockEngine,{},{});
 
 // <<<fold>>>
 
@@ -1279,7 +1278,6 @@ function pageChoose(pid) {
 		nothing - *
 */
 function pageEdit(aid,pagedata,pageinfo) {
-
 	/* grab the main div */
 	var main = document.getElementById('content');
 
@@ -1313,6 +1311,8 @@ function pageEdit(aid,pagedata,pageinfo) {
 		blockarray = [];
 	}
 
+	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},{});
+
 	wiseEngine.blockEngineStart('content',["page",pid,pid],blockarray);
 
 	/*** AFTER STUFF ***/
@@ -1345,6 +1345,35 @@ function pageEdit(aid,pagedata,pageinfo) {
 		}
 		return null;
 	};
+}
+
+/*
+	Function: pageEmbed
+
+	This function loads page data in show mode & embed style.
+
+	Parameters:
+
+		pagedata - string, page data is received in the format "type,content,type,content,etc."
+		pageinfo - json string, page info is what goes into the settings
+
+	Returns:
+
+		nothing - *
+*/
+function pageEmbed(pagedata,pageinfo) {
+	/*** BLOCKS ***/
+
+	/* block array -> mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
+	var blockarray;
+	if(pagedata !== "") {
+		blockarray = pagedata.split(',');
+	} else {
+		blockarray = [];
+	}
+
+	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},{enableSingleView:true});
+	wiseEngine.blockContentShow('content-embed',["page",pageinfo.id],blockarray);
 }
 
 /*
@@ -1416,6 +1445,8 @@ function pageShow(logstatus,mtoggle,pagedata,pageinfo) {
 	} else {
 		blockarray = [];
 	}
+
+	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},{});
 
 	wiseEngine.blockContentShow('content',["page",pid],blockarray);
 

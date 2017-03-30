@@ -24,6 +24,54 @@ this.extensibles = extensibles;
 this.globals = globals;
 
 /***
+	Section: Start Up Code
+	Any necessary start up code for Bengine goes here.
+***/
+
+var style = document.createElement('style');
+style.type = 'text/css';
+style.innerHTML = `.bengine-block-style {
+}
+.bengine-instance {
+	overflow: hidden;
+}
+.bengine-block-style-embed {
+	height: 85vh !important;
+}
+.bengine-x-blocks {
+
+}
+.bengine-single-view {
+	width: 100%;
+	height: 15vh;
+	position: absolute;
+	bottom: 0;
+	right: 0;
+}
+.bengine-btn-embed {
+	border: 0;
+	color: black;
+	float: left;
+	width: 100%;
+	height: 100%;
+	padding: 0px 30px;
+	text-align: center;
+	cursor: pointer;
+	transition: background-color .5s;
+	touch-action: manipulation;
+	font-size: 1em;
+	font-weight: 400;
+}
+.bengine-btn-color {
+	background-color: #00ffe1;
+}
+.bengine-btn-color:hover {
+	background-color: #00a895;
+}
+`;
+document.getElementsByTagName('head')[0].appendChild(style);
+
+/***
 	Section: Replaceable Functions
 	These functions are essentially helper functions that can be replaced by custom functions passed into Bengine.
 ***/
@@ -219,10 +267,20 @@ this.blockContentShow = function(main,id,data) {
 		var block = generateBlock(i,data[count]);
 		var retblock = extensibles[data[count]].showContent(block,data[count + 1]);
 
+		if(options.enableSingleView) {
+			retblock.children[0].className += " bengine-block-style-embed";
+		} else {
+			retblock.children[0].className += " bengine-block-style";
+		}
+
 		/* create the block div */
 		var group = document.createElement('div');
 		group.setAttribute('class','block');
 		group.setAttribute('id','bengine-' + i);
+
+		if(options.enableSingleView && i !== 1) {
+			group.setAttribute('style','display:none;visibility:hidden;');
+		}
 
 		/* append group to blocks div */
 		group.appendChild(retblock);
@@ -230,6 +288,61 @@ this.blockContentShow = function(main,id,data) {
 
 		count += 2;
 		i++;
+	}
+
+	function changeBlock(dir) {
+		/* back:false, forward:true */
+		var direction = -1;
+		if(dir) {
+			direction = 1;
+		}
+
+		var viewDiv = document.getElementById('bengine-currentBlock');
+		var viewStatus = Number(viewDiv.getAttribute('data-currentBlock'));
+
+		var next = viewStatus + direction;
+
+		var nextBlock = document.getElementById('bengine-' + next);
+		if(nextBlock !== null) {
+			var currentBlock = document.getElementById('bengine-' + viewStatus);
+			currentBlock.setAttribute('style','display:none;visibility:hidden;');
+
+			nextBlock.setAttribute('style','display:block;visibility:visible;');
+
+			viewDiv.setAttribute('data-currentBlock',next);
+		}
+	}
+
+	if(options.enableSingleView) {
+		var singleViewBtnsDiv = document.createElement('div');
+		singleViewBtnsDiv.setAttribute('id','bengine-single-view');
+		singleViewBtnsDiv.setAttribute('class','bengine-single-view');
+
+		var btnBack = document.createElement('button');
+		btnBack.setAttribute('class','bengine-btn-embed bengine-btn-color');
+		btnBack.setAttribute('style','width: 50%;');
+		btnBack.innerHTML = '&larr;';
+		btnBack.onclick = function() {
+			changeBlock(false);
+		};
+
+		var btnForward = document.createElement('button');
+		btnForward.setAttribute('class','bengine-btn-embed bengine-btn-color');
+		btnForward.setAttribute('style','width: 50%;');
+		btnForward.innerHTML = '&rarr;';
+		btnForward.onclick = function() {
+			changeBlock(true);
+		};
+
+		var currentSingle = document.createElement('div');
+		currentSingle.setAttribute('id','bengine-currentBlock');
+		currentSingle.setAttribute('data-currentBlock',1);
+		currentSingle.setAttribute('style','display:none;visibility:hidden;');
+
+		singleViewBtnsDiv.appendChild(btnBack);
+		singleViewBtnsDiv.appendChild(btnForward);
+		singleViewBtnsDiv.appendChild(currentSingle);
+		enginediv.appendChild(singleViewBtnsDiv);
 	}
 
 	return i;
@@ -441,7 +554,10 @@ var countBlocks = function() {
 */
 var generateBlock = function(bid,btype) {
 	var block = document.createElement('div');
-	block.setAttribute('class','bengine-block-wrapper');
+	if(!options.enableSingleView) {
+		block.setAttribute('style','margin-bottom:12px;');
+	}
+	block.setAttribute('data-btype',btype);
 	block.setAttribute('id','bengine-a' + bid);
 
 	return block;
@@ -882,7 +998,7 @@ var saveBlocks = function(which) {
 		var i = 0;
 		while(blockCount >= bid) {
 			/* get the block type */
-			var btype = document.getElementById('bengine-a' + bid).className;
+			var btype = document.getElementById('bengine-a' + bid).getAttribute('data-btype');
 			blockType[i] = btype;
 
 			/* get the block content */
@@ -893,8 +1009,8 @@ var saveBlocks = function(which) {
 		}
 
 		/* merge mediaType & mediaContent arrays into default comma-separated strings */
-		var types = blockType.join();
-		var contents = blockContent.join();
+		var types = blockType.join("@^@");
+		var contents = blockContent.join("@^@");
 	}
 
 	/* create the url destination for the ajax request */

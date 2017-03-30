@@ -1026,6 +1026,17 @@ function barPageSettings(pagetype,aid,settings) {
 	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
 	pageSettings.appendChild(ddsct);
 
+	/* grab autocomplete if topic is already set */
+	if(settings.topic !== "") {
+		getTags(settings.subject,settings.category,settings.topic).then(function(data) {
+			globalScope.tags = data;
+		},function(err) {
+			if(err === 'unset') {
+				alertify.alert("Missing Subject Category Or Topic.");
+			}
+		});
+	}
+
 	/* div for tag input & autcomplete box */
 	var tagAutoDiv = document.createElement('div');
 
@@ -1033,65 +1044,18 @@ function barPageSettings(pagetype,aid,settings) {
 	var tagInput = document.createElement('input');
 	tagInput.setAttribute('id','page-tags');
 	tagInput.setAttribute('class','text-input');
-	tagInput.setAttribute('placeholder','enter tags');
+	tagInput.setAttribute('placeholder','enter comma-separated tags');
+	var currentTags = "";
+	if(settings.tagthree !== null) {
+		currentTags = [settings.tagone,settings.tagtwo,settings.tagthree].join();
+	} else if(settings.tagtwo !== null) {
+		currentTags = [settings.tagone,settings.tagtwo].join();
+	} else if(settings.tagone !== null) {
+		currentTags = settings.tagone;
+	}
+	tagInput.setAttribute('value',currentTags);
 	tagInput.onkeyup = function(event) {
-		var dropdown = document.getElementById('tag-autocomplete-dropdown');
-		if(globalScope.tags && this.value !== "") {
-			var suggestions = [];
-			if(dropdown.children.length > 0) {
-				suggestions = dropdown.children[0].getElementsByTagName("li");
-			}
-			/* down key, up key, tab key, any other key */
-			var selected;
-			if(event.keyCode === 40 && suggestions.length > 0) {
-				var i = 0;
-				while (i < suggestions.length) {
-					if(suggestions[i].className === 'ac-dd-selected') {
-						selected = suggestions[i]; i++; break;
-					}
-					i++;
-				}
-				if(typeof selected === 'undefined') {
-					suggestions[0].className = "ac-dd-selected";
-				} else if (i < suggestions.length) {
-					selected.className = "";
-					selected.nextSibling.className = "ac-dd-selected";
-				}
-			} else if (event.keyCode === 38 && suggestions.length > 0) {
-				for (var j = 0; j < suggestions.length; j++) {
-					if(suggestions[j].className === 'ac-dd-selected') {
-						selected = suggestions[j]; break;
-					}
-				}
-				if(typeof selected !== 'undefined') {
-					if (j === 0) {
-						suggestions[0].className = "";
-					} else {
-						selected.className = "";
-						selected.previousSibling.className = "ac-dd-selected";
-					}
-				}
-			} else if ((event.keyCode === 9 || event.keyCode === 39 || event.keyCode === 13) && suggestions.length > 0) {
-				for (let i = 0; i < suggestions.length; i++) {
-					if(suggestions[i].className === 'ac-dd-selected') {
-						tagInput.value = tagInput.value.replace(/\w+$/,"");
-						tagInput.value += suggestions[i].innerHTML;
-						dropdown.style = "display:none;visibility:hidden";
-						break;
-					}
-				}
-			} else {
-				var matches = autoMatch(this.value,globalScope.tags);
-				if(matches.length > 0) {
-					autoComplete(dropdown,matches);
-					dropdown.style = "display:block;visibility:visible";
-				} else {
-					dropdown.style = "display:none;visibility:hidden";
-				}
-			}
-		} else if (this.value === "") {
-			dropdown.style = "display:none;visibility:hidden";
-		}
+		addAutoComplete('tag-autocomplete-dropdown',tagInput,globalScope.tags);
 	};
 
 	/* prevent tab, up, down default behaviour */
@@ -1241,6 +1205,66 @@ function barPageSettings(pagetype,aid,settings) {
 	pageSettings.appendChild(btnSaveSettings);
 
 	return pageSettings;
+}
+
+function addAutoComplete(dropdownID,inputDiv,autoCompleteArray) {
+	var dropdown = document.getElementById(dropdownID);
+	if(autoCompleteArray) {
+		var suggestions = [];
+		if(dropdown.children.length > 0) {
+			suggestions = dropdown.children[0].getElementsByTagName("li");
+		}
+		/* down key, up key, tab key, any other key */
+		var selected;
+		if(event.keyCode === 40 && suggestions.length > 0) {
+			var i = 0;
+			while (i < suggestions.length) {
+				if(suggestions[i].className === 'ac-dd-selected') {
+					selected = suggestions[i]; i++; break;
+				}
+				i++;
+			}
+			if(typeof selected === 'undefined') {
+				suggestions[0].className = "ac-dd-selected";
+			} else if (i < suggestions.length) {
+				selected.className = "";
+				selected.nextSibling.className = "ac-dd-selected";
+			}
+		} else if (event.keyCode === 38 && suggestions.length > 0) {
+			for (var j = 0; j < suggestions.length; j++) {
+				if(suggestions[j].className === 'ac-dd-selected') {
+					selected = suggestions[j]; break;
+				}
+			}
+			if(typeof selected !== 'undefined') {
+				if (j === 0) {
+					suggestions[0].className = "";
+				} else {
+					selected.className = "";
+					selected.previousSibling.className = "ac-dd-selected";
+				}
+			}
+		} else if ((event.keyCode === 9 || event.keyCode === 39 || event.keyCode === 13) && suggestions.length > 0) {
+			for (let i = 0; i < suggestions.length; i++) {
+				if(suggestions[i].className === 'ac-dd-selected') {
+					inputDiv.value = inputDiv.value.replace(/\w+$/,"");
+					inputDiv.value += suggestions[i].innerHTML;
+					dropdown.style = "display:none;visibility:hidden";
+					break;
+				}
+			}
+		} else {
+			var matches = autoMatch(inputDiv.value,autoCompleteArray);
+			if(matches.length > 0) {
+				autoComplete(dropdown,matches);
+				dropdown.style = "display:block;visibility:visible";
+			} else {
+				dropdown.style = "display:none;visibility:hidden";
+			}
+		}
+	} else if (this.value === "") {
+		dropdown.style = "display:none;visibility:hidden";
+	}
 }
 
 /*
@@ -1398,9 +1422,16 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 		var sc = document.getElementById('select-category');
 		var st = document.getElementById('select-topic');
 
-		getTags(ss.options[ss.selectedIndex].value,sc.options[sc.selectedIndex].value,st.options[st.selectedIndex].value).then(function(data) {
-			globalScope.tags = data;
-		});
+		/* don't get tags if changed to default empty first child in dropdown */
+		if(st.options[st.selectedIndex].value !== "") {
+			getTags(ss.options[ss.selectedIndex].value,sc.options[sc.selectedIndex].value,st.options[st.selectedIndex].value).then(function(data) {
+				globalScope.tags = data;
+			},function(err) {
+				if(err === 'unset') {
+					alertify.alert("Missing Subject Category Or Topic.");
+				}
+			});
+		}
 	};
 	listTopics.style = "color: grey";
 
@@ -1544,6 +1575,10 @@ var savePageSettings = function(pagetype) {
 						alertify.alert("Save Settings Error. You Are Not Logged In."); break;
 					case 'nosubjectnotsaved':
 						alertify.alert("Save Settings Error. Please Enter At Least A Subject."); break;
+					case 'invalidtags':
+						alertify.alert("Save Settings Error. Non-Existing Tag Entered."); break;
+					case 'excesstags':
+						alertify.alert("Save Settings Error. A Maximum Of 3 Tags Is Allowed."); break;
 					case 'err':
 					default:
 						alertify.alert("An Error Occured. Please Try Again Later");
@@ -1585,6 +1620,9 @@ function pageError(error) {
 	errorMessage.innerHTML = '<h2>Error</h2><br><p>' + error + '</p>';
 
 	var main = document.getElementById('content');
+	if(main === null) {
+		main = document.getElementById('content-embed');
+	}
 	emptyDiv(main);
 	main.appendChild(errorMessage);
 }
@@ -1689,6 +1727,8 @@ function getTags(subject,category,topic) {
 							resolve(result.data); break;
 						case 'err':
 							reject('err'); break;
+						case 'unset':
+							reject('unset'); break;
 						default:
 							reject('unknown');
 					}

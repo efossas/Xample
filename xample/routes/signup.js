@@ -93,7 +93,7 @@ exports.signup = function(request,response) {
 					var prefixPage = helper.getTablePrefixFromPageType("page");
 
 					/* create the user's page table */
-					var qryBlockPageTable = "CREATE TABLE " + prefixPage + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
+					var qryBlockPageTable = "CREATE TABLE " + prefixPage + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb))";
 
 					connection.query(qryBlockPageTable,function(err,rows,fields) {
 						if (err) {
@@ -105,7 +105,7 @@ exports.signup = function(request,response) {
 							var prefixGuide = helper.getTablePrefixFromPageType("guide");
 
 							/* create the user's guide table */
-							var qryLearningGuideTable = "CREATE TABLE " + prefixGuide + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
+							var qryLearningGuideTable = "CREATE TABLE " + prefixGuide + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb))";
 
 							connection.query(qryLearningGuideTable,function(err,rows,fields) {
 								if (err) {

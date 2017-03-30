@@ -52,6 +52,12 @@ exports.gettags = function(request,response) {
 	request.on('end',function() {
 		var POST = qs.parse(body);
 
+		if(POST.s === "" || POST.c === "" || POST.t === "") {
+			result.msg = 'unset';
+			response.end(JSON.stringify(result));
+			return;
+		}
+
 		var promiseTags = queryUserDB.getTags(userdb,POST.s,POST.c,POST.t);
 		promiseTags.then(function(data) {
 			result.msg = 'success';
@@ -60,7 +66,7 @@ exports.gettags = function(request,response) {
 		},function(err) {
 			result.msg = 'err';
 			response.end(JSON.stringify(result));
-			analytics.journal(1,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+			analytics.journal(1,121,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 		});
 
 	});

@@ -21,25 +21,76 @@ exports.addTag = function(connection,subject,category,topic,newtag,uid) {
     var treeBranch = [subject,category,topic,newtag].join(".");
 
     var promise = new Promise(function(resolve,reject) {
+        /* validate new tag */
+        if(newtag.length > 32) {
+            resolve('excess');
+        } else {
+            var collection = connection.collection('Tree');
+
+            var checkIfExistsObj = {_id:"tags"};
+            checkIfExistsObj[treeBranch] = {$exists:true};
+
+            collection.find(checkIfExistsObj).toArray(function(err,docs) {
+                if(err) {
+                    reject(err);
+                } else {
+                    if(docs.length > 0) {
+                        resolve('exists');
+                    } else {
+                        /* add the tag record to the collection, stores tag metadata */
+                        collection.insert(tag,function(err,result) {
+                            if(err) {
+                                reject(err);
+                            } else {
+                                /* insert the tag into the tree */
+                                var tagObj = {};
+                                tagObj[treeBranch] = String(result.insertedIds[0]);
+                                collection.update({_id:"tags"},{$set:tagObj},function(err,r) {
+                                    if(err) {
+                                        reject(err);
+                                    } else {
+                                        resolve('added');
+                                    }
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        }
+    });
+
+    return promise;
+};
+
+/// THIS IS NOT FINISHED! DO NOT USE!
+exports.deleteTag = function(connection,subject,category,topic,deletetag,uid) {
+    var ObjectId = require('mongodb').ObjectId;
+
+    var treeBranch = [subject,category,topic,deletetag].join(".");
+
+    var promise = new Promise(function(resolve,reject) {
         var collection = connection.collection('Tree');
 
-        var checkIfExistsObj = {_id:"tags"};
-        checkIfExistsObj[treeBranch] = {$exists:true};
+        var getTagID = {};
+        getTagID[treeBranch] = 1;
 
-        collection.find(checkIfExistsObj).toArray(function(err,docs) {
+        collection.find({_id:"tags"},getTagID).toArray(function(err,docs) {
             if(err) {
                 reject(err);
             } else {
-                if(docs.length > 0) {
-                    resolve('exists');
+                if(docs.length < 1) {
+                    resolve('notexists');
                 } else {
-                    collection.insert(tag,function(err,result) {
+                    var tagID = docs[0][subject][category][topic][deletetag];
+                    /* unset the tag from the tree, DOES NOT WORK!!! */
+                    collection.update({_id:"tags"},{$unset:{treeBranch:1}},function(err,result) {
                         if(err) {
                             reject(err);
                         } else {
-                            var tagObj = {};
-                            tagObj[treeBranch] = String(result.insertedIds[0]);
-                            collection.update({_id:"tags"},{$set:tagObj},function(err,r) {
+                            /* remove the tag record */
+                            resolve('deleted');
+                            collection.remove({_id:ObjectId(tagID)},function(err,r) {
                                 if(err) {
                                     reject(err);
                                 } else {
@@ -111,18 +162,21 @@ exports.getSubjects = function(connection) {
 };
 
 exports.getTags = function(connection,subject,category,topic) {
+    var sub = subject.replace(/'/g,"");
+    var cat = category.replace(/'/g,"");
+    var top = topic.replace(/'/g,"");
 	var promise = new Promise(function(resolve,reject) {
         var collection = connection.collection('Tree');
 
         var projection = {};
-        projection[[subject,category,topic].join(".")] = 1;
+        projection[[sub,cat,top].join(".")] = 1;
 
         collection.find({_id:"tags"},projection).toArray(function(err,docs) {
             if(err) {
                 reject(err);
             } else {
                 delete docs[0]._id;
-                var tags = Object.keys(docs[0][subject][category][topic]);
+                var tags = Object.keys(docs[0][sub][cat][top]);
                 resolve(tags);
             }
         });

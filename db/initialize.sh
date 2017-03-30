@@ -13,8 +13,8 @@ $mysql -uroot < initialize.sql;
 mongo xuser --eval "db.createCollection('Users')";
 mongo xuser --eval "db.createCollection('Tree')";
 
-TOPICS=$(cat ../xample/data/topics.json);
-TAGS=$(cat ../xample/data/tags.json);
+TOPICS=$(cat ../xample/data/topics.json | tr '"' "'");
+TAGS=$(cat ../xample/data/tags.json | tr '"' "'");
 
 mongo xuser --eval "db.Tree.insert({_id:'topics',$TOPICS})";
 mongo xuser --eval "db.Tree.insert({_id:'tags',$TAGS})";

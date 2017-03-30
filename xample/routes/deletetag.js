@@ -8,9 +8,9 @@ var analytics = require('./../analytics.js');
 var queryUserDB = require('./../queryuserdb.js');
 
 /*
-	Function: suggesttag
+	Function: deletetag
 
-	Ajax, adds a new tag for consideration.
+	Ajax, deletes a tag.
 
 	Parameters:
 
@@ -21,8 +21,8 @@ var queryUserDB = require('./../queryuserdb.js');
 
 		nothing - *
 */
-exports.suggesttag = function(request,response) {
-	var __function = "suggesttag";
+exports.deletetag = function(request,response) {
+	var __function = "deletetag";
 
 	var qs = require('querystring');
 
@@ -55,7 +55,7 @@ exports.suggesttag = function(request,response) {
 		var subject = POST.s;
 		var category = POST.c;
 		var topic = POST.t;
-		var newtag = POST.nt;
+		var tag = POST.dt;
 
 		if(typeof uid === 'undefined') {
 			result.msg = 'nosaveloggedout';
@@ -63,21 +63,15 @@ exports.suggesttag = function(request,response) {
 		} else {
 			var promiseUser = queryUserDB.getDocByUid(userdb,uid);
 			promiseUser.then(function(data) {
-				if(data[0].authority < 6) {
+				if(data[0].authority < 9) {
 					result.msg = 'nosavenoauthority';
 					response.end(JSON.stringify(result));
 					return;
 				}
 
-				var promiseNewTag = queryUserDB.addTag(userdb,subject,category,topic,newtag,uid);
+				var promiseNewTag = queryUserDB.deleteTag(userdb,subject,category,topic,tag,uid);
 				promiseNewTag.then(function(data) {
-					if(data === "exists") {
-						result.msg = 'exists';
-						response.end(JSON.stringify(result));
-					} else if(data === "excess") {
-						result.msg = 'excess';
-						response.end(JSON.stringify(result));
-					} else if(data === "added") {
+					if(data === "deleted") {
 						result.msg = 'success';
 						response.end(JSON.stringify(result));
 					} else {

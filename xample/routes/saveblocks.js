@@ -99,31 +99,31 @@ exports.saveblocks = function(request,response) {
 					});
 
 					/* get arrays of the media types and content */
-					var types = mediaType.split(',');
-					var contents = mediaContent.split(',');
+					var types = mediaType.split('@^@');
+					var contents = mediaContent.split('@^@');
 
-					/* this is saving the tags, only on permanent saves & block pages */
+					/* this is saving the btypes, only on permanent saves & block pages */
 					if(tabid && pagetype === "page") {
 						var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,xid);
 						promiseSettings.then(function(data) {
-							var tagTypes = new Map([["slide",0],["video",1],["audio",2],["image",4],["slide",4],["xtext",8],["xmath",16],["latex",16],["xcode",32]]);
+							var bTypeMap = new Map([["none",0],["video",1],["audio",2],["image",4],["slide",4],["xtext",8],["xmath",16],["latex",16],["xcode",32]]);
 
-							var tags = 0;
+							var btypes = 0;
 							types.forEach(function(element,index) {
-								tags = tagTypes.get(element) | tags;
+								btypes = bTypeMap.get(element) | btypes;
 							});
 
-							var qryTag = "UPDATE " + uTable + " SET tags=" + tags + ",edited=NOW() WHERE xid=" + xid;
+							var qryTag = "UPDATE " + uTable + " SET btypes=" + btypes + ",edited=NOW() WHERE xid=" + xid;
 
 							connection.query(qryTag,function(err,rows,fields) {
 								if(err) {
 									err.input = qryTag;
 									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
-									/* copy tags to redundant table */
+									/* copy btypes to redundant table */
 									var cRed = querypagedb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
 
-									var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.tags = xample.${uTable}.tags WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
+									var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.btypes = xample.${uTable}.btypes WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
 
 									connection.query(qryCopy,function(err,rows,fields) {
 										if(err) {

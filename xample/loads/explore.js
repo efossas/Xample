@@ -36,8 +36,8 @@ exports.explore = function(request,response) {
 	var category = request.query.category;
 	var topic = request.query.topic;
 	var sort = request.query.sort;
+	var btypes = request.query.btypes;
 	var tags = request.query.tags;
-	var keywords = request.query.keywords;
 
 	/* redirect users if logged out or no page id provided */
 	if(!content && !subject) {
@@ -55,25 +55,25 @@ exports.explore = function(request,response) {
 				loader.loadPage(request,response,"<script>pageError('dberror');</script>");
 				analytics.journal(true,220,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			} else {
-				/* if coming from the main page, neither sort nor tags are defined */
+				/* if coming from the main page, neither sort nor btypes are defined */
 				if(!sort) {
 					sort = "views";
 				}
-				if(!tags) {
-					tags = '0';
+				if(!btypes) {
+					btypes = '0';
 				}
-				if(!keywords) {
-					keywords = "";
+				if(!tags) {
+					tags = "";
 				}
 
-				var promise = queryPageDB.searchPageResults(connection,content,subject,category,topic,sort,tags,keywords);
+				var promise = queryPageDB.searchPageResults(connection,content,subject,category,topic,sort,btypes,tags);
 
 				promise.then(function(data) {
 					/* convert array into string */
 					var exploredata = JSON.stringify(data);
 
-					/* create content subject category topic tags array as string, doing it this way to avoid nulls */
-					var csctArray = [content,subject,category,topic,sort,tags,keywords];
+					/* create content subject category topic btypes array as string, doing it this way to avoid nulls */
+					var csctArray = [content,subject,category,topic,sort,btypes,tags];
 					var csctString = "['" + csctArray.join("','") + "']";
 
 					/* finished response */

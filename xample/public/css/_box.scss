@@ -36,6 +36,7 @@
 	display: block;
 	font-weight: normal;
 	padding: 4px 6px;
+	text-align: center;
 	transition: all 0.2s ease 0s;
     word-break: break-all;
 }
@@ -309,7 +310,8 @@
 
 	margin: 2px 0px 4px 6px;
 	height: 15 * 9px;
-	width: 15 * 16px;
+	//width: 15 * 16px;
+	width: 95%;
 }
 
 .box-blurb {

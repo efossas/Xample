@@ -154,13 +154,6 @@
 	background-color: #d31e1e;
 }
 
-/* Block Styles */
-.bengine-block-wrapper {
-	max-width: $site-width;
-	margin: 0px auto 0 auto;
-	margin-bottom: 12px;
-}
-
 /* Mobile Size */
 @media screen and (max-width: $site-width) {
     .page-title { width: 100%; }

@@ -14,6 +14,7 @@
 /* load functions, for loading pages */
 var l_editpage = require('./loads/editpage.js');
 var l_editguide = require('./loads/editguide.js');
+var l_embed = require('./loads/embed.js');
 var l_explore = require('./loads/explore.js');
 var l_guide = require('./loads/guide.js');
 var l_home = require('./loads/home.js');
@@ -26,6 +27,7 @@ var l_start = require('./loads/start.js');
 /* route functions, for ajax requeset asking for data */
 var r_createpage = require('./routes/createpage.js');
 var r_deletepage = require('./routes/deletepage.js');
+var r_deletetag = require('./routes/deletetag.js');
 var r_getbmdata = require('./routes/getbmdata.js');
 var r_getpages = require('./routes/getpages.js');
 var r_getprofiledata = require('./routes/getprofiledata.js');
@@ -57,8 +59,10 @@ var r_uploadthumb = require('./routes/uploadthumb.js');
 module.exports = {
     createpage: r_createpage.createpage,
     deletepage: r_deletepage.deletepage,
+    deletetag: r_deletetag.deletetag,
     editpage: l_editpage.editpage,
     editguide: l_editguide.editguide,
+    embed: l_embed.embed,
     explore: l_explore.explore,
     getbmdata: r_getbmdata.getbmdata,
     getpages: r_getpages.getpages,
