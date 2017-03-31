@@ -58,14 +58,6 @@ exports.signup = function(request,response) {
         var username = POST.username;
         var email = POST.email;
 
-		/// closing off sign ups
-		if(email !== "applegate") {
-			result.msg = 'closed';
-			response.setHeader('content-type','application/json');
-			response.end(JSON.stringify(result));
-			return;
-		}
-
 		/* ensure username is not taken */
 		var promiseCheckUsername = queryUserDB.getDocByUsername(userdb,username);
 		promiseCheckUsername.then(function(users) {
@@ -78,6 +70,13 @@ exports.signup = function(request,response) {
 			/* add the user to db */
 			var promiseCreateUser = queryUserDB.createUser(userdb,username,hash,email);
 			promiseCreateUser.then(function(res) {
+				if(res === 'closed') {
+					result.msg = 'closed';
+					response.setHeader('content-type','application/json');
+					response.end(JSON.stringify(result));
+					return;
+				}
+
 				/* log the user in */
 				var uid = res.ops[0]._id;
 				request.session.uid = uid;
