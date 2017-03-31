@@ -96,14 +96,24 @@ exports.getbmdata = function(request,response) {
 					var bmKeys = Object.keys(bookmarks[bmType]);
 
 					var bmLength = bmKeys.length;
-					if(bmLength > 0) {
+					if(bmLength > 0 && bmKeys) {
 						var qry = "SELECT * FROM ( ";
 
+						var qryBM = "";
 						for(var i = 0; i < bmKeys.length; i++) {
 							var pidArray = bookmarks[bmType][bmKeys[i]];
 							pidArray.forEach(function(elem) {
-								qry += "(SELECT '" + bmKeys[i] + "' AS 'aid',xid,xname,username AS 'author',imageurl FROM " + prefix + "_" + bmKeys[i] + "_0 WHERE xid='" + elem + "') UNION ";
+								qryBM += "(SELECT '" + bmKeys[i] + "' AS 'aid',xid,xname,username AS 'author',imageurl FROM " + prefix + "_" + bmKeys[i] + "_0 WHERE xid='" + elem + "') UNION ";
 							});
+						}
+
+						/* make sure bookmarks to query were actually grabbed */
+						if(qryBM !== "") {
+							qry += qryBM;
+						} else {
+							result.msg = 'success';
+							result.data.bmdata = [];
+							response.end(JSON.stringify(result));
 						}
 
 						qry = qry.slice(0,-7) + " ) a ORDER BY xname ASC";

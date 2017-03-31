@@ -71,6 +71,7 @@ exports.setbookmark = function(request,response) {
 				default:
 					result.msg = 'err';
 					response.end(JSON.stringify(result));
+					return;
 			}
 
 			/* validate the data a bit */
@@ -104,7 +105,12 @@ exports.setbookmark = function(request,response) {
 				} else if(POST.action === 'delete') {
 					var index = bookmarks[bmType][aid].indexOf(pid);
 					if (index > -1) {
+						/* delete bookmark */
 						bookmarks[bmType][aid].splice(index,1);
+					}
+					if(bookmarks[bmType][aid].length <= 0) {
+						/* remove aid if there are no bookmarks on that author */
+						delete bookmarks[bmType][aid];
 					}
 				}
 

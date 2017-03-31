@@ -683,7 +683,7 @@ blockExtensibles.image = new function image() {
 		var stylestr = `.xImg, .xImg-show {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 
@@ -814,7 +814,7 @@ blockExtensibles.video = new function video() {
 		var stylestr = `.xVid, .xVid-show {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 
@@ -960,7 +960,7 @@ blockExtensibles.slide = new function slide() {
 		var stylestr = `.xSli, .xSli-show {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 
@@ -1047,7 +1047,7 @@ blockExtensibles.xsvgs = new function xsvgs() {
 		var stylestr = `.xSvg {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 

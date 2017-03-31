@@ -1716,6 +1716,7 @@ function pageExplore(logstatus,csct,data) {
 		/* bookmark */
 		newBox.querySelector(".bmark").setAttribute('data-aid',data[index].uid);
 		newBox.querySelector(".bmark").setAttribute('data-pid',data[index].xid);
+		newBox.querySelector(".bmark").setAttribute('data-pagetype',pagetype);
 
 		newBox.querySelector(".bmark").addEventListener('change',setBookmark);
 
@@ -1753,7 +1754,7 @@ function pageExplore(logstatus,csct,data) {
 		newBox.querySelector(".box-edited").innerHTML = "edited: " + editedDate;
 
 		/* ranks */
-		newBox.querySelector(".box-ranks").innerHTML = "ranks: " + data[index].ranks;
+		newBox.querySelector(".box-ranks").innerHTML = "likes: " + data[index].ranks;
 
 		/* views */
 		newBox.querySelector(".box-views").innerHTML = "views: " + data[index].views;
@@ -1794,9 +1795,13 @@ function pageHome(auth) {
 	//var promiseLG = getPages("guide");
 
 	Promise.all([promiseBM,promiseBP]).then(function(values) {
-		/* bookmark display form */
-		var row_Bookmark = formDisplayPlaylist('Bookmarks: Pages',values[0]);
-		main.appendChild(row_Bookmark);
+		if(values[0] !== 'err') {
+			/* bookmark display form */
+			var row_Bookmark = formDisplayPlaylist('Bookmarks: Pages',values[0]);
+			main.appendChild(row_Bookmark);
+		} else {
+			alertify.alert("There Was An Error Getting Your Bookmarks.");
+		}
 
 		/* block page create form */
 		var row_PageCreate = formGenerateUserContent('page',values[1]);
@@ -2225,7 +2230,7 @@ function getBookmarkData(pagetype) {
 							resolve(result.data.bmdata); break;
 						case 'err':
 						default:
-							reject('err');
+							resolve('err'); // shouldn't break page, so resolve not reject
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");

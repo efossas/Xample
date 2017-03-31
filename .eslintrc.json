@@ -7,7 +7,6 @@
 	    "array-bracket-spacing": ["error"],
 	    "arrow-parens": ["error"],
 	    "block-spacing": ["error"],
-	    "brace-style": ["error"],
 	    "comma-dangle": ["error"],
 	    "comma-spacing": ["error",{"before":false,"after":false}],
 	    "comma-style": ["error"],

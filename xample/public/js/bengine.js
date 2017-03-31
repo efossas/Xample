@@ -37,6 +37,7 @@ style.innerHTML = `.bengine-block-style {
 }
 .bengine-block-style-embed {
 	height: 85vh !important;
+	margin: 0 !important;
 }
 .bengine-x-blocks {
 
