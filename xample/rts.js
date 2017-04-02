@@ -23,6 +23,7 @@ var l_page = require('./loads/page.js');
 var l_play = require('./loads/play.js');
 var l_profile = require('./loads/profile.js');
 var l_start = require('./loads/start.js');
+var l_tagreview = require('./loads/tagreview.js');
 
 /* route functions, for ajax requeset asking for data */
 var r_createpage = require('./routes/createpage.js');
@@ -44,6 +45,8 @@ var r_setbookmark = require('./routes/setbookmark.js');
 var r_setview = require('./routes/setview.js');
 var r_signup = require('./routes/signup.js');
 var r_suggesttag = require('./routes/suggesttag.js');
+var r_tagcomment = require('./routes/tagcomment.js');
+var r_tagvote = require('./routes/tagvote.js');
 var r_uploadmedia = require('./routes/uploadmedia.js');
 var r_uploadthumb = require('./routes/uploadthumb.js');
 
@@ -87,6 +90,9 @@ module.exports = {
     signup: r_signup.signup,
     start: l_start.start,
     suggesttag: r_suggesttag.suggesttag,
+    tagcomment: r_tagcomment.tagcomment,
+    tagreview: l_tagreview.tagreview,
+    tagvote: r_tagvote.tagvote,
     uploadmedia: r_uploadmedia.uploadmedia,
     uploadthumb: r_uploadthumb.uploadthumb
 };

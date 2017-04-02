@@ -35,10 +35,9 @@
 }
 
 /* Page Info */
-.page-blurb {
+.text-area {
 	display: block;
 	width: 100%;
-	height: 135px;
 	border: 1px solid black;
 	border-radius: 2px;
 
@@ -52,6 +51,22 @@
 	font-size: 1em;
 	font-weight: 300;
 	color: black;
+}
+
+.page-blurb {
+	@extend .text-area;
+	height: 135px;
+
+}
+
+.comment-box {
+	@extend .text-area;
+	margin-top: 12px;
+	height: 60px;
+}
+
+.info-row {
+	margin: 8px 6px 0px 6px;
 }
 
 .page-link {

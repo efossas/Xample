@@ -523,8 +523,8 @@ function dashExplore(exploreHeader,linkRoute) {
 			backTopic.setAttribute('style','position:absolute;z-index:2;');
 
 			var backBtn = btnSubmit('Back',showCategory,'red');
-			backBtn.setAttribute('data-subject',this.getAttribute('data-subject'));
-			backBtn.setAttribute('data-category',this.getAttribute('data-category'));
+			backBtn.setAttribute('data-subject',tagSubject);
+			backBtn.setAttribute('data-category',tagCategory);
 			backTopic.appendChild(backBtn);
 
 			/* create header for link section */
@@ -560,7 +560,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			var topicCol = document.createElement('div');
 			topicCol.setAttribute('class','col col-100');
 
-			var topicBtn = btnLink('<b>' + this.getAttribute('data-topic') + '</b>','','none');
+			var topicBtn = btnLink('<b>' + tagTopic + '</b>','','none');
 
 			topicCol.appendChild(topicBtn);
 
@@ -583,6 +583,11 @@ function dashExplore(exploreHeader,linkRoute) {
 				var tagLength = data.length - 1;
 				data.forEach(function(value,i) {
 					var row = document.createElement('div');
+					row.onclick = function() {
+						var query = ["s=",tagSubject,"&c=",tagCategory,"&t=",tagTopic,"&tag=",value].join("");
+						var tagurl = createURL('/tagreview?' + query);
+						window.location = tagurl;
+					};
 
 					switch(i) {
 						case 0:
@@ -597,14 +602,9 @@ function dashExplore(exploreHeader,linkRoute) {
 					var colLeft = document.createElement('div');
 					colLeft.setAttribute('class','col col-2');
 
-					/* page position in list */
-					var colPgNum = document.createElement('div');
-					colPgNum.setAttribute('class','col col-3 padtop');
-					colPgNum.innerHTML = (i + 1);
-
 					/* page name */
 					var colName = document.createElement('div');
-					colName.setAttribute('class','col col-93 padtop');
+					colName.setAttribute('class','col col-96 padtop');
 					colName.innerHTML = value;
 
 					/* right buffer */
@@ -613,7 +613,6 @@ function dashExplore(exploreHeader,linkRoute) {
 
 					/* append everything */
 					row.appendChild(colLeft);
-					row.appendChild(colPgNum);
 					row.appendChild(colName);
 					row.appendChild(colRight);
 
@@ -1239,6 +1238,330 @@ function barFilter(subject,category,topic,sort,curbtypes,tags) {
 	filter.appendChild(row);
 
 	return filter;
+}
+
+function barTagReview(taginfo) {
+	/* create top div for menu buttons */
+	var tagBar = document.createElement("div");
+	tagBar.setAttribute("class","tag-bar");
+
+	/* row 0 - just padding */
+	var rowZero = document.createElement("div");
+	rowZero.setAttribute("class","row");
+	rowZero.setAttribute('style','padding-top:6px;');
+
+	/* row sub cat top */
+	var rowSubCatTop = document.createElement("div");
+	rowSubCatTop.setAttribute("class","row");
+
+	var subjectInput = document.createElement("input");
+	subjectInput.setAttribute("class","text-input");
+	subjectInput.setAttribute("readonly","true");
+	subjectInput.setAttribute("title","subject");
+	subjectInput.setAttribute("placeholder",taginfo.subject);
+
+	var colSubject = document.createElement("div");
+	colSubject.setAttribute("class","col col-33");
+	colSubject.appendChild(subjectInput);
+
+	var categoryInput = document.createElement("input");
+	categoryInput.setAttribute("class","text-input");
+	categoryInput.setAttribute("readonly","true");
+	categoryInput.setAttribute("title","category");
+	categoryInput.setAttribute("placeholder",taginfo.category);
+
+	var colCategory = document.createElement("div");
+	colCategory.setAttribute("class","col col-33");
+	colCategory.appendChild(categoryInput);
+
+	var topicInput = document.createElement("input");
+	topicInput.setAttribute("class","text-input");
+	topicInput.setAttribute("readonly","true");
+	topicInput.setAttribute("title","topic");
+	topicInput.setAttribute("placeholder",taginfo.topic);
+
+	var colTopic = document.createElement("div");
+	colTopic.setAttribute("class","col col-33");
+	colTopic.appendChild(topicInput);
+
+	rowSubCatTop.appendChild(colSubject);
+	rowSubCatTop.appendChild(colCategory);
+	rowSubCatTop.appendChild(colTopic);
+
+	/* row tagname */
+	var rowTagName = document.createElement("div");
+	rowTagName.setAttribute("class","row");
+
+	var tagnameInput = document.createElement("input");
+	tagnameInput.setAttribute("class","text-input");
+	tagnameInput.setAttribute("readonly","true");
+	tagnameInput.setAttribute("title","tag");
+	tagnameInput.setAttribute("value",taginfo.tag);
+
+	var colTag = document.createElement("div");
+	colTag.setAttribute("class","col col-100");
+	colTag.appendChild(tagnameInput);
+	rowTagName.appendChild(colTag);
+
+	/* row votes */
+	var rowVotes = document.createElement("div");
+	rowVotes.setAttribute("class","row");
+
+	/* up votes */
+	var upVotes = document.createElement("p");
+	upVotes.setAttribute("id","up-votes");
+	upVotes.setAttribute("class","nomarpad info-row");
+	upVotes.innerHTML = "Up Votes: " + taginfo.upvotes.length;
+
+	var colUpVotes = document.createElement("div");
+	colUpVotes.setAttribute("class","col col-40");
+	colUpVotes.appendChild(upVotes);
+
+	/* down votes */
+	var downVotes = document.createElement("p");
+	downVotes.setAttribute("id","down-votes");
+	downVotes.setAttribute("class","nomarpad info-row");
+	downVotes.innerHTML = "Down Votes: " + taginfo.downvotes.length;
+
+	var colDownVotes = document.createElement("div");
+	colDownVotes.setAttribute("class","col col-40");
+	colDownVotes.appendChild(downVotes);
+
+	/* voting btns */
+	var upVoteColor = "gray";
+	var downVoteColor = "gray";
+	if(taginfo.thisUser === "up") {
+		upVoteColor = "blue";
+	} else if(taginfo.thisUser === "down") {
+		downVoteColor = "blue";
+	}
+
+	function voteTag(bool,subject,category,topic,tagname) {
+		var vote = "&vote=down";
+		var voteUpId = "down-votes";
+		var voteDownId = "up-votes";
+		var voteUpText = "Down Votes: ";
+		var voteDownText = "Up Votes: ";
+		var voteUpBtn = "Deny";
+		var voteDownBtn = "Approve";
+		if(bool) {
+			vote = "&vote=up";
+			voteUpId = "up-votes";
+			voteDownId = "down-votes";
+			voteUpText = "Up Votes: ";
+			voteDownText = "Down Votes: ";
+			voteUpBtn = "Approve";
+			voteDownBtn = "Deny";
+		}
+
+		var params = ["s=",subject,"&c=",category,"&t=",topic,"&tag=",tagname,vote].join("");
+
+		var url = createURL("/tagvote");
+
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open('POST',url,true);
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							/* 0 same vote, 1 modified */
+							if(result.data.switch[0] > 0) {
+								var updateUp = document.getElementById(voteUpId);
+								var textUp = updateUp.innerHTML.replace("Down Votes: ","").replace("Up Votes: ","");
+								updateUp.innerHTML = voteUpText + (Number(textUp) + 1);
+
+								var btnUp = document.getElementById(voteUpBtn);
+								btnUp.setAttribute("class",btnUp.className.replace("gray","blue"));
+							}
+							/* 0 new vote, 1 modified */
+							if(result.data.switch[1] > 0) {
+								var updateDown = document.getElementById(voteDownId);
+								var textDown = updateUp.innerHTML.replace("Down Votes: ","").replace("Up Votes: ","");
+								updateDown.innerHTML = voteDownText + (Number(textDown) - 1);
+
+								var btnDown = document.getElementById(voteDownBtn);
+								btnDown.setAttribute("class",btnDown.className.replace("blue","gray"));
+							}
+							break;
+						case 'novoteloggedout':
+							alertify.alert("You Cannot Vote Because You Are Logged Out");
+							break;
+						case 'noauth':
+							alertify.alert("You Do Not Have The Authority To Vote On Tags");
+							break;
+						case 'err':
+						default:
+							alertify.alert("Unable To Update Your Vote");
+					}
+				} else {
+					alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
+	}
+
+	var upV = function() {
+		voteTag(true,taginfo.subject,taginfo.category,taginfo.topic,taginfo.tag);
+	};
+
+	var downV = function() {
+		voteTag(false,taginfo.subject,taginfo.category,taginfo.topic,taginfo.tag);
+	};
+
+	var colUpVoteBtn = document.createElement("div");
+	colUpVoteBtn.setAttribute("class","col col-10");
+
+	var upVoteBtn = btnSubmit("Approve",upV,upVoteColor);
+	colUpVoteBtn.appendChild(upVoteBtn);
+
+	var colDownVoteBtn = document.createElement("div");
+	colDownVoteBtn.setAttribute("class","col col-10");
+
+	var downVoteBtn = btnSubmit("Deny",downV,downVoteColor);
+	colDownVoteBtn.appendChild(downVoteBtn);
+
+	rowVotes.appendChild(colUpVotes);
+	rowVotes.appendChild(colDownVotes);
+	rowVotes.appendChild(colDownVoteBtn);
+	rowVotes.appendChild(colUpVoteBtn);
+
+	/* row bottom padding */
+	var rowEnd = document.createElement("div");
+	rowEnd.setAttribute("class","row");
+
+	/* append all rows */
+	tagBar.appendChild(rowZero);
+	tagBar.appendChild(rowSubCatTop);
+	tagBar.appendChild(rowTagName);
+	tagBar.appendChild(rowVotes);
+	tagBar.appendChild(rowEnd);
+
+	return tagBar;
+}
+
+function createCommentBox(commentObj) {
+	var commentDisplay = document.createElement("div");
+	commentDisplay.setAttribute("class","comment-display-box");
+
+	var rowCommentInfo = document.createElement("div");
+	rowCommentInfo.setAttribute("class","row");
+
+	var colCommentInfo = document.createElement("div");
+	colCommentInfo.setAttribute("class","col col-100");
+
+	var author = document.createElement("p");
+	author.setAttribute("class","nomarpad inline bold info-row");
+	author.innerHTML = commentObj.writerName;
+	colCommentInfo.appendChild(author);
+
+	var timestamp = document.createElement("p");
+	timestamp.setAttribute("class","nomarpad inline info-row");
+
+	var date = new Date(commentObj.timeStamp);
+	var dateDisplay = [date.toLocaleDateString()," - ",date.getHours(),":",date.getMinutes()].join("");
+
+	timestamp.innerHTML = dateDisplay;
+	colCommentInfo.appendChild(timestamp);
+
+	var thread = document.createElement("p");
+	thread.setAttribute("class","nomarpad inline small info-row");
+	thread.innerHTML = commentObj.thread;
+	colCommentInfo.appendChild(thread);
+
+	rowCommentInfo.appendChild(colCommentInfo);
+
+	var rowCommentText = document.createElement("div");
+	rowCommentText.setAttribute("class","row");
+
+	var colCommentText = document.createElement("div");
+	colCommentText.setAttribute("class","col col-100");
+
+	var comment = document.createElement("p");
+	comment.setAttribute("class","nomarpad info-row");
+	comment.innerHTML = commentObj.comment;
+	colCommentText.appendChild(comment);
+
+	rowCommentText.appendChild(colCommentText);
+
+	commentDisplay.appendChild(rowCommentInfo);
+	commentDisplay.appendChild(rowCommentText);
+
+	return commentDisplay;
+}
+
+/*
+	Function: formComments
+
+	Creates a form for posting and viewing comments
+
+	Parameters:
+
+		formId - string,  just a generic id to get form element
+		submitCommentFunction - function, ajax sends new comment (only parameter is comment text)
+		commentsArray - array, objects containing existing comment,writerName,thread
+
+	Returns:
+
+		success - html node, filter form
+*/
+function formComments(formId,submitCommentFunction,commentsArray) {
+	var commentsSection = document.createElement("div");
+
+	/* comment box */
+	var commentBox = document.createElement("textarea");
+	commentBox.setAttribute("id","tag-comment-box");
+	commentBox.setAttribute("class","comment-box");
+	commentBox.setAttribute("placeholder","Type A Comment, Start With @thread To Create A New Thread");
+	commentBox.setAttribute("maxlength","1023");
+
+	/* comment submit btn */
+	var rowComSubmitBtn = document.createElement("div");
+	rowComSubmitBtn.setAttribute("class","row");
+
+	var colComSubmitEmptyLeft = document.createElement("div");
+	colComSubmitEmptyLeft.setAttribute("class","col col-80");
+
+	var colComSubmitBtn = document.createElement("div");
+	colComSubmitBtn.setAttribute("class","col col-20");
+
+	var submitCommentFunctionWithComment = function() {
+		var encodedComment = encodeURIComponent(document.getElementById('tag-comment-box').value);
+		submitCommentFunction(encodedComment);
+	};
+
+	var commentSubmitBtn = btnSubmit("Comment",submitCommentFunctionWithComment,"green");
+	colComSubmitBtn.appendChild(commentSubmitBtn);
+
+	rowComSubmitBtn.appendChild(colComSubmitEmptyLeft);
+	rowComSubmitBtn.appendChild(colComSubmitBtn);
+
+	/* hr separator between comment box and comments */
+	var hr = document.createElement("hr");
+	hr.setAttribute("style","margin: 12px 0px;");
+
+	/* encompassing div of existing comments */
+	var existingComments = document.createElement("div");
+	existingComments.setAttribute("id","existing-comments");
+	existingComments.setAttribute("class","existing-comments");
+
+	commentsArray.reverse().forEach(function(element,index) {
+		var commentDisplay = createCommentBox(element);
+		existingComments.appendChild(commentDisplay);
+	});
+
+	/* append everything */
+	commentsSection.appendChild(commentBox);
+	commentsSection.appendChild(rowComSubmitBtn);
+	commentsSection.appendChild(hr);
+	commentsSection.appendChild(existingComments);
+
+	return commentsSection;
 }
 
 /*
@@ -1928,6 +2251,86 @@ function pageProfile(profiledata) {
 	var main = document.getElementById('content');
 	main.appendChild(menu);
 	main.appendChild(profilediv);
+}
+
+/*
+	Function: pageTagReview
+
+	This function displays a a tag's review page.
+
+	Parameters:
+
+		tagdata - the tag's review data
+
+	Returns:
+
+		nothing - *
+*/
+function pageTagReview(tagdata) {
+	var taginfo = JSON.parse(tagdata);
+	console.log(taginfo);
+	/* MENU */
+
+	/* create menu */
+	var menu = barMenu();
+
+	/* TAG DATA */
+
+	var tagBar = barTagReview(taginfo);
+
+	/* COMMENTS SECTION */
+
+	/* function for submitting comment */
+	function tagNewComment(comment) {
+		var params = ["s=",taginfo.subject,"&c=",taginfo.category,"&t=",taginfo.topic,"&tag=",taginfo.tag,"&comment=",comment].join("");
+
+		var url = createURL("/tagcomment");
+
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open('POST',url,true);
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							var commentArea = document.getElementById("existing-comments");
+							var newCommentBox = createCommentBox(result.data.comment);
+							commentArea.insertBefore(newCommentBox,commentArea.firstChild);
+							document.getElementById("tag-comment-box").value = "";
+							break;
+						case 'nocommentloggedout':
+							alertify.alert("You Cannot Comment Because You Are Logged Out");
+							break;
+						case 'noauth':
+							alertify.alert("You Do Not Have The Authority To Comment");
+							break;
+						case 'refresh':
+							alertify.alert("Your Comment Might Not Have Posted. Check By Refreshing The Page");
+							break;
+						case 'err':
+						default:
+							alertify.alert("Unable To Add Your Comment");
+					}
+				} else {
+					alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
+	}
+
+	var commentsSection = formComments('tagReview-comments',tagNewComment,taginfo.comments);
+
+	/* MAIN */
+
+	var main = document.getElementById('content');
+	main.appendChild(menu);
+	main.appendChild(tagBar);
+	main.appendChild(commentsSection);
 }
 
 // <<<fold>>>

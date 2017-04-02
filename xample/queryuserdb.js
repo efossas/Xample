@@ -107,6 +107,85 @@ exports.deleteTag = function(connection,subject,category,topic,deletetag,uid) {
     return promise;
 };
 
+exports.setTagComment = function(connection,subject,category,topic,tag,newComment) {
+    var ObjectId = require('mongodb').ObjectId;
+
+    var promise = new Promise(function(resolve,reject) {
+        var collection = connection.collection('Tree');
+
+        var projection = {};
+        projection[[subject,category,topic].join(".")] = 1;
+
+        collection.find({_id:"tags"},projection).toArray(function(err,docs) {
+            if(err) {
+                reject(err);
+            } else {
+                var tagID = docs[0][subject][category][topic][tag];
+
+                var pushObj = {$push:{comments:newComment}};
+
+                collection.update({_id:ObjectId(tagID)},pushObj,function(err,r) {
+                    if(err) {
+                        reject(err);
+                    } else {
+                        resolve(r.result.nModified);
+                    }
+                });
+            }
+        });
+    });
+
+    return promise;
+};
+
+exports.setTagVote = function(connection,uid,subject,category,topic,tag,vote) {
+    var ObjectId = require('mongodb').ObjectId;
+
+    var promise = new Promise(function(resolve,reject) {
+        var collection = connection.collection('Tree');
+
+        var projection = {};
+        projection[[subject,category,topic].join(".")] = 1;
+
+        collection.find({_id:"tags"},projection).toArray(function(err,docs) {
+            if(err) {
+                reject(err);
+            } else {
+                var tagID = docs[0][subject][category][topic][tag];
+
+                var voteToAdd;
+                var voteToRemove;
+                if(vote === "up") {
+                    voteToAdd = {upvotes:uid};
+                    voteToRemove = {downvotes:uid};
+                } else if (vote === "down") {
+                    voteToAdd = {downvotes:uid};
+                    voteToRemove = {upvotes:uid};
+                } else {
+                    reject('badvote');
+                }
+
+                /* add vote, and possibly remove previous vote */
+                collection.update({_id:ObjectId(tagID)},{$addToSet:voteToAdd},function(err,rAdd) {
+                    if(err) {
+                        reject(err);
+                    } else {
+                        collection.update({_id:ObjectId(tagID)},{$pull:voteToRemove},function(err,rRemove) {
+                            if(err) {
+                                reject(err);
+                            } else {
+                                resolve([rAdd.result.nModified,rRemove.result.nModified]);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    });
+
+    return promise;
+};
+
 exports.getDocByUid = function(connection,uid) {
     var ObjectId = require('mongodb').ObjectId;
 
@@ -178,6 +257,34 @@ exports.getTags = function(connection,subject,category,topic) {
                 delete docs[0]._id;
                 var tags = Object.keys(docs[0][sub][cat][top]);
                 resolve(tags);
+            }
+        });
+    });
+
+    return promise;
+};
+
+exports.getTagData = function(connection,subject,category,topic,tagname) {
+    var ObjectId = require('mongodb').ObjectId;
+
+    var promise = new Promise(function(resolve,reject) {
+        var collection = connection.collection('Tree');
+
+        var projection = {};
+        projection[[subject,category,topic,tagname].join(".")] = 1;
+
+        collection.find({_id:"tags"},projection).toArray(function(err,docs) {
+            if(err) {
+                reject(err);
+            } else {
+                var tagID = docs[0][subject][category][topic][tagname];
+                collection.find({_id:ObjectId(tagID)}).toArray(function(err,r) {
+                    if(err) {
+                        reject(err);
+                    } else {
+                        resolve(r[0]);
+                    }
+                });
             }
         });
     });

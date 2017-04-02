@@ -127,6 +127,15 @@
 	}
 }
 
+/* Comments */
+.comment-display-box {
+	background-color: white;
+	box-shadow: 1px 1px 1px $shadow;
+	border-radius: 2px;
+	margin: 8px 0px;
+	padding: 6px;
+}
+
 /* Content Search Box - Landing Page */
 .explore {
 	@extend .wrapper;

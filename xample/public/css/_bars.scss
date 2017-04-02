@@ -198,6 +198,15 @@
   background: $bar-alt-color;
 }
 
+.tag-bar {
+	@extend .wrapper;
+}
+
+.tag-bar::after {
+  @extend .bar::after;
+  background: $bar-alt-color;
+}
+
 /* Mobile Size */
 @media screen and (max-width: $site-width) {
     .filter-bar { select { margin-top: 0px; } }

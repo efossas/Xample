@@ -11,6 +11,7 @@ fi
 $mysql -uroot < initialize.sql;
 
 mongo xuser --eval "db.createCollection('Users')";
+mongo xuser --eval "db.Users.createIndex({username:1},{unique:true})";
 mongo xuser --eval "db.createCollection('Tree')";
 
 TOPICS=$(cat ../xample/data/topics.json | tr '"' "'");

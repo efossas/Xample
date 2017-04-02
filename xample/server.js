@@ -281,6 +281,9 @@ app.post('/setbookmark',rts.setbookmark);
 app.post('/signup',rts.signup);
 app.post('/suggesttag',rts.suggesttag);
 app.post('/sv',rts.setview);
+app.post('/tagcomment',rts.tagcomment);
+app.get('/tagreview*',rts.tagreview);
+app.post('/tagvote',rts.tagvote);
 app.post('/uploadmedia*',rts.uploadmedia);
 app.post('/uploadthumb*',rts.uploadthumb);
 
