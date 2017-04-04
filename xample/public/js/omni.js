@@ -1048,7 +1048,7 @@ function barPageSettings(pagetype,aid,settings) {
 	pageSettings.appendChild(ddsct);
 
 	/* grab autocomplete if topic is already set */
-	if(settings.topic !== "") {
+	if(settings.topic !== "" && settings.topic !== null) {
 		getTags(settings.subject,settings.category,settings.topic).then(function(data) {
 			globalScope.tags = data;
 		},function(err) {

@@ -52,7 +52,7 @@ exports.gettags = function(request,response) {
 	request.on('end',function() {
 		var POST = qs.parse(body);
 
-		if(POST.s === "" || POST.c === "" || POST.t === "") {
+		if(POST.s === "" || POST.c === "" || POST.t === "" || POST.s === null || POST.c === null || POST.t === null || POST.s === 'null' || POST.c === 'null' || POST.t === 'null') {
 			result.msg = 'unset';
 			response.end(JSON.stringify(result));
 			return;

@@ -25,7 +25,7 @@ exports.login = function(request,response) {
 	var __function = "login";
 
 	var qs = require('querystring');
-	var ps = require('password-hash');
+	var scrypt = require("scrypt");
 
     var userdb = request.app.get("userdb");
 
@@ -57,9 +57,10 @@ exports.login = function(request,response) {
 		var promiseGetUser = queryUserDB.getDocByUsername(userdb,username);
 		promiseGetUser.then(function(userdata) {
 			/* check that the entered password matches the stored password */
-			if(ps.verify(POST.password,userdata[0].password)) {
+			if(scrypt.verifyKdfSync(userdata[0].password.buffer,POST.password)) {
 				/* set the user's session, this indicates logged in status */
 				request.session.uid = userdata[0]._id;
+				request.session.auth = userdata[0].authority;
 
 				/* delete possible unneeded cookies */
 				response.clearCookie("id");

@@ -1290,7 +1290,6 @@ function pageEdit(aid,pagedata,pageinfo) {
 	/* create menu & status bar */
 	var menu = barMenu();
 	var status = barStatus(pid);
-
 	var pageSettings = barPageSettings('page',aid,pageinfo);
 
 	/* create submenu */
@@ -1311,7 +1310,10 @@ function pageEdit(aid,pagedata,pageinfo) {
 		blockarray = [];
 	}
 
-	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},{});
+	var blockOptions = {
+		blockLimit:8
+	};
+	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},blockOptions);
 
 	wiseEngine.blockEngineStart('content',["page",pid,pid],blockarray);
 

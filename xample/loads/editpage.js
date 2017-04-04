@@ -56,7 +56,7 @@ exports.editpage = function(request,response) {
 		var prefix = helper.getTablePrefixFromPageType('page');
 
         pool.getConnection(function(err,connection) {
-            if(err) {
+            if(err || typeof connection === 'undefined') {
 				loader.loadBlockPage(request,response,"<script>pageError('dberr');</script>");
                 analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
             } else {

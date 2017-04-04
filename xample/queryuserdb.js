@@ -254,9 +254,13 @@ exports.getTags = function(connection,subject,category,topic) {
             if(err) {
                 reject(err);
             } else {
-                delete docs[0]._id;
-                var tags = Object.keys(docs[0][sub][cat][top]);
-                resolve(tags);
+                try {
+                    delete docs[0]._id;
+                    var tags = Object.keys(docs[0][sub][cat][top]);
+                    resolve(tags);
+                } catch(error) {
+                    reject(error);
+                }
             }
         });
     });
@@ -318,7 +322,7 @@ exports.createUser = function(connection,username,password,email) {
         authority:0,
         autosave:0,
         bookmarks:{g:{},p:{}},
-        defaulttext:1,
+        defaulttext:true,
         email:email,
         password:password,
         username:username
@@ -360,14 +364,63 @@ exports.createUser = function(connection,username,password,email) {
     return promise;
 };
 
-exports.updateUser = function(connection,uid,updatedPropertiesObj) {
+exports.updateUser = function(connection,uid,updatedPropObj) {
     var ObjectId = require('mongodb').ObjectId;
 
-    /// need to validate data types here of updatedPropertiesObj
+    var v = require("./validation.js");
 
     var promise = new Promise(function(resolve,reject) {
+        for (var prop in updatedPropObj) {
+            if (updatedPropObj.hasOwnProperty(prop)) {
+                if(v.isNumeric(updatedPropObj[prop])) {
+                    updatedPropObj[prop] = Number(updatedPropObj[prop]);
+                }
+                switch(prop) {
+                    case "authority":
+                        // internal
+                        break;
+                    case "autosave":
+                        if(!v.isInt(updatedPropObj[prop]) || updatedPropObj[prop] < 0) {
+                            reject("badtype"); return;
+                        }
+                        break;
+                    case "bookmarks":
+                        // internal
+                        break;
+                    case "defaulttext":
+                        if(!v.isBool(updatedPropObj[prop])) {
+                            reject("badtype"); return;
+                        } else {
+                            updatedPropObj[prop] = Boolean(updatedPropObj[prop]);
+                        }
+                        break;
+                    case "email":
+                        if(!v.isStr(updatedPropObj[prop]) || updatedPropObj[prop].indexOf('@') < 0) {
+                            reject("badtype"); return;
+                        }
+                        break;
+                    case "password":
+                        // internal
+                        break;
+                    case "phone":
+                        if(v.isStr(updatedPropObj[prop])) {
+                            updatedPropObj[prop] = Number(updatedPropObj[prop].replace(/[^0-9]/g,''));
+                        }
+                        break;
+                    case "username":
+                        if(!v.isStr(updatedPropObj[prop])) {
+                            reject("badtype"); return;
+                        }
+                        break;
+                    default:
+                        /* unknown property */
+                        reject("unknown"); return;
+                }
+            }
+        }
+
         var collection = connection.collection('Users');
-        collection.update({_id:ObjectId(uid)},{$set:updatedPropertiesObj},function(err,r) {
+        collection.update({_id:ObjectId(uid)},{$set:updatedPropObj},function(err,r) {
             if(err) {
                 reject(err);
             } else {

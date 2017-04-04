@@ -2227,7 +2227,7 @@ function pageProfile(profiledata) {
 	var row_Username = rowProfileSingle("username","Username:",profileinfo.username,true);
 	var row_Password = rowProfileCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
 	var row_Authority = rowProfileSingle("authority","Authority:",profileinfo.authority,false);
-	var row_Autosave = rowProfileSingle("bengine-autosave","Auto Save:",profileinfo.autosave,true);
+	var row_Autosave = rowProfileSingle("autosave","Auto Save:",profileinfo.autosave,true);
 	var row_DefaultText = rowProfileSingle("defaulttext","Default Text:",profileinfo.defaulttext,true);
 
 	/* make recovery profile rows */
@@ -2268,7 +2268,7 @@ function pageProfile(profiledata) {
 */
 function pageTagReview(tagdata) {
 	var taginfo = JSON.parse(tagdata);
-	console.log(taginfo);
+
 	/* MENU */
 
 	/* create menu */

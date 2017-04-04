@@ -51,7 +51,7 @@ exports.explore = function(request,response) {
 			uid = 0;
 		}
 		red.getConnection(function(err,connection) {
-			if(err) {
+			if(err || typeof connection === 'undefined') {
 				loader.loadPage(request,response,"<script>pageError('dberror');</script>");
 				analytics.journal(true,220,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			} else {

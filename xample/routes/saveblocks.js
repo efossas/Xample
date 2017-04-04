@@ -59,7 +59,7 @@ exports.saveblocks = function(request,response) {
         /* when the request ends,parse the POST data, & process the sql queries */
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
-                if(err) {
+                if(err || typeof connection === 'undefined') {
 					result.msg = 'err';
 					response.end(JSON.stringify(result));
                     analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
@@ -102,6 +102,22 @@ exports.saveblocks = function(request,response) {
 					var types = mediaType.split('@^@');
 					var contents = mediaContent.split('@^@');
 
+					/* validate block length */
+					if(types.length !== contents.length) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						return;
+					} else if(types.length > 8 && request.session.auth < 6) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						return;
+					} else if(types.length > 16) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						return;
+					}
+
 					/* this is saving the btypes, only on permanent saves & block pages */
 					if(tabid && pagetype === "page") {
 						var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,xid);
@@ -118,7 +134,7 @@ exports.saveblocks = function(request,response) {
 							connection.query(qryTag,function(err,rows,fields) {
 								if(err) {
 									err.input = qryTag;
-									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
 									/* copy btypes to redundant table */
 									var cRed = querypagedb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
@@ -128,13 +144,13 @@ exports.saveblocks = function(request,response) {
 									connection.query(qryCopy,function(err,rows,fields) {
 										if(err) {
 											err.input = qryCopy;
-											analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+											analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 										}
 									});
 								}
 							});
 						},function(error) {
-							analytics.journal(true,203,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							analytics.journal(true,204,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						});
 					}
 
@@ -152,7 +168,7 @@ exports.saveblocks = function(request,response) {
 							result.msg = 'err';
 							response.end(JSON.stringify(result));
 							err.input = qryTruncate;
-							analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
 							/* check that blocks exist to be saved */
 							if(types[0] !== 'undefined') {
@@ -175,7 +191,7 @@ exports.saveblocks = function(request,response) {
 										result.msg = 'err';
 										response.end(JSON.stringify(result));
 										err.input = qryInsert;
-										analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										analytics.journal(true,206,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 									} else {
 										/* only delete unused files on permanent table saves */
 										if(tid === 'p') {

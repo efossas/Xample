@@ -19,7 +19,7 @@ var stats = mysql.createPool({
 
 /* immediately test a connection, if this fails, print to console */
 stats.getConnection(function(error,connection) {
-    if(error) {
+    if(error || typeof connection === 'undefined') {
         console.log('analytics db connection error: ' + error + '\n');
         console.log(typeof connection);
         if(connection !== 'undefined') {
@@ -66,6 +66,29 @@ function writeToErrorLog(datedError,isError,idNumber,message,userID,lineNumber,f
     });
 }
 
+function slack(message) {
+	var request = require('request');
+
+	var postData = {};
+	postData.username = "xample-error";
+	postData.icon_emoji = ":rage:";
+	postData.channel = "#error";
+	postData.text = message;
+
+	var option = {
+		url:   'https://hooks.slack.com/services/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',
+		body:  JSON.stringify(postData)
+	};
+
+	request.post(option,function(err,res,body) {
+		if(body === "ok" && !err) {
+			console.log("Error Sent To Slack");
+		}
+	});
+}
+
+exports.slack = slack;
+
 /*
 	Function: journal
 
@@ -100,14 +123,18 @@ function journal(isError,idNumber,message,userID,lineNumber,functionName,scriptN
         }
     });
 
+    /// replace this with slack later, looking for dev / prod switch
+    if(isError && idNumber === 221) {
+        console.log("SQL Database Connection Error");
+    }
+
 	stats.getConnection(function(error,connection) {
 
         /* write to error log if failed to get connection */
-        if (error) {
+        if (error || typeof connection === 'undefined') {
             var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + error;
-            var escapedMessage = connection.escape(message).replace(/['"`]+/g,'');
-
-            writeToErrorLog(datedError,isError,idNumber,escapedMessage,userID,lineNumber,functionName,fileName);
+            writeToErrorLog(datedError,isError,idNumber,message,userID,lineNumber,functionName,fileName);
+            return;
         }
 
         /* create query to journal data or error */

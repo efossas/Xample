@@ -77,6 +77,7 @@ get: function stacker() {
 global.__stack = __stack;
 
 var rts = require('./rts.js');
+var analytics = require('./analytics.js');
 
 /* test if any routes are broken */
 for (var rt in rts) {
@@ -150,7 +151,7 @@ var red = mysql.createPool({
 
 /* immediately test a connection, if this fails, it's considered fatal */
 pool.getConnection(function(error,connection) {
-	if(error) {
+	if(error || typeof connection === 'undefined') {
 		console.log('xample main db connection error: ' + error + '\n');
 		if(connection !== 'undefined') {
             connection.release();
@@ -162,7 +163,7 @@ pool.getConnection(function(error,connection) {
 });
 
 red.getConnection(function(error,connection) {
-	if(error) {
+	if(error || typeof connection === 'undefined') {
 		console.log('xample redundant db connection error: ' + error + '\n');
 		if(connection !== 'undefined') {
             connection.release();
@@ -303,37 +304,16 @@ app.listen(port,function() {
 
 // <<<code>>>
 
-function slack(message) {
-	var request = require('request');
-
-	var postData = {};
-	postData.username = "xample-error";
-	postData.icon_emoji = ":rage:";
-	postData.channel = "#error";
-	postData.text = message;
-
-	var option = {
-		url:   'https://hooks.slack.com/services/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',
-		body:  JSON.stringify(postData)
-	};
-
-	request.post(option,function(err,res,body) {
-		if(body === "ok" && !err) {
-			console.log("Error Sent To Slack");
-		}
-	});
-}
-
 /* prevents node from exiting on error */
 process.on('uncaughtException',function(error) {
-	var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + ' ' + error + '\n';
+	var datedError = new Date().toISOString().replace(/T/,' ').replace(/\..+/,'') + ' ' + error;
 
 	/* print 666 error to console */
 	console.log(datedError);
 
 	/* slack message is disabled in testing */
 	if(host === 'remote') {
-		slack(datedError);
+		analytics.slack(datedError);
 	}
 
 	/* write error to file, if failed, print to console */

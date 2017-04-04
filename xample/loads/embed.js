@@ -59,7 +59,7 @@ exports.embed = function(request,response) {
     } else {
 		request.on('end',function() {
 			pool.getConnection(function(err,connection) {
-				if(err) {
+				if(err || typeof connection === 'undefined') {
 					loader.loadEmbedPage(request,response,"<script>pageError('dberr');</script>");
 					analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 				} else {

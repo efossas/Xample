@@ -53,7 +53,7 @@ exports.guide = function(request,response) {
         loader.loadLearningGuidePage(request,response,"<script>pageError('badquerystring');</script>");
     } else {
         pool.getConnection(function(err,connection) {
-            if(err) {
+            if(err || typeof connection === 'undefined') {
 				loader.loadLearningGuidePage(request,response,"<script>pageError('dberr');</script>");
                 analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
             } else {

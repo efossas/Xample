@@ -26,7 +26,8 @@ exports.signup = function(request,response) {
 	var __function = "signup";
 
 	var qs = require('querystring');
-	var ps = require('password-hash');
+	var scrypt = require("scrypt");
+	var scryptParameters = scrypt.paramsSync(0.1);
 	var fs = require('fs');
 
     var pool = request.app.get("pool");
@@ -54,7 +55,7 @@ exports.signup = function(request,response) {
 		var POST = qs.parse(body);
 
         /* get the data */
-        var hash = ps.generate(POST.password);
+		var kdfResult = scrypt.kdfSync(POST.password,scryptParameters);
         var username = POST.username;
         var email = POST.email;
 
@@ -68,7 +69,7 @@ exports.signup = function(request,response) {
 			}
 
 			/* add the user to db */
-			var promiseCreateUser = queryUserDB.createUser(userdb,username,hash,email);
+			var promiseCreateUser = queryUserDB.createUser(userdb,username,kdfResult,email);
 			promiseCreateUser.then(function(res) {
 				if(res === 'closed') {
 					result.msg = 'closed';
@@ -82,7 +83,7 @@ exports.signup = function(request,response) {
 				request.session.uid = uid;
 
 				pool.getConnection(function(err,connection) {
-					if(err) {
+					if(err || typeof connection === 'undefined') {
 						result.msg = 'err';
 						response.end(JSON.stringify(result));
 						analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);

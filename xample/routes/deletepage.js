@@ -56,7 +56,7 @@ exports.deletepage = function(request,response) {
         /* when the request ends,parse the POST data, & process the sql queries */
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
-                if(err) {
+                if(err || typeof connection === 'undefined') {
 					result.msg = 'err';
                     response.end(JSON.stringify(result));
 					analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);

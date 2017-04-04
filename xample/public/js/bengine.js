@@ -23,6 +23,10 @@ function Bengine(extensibles,globals,funcs,options) {
 this.extensibles = extensibles;
 this.globals = globals;
 
+options.blockLimit = options.blockLimit || 8;
+options.enableSave = options.enableSave || true;
+options.enableSingleView = options.enableSingleView || false;
+
 /***
 	Section: Start Up Code
 	Any necessary start up code for Bengine goes here.
@@ -68,6 +72,10 @@ style.innerHTML = `.bengine-block-style {
 }
 .bengine-btn-color:hover {
 	background-color: #00a895;
+}
+.bengine-block {
+	margin: 0;
+	padding: 0;
 }
 `;
 document.getElementsByTagName('head')[0].appendChild(style);
@@ -276,7 +284,7 @@ this.blockContentShow = function(main,id,data) {
 
 		/* create the block div */
 		var group = document.createElement('div');
-		group.setAttribute('class','block');
+		group.setAttribute('class','bengine-block');
 		group.setAttribute('id','bengine-' + i);
 
 		if(options.enableSingleView && i !== 1) {
@@ -424,7 +432,7 @@ var blockEngineStart = function(main,id,data) {
 
 		/* create block + button div */
 		var group = document.createElement('div');
-		group.setAttribute('class','block');
+		group.setAttribute('class','bengine-block');
 		group.setAttribute('id','bengine-' + i);
 
 		group.appendChild(retblock);
@@ -708,7 +716,7 @@ var insertBlock = function(block,buttons,bid,count) {
 
 	/* create the block div */
 	var group = document.createElement('div');
-	group.setAttribute('class','block');
+	group.setAttribute('class','bengine-block');
 	group.setAttribute('id','bengine-' + bid);
 
 	/* append the content block & buttons div to the block div */
@@ -782,6 +790,10 @@ var createBlock = function(cbid,blockObj) {
 		none
 */
 var addBlock = function(bid,blockTypeName) {
+	if(options.blockLimit < (document.getElementsByClassName("bengine-block").length + 1)) {
+		alertify.alert("You Have Reached The Block Limit");
+		return;
+	}
 
 	var blockObj = extensibles[blockTypeName];
 
@@ -971,7 +983,7 @@ this.revertBlocks = function() {
 
 		nothing - *
 */
-if(options.hasOwnProperty('enableSave') && options.enableSave === false) {
+if(options.enableSave === false) {
 	saveBlocks = function(which) { /* do nothing */ };
 } else {
 var saveBlocks = function(which) {

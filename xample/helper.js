@@ -42,7 +42,7 @@ exports.determineView = function(request,response,pagetype,cachedb,uid,aid,xid) 
                         /* log verified view */
                         var pool = request.app.get("pool");
                         pool.getConnection(function(err,connection) {
-                            if(err) {
+                            if(err || typeof connection === 'undefined') {
                                 reject(err);
                             } else {
                                 /* quality of view, verfied or not */
@@ -91,7 +91,7 @@ exports.determineView = function(request,response,pagetype,cachedb,uid,aid,xid) 
                                 /* log verified view */
                                 var pool = request.app.get("pool");
                                 pool.getConnection(function(err,connection) {
-                                    if(err) {
+                                    if(err || typeof connection === 'undefined') {
                                         reject(err);
                                     } else {
                                         /* quality of view, verfied or not */

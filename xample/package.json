@@ -12,9 +12,9 @@
     "express-session": "^1.7.6",
     "mongodb": "^2.2.16",
     "mysql": "^2.10.2",
-    "password-hash": "^1.2.2",
     "redis": "^2.6.3",
     "request": "^2.72.0",
+    "scrypt": "^6.0.3",
     "uglify-js": "git+https://github.com/mishoo/UglifyJS2.git#harmony"
   },
   "repository": {
@@ -27,6 +27,7 @@
     "mocha": "^3.2.0"
   },
   "scripts": {
+    "preinstall": "npm install -g node-gyp",
     "test": "mocha"
   },
   "author": "Eric Fossas",
