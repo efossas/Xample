@@ -252,11 +252,15 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
 exports.deleteMedia = function(connection,fileRoute,uid,did) {
 	var __function = "deleteMedia";
 
+	var helper = require('./helper.js');
+
 	/* get list of media file names in the page table */
 	var promise = new Promise(function(resolve,reject) {
 
+		var prefix = helper.getTablePrefixFromPageType("page");
+
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT mediaContent FROM p_" + uid + "_" + did + " WHERE mediaType='image' OR mediaType='audio' OR mediaType='video' OR mediaType='xsvgs' OR mediaType='slide'";
+		var qry = "SELECT content FROM " + prefix + "_" + uid + "_" + did + " WHERE type='image' OR type='audio' OR type='video' OR type='xsvgs' OR type='slide'";
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
@@ -281,7 +285,6 @@ exports.deleteMedia = function(connection,fileRoute,uid,did) {
 	});
 
 	promise.then(function(success) {
-
 		if(success !== -1) {
 			var exec = require('child_process').exec;
 

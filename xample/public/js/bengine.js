@@ -973,6 +973,9 @@ this.revertBlocks = function() {
 	var xid = document.getElementById('bengine-x-id').getAttribute('data-xid');
 	var xidName = document.getElementById('bengine-x-id').getAttribute('name');
 
+	/* get the did for restarting the bengine instance */
+	var did = document.getElementById('bengine-x-id').getAttribute('data-did');
+
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
@@ -992,7 +995,11 @@ this.revertBlocks = function() {
 						var oldBengine = document.getElementById('bengine-instance');
 						var main = oldBengine.parentNode;
 						main.removeChild(oldBengine);
-						blockEngineStart(main.getAttribute('id'),[xidName,xid],result.data.split(","));
+						if(result.data === "") {
+							blockEngineStart(main.getAttribute('id'),[xidName,xid,did],[]);
+						} else {
+							blockEngineStart(main.getAttribute('id'),[xidName,xid,did],result.data.split(","));
+						}
 						document.getElementById("bengine-savestatus").innerHTML = "Saved";
 						break;
 					case 'noxid':
