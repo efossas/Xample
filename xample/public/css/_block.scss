@@ -116,59 +116,9 @@
 	vertical-align:top;
 }
 
-/* Blocks */
-#x-blocks {
-	margin: 0;
-	padding: 0;
-}
-
-.blockbtns {
-	max-width: $site-width;
-	margin: 10px auto 0px auto;
-	position: relative;
-}
-
-.blockbtn {
-	color: black;
-	border: 1px solid transparent;
-	border-color: black;
-	border-radius: 2px;
-
-	width: 100%;
-
-	padding: 6px 12px;
-	text-align: center;
-
-	cursor: pointer;
-	transition: background-color .5s;
-	touch-action: manipulation;
-
-	font-size: 1em;
-	font-weight: 400;
-}
-
-.addbtn {
-	background-color: #00ffe1;
-}
-
-.addbtn:hover {
-	background-color: #00a895;
-}
-
-.delbtn {
-	background-color: #ff1111;
-}
-
-.delbtn:hover {
-	background-color: #d31e1e;
-}
-
 /* Mobile Size */
 @media screen and (max-width: $site-width) {
     .page-title { width: 100%; }
-
-    .blockbtns { width: 100%; }
-	.blockbtn { width: 100%; }
 
 	.xtext { max-width: 100%; margin: 0px auto 0 auto; }
 	.xTex, .xTex-show { width: 100%; }

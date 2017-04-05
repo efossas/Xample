@@ -125,7 +125,11 @@ app.disable('x-powered-by');
 app.use(express.static('public'));
 
 /* set up busboy */
-app.use(busboy());
+app.use(busboy({
+	limits: {
+		fileSize: 100 * 1024 * 1024
+	}
+}));
 
 /* set up cookie parser */
 app.use(cookieParser());

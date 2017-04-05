@@ -92,11 +92,12 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
                 break;
             case "audio":
                 newfile += ".mp3";
-                command = "ffmpeg/ffmpeg -i " + oldfilepath + " " + absdir + newfile + " 2>&1";
+				command = "./check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t audio";
+                //command = "ffmpeg/ffmpeg -i " + oldfilepath + " " + absdir + newfile + " 2>&1";
                 break;
             case "video":
                 newfile += ".mp4";
-                command = "ffmpeg/ffmpeg -i " + oldfilepath + " -vcodec h264 -s 1280x720 -acodec aac " + absdir + newfile + " 2>&1";
+				command = "./check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t video";
                 break;
             case "xsvgs":
                 newfile += ".svg";
@@ -183,6 +184,12 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
                 });
             } else if(btype === "audio" || btype === "video") {
                 child.stdout.on('data',function(data) {
+					/* check for error first */
+					if(data.toString().substr(0,5) === "ERROR") {
+						response.write('err');
+						return;
+					}
+
                     /* search for initial value, which is media length */
                     var initial = data.toString().match(/Duration: .{11}/g);
                     if(initial !== null) {

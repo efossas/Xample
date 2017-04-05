@@ -42,6 +42,13 @@ exports.uploadmedia = function(request,response) {
         request.pipe(request.busboy);
 
         request.busboy.on('file',function(fieldname,file,filename) {
+			/* handle file size limits */
+			file.on('limit',function(data) {
+				file.resume();
+				response.end('filesizeerr');
+				analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+			});
+
             /* set path to save the file, then pipe/save the file to that path */
 			var reldir = "xm/" + uid + "/" + did + "/";
             var absdir = request.app.get('fileRoute') + reldir;

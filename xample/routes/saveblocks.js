@@ -106,7 +106,8 @@ exports.saveblocks = function(request,response) {
 					if(types.length !== contents.length) {
 						result.msg = 'err';
 						response.end(JSON.stringify(result));
-						analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						var error = {input:"saveblocks: not equal types and contents lengths"};
+						analytics.journal(true,201,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						return;
 					} else if(types.length > 8 && request.session.auth < 6) {
 						result.msg = 'err';
