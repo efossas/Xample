@@ -1,48 +1,164 @@
 #!/bin/bash
 
-REPO=
-TEST=
+# "dev" - development gets full files & testing files
+# "sta" - staging gets full files, minified files, & testing files
+# "pro" - production gets only minified files
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -d|--dev)
+    DENV="dev"
+    shift
+    ;;
+    -i|--init)
+    INIT="yes"
+    shift
+    ;;
+    -p|--pro)
+    DENV="pro"
+    shift
+    ;;
+    -s|--sta)
+    DENV="sta"
+    shift
+    ;;
+    *)
+    # unknown option
+    ;;
+esac
+shift
+done
+
+if [[ -z "$DENV" ]]; then DENV="dev"; fi
+if [[ -z "$INIT" ]]; then INIT="no"; fi
+
+echo "Running With Environment: $DENV && Initialize: $INIT";
+
+# set directories
+if [[ "$DENV" == "dev" ]]; then
+    REPO=
+    DEST=
+else
+    REPO=/var/www/gitwise
+    DEST=/var/www/wisepool
+fi
+
+# check that the REPO & DEST directories exist
+if [ ! -d "$REPO" || ! -d "$DEST" ]; then
+    echo "REPO or DEST folder does not exist! Please create them first."
+fi
+
+# install node modules on initialize
+if [[ "$INIT" == "yes" ]]; then
+    mkdir -p $DEST/xample
+    rsync -a -v $REPO/xample/package.json $DEST/xample/package.json
+    npm --prefix $DEST/xample/ install
+fi
 
 # create folder if needed
-mkdir -p $TEST/xample/data
-mkdir -p $TEST/xample/error
-mkdir -p $TEST/xample/loads
-mkdir -p $TEST/xample/public/css
-mkdir -p $TEST/xample/public/js
-mkdir -p $TEST/xample/routes
-mkdir -p $TEST/xample/tests
+mkdir -p $DEST/xample/data
+mkdir -p $DEST/xample/error
+mkdir -p $DEST/xample/loads
+mkdir -p $DEST/xample/public/css
+mkdir -p $DEST/xample/public/js
+mkdir -p $DEST/xample/routes
+
+if [[ "$DENV" == "dev" || "$DENV" == "sta" ]]; then
+    mkdir -p $DEST/xample/front-tests
+    mkdir -p $DEST/xample/test
+else
+    rm -rf $DEST/xample/front-tests
+    rm -rf $DEST/xample/test
+fi
+
+# create symbolic links for testing scripts
+if [[ "$DENV" == "dev" || "$DENV" == "sta" ]]; then
+    ln -fs $DEST/xample/node_modules/mocha/mocha.css $DEST/xample/public/css/mocha.css
+    ln -fs $DEST/xample/node_modules/mocha/mocha.js $DEST/xample/public/js/mocha.js
+    ln -fs $DEST/xample/node_modules/chai/chai.js $DEST/xample/public/js/chai.js
+    ln -fs $DEST/xample/front-tests/blocktests.js $DEST/xample/public/js/blocktests.js
+    ln -fs $DEST/xample/front-tests/lguidetests.js $DEST/xample/public/js/lguidetests.js
+    ln -fs $DEST/xample/front-tests/pagetests.js $DEST/xample/public/js/pagetests.js
+else
+    rm -f $DEST/xample/public/css/mocha.css
+    rm -f $DEST/xample/public/js/mocha.js
+    rm -f $DEST/xample/public/js/chai.js
+    rm -f $DEST/xample/public/js/blocktests.js
+    rm -f $DEST/xample/public/js/lguidetests.js
+    rm -f $DEST/xample/public/js/pagetests.js
+fi
 
 # convert sass to css & make minified version
-sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$TEST/xample/public/css/wisepool.css
-sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$TEST/xample/public/css/wisepool.min.css --style compressed
+if [[ "$DENV" == "dev" ]]; then
+    sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$DEST/xample/public/css/wisepool.css
+    rm -f $DEST/xample/public/css/wisepool.min.css
+fi
+
+if [[ "$DENV" == "sta" ]]; then
+    sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$DEST/xample/public/css/wisepool.css
+    sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$DEST/xample/public/css/wisepool.min.css --style compressed
+fi
+
+if [[ "$DENV" == "pro" ]]; then
+    sass --no-cache --sourcemap=none $REPO/xample/public/css/wisepool.scss:$DEST/xample/public/css/wisepool.min.css --style compressed
+    rm -f $DEST/xample/public/css/wisepool.css
+fi
 
 # copy backend files
-rsync -a -v $REPO/xample/*.js $TEST/xample/
-rsync -a -v $REPO/xample/data/* $TEST/xample/data/
-rsync -a -v $REPO/xample/error/* $TEST/xample/error/
-rsync -a -v $REPO/xample/loads/* $TEST/xample/loads/
-rsync -a -v $REPO/xample/routes/* $TEST/xample/routes/
-rsync -a -v $REPO/xample/tests/* $TEST/xample/tests/
+rsync -a -v $REPO/xample/*.sh $DEST/xample/
+rsync -a -v $REPO/xample/*.js $DEST/xample/
+rsync -a -v $REPO/xample/data/* $DEST/xample/data/
+rsync -a -v $REPO/xample/error/* $DEST/xample/error/
+rsync -a -v $REPO/xample/loads/* $DEST/xample/loads/
+rsync -a -v $REPO/xample/routes/* $DEST/xample/routes/
+
+if [[ "$DENV" == "dev" || "$DENV" == "sta" ]]; then
+    rsync -a -v $REPO/xample/front-tests/* $DEST/xample/front-tests/
+    rsync -a -v $REPO/xample/test/* $DEST/xample/test/
+fi
 
 # copy frontend files
-rsync -a -v $REPO/xample/public/css/*.css $TEST/xample/public/css/
-rsync -a -v $REPO/xample/public/js/* $TEST/xample/public/js/
+rsync -a -v $REPO/xample/public/css/*.css $DEST/xample/public/css/
+rsync -a -v $REPO/xample/public/js/* $DEST/xample/public/js/
 
 # add frontend omni functions to js files
-cat $TEST/xample/public/js/bengine.js $TEST/xample/public/js/omni.js $TEST/xample/public/js/bp.js > $TEST/xample/public/js/temp.js
-mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/bp.js
+cat $DEST/xample/public/js/bengine.js $DEST/xample/public/js/omni.js $DEST/xample/public/js/bp.js > $DEST/xample/public/js/temp.js
+mv $DEST/xample/public/js/temp.js $DEST/xample/public/js/bp.js
 
-cat $TEST/xample/public/js/bengine.js $TEST/xample/public/js/omni.js $TEST/xample/public/js/lg.js > $TEST/xample/public/js/temp.js
-mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/lg.js
+cat $DEST/xample/public/js/bengine.js $DEST/xample/public/js/omni.js $DEST/xample/public/js/lg.js > $DEST/xample/public/js/temp.js
+mv $DEST/xample/public/js/temp.js $DEST/xample/public/js/lg.js
 
-cat $TEST/xample/public/js/bengine.js $TEST/xample/public/js/omni.js $TEST/xample/public/js/pl.js > $TEST/xample/public/js/temp.js
-mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/pl.js
+cat $DEST/xample/public/js/bengine.js $DEST/xample/public/js/omni.js $DEST/xample/public/js/pl.js > $DEST/xample/public/js/temp.js
+mv $DEST/xample/public/js/temp.js $DEST/xample/public/js/pl.js
 
-cat $TEST/xample/public/js/omni.js $TEST/xample/public/js/nav.js > $TEST/xample/public/js/temp.js
-mv $TEST/xample/public/js/temp.js $TEST/xample/public/js/nav.js
+cat $DEST/xample/public/js/omni.js $DEST/xample/public/js/nav.js > $DEST/xample/public/js/temp.js
+mv $DEST/xample/public/js/temp.js $DEST/xample/public/js/nav.js
+
+# remove unneeded files that were concatenated into others
+rm $DEST/xample/public/js/bengine.js
+rm $DEST/xample/public/js/omni.js
 
 # create minified versions of frontend js files
-$TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/bp.min.js $TEST/xample/public/js/bp.js
-$TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/lg.min.js $TEST/xample/public/js/lg.js
-$TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/pl.min.js $TEST/xample/public/js/pl.js
-$TEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $TEST/xample/public/js/nav.min.js $TEST/xample/public/js/nav.js
+if [[ "$DENV" == "pro" || "$DENV" == "sta" ]]; then
+        $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/bp.min.js $DEST/xample/public/js/bp.js
+        $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/lg.min.js $DEST/xample/public/js/lg.js
+        $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/pl.min.js $DEST/xample/public/js/pl.js
+        $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/nav.min.js $DEST/xample/public/js/nav.js
+fi
+
+if [[ "$DENV" == "pro" ]]; then
+    rm $DEST/xample/public/js/bp.js
+    rm $DEST/xample/public/js/lg.js
+    rm $DEST/xample/public/js/pl.js
+    rm $DEST/xample/public/js/nav.js
+fi
+
+if [[ "$DENV" == "dev" ]]; then
+    rm $DEST/xample/public/js/bp.min.js
+    rm $DEST/xample/public/js/lg.min.js
+    rm $DEST/xample/public/js/pl.min.js
+    rm $DEST/xample/public/js/nav.min.js
+fi
