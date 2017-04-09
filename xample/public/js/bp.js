@@ -51,13 +51,17 @@
 
 // <<<code>>
 
-var x = {};
-var globalBlockEngine = {};
+var wiseEngine;
+var blockExtensibles = {};
+var blockGlobals = {};
 
-x.xtext = new function xtext() {
+blockExtensibles.xtext = new function xtext() {
 	this.type = "xtext";
 	this.name = "text";
 	this.upload = false;
+
+	var xtextObj = this;
+	var blocklimit = 4095;
 
 	var parseBlock = function(blockText) {
 		var element = document.createElement('div');
@@ -73,7 +77,6 @@ x.xtext = new function xtext() {
 		/* WYSIWIG uses iframe */
 		var textBlock = document.createElement("iframe");
 		textBlock.setAttribute("class","xTex");
-		textBlock.setAttribute("maxlength","1023");
 
 		block.appendChild(textBlock);
 
@@ -112,6 +115,21 @@ x.xtext = new function xtext() {
 				iframe.onkeydown = objCopy.f.detectKey.bind(null,retblock);
 			}
 
+			/* set limit on paste */
+			iframe.onpaste = function(event) {
+				var ptext;
+				if (window.clipboardData && window.clipboardData.getData) {
+					ptext = window.clipboardData.getData('Text');
+				} else if (event.clipboardData && event.clipboardData.getData) {
+					ptext = event.clipboardData.getData('text/plain');
+				}
+
+				if((this.children[0].childNodes[1].innerHTML.length + ptext.length) > blocklimit) {
+					return false;
+				} else {
+					return true;
+				}
+			};
 		},1);
 
 		return block;
@@ -185,95 +203,103 @@ x.xtext = new function xtext() {
 				none
 		*/
 		detectKey: function detectKey(iframe,event) {
-
-			/* p : plain */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 80) {
-				iframe.contentDocument.execCommand('removeFormat',false,null);
-			}
-			/* b : bold */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 66) {
-				iframe.contentDocument.execCommand('bold',false,null);
-			}
-			/* i : italics */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 73) {
-				iframe.contentDocument.execCommand('italic',false,null);
-			}
-			/* h : highlight */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 72) {
-				iframe.contentDocument.execCommand('backColor',false,"yellow");
-			}
-			/* l : list */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 76) {
-				iframe.contentDocument.execCommand('insertUnorderedList',false,null);
-			}
-			/* + : superscript */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 187) {
-				iframe.contentDocument.execCommand('superscript',false,null);
-			}
-			/* - : subscript */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 189) {
-				iframe.contentDocument.execCommand('subscript',false,null);
-			}
-			/* j : justify left */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 74) {
-				iframe.contentDocument.execCommand('justifyLeft',false,null);
-			}
-			/* f : justify full */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 70) {
-				iframe.contentDocument.execCommand('justifyFull',false,null);
-			}
-			/* tab : indent */
-			if(event.keyCode === 9) {
-				iframe.contentDocument.execCommand('insertHTML',false,'&nbsp;&nbsp;&nbsp;&nbsp;');
-			}
-			/* a - anchor */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 65) {
-				function callback(event,str) {
-					if(event) {
-						if (str.indexOf("http://") < 0 && str.indexOf("https://") < 0) {
-							iframe.contentDocument.execCommand('createLink',false,"http://" + str);
-						} else if (str.indexOf("http://") === 0 || str.indexOf("https://") === 0) {
-							iframe.contentDocument.execCommand('createLink',false,str);
-						} else {
-							alertify.log("Not A Valid Link!","error");
-						}
-					} else { /* cancel */ }
+			/* set limit */
+			// iframe . document . html . body
+			if(event.keyCode !== 8 && iframe.contentDocument.children[0].childNodes[1].innerHTML.length > blocklimit) {
+				event.preventDefault();
+			} else {
+				/* p : plain */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 80) {
+					iframe.contentDocument.execCommand('removeFormat',false,null);
 				}
-				alertify.prompt('Enter the link: ',callback,'http://');
-			}
+				/* b : bold */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 66) {
+					iframe.contentDocument.execCommand('bold',false,null);
+				}
+				/* i : italics */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 73) {
+					iframe.contentDocument.execCommand('italic',false,null);
+				}
+				/* h : highlight */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 72) {
+					iframe.contentDocument.execCommand('backColor',false,"yellow");
+				}
+				/* l : list */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 76) {
+					iframe.contentDocument.execCommand('insertUnorderedList',false,null);
+				}
+				/* + : superscript */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 187) {
+					iframe.contentDocument.execCommand('superscript',false,null);
+				}
+				/* - : subscript */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 189) {
+					iframe.contentDocument.execCommand('subscript',false,null);
+				}
+				/* j : justify left */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 74) {
+					iframe.contentDocument.execCommand('justifyLeft',false,null);
+				}
+				/* f : justify full */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 70) {
+					iframe.contentDocument.execCommand('justifyFull',false,null);
+				}
+				/* tab : indent */
+				if(event.keyCode === 9) {
+					iframe.contentDocument.execCommand('insertHTML',false,'&nbsp;&nbsp;&nbsp;&nbsp;');
+				}
+				/* a - anchor */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 65) {
+					function callback(event,str) {
+						if(event) {
+							if (str.indexOf("http://") < 0 && str.indexOf("https://") < 0) {
+								iframe.contentDocument.execCommand('createLink',false,"http://" + str);
+							} else if (str.indexOf("http://") === 0 || str.indexOf("https://") === 0) {
+								iframe.contentDocument.execCommand('createLink',false,str);
+							} else {
+								alertify.log("Not A Valid Link!","error");
+							}
+						} else { /* cancel */ }
+					}
+					alertify.prompt('Enter the link: ',callback,'http://');
+				}
 
-			/* Command + letter, works for these, but include for consistency */
-			/* x : cut */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 88) {
-				iframe.contentDocument.execCommand('cut',false,null);
-			}
-			/* c : copy */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 67) {
-				iframe.contentDocument.execCommand('copy',false,null);
-			}
-			/* v : paste */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 86) {
-				iframe.contentDocument.execCommand('paste',false,null);
-			}
-			/* z : undo */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 90) {
-				iframe.contentDocument.execCommand('undo',false,null);
-			}
-			/* y : redo */
-			if(event.shiftKey && event.ctrlKey && event.keyCode === 89) {
-				iframe.contentDocument.execCommand('redo',false,null);
-			}
+				/* Command + letter, works for these, but include for consistency */
+				/* x : cut */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 88) {
+					iframe.contentDocument.execCommand('cut',false,null);
+				}
+				/* c : copy */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 67) {
+					iframe.contentDocument.execCommand('copy',false,null);
+				}
+				/* v : paste */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 86) {
+					iframe.contentDocument.execCommand('paste',false,null);
+				}
+				/* z : undo */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 90) {
+					iframe.contentDocument.execCommand('undo',false,null);
+				}
+				/* y : redo */
+				if(event.shiftKey && event.ctrlKey && event.keyCode === 89) {
+					iframe.contentDocument.execCommand('redo',false,null);
+				}
 
-			/// is this necessary ??
-			event.stopPropagation();
+				/// is this necessary ??
+				event.stopPropagation();
+			}
 		}
 	};
 };
 
-x.xcode = new function xcode() {
+blockExtensibles.xcode = new function xcode() {
 	this.type = "xcode";
 	this.name = "code";
 	this.upload = false;
+
+	var xcodeObj = this;
+	var blocklimit = 15; // these are lines <br>, not chars
 
 	var parseBlock = function(blockText) {
 		var element = document.createElement('div');
@@ -288,7 +314,9 @@ x.xcode = new function xcode() {
 	this.insertContent = function(block,content) {
 		var codeBlock = document.createElement("code");
 		codeBlock.setAttribute("class","xCde");
-		codeBlock.setAttribute('onblur','x["' + this.type + '"].f.renderCode(this)');
+		codeBlock.onblur = function() {
+			xcodeObj.f.renderCode(this);
+		};
 		codeBlock.contentEditable = true;
 
 		/* defaul text */
@@ -308,6 +336,25 @@ x.xcode = new function xcode() {
 		} else {
 			codeBlock.onkeydown = this.f.codeKeys.bind(null,block);
 		}
+
+		/* set limit on paste */
+		codeBlock.onpaste = function(event) {
+			var ptext;
+			if (window.clipboardData && window.clipboardData.getData) {
+				ptext = window.clipboardData.getData('Text');
+			} else if (event.clipboardData && event.clipboardData.getData) {
+				ptext = event.clipboardData.getData('text/plain');
+			}
+
+			var breakCount = (this.innerHTML.match(/<br>/g) || []).length;
+			var lineCount = (ptext.match(/\n/g) || []).length;
+
+			if((breakCount + lineCount) >= blocklimit) {
+				return false;
+			} else {
+				return true;
+			}
+		};
 
 		return block;
 	};
@@ -339,12 +386,14 @@ x.xcode = new function xcode() {
 
 			display: inline-block;
 			width: 100%;
-			height: 200px;
+			height: 385px;
 			border: 1px solid black;
 			border-radius: 2px;
 			background-color: white;
 
 			line-height: 1.8em;
+			word-wrap: break-word;
+			overflow:hidden;
 
 			background-image: -webkit-linear-gradient(#ccc, #ccc 3px, white 4px, white 18px, #ccc 19px, #ccc 32px);
 		    background-image: -moz-linear-gradient(#ccc, #ccc 3px, white 4px, white 18px, #ccc 19px, #ccc 32px);
@@ -377,26 +426,33 @@ x.xcode = new function xcode() {
 				none
 		*/
 		codeKeys: function codeKeys(block,event) {
-			/* tab */
-			if (event.keyCode === 9) {
-
-				/* prevent default tab behavior */
+			var breakCount = (block.innerHTML.match(/(<br>|\n)/g) || []).length;
+			if(event.keyCode === 13 && (breakCount + 1) >= blocklimit) {
 				event.preventDefault();
+			} else if(event.keyCode !== 8 && breakCount >= blocklimit) {
+				event.preventDefault();
+			} else {
+				/* tab */
+				if (event.keyCode === 9) {
 
-				/* grab the cursor location */
-				var doc = block.ownerDocument.defaultView;
-				var sel = doc.getSelection();
-				var range = sel.getRangeAt(0);
+					/* prevent default tab behavior */
+					event.preventDefault();
 
-				/* insert 4 spaces representing a tab */
-				var tabNode = document.createTextNode("\u00a0\u00a0\u00a0\u00a0");
-				range.insertNode(tabNode);
+					/* grab the cursor location */
+					var doc = block.ownerDocument.defaultView;
+					var sel = doc.getSelection();
+					var range = sel.getRangeAt(0);
 
-				/* replace cursor to after tab location */
-				range.setStartAfter(tabNode);
-				range.setEndAfter(tabNode);
-				sel.removeAllRanges();
-				sel.addRange(range);
+					/* insert 4 spaces representing a tab */
+					var tabNode = document.createTextNode("\u00a0\u00a0\u00a0\u00a0");
+					range.insertNode(tabNode);
+
+					/* replace cursor to after tab location */
+					range.setStartAfter(tabNode);
+					range.setEndAfter(tabNode);
+					sel.removeAllRanges();
+					sel.addRange(range);
+				}
 			}
 		},
 		/*
@@ -415,19 +471,17 @@ x.xcode = new function xcode() {
 		renderCode: function renderCode(block) {
 			/* add code formatting */
 			hljs.highlightBlock(block);
-
-			/// notify the user if they have surpassed our limit
-			if(block.textContent.length > 1024) {
-				alertify.alert("There is too much in this code block. The block will not save correctly. Please remove some of its content.");
-			}
 		}
 	};
 };
 
-x.xmath = new function xmath() {
+blockExtensibles.xmath = new function xmath() {
 	this.type = "xmath";
 	this.name = "math";
 	this.upload = false;
+
+	var xmathObj = this;
+	var blocklimit = 2047;
 
 	var parseBlock = function(blockText) {
 		var element = document.createElement('div');
@@ -445,7 +499,9 @@ x.xmath = new function xmath() {
 
 		var mathBlock = document.createElement('div');
 		mathBlock.setAttribute('class','xMat');
-		mathBlock.setAttribute('onblur','x["' + this.type + '"].f.renderMath(this)');
+		mathBlock.onblur = function() {
+			xmathObj.f.renderMath(this);
+		};
 		mathBlock.contentEditable = true;
 		/* defaul text */
 		if(globalScope.defaulttext && content === "") {
@@ -453,6 +509,36 @@ x.xmath = new function xmath() {
 		} else {
 			mathBlock.innerHTML = deparseBlock(content);
 		}
+
+		/* set limit function on keydown event */
+		function setLimit(block,event) {
+			if(event.keyCode !== 8 && block.innerText.length > blocklimit) {
+				event.preventDefault();
+			}
+		}
+
+		if (mathBlock.addEventListener) {
+			mathBlock.addEventListener("keydown",setLimit.bind(null,block),false);
+		} else if (mathBlock.attachEvent) {
+			mathBlock.attachEvent("onkeydown",setLimit.bind(null,block));
+		} else {
+			mathBlock.onkeydown = setLimit.bind(null,block);
+		}
+
+		/* set limit on paste */
+		mathBlock.onpaste = function(event) {
+			var ptext;
+			if (window.clipboardData && window.clipboardData.getData) {
+				ptext = window.clipboardData.getData('Text');
+			} else if (event.clipboardData && event.clipboardData.getData) {
+				ptext = event.clipboardData.getData('text/plain');
+			}
+
+			if((this.innerText.length + ptext.length) > blocklimit) {
+				return false;
+			}
+			return true;
+		};
 
 		block.appendChild(mathpreview);
 		block.appendChild(mathBlock);
@@ -533,10 +619,13 @@ x.xmath = new function xmath() {
 	};
 };
 
-x.latex = new function latex() {
+blockExtensibles.latex = new function latex() {
 	this.type = "latex";
 	this.name = "latex";
 	this.upload = false;
+
+	var latexObj = this;
+	var blocklimit = 2097;
 
 	var parseBlock = function(blockText) {
 		var element = document.createElement('div');
@@ -554,7 +643,9 @@ x.latex = new function latex() {
 
 		var latexBlock = document.createElement('div');
 		latexBlock.setAttribute('class','xLtx');
-		latexBlock.setAttribute('onblur','x["' + this.type + '"].f.renderLatex(this)');
+		latexBlock.onblur = function() {
+			latexObj.f.renderLatex(this);
+		};
 		latexBlock.contentEditable = true;
 		/* defaul text */
 		if(globalScope.defaulttext && content === "") {
@@ -562,6 +653,36 @@ x.latex = new function latex() {
 		} else {
 			latexBlock.innerHTML = deparseBlock(content);
 		}
+
+		/* set limit function on keydown event */
+		function setLimit(block,event) {
+			if(event.keyCode !== 8 && block.innerText.length > blocklimit) {
+				event.preventDefault();
+			}
+		}
+
+		if (latexBlock.addEventListener) {
+			latexBlock.addEventListener("keydown",setLimit.bind(null,block),false);
+		} else if (latexBlock.attachEvent) {
+			latexBlock.attachEvent("onkeydown",setLimit.bind(null,block));
+		} else {
+			latexBlock.onkeydown = setLimit.bind(null,block);
+		}
+
+		/* set limit on paste */
+		latexBlock.onpaste = function(event) {
+			var ptext;
+			if (window.clipboardData && window.clipboardData.getData) {
+				ptext = window.clipboardData.getData('Text');
+			} else if (event.clipboardData && event.clipboardData.getData) {
+				ptext = event.clipboardData.getData('text/plain');
+			}
+
+			if((this.innerText.length + ptext.length) > blocklimit) {
+				return false;
+			}
+			return true;
+		};
 
 		block.appendChild(latexpreview);
 		block.appendChild(latexBlock);
@@ -622,7 +743,7 @@ x.latex = new function latex() {
 			margin: 0px;
 			box-sizing: border-box;
 		}`;
-		return "";
+		return stylestr;
 	};
 
 	this.f = {
@@ -640,10 +761,12 @@ x.latex = new function latex() {
 	};
 };
 
-x.image = new function image() {
+blockExtensibles.image = new function image() {
 	this.type = "image";
 	this.name = "image";
 	this.upload = true;
+
+	var imageObj = this;
 
 	this.insertContent = function(block,content) {
 		var ximg = document.createElement("img");
@@ -682,7 +805,7 @@ x.image = new function image() {
 		var stylestr = `.xImg, .xImg-show {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 
@@ -694,10 +817,12 @@ x.image = new function image() {
 	};
 };
 
-x.audio = new function audio() {
+blockExtensibles.audio = new function audio() {
 	this.type = "audio";
 	this.name = "audio";
 	this.upload = true;
+
+	var audioObj = this;
 
 	this.insertContent = function(block,content) {
 		var audio = document.createElement("audio");
@@ -758,10 +883,12 @@ x.audio = new function audio() {
 	};
 };
 
-x.video = new function video() {
+blockExtensibles.video = new function video() {
 	this.type = "video";
 	this.name = "video";
 	this.upload = true;
+
+	var videoObj = this;
 
 	this.insertContent = function(block,content) {
 		var video = document.createElement("video");
@@ -813,7 +940,7 @@ x.video = new function video() {
 		var stylestr = `.xVid, .xVid-show {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 
@@ -825,14 +952,16 @@ x.video = new function video() {
 	};
 };
 
-x.slide = new function slide() {
+blockExtensibles.slide = new function slide() {
 	(function() {
-		globalBlockEngine.pdfObjects = {};
+		blockGlobals.pdfObjects = {};
 	})();
 
 	this.type = "slide";
 	this.name = "slide";
 	this.upload = true;
+
+	var slideObj = this;
 
 	this.insertContent = function(block,content) {
 		/* data-page attribute keeps track of which page is being displayed */
@@ -846,11 +975,11 @@ x.slide = new function slide() {
 		/* if block was just made, don't try to load pdf */
 		if (content !== "") {
 			PDFJS.getDocument(content).then(function(pdfObj) {
-				globalBlockEngine.pdfObjects[content] = pdfObj;
+				blockGlobals.pdfObjects[content] = pdfObj;
 
 				var tag = block.childNodes[0];
 
-				x.slide.f.renderPDF(pdfObj,1,tag);
+				blockExtensibles.slide.f.renderPDF(pdfObj,1,tag);
 			});
 		}
 
@@ -863,20 +992,20 @@ x.slide = new function slide() {
 			var canvas = this.childNodes[0];
 			var pageNum = canvas.getAttribute("data-page");
 			var pdfID = canvas.getAttribute("id");
-			var pageCount = globalBlockEngine.pdfObjects[pdfID].numPages;
+			var pageCount = blockGlobals.pdfObjects[pdfID].numPages;
 
 			/* determine whether left or right side was clicked, then render prev or next page */
 			if(X > this.offsetWidth / 1.7) {
 				if(pageNum < pageCount) {
 					pageNum++;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			} else {
 				if(pageNum > 1) {
 					pageNum--;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			}
 		};
@@ -890,7 +1019,7 @@ x.slide = new function slide() {
 			/* add the pdf to the pdfObjects array and render the first page */
 			PDFJS.getDocument(data).then(function(pdfObj) {
 
-				globalBlockEngine.pdfObjects[data] = pdfObj;
+				blockGlobals.pdfObjects[data] = pdfObj;
 
 				var slidetag = document.getElementById('bengine-a' + bid).childNodes[0];
 				slidetag.setAttribute("id",data);
@@ -917,11 +1046,11 @@ x.slide = new function slide() {
 		/* if block was just made, don't try to load pdf */
 		if (content !== "") {
 			PDFJS.getDocument(content).then(function(pdfObj) {
-				globalBlockEngine.pdfObjects[content] = pdfObj;
+				blockGlobals.pdfObjects[content] = pdfObj;
 
 				var tag = block.childNodes[0];
 
-				x.slide.f.renderPDF(pdfObj,1,tag);
+				blockExtensibles.slide.f.renderPDF(pdfObj,1,tag);
 			});
 		}
 
@@ -934,20 +1063,20 @@ x.slide = new function slide() {
 			var canvas = this.childNodes[0];
 			var pageNum = canvas.getAttribute("data-page");
 			var pdfID = canvas.getAttribute("id");
-			var pageCount = globalBlockEngine.pdfObjects[pdfID].numPages;
+			var pageCount = blockGlobals.pdfObjects[pdfID].numPages;
 
 			/* determine whether left or right side was clicked, then render prev or next page */
 			if(X > this.offsetWidth / 1.7) {
 				if(pageNum < pageCount) {
 					pageNum++;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			} else {
 				if(pageNum > 1) {
 					pageNum--;
 					canvas.setAttribute("data-page",pageNum);
-					x.slide.f.renderPDF(globalBlockEngine.pdfObjects[pdfID],pageNum,canvas);
+					blockExtensibles.slide.f.renderPDF(blockGlobals.pdfObjects[pdfID],pageNum,canvas);
 				}
 			}
 		};
@@ -959,7 +1088,7 @@ x.slide = new function slide() {
 		var stylestr = `.xSli, .xSli-show {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 
@@ -1007,7 +1136,7 @@ x.slide = new function slide() {
 };
 
 /*
-x.xsvgs = new function xsvgs() {
+blockExtensibles.xsvgs = new function xsvgs() {
 	this.type = "xsvgs";
 	this.name = "svg";
 	this.upload = false;
@@ -1046,7 +1175,7 @@ x.xsvgs = new function xsvgs() {
 		var stylestr = `.xSvg {
 			display: inline-block;
 			width: 100%;
-			height: 506px;
+			height: 100%;
 			border: 1px solid black;
 			border-radius: 2px;
 
@@ -1059,10 +1188,13 @@ x.xsvgs = new function xsvgs() {
 };
 */
 
-x.title = new function title() {
+blockExtensibles.title = new function title() {
 	this.type = "title";
 	this.name = "title";
 	this.upload = false;
+
+	var titleObj = this;
+	var blocklimit = 64;
 
 	var parseBlock = function(blockText) {
 		var element = document.createElement('div');
@@ -1075,7 +1207,7 @@ x.title = new function title() {
 	};
 
 	this.insertContent = function(block,content) {
-		var str = '<input type="text" class="xTit" maxlength="64" value="' + deparseBlock(content) + '">';
+		var str = '<input type="text" class="xTit" maxlength="' + blocklimit + '" value="' + deparseBlock(content) + '">';
 		block.innerHTML = str;
 
 		return block;
@@ -1141,8 +1273,6 @@ x.title = new function title() {
 		return stylestr;
 	};
 };
-
-var wiseEngine = new Bengine(x,globalBlockEngine,{},{});
 
 // <<<fold>>>
 
@@ -1279,7 +1409,6 @@ function pageChoose(pid) {
 		nothing - *
 */
 function pageEdit(aid,pagedata,pageinfo) {
-
 	/* grab the main div */
 	var main = document.getElementById('content');
 
@@ -1292,7 +1421,6 @@ function pageEdit(aid,pagedata,pageinfo) {
 	/* create menu & status bar */
 	var menu = barMenu();
 	var status = barStatus(pid);
-
 	var pageSettings = barPageSettings('page',aid,pageinfo);
 
 	/* create submenu */
@@ -1312,6 +1440,11 @@ function pageEdit(aid,pagedata,pageinfo) {
 	} else {
 		blockarray = [];
 	}
+
+	var blockOptions = {
+		blockLimit:8
+	};
+	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},blockOptions);
 
 	wiseEngine.blockEngineStart('content',["page",pid,pid],blockarray);
 
@@ -1345,6 +1478,35 @@ function pageEdit(aid,pagedata,pageinfo) {
 		}
 		return null;
 	};
+}
+
+/*
+	Function: pageEmbed
+
+	This function loads page data in show mode & embed style.
+
+	Parameters:
+
+		pagedata - string, page data is received in the format "type,content,type,content,etc."
+		pageinfo - json string, page info is what goes into the settings
+
+	Returns:
+
+		nothing - *
+*/
+function pageEmbed(pagedata,pageinfo) {
+	/*** BLOCKS ***/
+
+	/* block array -> mediaType-1,mediaContent-1,mediaType-2,mediaContent-2,etc */
+	var blockarray;
+	if(pagedata !== "") {
+		blockarray = pagedata.split(',');
+	} else {
+		blockarray = [];
+	}
+
+	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},{enableSingleView:true});
+	wiseEngine.blockContentShow('content-embed',["page",pageinfo.id],blockarray);
 }
 
 /*
@@ -1416,6 +1578,8 @@ function pageShow(logstatus,mtoggle,pagedata,pageinfo) {
 	} else {
 		blockarray = [];
 	}
+
+	wiseEngine = new Bengine(blockExtensibles,blockGlobals,{},{});
 
 	wiseEngine.blockContentShow('content',["page",pid],blockarray);
 

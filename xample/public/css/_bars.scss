@@ -143,6 +143,32 @@
 	background: $bar-color;
 }
 
+.section-about {
+    @extend .wrapper;
+    box-sizing: border-box;
+	height: 47px;
+	padding: 8px 12px;
+	width: 100%;
+}
+
+.section-about::after {
+    @extend .bar::after;
+	background-color: $bar-color;
+}
+
+.section-embed {
+    @extend .wrapper;
+    box-sizing: border-box;
+	height: 47px;
+	padding: 8px 12px;
+	width: 100%;
+}
+
+.section-embed::after {
+    @extend .bar::after;
+	background-color: $bar-color;
+}
+
 .settings-bar {
 	@extend .wrapper;
 	height: 100%;
@@ -168,6 +194,15 @@
 }
 
 .status-bar::after {
+  @extend .bar::after;
+  background: $bar-alt-color;
+}
+
+.tag-bar {
+	@extend .wrapper;
+}
+
+.tag-bar::after {
   @extend .bar::after;
   background: $bar-alt-color;
 }

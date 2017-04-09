@@ -18,6 +18,42 @@ var globalScope = {};
 
 // <<<code>>>
 
+function autoMatch(text,array) {
+	/* split text by whitespace */
+	var tarr = text.match(/\S+/g) || [];
+
+	if(tarr.length < 1) return [];
+
+	/* only autocomplete on last word & only match alphanumeric chars */
+	var current = tarr[tarr.length - 1].replace(/\W/g,'');
+
+	/* create regexp to match word */
+	var re = new RegExp("\\b" + current + "\\S+","i");
+
+	/* assemble any matches into an array */
+	var matches = [];
+
+	array.forEach(function(value,index) {
+		if(re.test(value)) {
+			matches.push(value);
+		}
+	});
+
+	return matches;
+}
+
+function autoComplete(dropdiv,matches) {
+	var list = "<ul>";
+	matches.forEach(function(value) {
+		list += "<li>" + value + "</li>";
+	});
+	list += "</ul>";
+
+	emptyDiv(dropdiv);
+
+	dropdiv.innerHTML = list;
+}
+
 /*
    Function: autosaveTimer
 
@@ -69,7 +105,7 @@ function autosaveTimer(asdiv,saveFunction) {
 /*
 	Function: createURL
 
-	Detects local or remote host and constructs desired url.
+	Detects local or remote host and constructs desired url. Make sure path contains leading forward slash "/".
 
 	Parameters:
 
@@ -87,7 +123,7 @@ function createURL(path) {
 	if(splitUrl[2].match(/localhost.*/)) {
 		url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
 	} else {
-		url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + encodeURI(path);
+		url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
 	}
 
 	return url;
@@ -269,7 +305,7 @@ function getCookies() {
 			// discard
 		}
 	});
-	console.log(userObj);
+
 	return userObj;
 }
 
@@ -401,10 +437,13 @@ function logout() {
 function btnLink(text,url,color) {
 	var linkbtn = document.createElement('a');
 	linkbtn.setAttribute('class','btn ' + color + '-btn');
-	linkbtn.setAttribute('href',url);
-	linkbtn.setAttribute('target','_self');
 	linkbtn.setAttribute('value',text);
 	linkbtn.innerHTML = text;
+
+	if(url !== '') {
+		linkbtn.setAttribute('href',url);
+		linkbtn.setAttribute('target','_self');
+	}
 
 	return linkbtn;
 }
@@ -427,6 +466,7 @@ function btnLink(text,url,color) {
 function btnSubmit(text,funcName,color) {
 	var submit = document.createElement('button');
 	submit.setAttribute('type','');
+	submit.setAttribute('id',text.replace(' ','-'));
 	submit.setAttribute('class','menubtn ' + color + '-btn');
 	submit.setAttribute('value','submit');
 
@@ -652,50 +692,69 @@ function barInfo(pagetype,pageinfo) {
 	var rowOne = document.createElement("div");
 	rowOne.setAttribute("class","row");
 
+	/* expand page settings div function */
+	function expandSettings(div,closeArray) {
+		closeArray.forEach(function(element) {
+			element.setAttribute('style','display:none;visibility:hidden;');
+			element.setAttribute('data-expanded','0');
+		});
+		if(div.getAttribute('data-expanded') === '0') {
+			div.setAttribute('style','display:inline-block;visibility:visible;');
+			div.setAttribute('data-expanded','1');
+		} else {
+			div.setAttribute('style','display:none;visibility:hidden;');
+			div.setAttribute('data-expanded','0');
+		}
+	}
+
+	/* about div */
+	var aboutDiv = document.createElement('div');
+	aboutDiv.setAttribute('id','section-about col-100');
+	aboutDiv.setAttribute('class','section-about');
+	aboutDiv.setAttribute('data-expanded','0');
+	aboutDiv.setAttribute('style','display:none;visibility:hidden;');
+	aboutDiv.innerHTML = pageinfo.blurb;
+
+	/* embed div */
+	var embedDiv = document.createElement('div');
+	embedDiv.setAttribute('id','section-embed col-100');
+	embedDiv.setAttribute('class','section-embed');
+	embedDiv.setAttribute('data-expanded','0');
+	embedDiv.setAttribute('style','display:none;visibility:hidden;');
+
+	var embedInput = document.createElement('input');
+	embedInput.setAttribute('class','text-input');
+	embedInput.setAttribute('readonly','true');
+	embedDiv.appendChild(embedInput);
+
+	/* add iframe code to input & highlight it */
+	var embedurl = createURL('/embed?a=' + pageinfo.aid + '&p=' + pageinfo.id);
+	embedInput.value = `<iframe width="100%" height="100%" src="${embedurl}" frameborder="0" allowfullscreen></iframe>`;
+
+	embedInput.onclick = function() {
+		this.setSelectionRange(0,embedInput.value.length);
+	};
+
 	/* about button */
-	var about = btnSubmit('About','','none');
+	var about = btnSubmit('About',function() { expandSettings(aboutDiv,[embedDiv]); },'none');
 	var colAbout = document.createElement("div");
 	colAbout.setAttribute("class","col col-15");
 	colAbout.appendChild(about);
 
-	/* share button */
-	var share = btnSubmit('Share','','none');
-	var colShare = document.createElement("div");
-	colShare.setAttribute("class","col col-15");
-	colShare.appendChild(share);
+	/* embed button */
+	var embed = btnSubmit('Embed',function() { expandSettings(embedDiv,[aboutDiv]); },'none');
+	var colEmbed = document.createElement("div");
+	colEmbed.setAttribute("class","col col-15");
+	colEmbed.appendChild(embed);
 
 	/* create views */
 	var colViews = document.createElement('div');
-	colViews.setAttribute('class','col col-15');
+	colViews.setAttribute('class','col col-25');
 
 	var views = document.createElement('div');
 	views.setAttribute('class','box-views-row');
 	views.innerHTML = String(pageinfo.views) + " views";
 	colViews.appendChild(views);
-
-	/* rank it */
-	var rankit = document.createElement('div');
-	rankit.setAttribute('class','box-rankit');
-
-	var starOne = document.createElement('input');
-	starOne.setAttribute('type','checkbox');
-	starOne.setAttribute('class','star');
-
-	var starTwo = document.createElement('input');
-	starTwo.setAttribute('type','checkbox');
-	starTwo.setAttribute('class','star');
-
-	var starThree = document.createElement('input');
-	starThree.setAttribute('type','checkbox');
-	starThree.setAttribute('class','star');
-
-	rankit.appendChild(starOne);
-	rankit.appendChild(starTwo);
-	rankit.appendChild(starThree);
-
-	var colRankit = document.createElement('div');
-	colRankit.setAttribute('class','col col-10');
-	colRankit.appendChild(rankit);
 
 	/* create rating */
 	var colRating = document.createElement('div');
@@ -720,6 +779,7 @@ function barInfo(pagetype,pageinfo) {
 	bmark.setAttribute('data-aid',pageinfo.aid);
 	bmark.setAttribute('data-pid',pageinfo.id);
 	bmark.setAttribute('data-pagetype',pagetype);
+	bmark.setAttribute('title','Bookmark This Page');
 
 	if(userObj.hasOwnProperty('bm')) {
 		if(userObj.bm.hasOwnProperty(pagetype)) {
@@ -744,15 +804,16 @@ function barInfo(pagetype,pageinfo) {
 
 	/* append columns to row */
 	rowOne.appendChild(colAbout);
-	rowOne.appendChild(colShare);
+	rowOne.appendChild(colEmbed);
 	rowOne.appendChild(colSpace);
 	rowOne.appendChild(colViews);
-	rowOne.appendChild(colRankit);
 	rowOne.appendChild(colRating);
 	rowOne.appendChild(colBookmark);
 
 	/* append row 1 to the menu */
 	info.appendChild(rowOne);
+	info.appendChild(aboutDiv);
+	info.appendChild(embedDiv);
 
 	return info;
 }
@@ -986,6 +1047,57 @@ function barPageSettings(pagetype,aid,settings) {
 	var ddsct = formDropDownsSCT(settings.subject,settings.category,settings.topic);
 	pageSettings.appendChild(ddsct);
 
+	/* grab autocomplete if topic is already set */
+	if(settings.topic !== "" && settings.topic !== null) {
+		getTags(settings.subject,settings.category,settings.topic).then(function(data) {
+			globalScope.tags = data;
+		},function(err) {
+			if(err === 'unset') {
+				alertify.alert("Missing Subject Category Or Topic.");
+			}
+		});
+	}
+
+	/* div for tag input & autcomplete box */
+	var tagAutoDiv = document.createElement('div');
+
+	/* tag input */
+	var tagInput = document.createElement('input');
+	tagInput.setAttribute('id','page-tags');
+	tagInput.setAttribute('class','text-input');
+	tagInput.setAttribute('placeholder','enter comma-separated tags');
+	var currentTags = "";
+	if(settings.tagthree) {
+		currentTags = [settings.tagone,settings.tagtwo,settings.tagthree].join();
+	} else if(settings.tagtwo) {
+		currentTags = [settings.tagone,settings.tagtwo].join();
+	} else if(settings.tagone) {
+		currentTags = settings.tagone;
+	}
+	tagInput.setAttribute('value',currentTags);
+	tagInput.onkeyup = function(event) {
+		addAutoComplete('tag-autocomplete-dropdown',tagInput,globalScope.tags);
+	};
+
+	/* prevent tab, up, down default behaviour */
+	document.onkeydown = function(event) {
+		if(event.keyCode === 9 || event.keyCode === 40 || event.keyCode === 38) {
+			event.preventDefault();
+		}
+	};
+
+	/* autcomplete box */
+	var autoCompleteBox = document.createElement('div');
+	autoCompleteBox.setAttribute('id','tag-autocomplete-dropdown');
+	autoCompleteBox.setAttribute('class','autocomplete-dropdown');
+	autoCompleteBox.setAttribute('style','display:none;visibility:hidden');
+
+	/* append all tag & autocomplete stuff */
+	tagAutoDiv.appendChild(tagInput);
+	tagAutoDiv.appendChild(autoCompleteBox);
+
+	pageSettings.appendChild(tagAutoDiv);
+
 	/* row for image and blurb */
 	var rowImgBlurb = document.createElement('div');
 	rowImgBlurb.setAttribute('class','row');
@@ -1078,7 +1190,7 @@ function barPageSettings(pagetype,aid,settings) {
 
 	/* page thumbnail img */
 	var colImg = document.createElement('div');
-	colImg.setAttribute('class','col col-33');
+	colImg.setAttribute('class','col col-26');
 
 	var thumbnail = document.createElement('img');
 	thumbnail.setAttribute('id','pageimg');
@@ -1091,7 +1203,7 @@ function barPageSettings(pagetype,aid,settings) {
 
 	/* page blurb input */
 	var colBlurb = document.createElement('div');
-	colBlurb.setAttribute('class','col col-66');
+	colBlurb.setAttribute('class','col col-74');
 
 	var blurb = document.createElement('textarea');
 	blurb.setAttribute('name','pageblurb');
@@ -1110,10 +1222,70 @@ function barPageSettings(pagetype,aid,settings) {
 
 	/* page settings save */
 	var capital = pagetype.charAt(0).toUpperCase() + pagetype.slice(1);
-	var btnSaveSettings = btnSubmit('Save ' + capital + ' Settings','savePageSettings("' + pagetype + '")','none');
+	var btnSaveSettings = btnSubmit('Save ' + capital + ' Settings','savePageSettings("' + pagetype + '")','green');
 	pageSettings.appendChild(btnSaveSettings);
 
 	return pageSettings;
+}
+
+function addAutoComplete(dropdownID,inputDiv,autoCompleteArray) {
+	var dropdown = document.getElementById(dropdownID);
+	if(autoCompleteArray) {
+		var suggestions = [];
+		if(dropdown.children.length > 0) {
+			suggestions = dropdown.children[0].getElementsByTagName("li");
+		}
+		/* down key, up key, tab key, any other key */
+		var selected;
+		if(event.keyCode === 40 && suggestions.length > 0) {
+			var i = 0;
+			while (i < suggestions.length) {
+				if(suggestions[i].className === 'ac-dd-selected') {
+					selected = suggestions[i]; i++; break;
+				}
+				i++;
+			}
+			if(typeof selected === 'undefined') {
+				suggestions[0].className = "ac-dd-selected";
+			} else if (i < suggestions.length) {
+				selected.className = "";
+				selected.nextSibling.className = "ac-dd-selected";
+			}
+		} else if (event.keyCode === 38 && suggestions.length > 0) {
+			for (var j = 0; j < suggestions.length; j++) {
+				if(suggestions[j].className === 'ac-dd-selected') {
+					selected = suggestions[j]; break;
+				}
+			}
+			if(typeof selected !== 'undefined') {
+				if (j === 0) {
+					suggestions[0].className = "";
+				} else {
+					selected.className = "";
+					selected.previousSibling.className = "ac-dd-selected";
+				}
+			}
+		} else if ((event.keyCode === 9 || event.keyCode === 39 || event.keyCode === 13) && suggestions.length > 0) {
+			for (let i = 0; i < suggestions.length; i++) {
+				if(suggestions[i].className === 'ac-dd-selected') {
+					inputDiv.value = inputDiv.value.replace(/\w+$/,"");
+					inputDiv.value += suggestions[i].innerHTML;
+					dropdown.style = "display:none;visibility:hidden";
+					break;
+				}
+			}
+		} else {
+			var matches = autoMatch(inputDiv.value,autoCompleteArray);
+			if(matches.length > 0) {
+				autoComplete(dropdown,matches);
+				dropdown.style = "display:block;visibility:visible";
+			} else {
+				dropdown.style = "display:none;visibility:hidden";
+			}
+		}
+	} else if (this.value === "") {
+		dropdown.style = "display:none;visibility:hidden";
+	}
 }
 
 /*
@@ -1266,6 +1438,21 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 	listTopics.setAttribute("id","select-topic");
 	listTopics.onchange = function() {
 		greyFirstSelect(listTopics);
+
+		var ss = document.getElementById('select-subject');
+		var sc = document.getElementById('select-category');
+		var st = document.getElementById('select-topic');
+
+		/* don't get tags if changed to default empty first child in dropdown */
+		if(st.options[st.selectedIndex].value !== "") {
+			getTags(ss.options[ss.selectedIndex].value,sc.options[sc.selectedIndex].value,st.options[st.selectedIndex].value).then(function(data) {
+				globalScope.tags = data;
+			},function(err) {
+				if(err === 'unset') {
+					alertify.alert("Missing Subject Category Or Topic.");
+				}
+			});
+		}
 	};
 	listTopics.style = "color: grey";
 
@@ -1384,13 +1571,14 @@ var savePageSettings = function(pagetype) {
 	var subject = document.getElementById('select-subject').value;
 	var category = document.getElementById('select-category').value;
 	var topic = document.getElementById('select-topic').value;
+	var tags = document.getElementById('page-tags').value;
 	var imageurl = document.getElementById('pageimg').src.replace(location.href.substring(0,location.href.lastIndexOf('/') + 1),"");
 	var blurb = document.getElementById('pageblurb').value;
 
 	var xmlhttp;
 	xmlhttp = new XMLHttpRequest();
 
-	var params = "pt=" + pagetype + "&id=" + id + "&p=" + title + "&s=" + subject + "&c=" + category + "&t=" + topic + "&i=" + imageurl + "&b=" + blurb;
+	var params = "pt=" + pagetype + "&id=" + id + "&p=" + title + "&s=" + subject + "&c=" + category + "&t=" + topic + "&tags=" + encodeURIComponent(tags) + "&i=" + imageurl + "&b=" + blurb;
 
 	xmlhttp.open("POST",url,true);
 
@@ -1408,6 +1596,10 @@ var savePageSettings = function(pagetype) {
 						alertify.alert("Save Settings Error. You Are Not Logged In."); break;
 					case 'nosubjectnotsaved':
 						alertify.alert("Save Settings Error. Please Enter At Least A Subject."); break;
+					case 'invalidtags':
+						alertify.alert("Save Settings Error. Non-Existing Tag Entered."); break;
+					case 'excesstags':
+						alertify.alert("Save Settings Error. A Maximum Of 3 Tags Is Allowed."); break;
 					case 'err':
 					default:
 						alertify.alert("An Error Occured. Please Try Again Later");
@@ -1449,6 +1641,9 @@ function pageError(error) {
 	errorMessage.innerHTML = '<h2>Error</h2><br><p>' + error + '</p>';
 
 	var main = document.getElementById('content');
+	if(main === null) {
+		main = document.getElementById('content-embed');
+	}
 	emptyDiv(main);
 	main.appendChild(errorMessage);
 }
@@ -1508,6 +1703,63 @@ function getSubjects() {
 		};
 
 		xmlhttp.send();
+	});
+
+	return promise;
+}
+
+/*
+	Function: getTags
+
+	This function retrieves json with tags for a subjects,categories,topics.
+
+	Parameters:
+
+		subject - string,
+		category - string,
+		topic - string,
+
+	Returns:
+
+		success - promise
+*/
+function getTags(subject,category,topic) {
+	var promise = new Promise(function(resolve,reject) {
+
+		/* create the url destination for the ajax request */
+		var url = createURL("/gettags");
+
+		var params = "s=" + subject + "&c=" + category + "&t=" + topic;
+
+		var xmlhttp;
+		xmlhttp = new XMLHttpRequest();
+
+		xmlhttp.open("POST",url,true);
+
+		xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							resolve(result.data); break;
+						case 'err':
+							reject('err'); break;
+						case 'unset':
+							reject('unset'); break;
+						default:
+							reject('unknown');
+					}
+				} else {
+					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
 	});
 
 	return promise;

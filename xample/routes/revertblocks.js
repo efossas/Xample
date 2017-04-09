@@ -66,7 +66,7 @@ exports.revertblocks = function(request,response) {
 				var prefix = helper.getTablePrefixFromPageType(pagetype);
 
                 pool.getConnection(function(err,connection) {
-                    if(err) {
+                    if(err || typeof connection === 'undefined') {
 						result.msg = 'err';
 						response.end(JSON.stringify(result));
                         analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);

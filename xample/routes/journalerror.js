@@ -52,7 +52,7 @@ exports.journalerror = function(request,response) {
     request.on('end',function() {
 		/* this connection is purely for using the escape() function, could be eliminated */
 		pool.getConnection(function(err,connection) {
-			if(err) {
+			if(err || typeof connection === 'undefined') {
 				analytics.journal(true,220,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 			}
 			var POST = qs.parse(body);

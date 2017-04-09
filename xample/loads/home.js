@@ -28,8 +28,16 @@ exports.home = function(request,response) {
 	var uid = request.session.uid;
 
 	if(uid) {
-		loader.loadPage(request,response,"<script>pageHome();</script>");
-		analytics.journal(false,0,"",request.session.uid,global.__stack[1].getLineNumber(),__function,__filename);
+		var userdb = request.app.get("userdb");
+		var queryUserDB = require('./../queryuserdb.js');
+		var promiseUserData = queryUserDB.getDocByUid(userdb,uid);
+		promiseUserData.then(function(data) {
+			loader.loadPage(request,response,"<script>pageHome(" + data[0].authority + ");</script>");
+			analytics.journal(false,0,"",request.session.uid,global.__stack[1].getLineNumber(),__function,__filename);
+		},function(err) {
+			loader.loadPage(request,response,"<script>pageHome(0);</script>");
+			analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+		});
 	} else {
 		response.writeHead(302,{Location:request.root});
 		response.end();

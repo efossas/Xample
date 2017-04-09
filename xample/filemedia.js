@@ -92,11 +92,12 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
                 break;
             case "audio":
                 newfile += ".mp3";
-                command = "ffmpeg/ffmpeg -i " + oldfilepath + " " + absdir + newfile + " 2>&1";
+				command = "./check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t audio";
+                //command = "ffmpeg/ffmpeg -i " + oldfilepath + " " + absdir + newfile + " 2>&1";
                 break;
             case "video":
                 newfile += ".mp4";
-                command = "ffmpeg/ffmpeg -i " + oldfilepath + " -vcodec h264 -s 1280x720 -acodec aac " + absdir + newfile + " 2>&1";
+				command = "./check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t video";
                 break;
             case "xsvgs":
                 newfile += ".svg";
@@ -183,6 +184,12 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
                 });
             } else if(btype === "audio" || btype === "video") {
                 child.stdout.on('data',function(data) {
+					/* check for error first */
+					if(data.toString().substr(0,5) === "ERROR") {
+						response.write('err');
+						return;
+					}
+
                     /* search for initial value, which is media length */
                     var initial = data.toString().match(/Duration: .{11}/g);
                     if(initial !== null) {
@@ -245,11 +252,15 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
 exports.deleteMedia = function(connection,fileRoute,uid,did) {
 	var __function = "deleteMedia";
 
+	var helper = require('./helper.js');
+
 	/* get list of media file names in the page table */
 	var promise = new Promise(function(resolve,reject) {
 
+		var prefix = helper.getTablePrefixFromPageType("page");
+
 		/* username must have connection.escape() already applied, which adds '' */
-		var qry = "SELECT mediaContent FROM p_" + uid + "_" + did + " WHERE mediaType='image' OR mediaType='audio' OR mediaType='video' OR mediaType='xsvgs' OR mediaType='slide'";
+		var qry = "SELECT content FROM " + prefix + "_" + uid + "_" + did + " WHERE type='image' OR type='audio' OR type='video' OR type='xsvgs' OR type='slide'";
 
 		/* query the database */
 		connection.query(qry,function(err,rows,fields) {
@@ -274,7 +285,6 @@ exports.deleteMedia = function(connection,fileRoute,uid,did) {
 	});
 
 	promise.then(function(success) {
-
 		if(success !== -1) {
 			var exec = require('child_process').exec;
 

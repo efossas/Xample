@@ -26,7 +26,8 @@ exports.signup = function(request,response) {
 	var __function = "signup";
 
 	var qs = require('querystring');
-	var ps = require('password-hash');
+	var scrypt = require("scrypt");
+	var scryptParameters = scrypt.paramsSync(0.1);
 	var fs = require('fs');
 
     var pool = request.app.get("pool");
@@ -54,16 +55,9 @@ exports.signup = function(request,response) {
 		var POST = qs.parse(body);
 
         /* get the data */
-        var hash = ps.generate(POST.password);
+		var kdfResult = scrypt.kdfSync(POST.password,scryptParameters);
         var username = POST.username;
         var email = POST.email;
-
-		/// closing off sign ups
-		if(email !== "applegate") {
-			result.msg = 'closed';
-			response.end(JSON.stringify(result));
-			return;
-		}
 
 		/* ensure username is not taken */
 		var promiseCheckUsername = queryUserDB.getDocByUsername(userdb,username);
@@ -75,14 +69,21 @@ exports.signup = function(request,response) {
 			}
 
 			/* add the user to db */
-			var promiseCreateUser = queryUserDB.createUser(userdb,username,hash,email);
+			var promiseCreateUser = queryUserDB.createUser(userdb,username,kdfResult,email);
 			promiseCreateUser.then(function(res) {
+				if(res === 'closed') {
+					result.msg = 'closed';
+					response.setHeader('content-type','application/json');
+					response.end(JSON.stringify(result));
+					return;
+				}
+
 				/* log the user in */
 				var uid = res.ops[0]._id;
 				request.session.uid = uid;
 
 				pool.getConnection(function(err,connection) {
-					if(err) {
+					if(err || typeof connection === 'undefined') {
 						result.msg = 'err';
 						response.end(JSON.stringify(result));
 						analytics.journal(true,221,err,0,global.__stack[1].getLineNumber(),__function,__filename);
@@ -92,7 +93,7 @@ exports.signup = function(request,response) {
 					var prefixPage = helper.getTablePrefixFromPageType("page");
 
 					/* create the user's page table */
-					var qryBlockPageTable = "CREATE TABLE " + prefixPage + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
+					var qryBlockPageTable = "CREATE TABLE " + prefixPage + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb))";
 
 					connection.query(qryBlockPageTable,function(err,rows,fields) {
 						if (err) {
@@ -104,7 +105,7 @@ exports.signup = function(request,response) {
 							var prefixGuide = helper.getTablePrefixFromPageType("guide");
 
 							/* create the user's guide table */
-							var qryLearningGuideTable = "CREATE TABLE " + prefixGuide + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tags BIGINT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500))";
+							var qryLearningGuideTable = "CREATE TABLE " + prefixGuide + "_" + uid + "_0 (xid SMALLINT UNSIGNED AUTO_INCREMENT PRIMARY KEY, xname VARCHAR(50), username VARCHAR(40), status BOOLEAN, subject VARCHAR(32), category VARCHAR(32), topic VARCHAR(32), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP, edited TIMESTAMP, rankpoints INT UNSIGNED, ranks INT UNSIGNED, views INT UNSIGNED, rating SMALLINT UNSIGNED DEFAULT 0, imageurl VARCHAR(128) DEFAULT '', blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb))";
 
 							connection.query(qryLearningGuideTable,function(err,rows,fields) {
 								if (err) {

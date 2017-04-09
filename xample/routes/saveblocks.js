@@ -59,7 +59,7 @@ exports.saveblocks = function(request,response) {
         /* when the request ends,parse the POST data, & process the sql queries */
         request.on('end',function() {
             pool.getConnection(function(err,connection) {
-                if(err) {
+                if(err || typeof connection === 'undefined') {
 					result.msg = 'err';
 					response.end(JSON.stringify(result));
                     analytics.journal(true,221,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
@@ -99,42 +99,59 @@ exports.saveblocks = function(request,response) {
 					});
 
 					/* get arrays of the media types and content */
-					var types = mediaType.split(',');
-					var contents = mediaContent.split(',');
+					var types = mediaType.split('@^@');
+					var contents = mediaContent.split('@^@');
 
-					/* this is saving the tags, only on permanent saves & block pages */
+					/* validate block length */
+					if(types.length !== contents.length) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						var error = {input:"saveblocks: not equal types and contents lengths"};
+						analytics.journal(true,201,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
+						return;
+					} else if(types.length > 8 && request.session.auth < 6) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						return;
+					} else if(types.length > 16) {
+						result.msg = 'err';
+						response.end(JSON.stringify(result));
+						return;
+					}
+
+					/* this is saving the btypes, only on permanent saves & block pages */
 					if(tabid && pagetype === "page") {
 						var promiseSettings = querypagedb.getPageSettings(connection,prefix,uid,xid);
 						promiseSettings.then(function(data) {
-							var tagTypes = new Map([["slide",0],["video",1],["audio",2],["image",4],["slide",4],["xtext",8],["xmath",16],["latex",16],["xcode",32]]);
+							var bTypeMap = new Map([["none",0],["video",1],["audio",2],["image",4],["slide",4],["xtext",8],["xmath",16],["latex",16],["xcode",32]]);
 
-							var tags = 0;
+							var btypes = 0;
 							types.forEach(function(element,index) {
-								tags = tagTypes.get(element) | tags;
+								btypes = bTypeMap.get(element) | btypes;
 							});
 
-							var qryTag = "UPDATE " + uTable + " SET tags=" + tags + ",edited=NOW() WHERE xid=" + xid;
+							var qryTag = "UPDATE " + uTable + " SET btypes=" + btypes + ",edited=NOW() WHERE xid=" + xid;
 
 							connection.query(qryTag,function(err,rows,fields) {
 								if(err) {
 									err.input = qryTag;
-									analytics.journal(true,201,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+									analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
-									/* copy tags to redundant table */
+									/* copy btypes to redundant table */
 									var cRed = querypagedb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
 
-									var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.tags = xample.${uTable}.tags WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
+									var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.btypes = xample.${uTable}.btypes WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
 
 									connection.query(qryCopy,function(err,rows,fields) {
 										if(err) {
 											err.input = qryCopy;
-											analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+											analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 										}
 									});
 								}
 							});
 						},function(error) {
-							analytics.journal(true,203,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							analytics.journal(true,204,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						});
 					}
 
@@ -152,7 +169,7 @@ exports.saveblocks = function(request,response) {
 							result.msg = 'err';
 							response.end(JSON.stringify(result));
 							err.input = qryTruncate;
-							analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+							analytics.journal(true,205,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 						} else {
 							/* check that blocks exist to be saved */
 							if(types[0] !== 'undefined') {
@@ -175,7 +192,7 @@ exports.saveblocks = function(request,response) {
 										result.msg = 'err';
 										response.end(JSON.stringify(result));
 										err.input = qryInsert;
-										analytics.journal(true,204,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+										analytics.journal(true,206,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 									} else {
 										/* only delete unused files on permanent table saves */
 										if(tid === 'p') {

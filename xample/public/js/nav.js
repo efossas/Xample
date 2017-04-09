@@ -36,6 +36,7 @@ var globalScope = {};
 
 /* list any functions that will be joined to this file here from omni */
 /*
+	global addAutoComplete:true
 	global autosaveTimer:true
 	global createURL:true
 	global emptyDiv:true
@@ -50,6 +51,7 @@ var globalScope = {};
 	global getCookies:true
 	global getSubjects:true
 	global getUserFields:true
+	global getTags:true
 	global journalError:true
 	global setBookmark:true
 	global setView:true
@@ -226,7 +228,7 @@ function boxCreate() {
 
 	/* create image */
 	var colImage = document.createElement('div');
-	colImage.setAttribute('class','col col-35');
+	colImage.setAttribute('class','col col-28');
 
 	var image = document.createElement('div');
 	image.setAttribute('class','box-image');
@@ -291,7 +293,7 @@ function boxCreate() {
 
 	/* column for upper and lower rows */
 	var colRightSection = document.createElement('div');
-	colRightSection.setAttribute('class','col col-65');
+	colRightSection.setAttribute('class','col col-72');
 
 	/* append upper and lower rows to right section */
 	colRightSection.appendChild(upperRow);
@@ -475,6 +477,241 @@ function dashExplore(exploreHeader,linkRoute) {
 		var subjectsData = data;
 		globalScope.subjects = subjectsData;
 
+		/* function for showing topic's tags in explore div */
+		function showTags() {
+			var tagSubject = this.getAttribute('data-subject');
+			var tagCategory = this.getAttribute('data-category');
+			var tagTopic = this.getAttribute('data-topic');
+
+			var params = "s=" + tagSubject + "&c=" + tagCategory + "&t=" + tagTopic;
+
+			/// you can probably replace this with getTags() in omni.js
+
+			var promiseTag = new Promise(function(resolve,reject) {
+				var url = createURL("/gettags");
+				var xmlhttp = new XMLHttpRequest();
+				xmlhttp.open("POST",url,true);
+				xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+				xmlhttp.onreadystatechange = function() {
+					if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+						if(xmlhttp.status === 200) {
+							var result = JSON.parse(xmlhttp.responseText);
+
+							switch(result.msg) {
+								case 'success':
+									resolve(result.data); break;
+								case 'err':
+								default:
+									alertify.alert("Unable To Retrieve Tags");
+									reject('err');
+							}
+						} else {
+							alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+						}
+					}
+				};
+
+				xmlhttp.send(params);
+			});
+
+			var tagsRow = document.createElement('div');
+			tagsRow.setAttribute('class','row');
+
+			/* make back btn & col */
+			var backTopic = document.createElement('div');
+			backTopic.setAttribute('class','col col-10');
+			backTopic.setAttribute('style','position:absolute;z-index:2;');
+
+			var backBtn = btnSubmit('Back',showCategory,'red');
+			backBtn.setAttribute('data-subject',tagSubject);
+			backBtn.setAttribute('data-category',tagCategory);
+			backTopic.appendChild(backBtn);
+
+			/* create header for link section */
+			var h3row = document.createElement('div');
+			h3row.setAttribute('class','row');
+
+			var h3col = document.createElement('div');
+			h3col.setAttribute('class','col col-100');
+
+			var h3 = document.createElement('h3');
+			h3.innerHTML = 'Tags';
+
+			h3row.appendChild(backTopic);
+			h3col.appendChild(h3);
+			h3row.appendChild(h3col);
+			tagsRow.appendChild(h3row);
+
+			/* make tag row & col */
+			var tagRow = document.createElement('div');
+			tagRow.setAttribute('class','row');
+
+			var tagCol = document.createElement('div');
+			tagCol.setAttribute('class','col col-100');
+
+			/* append back & tag columns */
+			tagRow.appendChild(tagCol);
+			tagsRow.appendChild(tagRow);
+
+			/* add topic row to tag col */
+			var topicRow = document.createElement('div');
+			topicRow.setAttribute('class','row');
+
+			var topicCol = document.createElement('div');
+			topicCol.setAttribute('class','col col-100');
+
+			var topicBtn = btnLink('<b>' + tagTopic + '</b>','','none');
+
+			topicCol.appendChild(topicBtn);
+
+			topicRow.appendChild(topicCol);
+			tagCol.appendChild(topicRow);
+
+			function listHover(evt) {
+				this.style = 'background-color:rgba(58, 50, 200, 0.2)';
+			}
+
+			function listOff(evt) {
+				this.style = 'background-color:transparent';
+			}
+
+			promiseTag.then(function(data) {
+				var tagsBox = document.createElement('div');
+				tagsBox.setAttribute('class','data-box');
+				tagsBox.setAttribute('style','border:0px solid black;border-bottom-width:1px');
+
+				var tagLength = data.length - 1;
+				data.forEach(function(value,i) {
+					var row = document.createElement('div');
+					row.onclick = function() {
+						var query = ["s=",tagSubject,"&c=",tagCategory,"&t=",tagTopic,"&tag=",value].join("");
+						var tagurl = createURL('/tagreview?' + query);
+						window.location = tagurl;
+					};
+
+					switch(i) {
+						case 0:
+							row.setAttribute('class','row toprow'); break;
+						case tagLength:
+							row.setAttribute('class','row bottomrow'); break;
+						default:
+							row.setAttribute('class','row');
+					}
+
+					/* left buffer */
+					var colLeft = document.createElement('div');
+					colLeft.setAttribute('class','col col-2');
+
+					/* page name */
+					var colName = document.createElement('div');
+					colName.setAttribute('class','col col-96 padtop');
+					colName.innerHTML = value;
+
+					/* right buffer */
+					var colRight = document.createElement('div');
+					colRight.setAttribute('class','col col-2');
+
+					/* append everything */
+					row.appendChild(colLeft);
+					row.appendChild(colName);
+					row.appendChild(colRight);
+
+					row.addEventListener('mouseover',listHover,true);
+					row.addEventListener('mouseout',listOff,true);
+
+					tagsBox.appendChild(row);
+				});
+
+				tagsRow.appendChild(tagsBox);
+
+				/* add input for suggested tag */
+				var rowSuggestTag = document.createElement('div');
+				rowSuggestTag.setAttribute('class','row');
+
+				var colSuggestTagInput = document.createElement('div');
+				colSuggestTagInput.setAttribute('class','col col-85');
+
+				var suggestTagInput = document.createElement('input');
+				suggestTagInput.setAttribute('class','log-input');
+				suggestTagInput.setAttribute('id','suggest-tag');
+				suggestTagInput.setAttribute('style','border-left-width:0px');
+				suggestTagInput.setAttribute('placeholder','Suggest A New Tag');
+
+				colSuggestTagInput.appendChild(suggestTagInput);
+
+				var colSuggestTagBtn = document.createElement('div');
+				colSuggestTagBtn.setAttribute('class','col col-15');
+
+				function suggestTag() {
+					var url = createURL("/suggesttag");
+
+					var newtag = document.getElementById('suggest-tag').value;
+					var params = "s=" + tagSubject + "&c=" + tagCategory + "&t=" + tagTopic + "&nt=" + newtag;
+
+					var xmlhttp = new XMLHttpRequest();
+					xmlhttp.open("POST",url,true);
+					xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+					xmlhttp.onreadystatechange = function() {
+						if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+							if(xmlhttp.status === 200) {
+								var result = JSON.parse(xmlhttp.responseText);
+
+								switch(result.msg) {
+									case 'success':
+										var btn = document.createElement('button');
+										btn.setAttribute('data-subject',tagSubject);
+										btn.setAttribute('data-category',tagCategory);
+										btn.setAttribute('data-topic',tagTopic);
+										btn.onclick = showTags;
+										btn.click();
+										break;
+									case 'exists':
+										alertify.alert("That Tag Already Exists");
+										break;
+									case 'excess':
+										alertify.alert("Tags Must Be Less Than 32 Characters.");
+										break;
+									case 'nosaveloggedout':
+										alertify.alert("You Are Currently Logged Out");
+										break;
+									case 'nosavenoauthority':
+										alertify.alert("You Do Not Have The Authority To Add Tags");
+										break;
+									case 'err':
+									default:
+										alertify.alert("Unable To Update Tags");
+								}
+							} else {
+								alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");
+							}
+						}
+					};
+
+					xmlhttp.send(params);
+				}
+
+				var suggestTagBtn = btnSubmit("Suggest Tag",suggestTag,"green");
+
+				colSuggestTagBtn.appendChild(suggestTagBtn);
+
+				rowSuggestTag.appendChild(colSuggestTagInput);
+				rowSuggestTag.appendChild(colSuggestTagBtn);
+
+				tagsRow.appendChild(rowSuggestTag);
+
+				/* empty the div and refill it */
+				emptyDiv(explore);
+
+				explore.appendChild(tagsRow);
+			},function(err) {
+				explore.appendChild(tagRow);
+				alertify.alert("There Was An Error Retrieving The Tags");
+				if(err === "unknown") {
+					journalError("getTags() unknown result.msg","nav.js",new Error().lineNumber,"","");
+				}
+			});
+		}
+
 		function showTop() {
 			/* first box - subject names */
 			var subjectsNames = Object.keys(subjectsData);
@@ -557,8 +794,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			var categoryCol = document.createElement('div');
 			categoryCol.setAttribute('class','col col-100');
 
-			var categoryUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category'));
-			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>',categoryUrl,'none');
+			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>','','none');
 
 			categoryCol.appendChild(categoryBtn);
 
@@ -578,9 +814,17 @@ function dashExplore(exploreHeader,linkRoute) {
 				var currentTopicCol = document.createElement('div');
 				currentTopicCol.setAttribute('class','col col-100');
 
-				var topicUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
+				var currentTopicBtn;
+				if(linkRoute === 'tags') {
+					currentTopicBtn = btnSubmit(currentTopic,showTags,'none');
+					currentTopicBtn.setAttribute('data-subject',this.getAttribute('data-subject'));
+					currentTopicBtn.setAttribute('data-category',this.getAttribute('data-category'));
+					currentTopicBtn.setAttribute('data-topic',currentTopic);
+				} else {
+					var topicUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject') + '&category=' + this.getAttribute('data-category') + '&topic=' + currentTopic);
 
-				var currentTopicBtn = btnLink(currentTopic,topicUrl,'none');
+					currentTopicBtn = btnLink(currentTopic,topicUrl,'none');
+				}
 
 				currentTopicCol.appendChild(currentTopicBtn);
 				currentTopicRow.appendChild(currentTopicCol);
@@ -592,7 +836,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			explore.appendChild(topicRow);
 		}
 
-		/* function for showing subject's categoris in explore div */
+		/* function for showing subject's categories in explore div */
 		function showSubject() {
 			var categoryRow = document.createElement('div');
 			categoryRow.setAttribute('class','row');
@@ -635,8 +879,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			subjectCol.setAttribute('class','col col-100');
 			subjectCol.setAttribute('style','border-bottom-color:black;border-bottom-width:1px;');
 
-			var subjectUrl = createURL('/' + linkRoute + '&subject=' + this.getAttribute('data-subject'));
-			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>',subjectUrl,'none');
+			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>','','none');
 			subjectCol.appendChild(subjectBtn);
 
 			subjectRow.appendChild(subjectCol);
@@ -686,14 +929,18 @@ function dashExplore(exploreHeader,linkRoute) {
 
 	Parameters:
 
+		subject - string, the subject
+		category - string, the category
+		topic - string, the topic
 		sort - string, the type of sort already applied
-		tags - string, the tags already applied
+		curbtypes - string, the current btypes already applied
+		keywords - string, comma-separated tags
 
 	Returns:
 
 		success - html node, filter form
 */
-function barFilter(sort,tags,keywords) {
+function barFilter(subject,category,topic,sort,curbtypes,tags) {
 	var row = document.createElement('div');
 	row.setAttribute('class','row');
 
@@ -732,7 +979,7 @@ function barFilter(sort,tags,keywords) {
 	SortSelect.selectedIndex = sortIndex;
 
 	/* get convert tag binary to decimal number */
-	var tagTypes = parseInt(tags,2);
+	var btypes = parseInt(curbtypes,2);
 
 	/* set tag keys */
 	globalScope.tagKeys = new Map([["none",0],["video",1],["audio",2],["image",4],["text",8],["math",16],["topic",32],["",64],["",128]]);
@@ -749,7 +996,7 @@ function barFilter(sort,tags,keywords) {
 	checkVideo.setAttribute('onclick','toggleCheck(this);');
 	checkVideo.innerHTML = "video";
 
-	if(tagTypes & 1) {
+	if(btypes & 1) {
 		checkVideo.setAttribute('data-checked','true');
 		checkVideo.style["color"] = "white";
 		checkVideo.style["background-color"] = "blue";
@@ -768,7 +1015,7 @@ function barFilter(sort,tags,keywords) {
 	checkAudio.setAttribute('onclick','toggleCheck(this);');
 	checkAudio.innerHTML = "audio";
 
-	if(tagTypes & 2) {
+	if(btypes & 2) {
 		checkAudio.setAttribute('data-checked','true');
 		checkAudio.style["color"] = "white";
 		checkAudio.style["background-color"] = "blue";
@@ -787,7 +1034,7 @@ function barFilter(sort,tags,keywords) {
 	checkImage.setAttribute('onclick','toggleCheck(this);');
 	checkImage.innerHTML = "image";
 
-	if(tagTypes & 4) {
+	if(btypes & 4) {
 		checkImage.setAttribute('data-checked','true');
 		checkImage.style["color"] = "white";
 		checkImage.style["background-color"] = "blue";
@@ -806,7 +1053,7 @@ function barFilter(sort,tags,keywords) {
 	checkText.setAttribute('onclick','toggleCheck(this);');
 	checkText.innerHTML = "text";
 
-	if(tagTypes & 8) {
+	if(btypes & 8) {
 		checkText.setAttribute('data-checked','true');
 		checkText.style["color"] = "white";
 		checkText.style["background-color"] = "blue";
@@ -825,7 +1072,7 @@ function barFilter(sort,tags,keywords) {
 	checkMath.setAttribute('onclick','toggleCheck(this);');
 	checkMath.innerHTML = "math";
 
-	if(tagTypes & 16) {
+	if(btypes & 16) {
 		checkMath.setAttribute('data-checked','true');
 		checkMath.style["color"] = "white";
 		checkMath.style["background-color"] = "blue";
@@ -844,7 +1091,7 @@ function barFilter(sort,tags,keywords) {
 	checkCustom.setAttribute('onclick','toggleCheck(this);');
 	checkCustom.innerHTML = "topic";
 
-	if(tagTypes & 32) {
+	if(btypes & 32) {
 		checkCustom.setAttribute('data-checked','true');
 		checkCustom.style["color"] = "white";
 		checkCustom.style["background-color"] = "blue";
@@ -856,8 +1103,47 @@ function barFilter(sort,tags,keywords) {
 	var bottomRow = document.createElement('div');
 	bottomRow.setAttribute('class','row');
 
+	/* tag search & autocomplete div */
+	var tagAutoDiv = document.createElement('div');
+
 	/* only search bar goes in bottom row */
-	var colSearch = barSearch('keywords',keywords);
+	var colSearch = document.createElement('input');
+	colSearch.setAttribute('id','search-tags');
+	colSearch.setAttribute('class','text-input');
+	colSearch.setAttribute('placeholder','Search Tags Comma-Separated');
+	colSearch.setAttribute('value',tags);
+
+	/* grab autocomplete for tags */
+	if(topic !== "") {
+		getTags(subject,category,topic).then(function(data) {
+			globalScope.tags = data;
+			/* attach autocomplete to colsearch */
+			colSearch.onkeyup = function(event) {
+				addAutoComplete('tag-autocomplete-dropdown',colSearch,globalScope.tags);
+			};
+		},function(err) {
+			if(err === 'unset') {
+				alertify.alert("Missing Subject Category Or Topic.");
+			}
+		});
+	}
+
+	/* prevent tab, up, down default behaviour */
+	document.onkeydown = function(event) {
+		if(event.keyCode === 9 || event.keyCode === 40 || event.keyCode === 38) {
+			event.preventDefault();
+		}
+	};
+
+	/* autcomplete box */
+	var autoCompleteBox = document.createElement('div');
+	autoCompleteBox.setAttribute('id','tag-autocomplete-dropdown');
+	autoCompleteBox.setAttribute('class','autocomplete-dropdown');
+	autoCompleteBox.setAttribute('style','display:none;visibility:hidden');
+
+	/* append all tag & autocomplete stuff */
+	tagAutoDiv.appendChild(colSearch);
+	tagAutoDiv.appendChild(autoCompleteBox);
 
 	/* buttons for filter bar */
 	var colFilterBtn = document.createElement('div');
@@ -885,11 +1171,11 @@ function barFilter(sort,tags,keywords) {
 		});
 
 		/* create final binary tag of block types selected & tag category */
-		var tagResult = ((typeResult) >>> 0).toString(2);
+		var btypeResult = ((typeResult) >>> 0).toString(2);
 
 		/* get keywords */
-		var keyWords = document.getElementById('keywords').value;
-		keyWords.replace(/ /g,"_").replace(/[^a-zA-Z ]/g,"");
+		var searchTags = document.getElementById('search-tags').value;
+		searchTags.replace(/ /g,"_").replace(/[^a-zA-Z ]/g,"");
 
 		/* set these into hidden divs for retrieval */
 		var content = document.getElementById('queryContent').value;
@@ -897,7 +1183,7 @@ function barFilter(sort,tags,keywords) {
 		var category = document.getElementById('queryCategory').value;
 		var topic = document.getElementById('queryTopic').value;
 
-		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&tags=",tagResult,"&keywords=",keyWords];
+		var queryStringArray = ["/explore?content=",content,"&subject=",subject,"&category=",category,"&topic=",topic,"&sort=",sortValue,"&btypes=",btypeResult,"&tags=",searchTags];
 
 		window.location = createURL(queryStringArray.join(""));
 	}
@@ -940,7 +1226,7 @@ function barFilter(sort,tags,keywords) {
 	topRow.appendChild(colTypeText);
 	topRow.appendChild(colTypeMath);
 	topRow.appendChild(colTypeCustom);
-	bottomRow.appendChild(colSearch);
+	bottomRow.appendChild(tagAutoDiv);
 	formDiv.appendChild(topRow);
 	formDiv.appendChild(bottomRow);
 	row.appendChild(formDiv);
@@ -952,6 +1238,349 @@ function barFilter(sort,tags,keywords) {
 	filter.appendChild(row);
 
 	return filter;
+}
+
+function barTagReview(taginfo) {
+	/* create top div for menu buttons */
+	var tagBar = document.createElement("div");
+	tagBar.setAttribute("class","tag-bar");
+
+	/* row 0 - just padding */
+	var rowZero = document.createElement("div");
+	rowZero.setAttribute("class","row");
+	rowZero.setAttribute('style','padding-top:6px;');
+
+	/* row sub cat top */
+	var rowSubCatTop = document.createElement("div");
+	rowSubCatTop.setAttribute("class","row");
+
+	var subjectInput = document.createElement("input");
+	subjectInput.setAttribute("class","text-input");
+	subjectInput.setAttribute("readonly","true");
+	subjectInput.setAttribute("title","subject");
+	subjectInput.setAttribute("placeholder",taginfo.subject);
+
+	var colSubject = document.createElement("div");
+	colSubject.setAttribute("class","col col-33");
+	colSubject.appendChild(subjectInput);
+
+	var categoryInput = document.createElement("input");
+	categoryInput.setAttribute("class","text-input");
+	categoryInput.setAttribute("readonly","true");
+	categoryInput.setAttribute("title","category");
+	categoryInput.setAttribute("placeholder",taginfo.category);
+
+	var colCategory = document.createElement("div");
+	colCategory.setAttribute("class","col col-33");
+	colCategory.appendChild(categoryInput);
+
+	var topicInput = document.createElement("input");
+	topicInput.setAttribute("class","text-input");
+	topicInput.setAttribute("readonly","true");
+	topicInput.setAttribute("title","topic");
+	topicInput.setAttribute("placeholder",taginfo.topic);
+
+	var colTopic = document.createElement("div");
+	colTopic.setAttribute("class","col col-33");
+	colTopic.appendChild(topicInput);
+
+	rowSubCatTop.appendChild(colSubject);
+	rowSubCatTop.appendChild(colCategory);
+	rowSubCatTop.appendChild(colTopic);
+
+	/* row tagname */
+	var rowTagName = document.createElement("div");
+	rowTagName.setAttribute("class","row");
+
+	var tagnameInput = document.createElement("input");
+	tagnameInput.setAttribute("class","text-input");
+	tagnameInput.setAttribute("readonly","true");
+	tagnameInput.setAttribute("title","tag");
+	tagnameInput.setAttribute("value",taginfo.tag);
+
+	var colTag = document.createElement("div");
+	colTag.setAttribute("class","col col-100");
+	colTag.appendChild(tagnameInput);
+	rowTagName.appendChild(colTag);
+
+	/* row votes */
+	var rowVotes = document.createElement("div");
+	rowVotes.setAttribute("class","row");
+
+	/* up votes */
+	var upVotes = document.createElement("p");
+	upVotes.setAttribute("id","up-votes");
+	upVotes.setAttribute("class","nomarpad info-row");
+	upVotes.innerHTML = "Up Votes: " + taginfo.upvotes.length;
+
+	var colUpVotes = document.createElement("div");
+	colUpVotes.setAttribute("class","col col-40");
+	colUpVotes.appendChild(upVotes);
+
+	/* down votes */
+	var downVotes = document.createElement("p");
+	downVotes.setAttribute("id","down-votes");
+	downVotes.setAttribute("class","nomarpad info-row");
+	downVotes.innerHTML = "Down Votes: " + taginfo.downvotes.length;
+
+	var colDownVotes = document.createElement("div");
+	colDownVotes.setAttribute("class","col col-40");
+	colDownVotes.appendChild(downVotes);
+
+	/* voting btns */
+	var upVoteColor = "gray";
+	var downVoteColor = "gray";
+	if(taginfo.thisUser === "up") {
+		upVoteColor = "blue";
+	} else if(taginfo.thisUser === "down") {
+		downVoteColor = "blue";
+	}
+
+	function voteTag(bool,subject,category,topic,tagname) {
+		var vote = "&vote=down";
+		var voteUpId = "down-votes";
+		var voteDownId = "up-votes";
+		var voteUpText = "Down Votes: ";
+		var voteDownText = "Up Votes: ";
+		var voteUpBtn = "Deny";
+		var voteDownBtn = "Approve";
+		if(bool) {
+			vote = "&vote=up";
+			voteUpId = "up-votes";
+			voteDownId = "down-votes";
+			voteUpText = "Up Votes: ";
+			voteDownText = "Down Votes: ";
+			voteUpBtn = "Approve";
+			voteDownBtn = "Deny";
+		}
+
+		var params = ["s=",subject,"&c=",category,"&t=",topic,"&tag=",tagname,vote].join("");
+
+		var url = createURL("/tagvote");
+
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open('POST',url,true);
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							/* 0 same vote, 1 modified */
+							if(result.data.switch[0] > 0) {
+								var updateUp = document.getElementById(voteUpId);
+								var textUp = updateUp.innerHTML.replace("Down Votes: ","").replace("Up Votes: ","");
+								updateUp.innerHTML = voteUpText + (Number(textUp) + 1);
+
+								var btnUp = document.getElementById(voteUpBtn);
+								btnUp.setAttribute("class",btnUp.className.replace("gray","blue"));
+							}
+							/* 0 new vote, 1 modified */
+							if(result.data.switch[1] > 0) {
+								var updateDown = document.getElementById(voteDownId);
+								var textDown = updateUp.innerHTML.replace("Down Votes: ","").replace("Up Votes: ","");
+								updateDown.innerHTML = voteDownText + (Number(textDown) - 1);
+
+								var btnDown = document.getElementById(voteDownBtn);
+								btnDown.setAttribute("class",btnDown.className.replace("blue","gray"));
+							}
+							break;
+						case 'novoteloggedout':
+							alertify.alert("You Cannot Vote Because You Are Logged Out");
+							break;
+						case 'noauth':
+							alertify.alert("You Do Not Have The Authority To Vote On Tags");
+							break;
+						case 'err':
+						default:
+							alertify.alert("Unable To Update Your Vote");
+					}
+				} else {
+					alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
+	}
+
+	var upV = function() {
+		voteTag(true,taginfo.subject,taginfo.category,taginfo.topic,taginfo.tag);
+	};
+
+	var downV = function() {
+		voteTag(false,taginfo.subject,taginfo.category,taginfo.topic,taginfo.tag);
+	};
+
+	var colUpVoteBtn = document.createElement("div");
+	colUpVoteBtn.setAttribute("class","col col-10");
+
+	var upVoteBtn = btnSubmit("Approve",upV,upVoteColor);
+	colUpVoteBtn.appendChild(upVoteBtn);
+
+	var colDownVoteBtn = document.createElement("div");
+	colDownVoteBtn.setAttribute("class","col col-10");
+
+	var downVoteBtn = btnSubmit("Deny",downV,downVoteColor);
+	colDownVoteBtn.appendChild(downVoteBtn);
+
+	rowVotes.appendChild(colUpVotes);
+	rowVotes.appendChild(colDownVotes);
+	rowVotes.appendChild(colDownVoteBtn);
+	rowVotes.appendChild(colUpVoteBtn);
+
+	/* row bottom padding */
+	var rowEnd = document.createElement("div");
+	rowEnd.setAttribute("class","row");
+
+	/* append all rows */
+	tagBar.appendChild(rowZero);
+	tagBar.appendChild(rowSubCatTop);
+	tagBar.appendChild(rowTagName);
+	tagBar.appendChild(rowVotes);
+	tagBar.appendChild(rowEnd);
+
+	return tagBar;
+}
+
+function createCommentBox(commentObj) {
+	var commentDisplay = document.createElement("div");
+	commentDisplay.setAttribute("class","comment-display-box");
+
+	var rowCommentInfo = document.createElement("div");
+	rowCommentInfo.setAttribute("class","row");
+
+	var colCommentInfo = document.createElement("div");
+	colCommentInfo.setAttribute("class","col col-100");
+
+	var author = document.createElement("p");
+	author.setAttribute("class","nomarpad inline bold info-row");
+	author.innerHTML = commentObj.writerName;
+	colCommentInfo.appendChild(author);
+
+	var timestamp = document.createElement("p");
+	timestamp.setAttribute("class","nomarpad inline info-row");
+
+	var date = new Date(commentObj.timeStamp);
+	var dateDisplay = [date.toLocaleDateString()," - ",date.getHours(),":",date.getMinutes()].join("");
+
+	timestamp.innerHTML = dateDisplay;
+	colCommentInfo.appendChild(timestamp);
+
+	var thread = document.createElement("p");
+	thread.setAttribute("class","nomarpad inline small info-row");
+	thread.innerHTML = commentObj.thread;
+	colCommentInfo.appendChild(thread);
+
+	rowCommentInfo.appendChild(colCommentInfo);
+
+	var rowCommentText = document.createElement("div");
+	rowCommentText.setAttribute("class","row");
+
+	var colCommentText = document.createElement("div");
+	colCommentText.setAttribute("class","col col-100");
+
+	var comment = document.createElement("p");
+	comment.setAttribute("class","nomarpad info-row");
+	comment.innerHTML = commentObj.comment;
+	colCommentText.appendChild(comment);
+
+	rowCommentText.appendChild(colCommentText);
+
+	commentDisplay.appendChild(rowCommentInfo);
+	commentDisplay.appendChild(rowCommentText);
+
+	return commentDisplay;
+}
+
+/*
+	Function: formComments
+
+	Creates a form for posting and viewing comments
+
+	Parameters:
+
+		formId - string,  just a generic id to get form element
+		submitCommentFunction - function, ajax sends new comment (only parameter is comment text)
+		commentsArray - array, objects containing existing comment,writerName,thread
+
+	Returns:
+
+		success - html node, filter form
+*/
+function formComments(formId,submitCommentFunction,commentsArray) {
+	var commentsSection = document.createElement("div");
+
+	/* comment box */
+	var commentBox = document.createElement("textarea");
+	commentBox.setAttribute("id","tag-comment-box");
+	commentBox.setAttribute("class","comment-box");
+	commentBox.setAttribute("placeholder","Type A Comment, Start With @thread To Create A New Thread");
+	commentBox.setAttribute("maxlength","1023");
+
+	/* comment submit btn */
+	var rowComSubmitBtn = document.createElement("div");
+	rowComSubmitBtn.setAttribute("class","row");
+
+	var colComSubmitEmptyLeft = document.createElement("div");
+	colComSubmitEmptyLeft.setAttribute("class","col col-80");
+
+	var colComSubmitBtn = document.createElement("div");
+	colComSubmitBtn.setAttribute("class","col col-20");
+
+	var submitCommentFunctionWithComment = function() {
+		var encodedComment = encodeURIComponent(document.getElementById('tag-comment-box').value);
+		submitCommentFunction(encodedComment);
+	};
+
+	var commentSubmitBtn = btnSubmit("Comment",submitCommentFunctionWithComment,"green");
+	colComSubmitBtn.appendChild(commentSubmitBtn);
+
+	rowComSubmitBtn.appendChild(colComSubmitEmptyLeft);
+	rowComSubmitBtn.appendChild(colComSubmitBtn);
+
+	/* hr separator between comment box and comments */
+	var hr = document.createElement("hr");
+	hr.setAttribute("style","margin: 12px 0px;");
+
+	/* encompassing div of existing comments */
+	var existingComments = document.createElement("div");
+	existingComments.setAttribute("id","existing-comments");
+	existingComments.setAttribute("class","existing-comments");
+
+	commentsArray.reverse().forEach(function(element,index) {
+		var commentDisplay = createCommentBox(element);
+		existingComments.appendChild(commentDisplay);
+	});
+
+	/* append everything */
+	commentsSection.appendChild(commentBox);
+	commentsSection.appendChild(rowComSubmitBtn);
+	commentsSection.appendChild(hr);
+	commentsSection.appendChild(existingComments);
+
+	return commentsSection;
+}
+
+/*
+	Function: formGenerateTags
+
+	Make a create tag form.
+
+	Parameters:
+
+		none
+
+	Returns:
+
+		success - html node, tag creation form
+*/
+function formGenerateTags() {
+	var exploreTags = dashExplore('Tags','tags');
+
+	return exploreTags;
 }
 
 /*
@@ -1240,12 +1869,13 @@ function rowProfileCheck(check,field,placeholders,description) {
 		field - string, the name of the field, must match the column name in MySQL database
 		description - string, short description shown on the left of input tag
 		data - the current profile data for that field, will populate the input tag
+		editFlag - boolean, if true, user can edit data
 
 	Returns:
 
 		success - html node, profile row div
 */
-function rowProfileSingle(field,description,data) {
+function rowProfileSingle(field,description,data,editFlag) {
 
 	var row = document.createElement("div");
 	row.setAttribute("class","row profile-row");
@@ -1270,15 +1900,30 @@ function rowProfileSingle(field,description,data) {
 	fieldInput.setAttribute('name',field);
 	fieldInput.setAttribute('class','text-input');
 	fieldInput.setAttribute('maxlength','50');
-	fieldInput.setAttribute('value',data);
 
-	/* save username btn */
-	var saveBtn = document.createElement('button');
-	saveBtn.setAttribute('type','button');
-	saveBtn.setAttribute('name','save-' + field);
-	saveBtn.setAttribute('class','menubtn green-btn');
-	saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
-	saveBtn.innerHTML = "Save";
+	if(editFlag) {
+		fieldInput.setAttribute('value',data);
+	} else {
+		fieldInput.setAttribute('placeholder',data);
+		fieldInput.setAttribute('readonly','true');
+	}
+
+		/* save username btn */
+		var saveBtn = document.createElement('button');
+	if(editFlag) {
+		saveBtn.setAttribute('type','button');
+		saveBtn.setAttribute('name','save-' + field);
+		saveBtn.setAttribute('class','menubtn green-btn');
+		saveBtn.setAttribute('onclick','saveProfileInfo(this,["' + field + '"])');
+		saveBtn.innerHTML = "Save";
+	} else {
+		saveBtn.setAttribute('type','button');
+		saveBtn.setAttribute('name','save-' + field);
+		saveBtn.setAttribute('class','menubtn black-btn');
+		saveBtn.setAttribute('disabled','true');
+		saveBtn.setAttribute('style','cursor:default');
+		saveBtn.innerHTML = "Immutable";
+	}
 
 	colLeft.appendChild(profileTitle);
 	colMiddle.appendChild(fieldInput);
@@ -1364,7 +2009,7 @@ function pageExplore(logstatus,csct,data) {
 	main.appendChild(contentHidden).appendChild(subjectHidden).appendChild(categoryHidden).appendChild(topicHidden);
 
 	/* create filter menu */
-	var filter = barFilter(csct[4],csct[5],csct[6]);
+	var filter = barFilter(csct[1],csct[2],csct[3],csct[4],csct[5],csct[6]);
 	main.appendChild(filter);
 
 	/* create box template */
@@ -1394,6 +2039,7 @@ function pageExplore(logstatus,csct,data) {
 		/* bookmark */
 		newBox.querySelector(".bmark").setAttribute('data-aid',data[index].uid);
 		newBox.querySelector(".bmark").setAttribute('data-pid',data[index].xid);
+		newBox.querySelector(".bmark").setAttribute('data-pagetype',pagetype);
 
 		newBox.querySelector(".bmark").addEventListener('change',setBookmark);
 
@@ -1431,7 +2077,7 @@ function pageExplore(logstatus,csct,data) {
 		newBox.querySelector(".box-edited").innerHTML = "edited: " + editedDate;
 
 		/* ranks */
-		newBox.querySelector(".box-ranks").innerHTML = "ranks: " + data[index].ranks;
+		newBox.querySelector(".box-ranks").innerHTML = "likes: " + data[index].ranks;
 
 		/* views */
 		newBox.querySelector(".box-views").innerHTML = "views: " + data[index].views;
@@ -1449,13 +2095,13 @@ function pageExplore(logstatus,csct,data) {
 
 	Parameters:
 
-		none
+	auth - the users authority level
 
 	Returns:
 
 		nothing - *
 */
-function pageHome() {
+function pageHome(auth) {
 	var main = document.getElementById('content');
 
 	/* append the form to the main div */
@@ -1469,20 +2115,42 @@ function pageHome() {
 	var promiseBP = getPages("page");
 
 	/* fetch user learning guides */
-	var promiseLG = getPages("guide");
+	//var promiseLG = getPages("guide");
 
-	Promise.all([promiseBM,promiseBP,promiseLG]).then(function(values) {
-		/* bookmark display form */
-		var row_Bookmark = formDisplayPlaylist('Bookmarks: Pages',values[0]);
-		main.appendChild(row_Bookmark);
+	Promise.all([promiseBM,promiseBP]).then(function(values) {
+		if(values[0] !== 'err') {
+			/* bookmark display form */
+			var row_Bookmark = formDisplayPlaylist('Bookmarks: Pages',values[0]);
+			main.appendChild(row_Bookmark);
+		} else {
+			alertify.alert("There Was An Error Getting Your Bookmarks.");
+		}
 
 		/* block page create form */
 		var row_PageCreate = formGenerateUserContent('page',values[1]);
 		main.appendChild(row_PageCreate);
 
 		/* learning guide create form */
-		var row_LgCreate = formGenerateUserContent('guide',values[2]);
-		main.appendChild(row_LgCreate);
+		//var row_LgCreate = formGenerateUserContent('guide',values[2]);
+		//main.appendChild(row_LgCreate);
+
+		/* create tags form */
+		switch(auth) {
+			case 9:
+			case 8:
+			case 7:
+			case 6:
+				var row_TaCreate = formGenerateTags();
+				main.appendChild(row_TaCreate);
+			case 5:
+			case 4:
+			case 3:
+			case 2:
+			case 1:
+			case 0:
+			default:
+				// do nothing
+		}
 	},function(error) {
 		alertify.alert("There Was An Error Getting Your Pages.");
 	});
@@ -1524,8 +2192,8 @@ function pageLanding(logstatus) {
 	main.appendChild(explorePages);
 
 	/* learning guide div */
-	var exploreLGs = dashExplore('Learning Guides','explore?content=lg');
-	main.appendChild(exploreLGs);
+	//var exploreLGs = dashExplore('Learning Guides','explore?content=lg');
+	//main.appendChild(exploreLGs);
 }
 
 /*
@@ -1556,20 +2224,22 @@ function pageProfile(profiledata) {
 	profilediv.setAttribute('class','profile-list');
 
 	/* make mandatory profile rows */
-	var row_Username = rowProfileSingle("username","Username:",profileinfo.username);
+	var row_Username = rowProfileSingle("username","Username:",profileinfo.username,true);
 	var row_Password = rowProfileCheck("currentPass","newPass",["Current Password","New Password"],"Password:");
-	var row_Autosave = rowProfileSingle("bengine-autosave","Auto Save:",profileinfo.autosave);
-	var row_DefaultText = rowProfileSingle("defaulttext","Default Text:",profileinfo.defaulttext);
+	var row_Authority = rowProfileSingle("authority","Authority:",profileinfo.authority,false);
+	var row_Autosave = rowProfileSingle("autosave","Auto Save:",profileinfo.autosave,true);
+	var row_DefaultText = rowProfileSingle("defaulttext","Default Text:",profileinfo.defaulttext,true);
 
 	/* make recovery profile rows */
-	var row_Email = rowProfileSingle("email","Email:",profileinfo.email);
-	var row_Phone = rowProfileSingle("phone","Phone:",profileinfo.phone);
+	var row_Email = rowProfileSingle("email","Email:",profileinfo.email,true);
+	var row_Phone = rowProfileSingle("phone","Phone:",profileinfo.phone,true);
 
 	/* make optional profile rows */
 
 	/* append rows to profilediv */
 	profilediv.appendChild(row_Username);
 	profilediv.appendChild(row_Password);
+	profilediv.appendChild(row_Authority);
 	profilediv.appendChild(row_Autosave);
 	profilediv.appendChild(row_DefaultText);
 	profilediv.appendChild(row_Email);
@@ -1581,6 +2251,86 @@ function pageProfile(profiledata) {
 	var main = document.getElementById('content');
 	main.appendChild(menu);
 	main.appendChild(profilediv);
+}
+
+/*
+	Function: pageTagReview
+
+	This function displays a a tag's review page.
+
+	Parameters:
+
+		tagdata - the tag's review data
+
+	Returns:
+
+		nothing - *
+*/
+function pageTagReview(tagdata) {
+	var taginfo = JSON.parse(tagdata);
+
+	/* MENU */
+
+	/* create menu */
+	var menu = barMenu();
+
+	/* TAG DATA */
+
+	var tagBar = barTagReview(taginfo);
+
+	/* COMMENTS SECTION */
+
+	/* function for submitting comment */
+	function tagNewComment(comment) {
+		var params = ["s=",taginfo.subject,"&c=",taginfo.category,"&t=",taginfo.topic,"&tag=",taginfo.tag,"&comment=",comment].join("");
+
+		var url = createURL("/tagcomment");
+
+		var xmlhttp = new XMLHttpRequest();
+		xmlhttp.open('POST',url,true);
+
+		xmlhttp.onreadystatechange = function() {
+			if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+				if(xmlhttp.status === 200) {
+					var result = JSON.parse(xmlhttp.responseText);
+
+					switch(result.msg) {
+						case 'success':
+							var commentArea = document.getElementById("existing-comments");
+							var newCommentBox = createCommentBox(result.data.comment);
+							commentArea.insertBefore(newCommentBox,commentArea.firstChild);
+							document.getElementById("tag-comment-box").value = "";
+							break;
+						case 'nocommentloggedout':
+							alertify.alert("You Cannot Comment Because You Are Logged Out");
+							break;
+						case 'noauth':
+							alertify.alert("You Do Not Have The Authority To Comment");
+							break;
+						case 'refresh':
+							alertify.alert("Your Comment Might Not Have Posted. Check By Refreshing The Page");
+							break;
+						case 'err':
+						default:
+							alertify.alert("Unable To Add Your Comment");
+					}
+				} else {
+					alertify.alert('Error:' + xmlhttp.status + ": Please Try Again");
+				}
+			}
+		};
+
+		xmlhttp.send(params);
+	}
+
+	var commentsSection = formComments('tagReview-comments',tagNewComment,taginfo.comments);
+
+	/* MAIN */
+
+	var main = document.getElementById('content');
+	main.appendChild(menu);
+	main.appendChild(tagBar);
+	main.appendChild(commentsSection);
 }
 
 // <<<fold>>>
@@ -1883,7 +2633,7 @@ function getBookmarkData(pagetype) {
 							resolve(result.data.bmdata); break;
 						case 'err':
 						default:
-							reject('err');
+							resolve('err'); // shouldn't break page, so resolve not reject
 					}
 				} else {
 					alertify.alert("Error:" + xmlhttp.status + ": Please Try Again Later");

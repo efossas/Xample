@@ -5,6 +5,7 @@
 */
 
 var analytics = require('./../analytics.js');
+var queryUserDB = require('./../queryuserdb.js');
 
 /*
 	Function: getsubjects
@@ -23,7 +24,7 @@ var analytics = require('./../analytics.js');
 exports.getsubjects = function(request,response) {
 	var __function = "getsubjects";
 
-    var fs = require("fs");
+    var userdb = request.app.get("userdb");
 
 	/* create response object */
 	var result = {msg:"",data:{}};
@@ -31,16 +32,28 @@ exports.getsubjects = function(request,response) {
 	/* get the user's id */
 	var uid = request.session.uid;
 
-    /* get the topics from the local json file */
-    fs.readFile('data/topics.json',function(err,data) {
-        if (err) {
-			result.msg = 'err';
-            response.end(JSON.stringify(result));
-            analytics.journal(1,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-        } else {
+	var body = "";
+	request.on('data',function(data) {
+		body += data;
+
+		/* prevent overload attacks */
+		if (body.length > 1e6) {
+			request.connection.destroy();
+			var errmsg = {message:"Overload Attack!"};
+			analytics.journal(true,199,errmsg,uid,global.__stack[1].getLineNumber(),__function,__filename);
+		}
+	});
+
+	request.on('end',function() {
+		var promiseSubjects = queryUserDB.getSubjects(userdb);
+		promiseSubjects.then(function(data) {
 			result.msg = 'success';
-			result.data = JSON.parse(data.toString());
-            response.end(JSON.stringify(result));
-        }
-    });
+			result.data = data;
+			response.end(JSON.stringify(result));
+		},function(err) {
+			result.msg = 'err';
+			response.end(JSON.stringify(result));
+			analytics.journal(1,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+		});
+	});
 };

@@ -1,40 +1,63 @@
-{
-    "computer science":
-        {
-            "algorithm types":
-                ["mathematical","search $ optimization $ patterns","sort"]
-            ,"algorithm analysis":
-                ["asymptotic notation","amortized analysis","space complexity"]
-            ,"algorithm strategies":
-                ["backtracking $ branch and bound","divide and conquer","dynamic programming","greedy","heuristic"]
-            ,"data structures":
-                ["arrays","graphs","linked lists","stacks $ queues","trees"]
-            ,"programming compilers $ interpreters":
-                ["code optimization","intermediate code $ three address code","lexical analysis","semantic analysis","syntax analysis $ parsing"]
-            ,"programming languages":
-                ["astract syntax trees","backus naur form","judgements,inference rules,derviations","lambda calculus","environment"]
-            ,"programming paradigms":
-                ["declarative miscellaneous","declarative functional","imperative object oriented","imperative miscellanous"]
-            ,"systems":
-                ["assembly","binary","concurrency","file systems","linking","memory hierarchy","networks","optimization","processes","scheduling","virtual memory"]
-        },
-    "mathematics":
-        {
-            "algebra":
-                ["complex numbers","exponents $ radicals","functions","linear equations","logarithms","polynomials","quadratic equations","vector algebra"]
-            ,"arithmetic":
-                ["addition","division","multiplication","subtraction","modular"]
-            ,"calculus":
-                ["antiderivatives","differential equations","derivatives","integrals","limits","multiple integrals","partial derivatives","series","vector calculus"]
-            ,"discrete math":
-                ["combinatorics","graphs $ trees","logic $ booleans","probability","sequences $ summation $ products","sets $ relations"]
-            ,"geometry":
-                ["none"]
-            ,"linear algebra":
-                ["determinants","LU factorization","matrix operations","row reduction"]
-            ,"statistics":
-                ["discrete distributions","continuous distributions"]
-            ,"trigonometry":
-                ["none"]
-        }
-}
+"mathematics":
+    {
+        "algebra":
+            [
+                "complex numbers"
+                ,"exponents $ radicals"
+                ,"functions"
+                ,"linear equations"
+                ,"logarithms"
+                ,"polynomials"
+                ,"quadratic equations"
+                ,"vector algebra"
+            ]
+        ,"arithmetic":
+            [
+                "addition"
+                ,"division"
+                ,"multiplication"
+                ,"subtraction"
+                ,"modular"
+            ]
+        ,"calculus":
+            [
+                "antiderivatives"
+                ,"differential equations"
+                ,"derivatives"
+                ,"integrals"
+                ,"limits"
+                ,"multiple integrals"
+                ,"partial derivatives"
+                ,"series"
+                ,"vector calculus"
+            ]
+        ,"discrete math":
+            [
+                "combinatorics"
+                ,"graphs $ trees"
+                ,"logic $ booleans"
+                ,"probability"
+                ,"sequences $ summation $ products"
+                ,"sets $ relations"
+            ]
+        ,"geometry":
+            [
+                "none"
+            ]
+        ,"linear algebra":
+            [
+                "determinants"
+                ,"LU factorization"
+                ,"matrix operations"
+                ,"row reduction"
+            ]
+        ,"statistics":
+            [
+                "discrete distributions"
+                ,"continuous distributions"
+            ]
+        ,"trigonometry":
+            [
+                "none"
+            ]
+    }

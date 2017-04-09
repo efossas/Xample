@@ -16,3 +16,21 @@
 	z-index: 99;
 	color: black;
 }
+
+.nomarpad {
+	margin: 0px;
+	padding: 0px;
+}
+
+.inline {
+	display: inline;
+}
+
+.bold {
+	font-weight: bold;
+}
+
+.small {
+	color: rgb(113, 113, 113);
+	font-size: 0.8em;
+}

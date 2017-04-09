@@ -25,7 +25,7 @@ exports.saveprofile = function(request,response) {
 	var __function = "saveprofile";
 
 	var qs = require('querystring');
-	var ps = require('password-hash');
+	var scrypt = require("scrypt");
 
     var userdb = request.app.get("userdb");
 
@@ -64,15 +64,21 @@ exports.saveprofile = function(request,response) {
 
 				var POST = qs.parse(body);
 
+				/* remove any fields that users should not be allowed to edit */
+				delete POST.authority;
+				delete POST.bookmarks;
+				delete POST.password;
+
 				/* profile data that requires checks should be queried here and deleted */
 				if(Object.prototype.hasOwnProperty.call(POST,'newPass')) {
 					var currentPassword = POST.currentPass;
 					var newPassword = POST.newPass;
 
-					if(ps.verify(currentPassword,doc.password)) {
-						var hash = ps.generate(newPassword);
+					if(scrypt.verifyKdfSync(doc.password.buffer,currentPassword)) {
+						var scryptParameters = scrypt.paramsSync(0.1);
+						var kdfResult = scrypt.kdfSync(newPassword,scryptParameters);
 
-						var passObj = {password:hash};
+						var passObj = {password:kdfResult};
 
 						var promisePass = queryUserDB.updateUser(userdb,uid,passObj);
 						promisePass.then(function(res) {
