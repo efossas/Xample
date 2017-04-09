@@ -1,6 +1,9 @@
 ### install dependencies on ubuntu 16 docker container
 
-### assume 'apt-get update; apt-get install -y git' has been run on machine
+### assumes:
+### apt-get update
+### apt-get install -y git wget
+### wget https://raw.githubusercontent.com/efossas/Xample/master/setup/wisepool.sh?token=AF3Rh4UFtQn9nUb685IY8jwNCGcl9w6Tks5Y880WwA%3D%3D -O wisepool.sh
 
 while [[ $# -gt 1 ]]
 do
