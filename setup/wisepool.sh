@@ -97,6 +97,7 @@ mysql --user=root --password="$SQL" -e "FLUSH PRIVILEGES"
 apt-get install -y tcl8.5
 curl -O http://download.redis.io/releases/redis-3.2.8.tar.gz
 tar xzf redis-3.2.8.tar.gz
+rm redis-3.2.8.tar.gz
 cd redis-3.2.8
 make
 make install
@@ -140,8 +141,17 @@ rm -rf ffmpeg-3.2.4-64bit-static
 # clone xample repo & install
 git clone https://github.com/efossas/JS-Xample /var/www/gitwise
 mkdir /var/www/wisepool
+
+chmod 500 /var/www/gitwise/permissions.sh
+/var/www/gitwise/permissions.sh
+
 /var/www/gitwise/sync-xample.sh -i -p
 
-/var/www/gitwise/db/initialize.sh -m $MONGO -s $MYSQL
+cd /var/www/gitwise/db
+initialize.sh -m $MONGO -s $SQL
+
+unset $MONGO
+unset $MYSQL
+unset $REDIS
 
 history -wc

@@ -28,10 +28,10 @@ else
     mysql=mysql
 fi
 
-if [ -z "$MYSQLPASS" ]; then
+if [[ -z "$MYSQLPASS" ]]; then
     $mysql -uroot < initialize.sql;
 else
-    $mysql -uroot -password="$MYSQLPASS" < initialize.sql;
+    $mysql -uroot -p"$MYSQLPASS" < initialize.sql;
 fi
 
 

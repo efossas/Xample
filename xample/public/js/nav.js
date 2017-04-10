@@ -560,7 +560,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			var topicCol = document.createElement('div');
 			topicCol.setAttribute('class','col col-100');
 
-			var topicBtn = btnLink('<b>' + tagTopic + '</b>','','none');
+			var topicBtn = btnLink('<b>' + tagTopic + '</b>','','inactive');
 
 			topicCol.appendChild(topicBtn);
 
@@ -794,7 +794,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			var categoryCol = document.createElement('div');
 			categoryCol.setAttribute('class','col col-100');
 
-			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>','','none');
+			var categoryBtn = btnLink('<b>' + this.getAttribute('data-category') + '</b>','','inactive');
 
 			categoryCol.appendChild(categoryBtn);
 
@@ -879,7 +879,7 @@ function dashExplore(exploreHeader,linkRoute) {
 			subjectCol.setAttribute('class','col col-100');
 			subjectCol.setAttribute('style','border-bottom-color:black;border-bottom-width:1px;');
 
-			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>','','none');
+			var subjectBtn = btnLink('<b>' + this.getAttribute('data-subject') + '</b>','','inactive');
 			subjectCol.appendChild(subjectBtn);
 
 			subjectRow.appendChild(subjectCol);

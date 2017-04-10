@@ -4,32 +4,29 @@
 # "sta" - staging gets full files, minified files, & testing files
 # "pro" - production gets only minified files
 
-while [[ $# -gt 0 ]]
-do
-key="$1"
-
-case $key in
-    -d|--dev)
-    DENV="dev"
-    shift
-    ;;
-    -i|--init)
-    INIT="yes"
-    shift
-    ;;
-    -p|--pro)
-    DENV="pro"
-    shift
-    ;;
-    -s|--sta)
-    DENV="sta"
-    shift
-    ;;
-    *)
-    # unknown option
-    ;;
-esac
-shift
+while test $# -gt 0; do
+        case "$1" in
+                -d|--dev)
+                        DENV="dev"
+                        shift
+                        ;;
+                -i|--init)
+                        INIT="yes"
+                        shift
+                        ;;
+                -p|--pro)
+                        DENV="pro"
+                        shift
+                        ;;
+                -s|--sta)
+                        DENV="sta"
+                        shift
+                        ;;
+                *)
+                        # unknown option
+                        shift
+                        ;;
+        esac
 done
 
 if [[ -z "$DENV" ]]; then DENV="dev"; fi
@@ -48,14 +45,15 @@ fi
 
 # check that the REPO & DEST directories exist
 if [ ! -d "$REPO" || ! -d "$DEST" ]; then
-    echo "REPO or DEST folder does not exist! Please create them first."
+    echo "REPO or DEST folder does not exist! Please create them first.";
+    exit 1;
 fi
 
 # install node modules on initialize
 if [[ "$INIT" == "yes" ]]; then
     mkdir -p $DEST/xample
     rsync -a -v $REPO/xample/package.json $DEST/xample/package.json
-    npm --prefix $DEST/xample/ install
+    npm --prefix $DEST/xample/ --unsafe-perm install
 fi
 
 # create folder if needed
