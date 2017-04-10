@@ -2,62 +2,49 @@
     {
         "algebra":
             [
-                "complex numbers"
-                ,"exponents $ radicals"
-                ,"functions"
-                ,"linear equations"
-                ,"logarithms"
-                ,"polynomials"
-                ,"quadratic equations"
-                ,"vector algebra"
-            ]
-        ,"arithmetic":
+                "complex numbers",
+                "exponents-radicals",
+                "functions",
+                "linear equations",
+                "logarithms",
+                "polynomials",
+                "quadratic equations",
+                "vector algebra"
+            ],
+        "arithmetic":
             [
-                "addition"
-                ,"division"
-                ,"multiplication"
-                ,"subtraction"
-                ,"modular"
-            ]
-        ,"calculus":
+                "addition",
+                "division",
+                "multiplication",
+                "subtraction",
+                "modular"
+            ],
+        "calculus":
             [
-                "antiderivatives"
-                ,"differential equations"
-                ,"derivatives"
-                ,"integrals"
-                ,"limits"
-                ,"multiple integrals"
-                ,"partial derivatives"
-                ,"series"
-                ,"vector calculus"
-            ]
-        ,"discrete math":
+                "differential equations",
+                "derivatives",
+                "integrals",
+                "limits",
+                "multiple integrals",
+                "partial derivatives",
+                "series",
+                "vector calculus"
+            ],
+        "discrete math":
             [
-                "combinatorics"
-                ,"graphs $ trees"
-                ,"logic $ booleans"
-                ,"probability"
-                ,"sequences $ summation $ products"
-                ,"sets $ relations"
-            ]
-        ,"geometry":
+                "combinatorics",
+                "graphs-trees",
+                "logic-booleans",
+                "probability",
+                "sequences-summation-products",
+                "sets-relations"
+            ],
+        "statistics":
             [
-                "none"
-            ]
-        ,"linear algebra":
-            [
-                "determinants"
-                ,"LU factorization"
-                ,"matrix operations"
-                ,"row reduction"
-            ]
-        ,"statistics":
-            [
-                "discrete distributions"
-                ,"continuous distributions"
-            ]
-        ,"trigonometry":
-            [
-                "none"
+                "association analysis",
+                "descriptive statistics",
+                "discrete distributions",
+                "continuous distributions",
+                "inferential statistics"
             ]
     }

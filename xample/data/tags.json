@@ -1,27 +1,26 @@
 "mathematics":
     {
         "algebra":
-            {
+            [
                 "complex numbers":{},
-                "exponents $ radicals":{},
+                "exponents-radicals":{},
                 "functions":{},
                 "linear equations":{},
                 "logarithms":{},
                 "polynomials":{},
                 "quadratic equations":{},
                 "vector algebra":{}
-            }
-        ,"arithmetic":
-            {
+            ],
+        "arithmetic":
+            [
                 "addition":{},
                 "division":{},
                 "multiplication":{},
                 "subtraction":{},
                 "modular":{}
-            }
-        ,"calculus":
-            {
-                "antiderivatives":{},
+            ],
+        "calculus":
+            [
                 "differential equations":{},
                 "derivatives":{},
                 "integrals":{},
@@ -30,34 +29,22 @@
                 "partial derivatives":{},
                 "series":{},
                 "vector calculus":{}
-            }
-        ,"discrete math":
-            {
+            ],
+        "discrete math":
+            [
                 "combinatorics":{},
-                "graphs $ trees":{},
-                "logic $ booleans":{},
+                "graphs-trees":{},
+                "logic-booleans":{},
                 "probability":{},
-                "sequences $ summation $ products":{},
-                "sets $ relations":{}
-            }
-        ,"geometry":
-            {
-                "none":{}
-            }
-        ,"linear algebra":
-            {
-                "determinants":{},
-                "LU factorization":{},
-                "matrix operations":{},
-                "row reduction":{}
-            }
-        ,"statistics":
-            {
+                "sequences-summation-products":{},
+                "sets-relations":{}
+            ],
+        "statistics":
+            [
+                "association analysis":{},
+                "descriptive statistics":{},
                 "discrete distributions":{},
-                "continuous distributions":{}
-            }
-        ,"trigonometry":
-            {
-                "none":{}
-            }
+                "continuous distributions":{},
+                "inferential statistics":{}
+            ]
     }
