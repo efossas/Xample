@@ -79,6 +79,10 @@ a.inbtn {
     text-decoration: none;
 }
 
+a.inactive {
+	cursor: default !important;
+}
+
 a.savebar {
 	padding: 19px 0px 19px 0px;
 }

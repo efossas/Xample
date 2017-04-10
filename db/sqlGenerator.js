@@ -52,7 +52,7 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
                     var tableName = prefix + reduceName(subjects[i]) + "_" + reduceName(categories[j]) + "_" + reduceName(item);
                     check(tableName);
 
-                    var sqlTopicArray = ["CREATE TABLE ",tableName," (uid CHAR(24), xid SMALLINT UNSIGNED, username VARCHAR(50) NOT NULL, xname VARCHAR(50), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, rankpoints INT UNSIGNED DEFAULT 0 NOT NULL, ranks INT UNSIGNED DEFAULT 0 NOT NULL, views INT UNSIGNED DEFAULT 0 NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
+                    var sqlTopicArray = ["CREATE TABLE ",tableName," (uid CHAR(24), xid SMALLINT UNSIGNED, username VARCHAR(50) NOT NULL, xname VARCHAR(50), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT NOW() NOT NULL, edited TIMESTAMP DEFAULT NOW() NOT NULL, rankpoints INT UNSIGNED DEFAULT 0 NOT NULL, ranks INT UNSIGNED DEFAULT 0 NOT NULL, views INT UNSIGNED DEFAULT 0 NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
 
                     sqlFile += sqlTopicArray.join("");
                 });
