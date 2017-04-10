@@ -32,9 +32,8 @@ if [[ $DURATION -ge 900 ]]; then
     echo "ERROR TOO LARGE"
 else
 	if [[ $TYPE == "video" ]]; then
-    	ffmpeg/ffmpeg -i $FILE -vcodec h264 -s 1280x720 -acodec aac $OUTPUT 2>&1
+    	ffmpeg -i $FILE -vcodec h264 -s 1280x720 -acodec aac $OUTPUT 2>&1
     elif [[ $TYPE == "audio" ]]; then
-    	ffmpeg/ffmpeg -i $FILE $OUTPUT 2>&1
+    	ffmpeg -i $FILE $OUTPUT 2>&1
     fi
 fi
-

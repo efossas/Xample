@@ -57,7 +57,7 @@ a2enmod proxy_http
 service apache2 restart
 
 # sass
-git clone https://github.com/rbenv/rbenv.git0=~/.rbenv
+git clone https://github.com/rbenv/rbenv.git ~/.rbenv
 cd ~/.rbenv && src/configure && make -C src
 echo 'export PATH="$HOME/.rbenv/bin:$PATH"' >> ~/.bashrc
 echo 'eval "$(rbenv init -)"' >> ~/.bashrc
@@ -88,11 +88,10 @@ debconf-set-selections <<< "mysql-server mysql-server/root_password password $SQ
 debconf-set-selections <<< "mysql-server mysql-server/root_password_again password $SQL"
 apt-get install -y mysql-server
 
-mysql -e "UPDATE mysql.user SET Password = PASSWORD('$SQL') WHERE User = 'root'"
-mysql -e "DROP USER ''@'localhost'"
-mysql -e "DROP USER ''@'$(hostname)'"
-mysql -e "DROP DATABASE test"
-mysql -e "FLUSH PRIVILEGES"
+mysql --user=root --password="$SQL" -e "DROP USER ''@'localhost'"
+mysql --user=root --password="$SQL" -e "DROP USER ''@'$(hostname)'"
+mysql --user=root --password="$SQL" -e "DROP DATABASE test"
+mysql --user=root --password="$SQL" -e "FLUSH PRIVILEGES"
 
 # redis
 apt-get install -y tcl8.5
@@ -105,7 +104,6 @@ echo -n | utils/install_server.sh
 cd ~
 
 # secure redis
-REDIS=test
 sed -i "s/# requirepass foobared/requirepass $REDIS/g" /etc/redis/6379.conf
 
 redis-server /etc/redis/6379.conf
@@ -116,10 +114,11 @@ echo "deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb
 apt-get update
 apt-get install -y mongodb-org
 
+service mongod restart
 mongo admin --eval "db.createUser({user:'root',pwd:'$MONGO',roles:['root']})"
 service mongod stop
 
-sed -i 's/#security:/security:\n  authorization: enabled\n/g' /etc/mongod.conf
+sed -i 's/#security:/security:\n  authorization: enabled/g' /etc/mongod.conf
 
 service mongod restart
 
@@ -144,3 +143,5 @@ mkdir /var/www/wisepool
 /var/www/gitwise/sync-xample.sh -i -p
 
 /var/www/gitwise/db/initialize.sh -m $MONGO -s $MYSQL
+
+history -wc

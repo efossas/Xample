@@ -93,7 +93,6 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
             case "audio":
                 newfile += ".mp3";
 				command = "./check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t audio";
-                //command = "ffmpeg/ffmpeg -i " + oldfilepath + " " + absdir + newfile + " 2>&1";
                 break;
             case "video":
                 newfile += ".mp4";

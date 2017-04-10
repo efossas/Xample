@@ -31,7 +31,7 @@ fi
 if [ -z "$MYSQLPASS" ]; then
     $mysql -uroot < initialize.sql;
 else
-    $mysql -uroot -p $MYSQLPASS < initialize.sql;
+    $mysql -uroot -password="$MYSQLPASS" < initialize.sql;
 fi
 
 
