@@ -44,7 +44,7 @@ else
 fi
 
 # check that the REPO & DEST directories exist
-if [ ! -d "$REPO" || ! -d "$DEST" ]; then
+if [[ ! -d "$REPO" || ! -d "$DEST" ]]; then
     echo "REPO or DEST folder does not exist! Please create them first.";
     exit 1;
 fi

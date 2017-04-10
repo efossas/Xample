@@ -1,7 +1,7 @@
 "mathematics":
     {
         "algebra":
-            [
+            {
                 "complex numbers":{},
                 "exponents-radicals":{},
                 "functions":{},
@@ -10,17 +10,17 @@
                 "polynomials":{},
                 "quadratic equations":{},
                 "vector algebra":{}
-            ],
+            },
         "arithmetic":
-            [
+            {
                 "addition":{},
                 "division":{},
                 "multiplication":{},
                 "subtraction":{},
                 "modular":{}
-            ],
+            },
         "calculus":
-            [
+            {
                 "differential equations":{},
                 "derivatives":{},
                 "integrals":{},
@@ -29,9 +29,9 @@
                 "partial derivatives":{},
                 "series":{},
                 "vector calculus":{}
-            ],
+            },
         "discrete math":
-            [
+            {
                 "combinatorics":{},
                 "graphs-trees":{},
                 "logic-booleans":{},
@@ -40,11 +40,11 @@
                 "sequences-summation-products":{}
             ],
         "statistics":
-            [
+            {
                 "association analysis":{},
                 "descriptive statistics":{},
                 "discrete distributions":{},
                 "continuous distributions":{},
                 "inferential statistics":{}
-            ]
+            }
     }

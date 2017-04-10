@@ -18,11 +18,11 @@ switch(host) {
 		testing = true;
 		break;
 	case "stage":
-		root = "http://wisepool.io/";
+		root = "https://wisepool.io/";
 		testing = true;
 		break;
 	case "prod":
-		root = "http://wisepool.io/";
+		root = "https://wisepool.io/";
 		testing = false;
 		break;
 	default:
@@ -184,10 +184,16 @@ app.set("red",red);
 
 /* set up mongodb */
 var MongoClient = require('mongodb').MongoClient;
-var assert = require('assert');
+var f = require('util').format;
+
+var mongoUser = encodeURIComponent('nodemongo');
+var mongoPassword = encodeURIComponent('9k}7{iUYJB');
+var authMechanism = 'DEFAULT';
+
+var mongourl = f('mongodb://%s:%s@localhost:27017/xuser?authMechanism=%s',mongoUser,mongoPassword,authMechanism);
 
 /* default mongodb url */
-MongoClient.connect('mongodb://localhost:27017/xuser',function(err,db) {
+MongoClient.connect(mongourl,function(err,db) {
 	if(err) {
 		console.log('xample nosql db connection error: ' + err + '\n');
 		process.send({code:'fatal'});
