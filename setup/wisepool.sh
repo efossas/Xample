@@ -1,9 +1,12 @@
 ### install dependencies on ubuntu 16 docker container
 
-### assumes:
 ### apt-get update
 ### apt-get install -y git wget
 ### wget https://raw.githubusercontent.com/efossas/Xample/master/setup/wisepool.sh?token=AF3Rh4UFtQn9nUb685IY8jwNCGcl9w6Tks5Y880WwA%3D%3D -O wisepool.sh
+
+### ./wisepool.sh
+### ./connect.sh -s 'node' -p 'password'
+### ./gateway.sh
 
 while [[ $# -gt 1 ]]
 do
@@ -142,16 +145,18 @@ rm -rf ffmpeg-3.2.4-64bit-static
 git clone https://github.com/efossas/JS-Xample /var/www/gitwise
 mkdir /var/www/wisepool
 
-chmod 500 /var/www/gitwise/permissions.sh
-/var/www/gitwise/permissions.sh
+chmod 500 /var/www/gitwise/setup/permissions.sh
+/var/www/gitwise/setup/permissions.sh
 
-/var/www/gitwise/sync-xample.sh -i -p
+/var/www/gitwise/sync-xample.sh -p -i
 
 cd /var/www/gitwise/db
-initialize.sh -m $MONGO -s $SQL
+./initialize.sh -m $MONGO -s $SQL
 
-unset $MONGO
-unset $MYSQL
-unset $REDIS
+cd ~
+
+unset MONGO
+unset MYSQL
+unset REDIS
 
 history -wc

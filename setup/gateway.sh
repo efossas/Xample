@@ -28,6 +28,8 @@ findtime = 5\n\
 bantime = 600\n\
 action = iptables[name=HTTP, port=http, protocol=tcp]\n" >> /etc/fail2ban/jail.local
 
+sed -i 's/maxretry = 5/maxretry = 10/g' /etc/fail2ban/jail.local
+
 printf "[Definition]\n\
 \n\
 failregex = ^ -.*GET\n\
@@ -35,3 +37,5 @@ failregex = ^ -.*GET\n\
 ignoreregex =\n" > /etc/fail2ban/filter.d/http-dos.conf
 
 service fail2ban start
+
+history -wc
