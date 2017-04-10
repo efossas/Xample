@@ -52,6 +52,10 @@ a.btn {
     text-decoration: none;
 }
 
+a.inactive {
+	cursor: default;
+}
+
 a.inbtn {
 	color: black;
 	border: 1px solid black;
@@ -102,6 +106,11 @@ a.savebar {
 }
 
 /* Colors */
+.inactive-btn {
+	width: 100%;
+	background-color: transparent;
+}
+
 .none-btn {
 	width: 100%;
 	background-color: transparent;

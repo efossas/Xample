@@ -36,8 +36,8 @@
                 "graphs-trees",
                 "logic-booleans",
                 "probability",
-                "sequences-summation-products",
-                "sets-relations"
+                "relations-sets-functions",
+                "sequences-summation-products"
             ],
         "euclidean geometry":
             [

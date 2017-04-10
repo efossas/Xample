@@ -43,7 +43,29 @@ fs.readFile('../xample/data/topics.json','utf8',function(err,data) {
         var categories = Object.keys(tree[subjects[i]]);
         var categoriesCount = categories.length;
 
+        /* subject */
+        var prefixSub = ["red_bp_","red_lg_"];
+        prefixSub.forEach(function(prefix,index) {
+            var tableName = prefix + reduceName(subjects[i]);
+            check(tableName);
+
+            var sqlSubjectArray = ["CREATE TABLE ",tableName," (uid CHAR(24), xid SMALLINT UNSIGNED, username VARCHAR(50) NOT NULL, xname VARCHAR(50), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, rankpoints INT UNSIGNED DEFAULT 0 NOT NULL, ranks INT UNSIGNED DEFAULT 0 NOT NULL, views INT UNSIGNED DEFAULT 0 NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
+
+            sqlFile += sqlSubjectArray.join("");
+        });
+
         for(var j = 0; j < categoriesCount; j++) {
+            /* subject_category */
+            var prefixCat = ["red_bp_","red_lg_"];
+            prefixCat.forEach(function(prefix,index) {
+                var tableName = prefix + reduceName(subjects[i]) + "_" + reduceName(categories[j]);
+                check(tableName);
+
+                var sqlCategoryArray = ["CREATE TABLE ",tableName," (uid CHAR(24), xid SMALLINT UNSIGNED, username VARCHAR(50) NOT NULL, xname VARCHAR(50), tagone VARCHAR(32), tagtwo VARCHAR(32), tagthree VARCHAR(32), btypes INT UNSIGNED DEFAULT 0, created TIMESTAMP DEFAULT 0 NOT NULL, edited TIMESTAMP DEFAULT 0 NOT NULL, rankpoints INT UNSIGNED DEFAULT 0 NOT NULL, ranks INT UNSIGNED DEFAULT 0 NOT NULL, views INT UNSIGNED DEFAULT 0 NOT NULL, rating SMALLINT UNSIGNED DEFAULT 0 NOT NULL, imageurl VARCHAR(128), blurb VARCHAR(500), FULLTEXT(tagone,tagtwo,tagthree,blurb), PRIMARY KEY(uid,xid), KEY(created), KEY(edited), KEY(ranks), KEY(views), KEY(rating) );\n"];
+
+                sqlFile += sqlCategoryArray.join("");
+            });
+
             var topics = tree[subjects[i]][categories[j]];
             topics.forEach(function(item,index) {
                 /* subject_category_topic */
