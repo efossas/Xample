@@ -121,6 +121,7 @@ fi
 # copy frontend files
 rsync -a -v $REPO/xample/public/css/*.css $DEST/xample/public/css/
 rsync -a -v $REPO/xample/public/js/* $DEST/xample/public/js/
+rsync -a -v $REPO/xample/public/favicon.ico $DEST/xample/public/favicon.ico
 
 # add frontend omni functions to js files
 cat $DEST/xample/public/js/bengine.js $DEST/xample/public/js/omni.js $DEST/xample/public/js/bp.js > $DEST/xample/public/js/temp.js
