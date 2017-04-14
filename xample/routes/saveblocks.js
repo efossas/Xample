@@ -137,17 +137,19 @@ exports.saveblocks = function(request,response) {
 									err.input = qryTag;
 									analytics.journal(true,202,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 								} else {
-									/* copy btypes to redundant table */
-									var cRed = querypagedb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
+									/* copy btypes to redundant table, if exists */
+									if(data.subject) {
+										var cRed = querypagedb.createRedundantTableName(prefix,data.subject,data.category,data.topic);
 
-									var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.btypes = xample.${uTable}.btypes WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
+										var qryCopy = `UPDATE xred.${cRed}, xample.${uTable} SET xred.${cRed}.btypes = xample.${uTable}.btypes WHERE xred.${cRed}.uid = '${uid}' AND xred.${cRed}.xid = ${xid} AND xample.${uTable}.xid = ${xid};`;
 
-									connection.query(qryCopy,function(err,rows,fields) {
-										if(err) {
-											err.input = qryCopy;
-											analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
-										}
-									});
+										connection.query(qryCopy,function(err,rows,fields) {
+											if(err) {
+												err.input = qryCopy;
+												analytics.journal(true,203,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+											}
+										});
+									}
 								}
 							});
 						},function(error) {

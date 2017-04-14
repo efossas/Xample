@@ -5,8 +5,15 @@
 ### wget https://raw.githubusercontent.com/efossas/Xample/master/setup/wisepool.sh?token=AF3Rh4UFtQn9nUb685IY8jwNCGcl9w6Tks5Y880WwA%3D%3D -O wisepool.sh
 
 ### ./wisepool.sh
+### ./permission.sh
 ### ./connect.sh -s 'node' -p 'password'
 ### ./gateway.sh
+
+### if recompiling repo
+### mkdir /var/www/wisepool
+### chmod 500 /var/www/gitwise/setup/permissions.sh
+### /var/www/gitwise/setup/permissions.sh
+### /var/www/gitwise/sync-xample.sh -p -i
 
 while [[ $# -gt 1 ]]
 do
