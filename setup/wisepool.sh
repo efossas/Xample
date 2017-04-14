@@ -1,4 +1,4 @@
-### install dependencies on ubuntu 16 docker container
+### install dependencies on ubuntu 16
 
 ### apt-get update
 ### apt-get install -y git wget
@@ -39,9 +39,9 @@ esac
 shift
 done
 
-if [ -z "$MONGO" ]; then echo "ERROR Usage: -m mongo-pass -r redis-pass -s mysql-pass"; exit 1; fi
-if [ -z "$REDIS" ]; then echo "ERROR Usage: -m mongo-pass -r redis-pass -s mysql-pass"; exit 1; fi
-if [ -z "$SQL" ]; then echo "ERROR Usage: -m mongo-pass -r redis-pass -s mysql-pass"; exit 1; fi
+if [[ -z "$MONGO" ]]; then echo "ERROR Usage: -m mongo-pass -r redis-pass -s mysql-pass"; exit 1; fi
+if [[ -z "$REDIS" ]]; then echo "ERROR Usage: -m mongo-pass -r redis-pass -s mysql-pass"; exit 1; fi
+if [[ -z "$SQL" ]]; then echo "ERROR Usage: -m mongo-pass -r redis-pass -s mysql-pass"; exit 1; fi
 
 # always stay in root home folder when possible
 cd ~
