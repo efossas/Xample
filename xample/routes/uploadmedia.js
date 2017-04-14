@@ -53,28 +53,38 @@ exports.uploadmedia = function(request,response) {
 			var reldir = "xm/" + uid + "/" + did + "/";
             var absdir = request.app.get('fileRoute') + reldir;
 
-            /* replace spaces with underscores, fixes issues with shell commands */
-            var oldfile = filename.replace(/ /g,"_");
-            var fullpath = absdir + oldfile;
+			/* check that the user's directory exists */
+			fs.access(absdir,fs.constants.F_OK,(err) => {
+				if(err) {
+					response.end('userfoldermissing');
+					analytics.journal(true,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
+					file.resume();
+					return;
+				}
 
-            /* save the file, then process it */
-            fstream = fs.createWriteStream(fullpath);
-            file.pipe(fstream);
+				/* replace spaces with underscores, fixes issues with shell commands */
+				var oldfile = filename.replace(/ /g,"_");
+				var fullpath = absdir + oldfile;
 
-            fstream.on('close',function() {
-                /* media conversion */
-                var promise = filemedia.convertMedia(response,oldfile,absdir,reldir,btype,uid,did);
+				/* save the file, then process it */
+				fstream = fs.createWriteStream(fullpath);
+				file.pipe(fstream);
 
-                promise.then(function(success) {
-                    /* respond with the absolute url to the uploaded file */
-                    response.end(request.root + success);
-                    analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
-                },function(error) {
-                    response.end('convertmediaerr');
-                    /// remove bad media
-                    analytics.journal(true,110,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
-                });
-            });
+				fstream.on('close',function() {
+					/* media conversion */
+					var promise = filemedia.convertMedia(response,oldfile,absdir,reldir,btype,uid,did);
+
+					promise.then(function(success) {
+						/* respond with the absolute url to the uploaded file */
+							response.end(request.root + success);
+							analytics.journal(false,0,"",uid,global.__stack[1].getLineNumber(),__function,__filename);
+						},function(error) {
+							response.end('convertmediaerr');
+							/// remove bad media
+							analytics.journal(true,110,error,uid,global.__stack[1].getLineNumber(),__function,__filename);
+					});
+				});
+			});
         });
 	}
 };

@@ -22,9 +22,9 @@ esac
 shift
 done
 
-if [ -z "$FILE" ]; then echo "ERROR Usage: -f filename -o outputname -t [video|audio]"; exit 1; fi
-if [ -z "$OUTPUT" ]; then echo "ERROR Usage: -f filename -o outputname -t [video|audio]"; exit 1; fi
-if [ -z "$TYPE" ]; then echo "ERROR Usage: -f filename -o outputname -t [video|audio]"; exit 1; fi
+if [[ -z "$FILE" ]]; then echo "ERROR Usage: -f filename -o outputname -t [video|audio]"; exit 1; fi
+if [[ -z "$OUTPUT" ]]; then echo "ERROR Usage: -f filename -o outputname -t [video|audio]"; exit 1; fi
+if [[ -z "$TYPE" ]]; then echo "ERROR Usage: -f filename -o outputname -t [video|audio]"; exit 1; fi
 
 DURATION=$(ffmpeg/ffprobe -show_entries format=duration $FILE 2>&1 | grep 'duration=' | cut -d= -f2 | cut -d. -f1);
 
