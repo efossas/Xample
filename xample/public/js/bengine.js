@@ -175,7 +175,7 @@ if(funcs.hasOwnProperty('createURL') && typeof funcs.createURL === 'function') {
 		if(splitUrl[2].match(/localhost.*/)) {
 			url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
 		} else {
-			url = splitUrl[0] + "//" + splitUrl[2] + "/" + splitUrl[3] + encodeURI(path);
+			url = splitUrl[0] + "//" + splitUrl[2] + encodeURI(path);
 		}
 
 		return url;

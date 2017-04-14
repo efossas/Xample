@@ -62,6 +62,7 @@ mkdir -p $DEST/xample/error
 mkdir -p $DEST/xample/loads
 mkdir -p $DEST/xample/public/css
 mkdir -p $DEST/xample/public/js
+mkdir -p $DEST/xample/public/xm
 mkdir -p $DEST/xample/routes
 
 if [[ "$DENV" == "dev" || "$DENV" == "sta" ]]; then
@@ -121,6 +122,7 @@ fi
 # copy frontend files
 rsync -a -v $REPO/xample/public/css/*.css $DEST/xample/public/css/
 rsync -a -v $REPO/xample/public/js/* $DEST/xample/public/js/
+rsync -a -v $REPO/xample/public/xm/index.html $DEST/xample/public/xm/index.html
 rsync -a -v $REPO/xample/public/favicon.ico $DEST/xample/public/favicon.ico
 
 # add frontend omni functions to js files
@@ -160,4 +162,14 @@ if [[ "$DENV" == "dev" ]]; then
     rm $DEST/xample/public/js/lg.min.js
     rm $DEST/xample/public/js/pl.min.js
     rm $DEST/xample/public/js/nav.min.js
+fi
+
+# install any remote archive files
+if [[ "$INIT" == "yes" ]]; then
+    wget http://104.131.155.58/pdfjs.tar.gz -P /var/www/wisepool/xample/public/js/
+    wget http://104.131.155.58/pdfjs.tar.gz -P $DEST/xample/public/js/
+    tar xvzf $DEST/xample/public/js/pdfjs.tar.gz  --strip 1
+    rm $DEST/xample/public/js/pdfjs.tar.gz
+    chown root:root pdf.min.js
+    chown root:root pdf.min.worker.js
 fi

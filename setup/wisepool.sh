@@ -9,6 +9,12 @@
 ### ./connect.sh -s 'node' -p 'password'
 ### ./gateway.sh
 
+### if recompiling repo
+### mkdir /var/www/wisepool
+### chmod 500 /var/www/gitwise/setup/permissions.sh
+### /var/www/gitwise/setup/permissions.sh
+### /var/www/gitwise/sync-xample.sh -p -i
+
 while [[ $# -gt 1 ]]
 do
 key="$1"

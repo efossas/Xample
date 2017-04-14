@@ -166,7 +166,7 @@ blockExtensibles.xtext = new function xtext() {
 			overflow-y: auto;
 
 			width: 100%;
-			height: 200px;
+			height: auto;
 			border: 1px solid black;
 			border-radius: 2px;
 			background-color: white;
@@ -386,7 +386,8 @@ blockExtensibles.xcode = new function xcode() {
 
 			display: inline-block;
 			width: 100%;
-			height: 385px;
+			min-height: 62px;
+			height: auto;
 			border: 1px solid black;
 			border-radius: 2px;
 			background-color: white;
@@ -577,12 +578,12 @@ blockExtensibles.xmath = new function xmath() {
 		var stylestr = `.xMat {
 			display: inline-block;
 			width: 100%;
-			height: 100px;
+			height: auto;
 			border: 1px solid black;
 			border-radius: 2px;
 			background-color: white;
 
-			padding: 4px 6px;
+			padding: 8px 6px;
 			margin: 2px 0 0 0;
 			box-sizing: border-box;
 
@@ -592,12 +593,12 @@ blockExtensibles.xmath = new function xmath() {
 		.mathImage, .mathImage-show {
 			display: inline-block;
 			width: 100%;
-			height: 200px;
+			height: auto;
 			border: 1px solid black;
 			border-radius: 2px;
 			background-color: white;
 
-			padding: 4px 6px;
+			padding: 8px 6px;
 			margin: 0px;
 			box-sizing: border-box;
 		}`;
@@ -721,12 +722,12 @@ blockExtensibles.latex = new function latex() {
 		var stylestr = `.xLtx {
 			display: inline-block;
 			width: 100%;
-			height: 100px;
+			height: auto;
 			border: 1px solid black;
 			border-radius: 2px;
 			background-color: white;
 
-			padding: 4px 6px;
+			padding: 8px 6px;
 			margin: 2px 0 0 0;
 			box-sizing: border-box;
 		}
@@ -734,12 +735,12 @@ blockExtensibles.latex = new function latex() {
 		.latexImage, .latexImage-show {
 			display: inline-block;
 			width: 100%;
-			height: 200px;
+			height: auto;
 			border: 1px solid black;
 			border-radius: 2px;
 			background-color: white;
 
-			padding: 4px 6px;
+			padding: 8px 6px;
 			margin: 0px;
 			box-sizing: border-box;
 		}`;
