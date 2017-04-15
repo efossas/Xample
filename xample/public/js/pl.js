@@ -34,7 +34,6 @@
 */
 
 var blockExtensibles = {};
-var blockGlobals = {};
 var blockCustomFunctions = {};
 var blockOptions = {
     enableSave:false
@@ -217,7 +216,7 @@ this.f = {
         console.log(blockObject);
         blockExtensibles[blockObject.type] = blockObject;
 
-        var playEngine = new Bengine(blockExtensibles,blockGlobals,blockCustomFunctions,blockOptions);
+        var playEngine = new Bengine(blockExtensibles,blockCustomFunctions,blockOptions);
         playEngine.blockEngineStart('content',['page',1,1],[]);
     }
 

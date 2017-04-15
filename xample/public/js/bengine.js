@@ -9,19 +9,19 @@
 	global alertify:true
 */
 
-function Bengine(extensibles,globals,funcs,options) {
+var extensibles = {},
+funcs = {},
+options = {};
+
+function Bengine(extensibles,funcs,options) {
 
 /***
-	Section: Globals
-	These are the global variables xample uses
+	Section: Defaults
 
 	extensibles - used to store extensible blocks. hence, extensibles.newBlock should be an object that contains all of the necessary methods for block execution.
-	globals - used to store any globals that blocks need. block objects should call a self executing anonymous function that appends a property to this global, such as globals.newProperty = {};
-
 ***/
 
 this.extensibles = extensibles;
-this.globals = globals;
 
 options.blockLimit = options.blockLimit || 8;
 options.enableSave = options.enableSave || true;
