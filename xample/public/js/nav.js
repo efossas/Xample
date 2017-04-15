@@ -949,6 +949,10 @@ function barFilter(subject,category,topic,sort,curbtypes,tags) {
 	formDiv.setAttribute('class','col col-70');
 	formDiv.setAttribute('action','');
 
+	formDiv.onsubmit = function(event) {
+		event.preventDefault();
+	};
+
 	/* start top row */
 	var topRow = document.createElement('div');
 	topRow.setAttribute('class','row');
@@ -2185,7 +2189,7 @@ function pageLanding(logstatus) {
 	/* search bar */
 	var search = barSearch('fullsearch','');
 	search.setAttribute('style','margin-top: 8px;');
-	main.appendChild(search);
+	//main.appendChild(search);
 
 	/* pages div */
 	var explorePages = dashExplore('Pages','explore?content=bp');
