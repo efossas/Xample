@@ -62,6 +62,7 @@ mkdir -p $DEST/xample/error
 mkdir -p $DEST/xample/loads
 mkdir -p $DEST/xample/public/css
 mkdir -p $DEST/xample/public/js
+mkdir -p $DEST/xample/public/js/blocks
 mkdir -p $DEST/xample/public/xm
 mkdir -p $DEST/xample/routes
 
@@ -122,11 +123,24 @@ fi
 # copy frontend files
 rsync -a -v $REPO/xample/public/css/*.css $DEST/xample/public/css/
 rsync -a -v $REPO/xample/public/js/* $DEST/xample/public/js/
+rsync -a -v $REPO/xample/public/js/blocks/* $DEST/xample/public/js/
 rsync -a -v $REPO/xample/public/xm/index.html $DEST/xample/public/xm/index.html
 rsync -a -v $REPO/xample/public/favicon.ico $DEST/xample/public/favicon.ico
 
+# create concatenated bengine & block function file
+cat $DEST/xample/public/js/bengine.js \
+$DEST/xample/public/js/blocks/asciimath.js \
+$DEST/xample/public/js/blocks/audio.js \
+$DEST/xample/public/js/blocks/code.js \
+$DEST/xample/public/js/blocks/image.js \
+$DEST/xample/public/js/blocks/latex.js \
+$DEST/xample/public/js/blocks/pdfslide.js \
+$DEST/xample/public/js/blocks/title.js \
+$DEST/xample/public/js/blocks/video.js \
+$DEST/xample/public/js/blocks/wysiwyg.js > $DEST/xample/public/js/btemp.js
+
 # add frontend omni functions to js files
-cat $DEST/xample/public/js/bengine.js $DEST/xample/public/js/omni.js $DEST/xample/public/js/bp.js > $DEST/xample/public/js/temp.js
+cat $DEST/xample/public/js/btemp.js $DEST/xample/public/js/omni.js $DEST/xample/public/js/bp.js > $DEST/xample/public/js/temp.js
 mv $DEST/xample/public/js/temp.js $DEST/xample/public/js/bp.js
 
 cat $DEST/xample/public/js/bengine.js $DEST/xample/public/js/omni.js $DEST/xample/public/js/lg.js > $DEST/xample/public/js/temp.js
@@ -141,6 +155,8 @@ mv $DEST/xample/public/js/temp.js $DEST/xample/public/js/nav.js
 # remove unneeded files that were concatenated into others
 rm $DEST/xample/public/js/bengine.js
 rm $DEST/xample/public/js/omni.js
+rm $DEST/xample/public/js/btemp.js
+rm -rf $DEST/xample/public/js/blocks
 
 # create minified versions of frontend js files
 if [[ "$DENV" == "pro" || "$DENV" == "sta" ]]; then
@@ -151,17 +167,17 @@ if [[ "$DENV" == "pro" || "$DENV" == "sta" ]]; then
 fi
 
 if [[ "$DENV" == "pro" ]]; then
-    rm $DEST/xample/public/js/bp.js
-    rm $DEST/xample/public/js/lg.js
-    rm $DEST/xample/public/js/pl.js
-    rm $DEST/xample/public/js/nav.js
+    rm -f $DEST/xample/public/js/bp.js
+    rm -f $DEST/xample/public/js/lg.js
+    rm -f $DEST/xample/public/js/pl.js
+    rm -f $DEST/xample/public/js/nav.js
 fi
 
 if [[ "$DENV" == "dev" ]]; then
-    rm $DEST/xample/public/js/bp.min.js
-    rm $DEST/xample/public/js/lg.min.js
-    rm $DEST/xample/public/js/pl.min.js
-    rm $DEST/xample/public/js/nav.min.js
+    rm -f $DEST/xample/public/js/bp.min.js
+    rm -f $DEST/xample/public/js/lg.min.js
+    rm -f $DEST/xample/public/js/pl.min.js
+    rm -f $DEST/xample/public/js/nav.min.js
 fi
 
 # install any remote archive files

@@ -52,10 +52,9 @@
 
 // <<<code>>
 
-var x = {};
-var globalBlockEngine = {};
+var extensibles = {};
 
-x.xlist = new function xlist() {
+extensibles.xlist = new function xlist() {
 	this.type = "xlist";
 	this.name = "list";
 	this.upload = false;
@@ -239,7 +238,7 @@ x.xlist = new function xlist() {
 	};
 };
 
-var wiseEngine = new Bengine(x,globalBlockEngine,{},{});
+var wiseEngine = new Bengine(extensibles,{},{});
 
 // <<<fold>>>
 
