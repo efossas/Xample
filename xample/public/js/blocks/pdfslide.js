@@ -4,7 +4,7 @@ extensibles.slide = new function slide() {
 	this.upload = true;
 
 	var slideObj = this;
-
+	
 	var parseBlock = function(blockText) {
 		return encodeURIComponent(blockText);
 	};
@@ -183,7 +183,7 @@ extensibles.slide = new function slide() {
 			});
 		}
 	};
-
+	
 	this.g = {
 		pdfObjects: {}
 	};

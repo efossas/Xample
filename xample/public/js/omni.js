@@ -1197,6 +1197,10 @@ function barPageSettings(pagetype,aid,settings) {
 	var colImg = document.createElement('div');
 	colImg.setAttribute('class','col col-26');
 
+	var thumbContainer = document.createElement('div');
+	thumbContainer.setAttribute('class','thumb-center');
+	colImg.appendChild(thumbContainer);
+
 	var thumbnail = document.createElement('img');
 	thumbnail.setAttribute('id','pageimg');
 	thumbnail.setAttribute('class','thumb-img');
@@ -1204,7 +1208,7 @@ function barPageSettings(pagetype,aid,settings) {
 	if(settings.imageurl !== "") {
 		thumbnail.setAttribute('src',settings.imageurl);
 	}
-	colImg.appendChild(thumbnail);
+	thumbContainer.appendChild(thumbnail);
 
 	/* page blurb input */
 	var colBlurb = document.createElement('div');

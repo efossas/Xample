@@ -161,7 +161,7 @@
 	margin-top: 8px;
 	margin-bottom: 8px;
 
-	background-color: white;
+	background-color: mintcream;
 	box-shadow: 1px 1px 1px $shadow;
 }
 
@@ -264,8 +264,7 @@
 
 .box-bookmark {
 	text-align: center;
-	height: 20px;
-	line-height: 20px;
+	margin: 6px 0px 8px 0px;
 
 	input.star {
 		margin: 6px 5px;
@@ -286,7 +285,7 @@
 	}
 
 	input.bmark {
-		margin: 7px;
+		margin: 0px;
 		padding: 0px;
 	    visibility: hidden;
 	    font-size: 1.2em;
@@ -314,17 +313,17 @@
 }
 
 .box-image {
-	background-color: $offwhite;
 	border-radius: 4px;
 
 	margin: 2px 0px 4px 6px;
 	height: 15 * 9px;
-	//width: 15 * 16px;
 	width: 95%;
+	overflow: hidden;
+	text-align: center;
 }
 
 .box-blurb {
-	background-color: $offwhite;
+	background-color: white;
 	border-radius: 4px;
 
 	margin: 2px 6px 2px 0px;
@@ -403,5 +402,13 @@
 			border-left-width: 0px;
 			border-right-width: 0px;
 		}
+	}
+
+	.box-image {
+		width: 98px;
+	}
+
+	.box-views-row {
+		text-align: center;
 	}
 }

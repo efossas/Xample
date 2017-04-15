@@ -92,11 +92,11 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
                 break;
             case "audio":
                 newfile += ".mp3";
-				command = "./check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t audio";
+				command = "bash check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t audio";
                 break;
             case "video":
                 newfile += ".mp4";
-				command = "./check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t video";
+				command = "bash check.sh -f " + oldfilepath + " -o " + absdir + newfile + " -t video";
                 break;
             case "xsvgs":
                 newfile += ".svg";
@@ -316,7 +316,9 @@ exports.deleteMedia = function(connection,fileRoute,uid,did) {
 					if (difference.length > 0) {
 						command = "rm ";
 						difference.forEach(function(filename) {
-							command += fileRoute + "xm/" + uid + "/" + did + "/" + filename + " ";
+							if(filename !== "thumb.jpg") {
+								command += fileRoute + "xm/" + uid + "/" + did + "/" + filename + " ";
+							}
 						});
 
                         /// todo: this had childrm = exec before
