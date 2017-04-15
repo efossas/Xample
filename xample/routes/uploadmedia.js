@@ -56,7 +56,7 @@ exports.uploadmedia = function(request,response) {
 			/* check that the user's directory exists */
 			fs.access(absdir,fs.constants.F_OK,(err) => {
 				if(err) {
-					response.end('userfoldermissing');
+					response.end('nopatherr');
 					analytics.journal(true,120,err,uid,global.__stack[1].getLineNumber(),__function,__filename);
 					file.resume();
 					return;

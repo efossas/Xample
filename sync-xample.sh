@@ -123,7 +123,7 @@ fi
 # copy frontend files
 rsync -a -v $REPO/xample/public/css/*.css $DEST/xample/public/css/
 rsync -a -v $REPO/xample/public/js/* $DEST/xample/public/js/
-rsync -a -v $REPO/xample/public/js/blocks/* $DEST/xample/public/js/
+rsync -a -v $REPO/xample/public/js/blocks/* $DEST/xample/public/js/blocks/
 rsync -a -v $REPO/xample/public/xm/index.html $DEST/xample/public/xm/index.html
 rsync -a -v $REPO/xample/public/favicon.ico $DEST/xample/public/favicon.ico
 

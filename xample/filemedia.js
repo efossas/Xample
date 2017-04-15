@@ -114,7 +114,6 @@ exports.convertMedia = function(response,oldfile,absdir,reldir,btype,uid = 0,did
 		if(newfile !== "error") {
 			/* execute the command */
 			var child = exec(command,function(error,stdout,stderr) {
-
 				/* delete the old uploaded file no matter what */
 				var err = removeMedia(oldfilepath,uid,did);
 				if(err !== "success") {
@@ -273,7 +272,8 @@ exports.deleteMedia = function(connection,fileRoute,uid,did) {
 
 					/* get only the file name */
 					for (var i = 0; i < mediaCount; i++) {
-						table[i] = rows[i].mediaContent.replace("xm/" + uid + "/" + did + "/","");
+						var decodedLink = decodeURIComponent(rows[i].content);
+						table[i] = decodedLink.replace("xm/" + uid + "/" + did + "/","");
 					}
 					resolve(table);
 				} else {
