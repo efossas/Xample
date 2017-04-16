@@ -4,6 +4,16 @@
 	General helper functions for routes.
 */
 
+exports.isMinified = function(request) {
+	/* use minified code unless running from localhost */
+    var minified = ".min";
+    if(request.root.indexOf("localhost") > 0) {
+        minified = "";
+    }
+
+	return minified;
+};
+
 exports.determineView = function(request,response,pagetype,cachedb,uid,aid,xid) {
 	var __function = "determineView";
 

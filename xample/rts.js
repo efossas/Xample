@@ -24,6 +24,7 @@ var l_play = require('./loads/play.js');
 var l_profile = require('./loads/profile.js');
 var l_start = require('./loads/start.js');
 var l_tagreview = require('./loads/tagreview.js');
+var l_tutorial = require('./loads/tutorial.js');
 
 /* route functions, for ajax requeset asking for data */
 var r_createpage = require('./routes/createpage.js');
@@ -37,6 +38,7 @@ var r_gettags = require('./routes/gettags.js');
 var r_journalerror = require('./routes/journalerror.js');
 var r_login = require('./routes/login.js');
 var r_logout = require('./routes/logout.js');
+var r_message = require('./routes/message.js');
 var r_revertblocks = require('./routes/revertblocks.js');
 var r_saveblocks = require('./routes/saveblocks.js');
 var r_savepagesettings = require('./routes/savepagesettings.js');
@@ -77,6 +79,7 @@ module.exports = {
     journalerror: r_journalerror.journalerror,
     login: r_login.login,
     logout: r_logout.logout,
+    message: r_message.message,
     notfound: l_notfound.notfound,
     play: l_play.play,
     page: l_page.page,
@@ -93,6 +96,7 @@ module.exports = {
     tagcomment: r_tagcomment.tagcomment,
     tagreview: l_tagreview.tagreview,
     tagvote: r_tagvote.tagvote,
+    tutorial: l_tutorial.tutorial,
     uploadmedia: r_uploadmedia.uploadmedia,
     uploadthumb: r_uploadthumb.uploadthumb
 };

@@ -499,9 +499,9 @@ function btnSubmit(text,funcName,color) {
 
 		success - html node, auto save display.
 */
-function dashAutoSave() {
+function dashAutoSave(engineID) {
 	var autosave = document.createElement("div");
-	autosave.setAttribute("id","bengine-autosave");
+	autosave.setAttribute("id","bengine-autosave-" + engineID + "-");
 
 	return autosave;
 }
@@ -519,9 +519,9 @@ function dashAutoSave() {
 
 		success - html node, save status display
 */
-function dashSaveStatus() {
+function dashSaveStatus(engineID) {
 	var savestatus = document.createElement("div");
-	savestatus.setAttribute("id","bengine-savestatus");
+	savestatus.setAttribute("id","bengine-savestatus-" + engineID + "-");
 	savestatus.innerHTML = "Saved";
 
 	return savestatus;
@@ -540,12 +540,12 @@ function dashSaveStatus() {
 
 		success - html node, progress display.
 */
-function dashSaveProgress() {
+function dashSaveProgress(engineID) {
 	var saveprogress = document.createElement("div");
 	saveprogress.setAttribute("id","saveprogress");
 
 	var progressbar = document.createElement("progress");
-	progressbar.setAttribute("id","bengine-progressbar");
+	progressbar.setAttribute("id","bengine-progressbar-" + engineID + "-");
 	progressbar.setAttribute("value",100);
 	progressbar.setAttribute("max",100);
 	progressbar.style.visibility = 'hidden';
@@ -734,7 +734,7 @@ function barInfo(pagetype,pageinfo) {
 
 	/* add iframe code to input & highlight it */
 	var embedurl = createURL('/embed?a=' + pageinfo.aid + '&p=' + pageinfo.id);
-	embedInput.value = `<iframe width="100%" height="100%" src="${embedurl}" frameborder="0" allowfullscreen></iframe>`;
+	embedInput.value = `<div style="position:relative;height:0;overflow:hidden;padding-bottom:56.25%;"><iframe src="${embedurl}" style="position:absolute;top:0;left:0;width:100%;height:100%;" frameborder="0" allowfullscreen></iframe></div>`;
 
 	embedInput.onclick = function() {
 		this.setSelectionRange(0,embedInput.value.length);
@@ -954,7 +954,7 @@ function barSubMenu(btnName,settingsDiv) {
 
 		success - html node, status bar div
 */
-function barStatus(pid) {
+function barStatus(pid,engineID) {
 	/* create top div for menu buttons */
 	var statusBar = document.createElement("div");
 	statusBar.setAttribute("class","status-bar");
@@ -985,9 +985,9 @@ function barStatus(pid) {
 	colSaveBar.appendChild(savebar);
 
 	/* save progress bar div, save status div, & auto save timer div */
-	var saveprogress = dashSaveProgress();
-	var savestatus = dashSaveStatus();
-	var autosave = dashAutoSave();
+	var saveprogress = dashSaveProgress(engineID);
+	var savestatus = dashSaveStatus(engineID);
+	var autosave = dashAutoSave(engineID);
 
 	/* wrap status and autosave in saveinfo div */
 	var saveinfo = document.createElement("div");
@@ -1027,7 +1027,7 @@ function barStatus(pid) {
 
 		success - html node, dropdowns.
 */
-function barPageSettings(pagetype,aid,settings) {
+function barPageSettings(pagetype,aid,settings,engineID) {
 	var pageSettings = document.createElement('div');
 	pageSettings.setAttribute('class','settings-bar col-100');
 
@@ -1109,7 +1109,7 @@ function barPageSettings(pagetype,aid,settings) {
 
 	function uploadThumb() {
 		/* get the hidden file-select object that will store the user's file selection */
-		var fileSelect = document.getElementById('bengine-file-select');
+		var fileSelect = document.getElementById('bengine-file-select-' + engineID + "-");
 		fileSelect.setAttribute("accept",".bmp,.bmp2,.bmp3,.jpeg,.jpg,.pdf,.png,.svg");
 
 		fileSelect.click();
@@ -1143,7 +1143,7 @@ function barPageSettings(pagetype,aid,settings) {
 					formData.append('media',file,file.name);
 
 					/* get the directory id */
-					var id = document.getElementById('bengine-x-id').getAttribute('data-did');
+					var id = document.getElementById('bengine-x-id-' + engineID + "-").getAttribute('data-did');
 
 					/* grab the domain and create the url destination for the ajax request */
 					var url = createURL("/uploadthumb?id=" + id);
@@ -1231,7 +1231,7 @@ function barPageSettings(pagetype,aid,settings) {
 
 	/* page settings save */
 	var capital = pagetype.charAt(0).toUpperCase() + pagetype.slice(1);
-	var btnSaveSettings = btnSubmit('Save ' + capital + ' Settings','savePageSettings("' + pagetype + '")','green');
+	var btnSaveSettings = btnSubmit('Save ' + capital + ' Settings','savePageSettings("' + pagetype + '","' + engineID + '")','green');
 	pageSettings.appendChild(btnSaveSettings);
 
 	return pageSettings;
@@ -1570,12 +1570,12 @@ function formDropDownsSCT(defSub,defCat,defTop) {
 
 		none
 */
-var savePageSettings = function(pagetype) {
+var savePageSettings = function(pagetype,engineID) {
 	/* create the url destination for the ajax request */
 	var url = createURL('/savepagesettings');
 
 	/* get the pid & page name */
-	var id = document.getElementById('bengine-x-id').getAttribute('data-xid');
+	var id = document.getElementById('bengine-x-id-' + engineID + "-").getAttribute('data-xid');
 	var title = document.getElementById('pagetitle').value;
 	var subject = document.getElementById('select-subject').value;
 	var category = document.getElementById('select-category').value;

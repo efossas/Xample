@@ -194,7 +194,8 @@ function pageChoose(pid) {
 */
 function pageEdit(aid,pagedata,pageinfo) {
 	/* grab the main div */
-	var main = document.getElementById('content');
+	var engineID = 'content';
+	var main = document.getElementById(engineID);
 
 	/* hidden pid & title */
 	var pid = pageinfo.id;
@@ -204,8 +205,8 @@ function pageEdit(aid,pagedata,pageinfo) {
 
 	/* create menu & status bar */
 	var menu = barMenu();
-	var status = barStatus(pid);
-	var pageSettings = barPageSettings('page',aid,pageinfo);
+	var status = barStatus(pid,engineID);
+	var pageSettings = barPageSettings('page',aid,pageinfo,engineID);
 
 	/* create submenu */
 	var submenu = barSubMenu('Page Settings',pageSettings);
@@ -230,12 +231,12 @@ function pageEdit(aid,pagedata,pageinfo) {
 	};
 	wiseEngine = new Bengine(blockExtensibles,{},blockOptions);
 
-	wiseEngine.blockEngineStart('content',["page",pid,pid],blockarray);
+	wiseEngine.blockEngineStart(engineID,["page",pid,pid],blockarray);
 
 	/*** AFTER STUFF ***/
 
 	/* start auto save timer */
-	autosaveTimer(document.getElementById("bengine-autosave"),function() {
+	autosaveTimer(document.getElementById("bengine-autosave-" + engineID + "-"),function() {
 		return wiseEngine.saveBlocks(true);
 	});
 

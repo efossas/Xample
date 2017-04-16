@@ -145,6 +145,17 @@
 	box-shadow: 1px 1px 1px $shadow;
 }
 
+.dash {
+	@extend .wrapper;
+	margin-top: 12px;
+	padding: 8px;
+
+	box-sizing: border-box;
+	border-radius: 2px;
+	background-color: white;
+	box-shadow: 1px 1px 1px $shadow;
+}
+
 /* Block Display Box - Learning Guide Page */
 .block-display {
 	@extend .wrapper;

@@ -923,6 +923,29 @@ function dashExplore(exploreHeader,linkRoute) {
 }
 
 /*
+	Function: dashText
+
+	Create dash that displays text.
+
+	Parameters:
+
+		text - string, the text to display
+
+	Returns:
+
+		success - html node, text dash
+*/
+function dashText(text) {
+
+	/* create main div for entire dash */
+	var textDash = document.createElement('div');
+	textDash.setAttribute('class','dash');
+
+	textDash.innerHTML = text;
+	return textDash;
+}
+
+/*
 	Function: barFilter
 
 	Make the form for filtering content searches.
@@ -2185,6 +2208,13 @@ function pageLanding(logstatus) {
 		menu = barLog();
 	}
 	main.appendChild(menu);
+
+	/* welcome div */
+	var tutorialURL = createURL('/tutorial');
+	var welcomeDash = dashText(`Welcome! WisePool is a site dedicated to creating & sharing educational resources.<br><br>Check out everything it can do: <a href="${tutorialURL}" target="_blank">WisePool Tutorial</a>`);
+	welcomeDash.className += " center";
+	welcomeDash.style = "padding:20px 0px;font-size:1.4em;";
+	main.appendChild(welcomeDash);
 
 	/* search bar */
 	var search = barSearch('fullsearch','');

@@ -281,6 +281,7 @@ app.get('/home',rts.home);
 app.post('/journalerror',rts.journalerror);
 app.post('/login',rts.login);
 app.post('/logout',rts.logout);
+app.post('/message',rts.message);
 app.get('/page*',rts.page);
 app.get('/play',rts.play);
 app.get('/profile',rts.profile);
@@ -295,6 +296,7 @@ app.post('/sv',rts.setview);
 app.post('/tagcomment',rts.tagcomment);
 app.get('/tagreview*',rts.tagreview);
 app.post('/tagvote',rts.tagvote);
+app.get('/tutorial',rts.tutorial);
 app.post('/uploadmedia*',rts.uploadmedia);
 app.post('/uploadthumb*',rts.uploadthumb);
 
