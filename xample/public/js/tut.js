@@ -175,7 +175,7 @@ function pageTutorial() {
 
     var authText = `When you first sign up, you start with Authority = 1 and your pages will have the following restrictions:<br><ul><li>8 blocks per page</li><li>Up to 3 minute Video & Audio blocks</li><li>Up to 100 MB blocks</li></ul>As you increase in Authority (which is earned by creating successful pages) you gain the ability to add more blocks with larger sizes.<br><br>Increases in Authority also allow you to contribute in other ways to the community, like creating Tags for the Subject, Category, Topic tree.`;
 
-    var conText = `"Bengine", the block engine, is open source. If you want to create your own blocks or add features, go here: <a href="https://github.com/efossas/Bengine" target="_blank">Bengine Repository</a>.<br><br>If you would like to make any comments or suggest features you would like to see added to WisePool, please use the form below. Thank you!`;
+    var conText = `"Bengine", the block engine, is open source. If you want to create your own blocks or add features, go here: <a href="https://github.com/efossas/Bengine" target="_blank">Bengine Repository</a>.<br><br>Signing up is currently restricted by request. If you would like to request access to WisePool, make any comments, or suggest features you would like to see added to WisePool, please use the form below. Thank you!`;
 
     var blockOptionsRulEngine = {
         enableSave:false
@@ -272,7 +272,7 @@ function pageTutorial() {
     var textareaComment = document.createElement('textarea');
     textareaComment.setAttribute('class','text-input-area');
     textareaComment.setAttribute('name','comment');
-    textareaComment.setAttribute('placeholder','Write your comments or suggestions here.');
+    textareaComment.setAttribute('placeholder','Request access or write your comments / suggestions here.');
 
     var captchaBtn = document.createElement('button');
     captchaBtn.setAttribute('class','g-recaptcha');
