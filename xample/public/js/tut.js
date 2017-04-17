@@ -42,7 +42,11 @@
 */
 
 var blockExtensibles = extensibles;
-var blockCustomFunctions = {};
+var blockCustomFunctions = {
+    progressFinalize:function(msg,max) { /* */ },
+    progressInitialize:function(msg,max) { /* */ },
+    progressUpdate:function(msg,max) { /* */ }
+};
 
 function sendMessage() {
     event.preventDefault();
@@ -124,7 +128,7 @@ function pageTutorial() {
     };
 
     var exampleEngine = new Bengine(blockExtensibles,blockCustomFunctions,blockOptionsExampleEngine);
-    exampleEngine.blockEngineStart('exampleEngine',['',0,0],[]);
+    exampleEngine.blockEngineStart('exampleEngine',['page','wptemp','wptemp'],[]);
 
     var hr1 = document.createElement('hr');
     hr1.setAttribute('style','margin:30px 0px 40px 0px;');

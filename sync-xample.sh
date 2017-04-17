@@ -64,6 +64,7 @@ mkdir -p $DEST/xample/public/css
 mkdir -p $DEST/xample/public/js
 mkdir -p $DEST/xample/public/js/blocks
 mkdir -p $DEST/xample/public/xm
+mkdir -p $DEST/xample/public/xm/wptemp/files
 mkdir -p $DEST/xample/routes
 
 if [[ "$DENV" == "dev" || "$DENV" == "sta" ]]; then
@@ -163,6 +164,7 @@ if [[ "$DENV" == "pro" || "$DENV" == "sta" ]]; then
         $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/bp.min.js $DEST/xample/public/js/bp.js
         $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/lg.min.js $DEST/xample/public/js/lg.js
         $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/pl.min.js $DEST/xample/public/js/pl.js
+        $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/tut.min.js $DEST/xample/public/js/tut.js
         $DEST/xample/node_modules/uglify-js/bin/uglifyjs -mt -o $DEST/xample/public/js/nav.min.js $DEST/xample/public/js/nav.js
 fi
 
@@ -170,6 +172,7 @@ if [[ "$DENV" == "pro" ]]; then
     rm -f $DEST/xample/public/js/bp.js
     rm -f $DEST/xample/public/js/lg.js
     rm -f $DEST/xample/public/js/pl.js
+    rm -f $DEST/xample/public/js/tut.js
     rm -f $DEST/xample/public/js/nav.js
 fi
 
@@ -177,6 +180,7 @@ if [[ "$DENV" == "dev" ]]; then
     rm -f $DEST/xample/public/js/bp.min.js
     rm -f $DEST/xample/public/js/lg.min.js
     rm -f $DEST/xample/public/js/pl.min.js
+    rm -f $DEST/xample/public/js/tut.min.js
     rm -f $DEST/xample/public/js/nav.min.js
 fi
 

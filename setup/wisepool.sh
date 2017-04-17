@@ -162,6 +162,9 @@ cd /var/www/gitwise/db
 
 cd ~
 
+# install cronjobs
+printf "\n00 00 * * * rm -rf /var/www/wisepool/xample/public/xm/wtemp/*" >> /etc/crontab
+
 unset MONGO
 unset MYSQL
 unset REDIS
