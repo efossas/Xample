@@ -1,11 +1,12 @@
 # JS-Xample
-Media Block Generator
 
-##Documentation
+This project is now Bengine. Originally WisePool (codenamed Xample) was going to be a Github for the block generator tool. That plan has been abandoned for now.
+
+## Documentation
 
 manual/index.html
 
-##Merging
+## Merging
 
 - git checkout chaos
 - git pull origin chaos
